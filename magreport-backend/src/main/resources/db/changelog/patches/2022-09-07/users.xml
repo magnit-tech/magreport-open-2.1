@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="USER-DOMAIN-001" author="artemenko_pa">
+        <preConditions>
+            <and>
+                <tableExists schemaName="REPOSITORY" tableName="USERS"/>
+                <not>
+                    <columnExists schemaName="REPOSITORY" tableName="USERS" columnName="DOMAIN_ID"/>
+                </not>
+            </and>
+        </preConditions>
+
+        <addColumn schemaName="REPOSITORY" tableName="USERS">
+            <column name="DOMAIN_ID" type="INT" defaultValueComputed="SELECT DOMAIN_ID FROM ${default-schema}.DOMAINS WHERE NAME='MAGREPORT_LOCAL'">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <addForeignKeyConstraint baseColumnNames="DOMAIN_ID" baseTableName="USERS"
+                                 constraintName="FK-USERS-DOMAINS"
+                                 deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="DOMAIN_ID" referencedTableName="DOMAINS"/>
+
+    </changeSet>
+
+</databaseChangeLog>

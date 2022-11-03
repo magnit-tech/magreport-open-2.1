@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+<changeSet id="V_REPORT_DATASET_LNK" author="artemenko_pa">
+    <createView schemaName="REPOSITORY" viewName="V_REPORT_DATASET_LNK"
+                fullDefinition="false" replaceIfExists="true">
+        SELECT
+            REPORT_ID,
+            DATASET_ID,
+            MIN(LINK_TYPE) AS LINK_TYPE
+        FROM
+            (SELECT
+                 REPORT_ID,
+                 DATASET_ID,
+                 'SELF' as LINK_TYPE
+             FROM REPOSITORY.REPORT
+             UNION ALL
+             SELECT
+                 FRG.REPORT_ID,
+                 FI.DATASET_ID,
+                 'FILTER' AS LINK_TYPE
+             FROM REPOSITORY.FILTER_REPORT_GROUP FRG
+                      INNER JOIN REPOSITORY.FILTER_REPORT FR ON FR.FILTER_REPORT_GROUP_ID = FRG.FILTER_REPORT_GROUP_ID
+                      INNER JOIN REPOSITORY.FILTER_INSTANCE FI ON FI.FILTER_INSTANCE_ID = FR.FILTER_INSTANCE_ID AND FI.DATASET_ID IS NOT NULL)
+        GROUP BY REPORT_ID, DATASET_ID;
+    </createView>
+
+</changeSet>
+
+</databaseChangeLog>

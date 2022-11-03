@@ -1,0 +1,3 @@
+#!/bin/bash
+
+npx ldap-server-mock --conf=./ldap-server-mock-conf.json --database=./users.json

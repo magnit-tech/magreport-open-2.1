@@ -1,0 +1,12 @@
+package ru.magnit.magreportbackend.dto.backup.filtertemplate;
+
+import java.time.LocalDateTime;
+
+public record FilterTemplateFolderBackupTuple (
+
+        Long filterTemplateFolderId,
+        Long parentId,
+        String name,
+        String description,
+        LocalDateTime created,
+        LocalDateTime modified) {}

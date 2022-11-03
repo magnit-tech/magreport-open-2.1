@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="V_REPORT_SECURITY_FILTER_LNK" author="artemenko_pa">
+        <createView schemaName="REPOSITORY" viewName="V_REPORT_SECURITY_FILTER_LNK"
+                    fullDefinition="false" replaceIfExists="true">
+            SELECT
+                RDL.REPORT_ID,
+                SFD.SECURITY_FILTER_ID
+            FROM REPOSITORY.V_REPORT_DATASET_LNK RDL
+                     INNER JOIN REPOSITORY.SECURITY_FILTER_DATASET SFD ON SFD.DATASET_ID = RDL.DATASET_ID
+            GROUP BY
+                RDL.REPORT_ID,
+                SFD.SECURITY_FILTER_ID;
+        </createView>
+    </changeSet>
+
+</databaseChangeLog>

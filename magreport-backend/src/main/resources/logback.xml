@@ -1,0 +1,19 @@
+<configuration debug = "false">
+
+    <property name="LOG_DIR" value="${MAGREPORT_HOME}/log"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%-30(%d{yyyy-MM-dd HH:mm:ss.SSS} %green([%26.26thread])) %highlight(%-5level) %cyan(%logger{36}) - %msg %n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="ru.magnit.magreportbackend" level="debug"/>
+    <logger name="com.zaxxer.hikari" level="warn"/>
+    <logger name="exception_logger" level="error" />
+
+    <root level="warn">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+</configuration>

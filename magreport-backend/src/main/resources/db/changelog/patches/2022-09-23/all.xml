@@ -1,0 +1,23 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet author="vyushin_aa" id="ASM-DOMAIN-001">
+
+        <insert tableName="EXTERNAL_AUTH_SOURCE_FIELD_TYPE" schemaName="REPOSITORY">
+            <column name="NAME" value="DOMAIN_NAME_FIELD"/>
+            <column name="DESCRIPTION" value="Поле с информацией о наименовании домена пользователя"/>
+        </insert>
+
+        <addColumn tableName="DATASET" schemaName="REPOSITORY">
+            <column name="DOMAIN_NAME" type="VARCHAR(100)"/>
+        </addColumn>
+
+        <sql>
+            UPDATE REPOSITORY.DATASET SET DOMAIN_NAME = 'CORP' WHERE DATASET_ID IN (SELECT DATASET_ID FROM REPOSITORY.EXTERNAL_AUTH_SOURCE WHERE EXTERNAL_AUTH_SOURCE_TYPE_ID = 2)
+        </sql>
+
+    </changeSet>
+</databaseChangeLog>

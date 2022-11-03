@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet author="vyushin_aa" id="ADD_NEW_SYSTEM_ROLE">
+       <insert tableName="ROLE" schemaName="REPOSITORY">
+           <column name="ROLE_TYPE_ID"  value="0"/>
+           <column name="NAME"  value="UNBOUNDED_JOB_ACCESS"/>
+           <column name="DESCRIPTION" value="Неограниченный доступ к заданиям"/>
+       </insert>
+    </changeSet>
+
+</databaseChangeLog>
