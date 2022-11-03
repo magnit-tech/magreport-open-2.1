@@ -1,0 +1,50 @@
+dn: dc=magreport,dc=ru
+objectClass: top
+objectClass: domain
+
+dn: ou=groups,dc=magreport,dc=ru
+objectclass: top
+objectclass: organizationalUnit
+ou: groups
+
+dn: ou=users,dc=magreport,dc=ru
+objectclass: top
+objectclass: organizationalUnit
+ou: users
+
+dn: uid=superuser,ou=users,dc=magreport,dc=ru
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+mail: superuser@magreport.ru
+displayName: Иванов Иван Иванович
+cn: MagReport Admin
+sn: Admin
+uid: superuser
+userPassword: 123
+
+dn: uid=user,ou=users,dc=magreport,dc=ru
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+mail: user@magreport.ru
+displayName: Пертов Петр Петрович
+cn: MagReport User
+sn: User
+uid: user
+userPassword: 1234
+
+dn: cn=magreport_users,ou=groups,dc=magreport,dc=ru
+objectclass: top
+objectclass: groupOfNames
+cn: magreport_users
+uniqueMember: uid=superuser,ou=users,dc=magreport,dc=ru
+uniqueMember: uid=user,ou=users,dc=magreport,dc=ru
+
+dn: cn=magreport_admins,ou=groups,dc=magreport,dc=ru
+objectclass: top
+objectclass: groupOfNames
+cn: magreport_admins
+uniqueMember: uid=superuser,ou=users,dc=magreport,dc=ru

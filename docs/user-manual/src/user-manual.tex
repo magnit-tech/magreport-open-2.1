@@ -1,0 +1,59 @@
+\documentclass[a4paper, 11pt]{scrbook}
+
+\usepackage[a4paper, total={18cm, 24cm}]{geometry}
+
+\usepackage[english, russian]{babel}
+
+\usepackage{subfiles}
+
+\usepackage{listings}
+
+\usepackage{graphicx}
+
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue,
+	filecolor=magenta,      
+	urlcolor=cyan,
+	pdftitle={Магрепорт - Руководство пользователя},
+	pdfpagemode=UseOutlines,
+}
+
+\usepackage{setspace}
+
+\usepackage{framed}
+\usepackage{xcolor}
+\colorlet{shadecolor}{gray!10}
+
+%\usepackage{imakeidx}
+%\makeindex
+
+%\newcommand{\addtoindex}[1]{#1\index{#1}}
+
+\usepackage{user-manual}
+
+\newcommand{\graphicswidth}{0.5\textwidth}
+
+\begin{document}
+	
+	\subfile{./0-0-title-page/title-page}
+	
+	\subfile{./0-1-copyright/copyright}
+	
+	\tableofcontents
+
+	\chapter{Установка и настройка системы} \label{chapter:installation-and-settings}
+	\subfile{./1-installation-and-settings/installation-and-settings}
+	
+	\chapter{Выполнение и выгрузка отчёта} \label{chapter:report-running}
+	\subfile{./2-report-running/report-running}	
+	
+	\chapter{Администрирование системы} \label{chapter:administration}
+	\subfile{./3-administration/administration}
+	
+	\chapter{Разработка отчётов} \label{chapter:developing}
+	\subfile{./4-developing/developing}
+	
+	%\printindex
+\end{document}

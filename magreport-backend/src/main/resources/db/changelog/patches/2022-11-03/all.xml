@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="ADD-INDEX-REPORT_JOB_STATISTICS-001" author="vyushin_aa">
+
+        <preConditions>
+            <not>
+                <indexExists schemaName="REPOSITORY" tableName="REPORT_JOB_STATISTICS" indexName="REPORT_JOB_STATISTICS_REPORT_JOB_ID"/>
+            </not>
+        </preConditions>
+
+        <createIndex schemaName="REPOSITORY" tableName="REPORT_JOB_STATISTICS" indexName="REPORT_JOB_STATISTICS_REPORT_JOB_ID">
+            <column name="REPORT_JOB_ID"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

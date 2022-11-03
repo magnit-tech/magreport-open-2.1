@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet author="artemenko_pa" id="DERIVED_FIELD_EXPRESSION-001">
+        <preConditions>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK-DERIVED_FIELD_EXPRESSION-DERIVED_FIELD"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="DERIVED_FIELD_ID" baseTableName="DERIVED_FIELD_EXPRESSION"
+                                 constraintName="FK-DERIVED_FIELD_EXPRESSION-DERIVED_FIELD"
+                                 deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="DERIVED_FIELD_ID" referencedTableName="DERIVED_FIELD"/>
+    </changeSet>
+
+    <changeSet author="artemenko_pa" id="DERIVED_FIELD_EXPRESSION-002">
+        <preConditions>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK-DERIVED_FIELD_EXPRESSION-PARENT"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="PARENT_FIELD_EXPRESSION_ID" baseTableName="DERIVED_FIELD_EXPRESSION"
+                                 constraintName="FK-DERIVED_FIELD_EXPRESSION-PARENT"
+                                 deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="DERIVED_FIELD_EXPRESSION_ID" referencedTableName="DERIVED_FIELD_EXPRESSION"/>
+    </changeSet>
+
+    <changeSet author="artemenko_pa" id="DERIVED_FIELD_EXPRESSION-003">
+        <preConditions>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK-DERIVED_FIELD_EXPRESSION-EXPRESSIONS"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="EXPRESSION_ID" baseTableName="DERIVED_FIELD_EXPRESSION"
+                                 constraintName="FK-DERIVED_FIELD_EXPRESSION-EXPRESSIONS"
+                                 deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="EXPRESSION_ID" referencedTableName="EXPRESSIONS"/>
+    </changeSet>
+
+    <changeSet author="artemenko_pa" id="DERIVED_FIELD_EXPRESSION-004">
+        <preConditions>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK-DERIVED_FIELD_EXPRESSION-PARAMETER_DERIVED_FIELD"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="PARAMETER_DERIVED_FIELD_ID" baseTableName="DERIVED_FIELD_EXPRESSION"
+                                 constraintName="FK-DERIVED_FIELD_EXPRESSION-PARAMETER_DERIVED_FIELD"
+                                 deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="DERIVED_FIELD_ID" referencedTableName="DERIVED_FIELD"/>
+    </changeSet>
+
+    <changeSet author="artemenko_pa" id="DERIVED_FIELD_EXPRESSION-005">
+        <preConditions>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK-DERIVED_FIELD_EXPRESSION-REPORT_FIELD"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="PARAMETER_REPORT_FIELD_ID" baseTableName="DERIVED_FIELD_EXPRESSION"
+                                 constraintName="FK-DERIVED_FIELD_EXPRESSION-REPORT_FIELD"
+                                 deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="REPORT_FIELD_ID" referencedTableName="REPORT_FIELD"/>
+    </changeSet>
+
+    <changeSet author="artemenko_pa" id="DERIVED_FIELD_EXPRESSION-006">
+        <preConditions>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK-DERIVED_FIELD_EXPRESSION-DATA_TYPE"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="CONSTANT_DATA_TYPE_ID" baseTableName="DERIVED_FIELD_EXPRESSION"
+                                 constraintName="FK-DERIVED_FIELD_EXPRESSION-DATA_TYPE"
+                                 deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="DATA_TYPE_ID" referencedTableName="DATA_TYPE"/>
+    </changeSet>
+
+    <changeSet author="artemenko_pa" id="DERIVED_FIELD_EXPRESSION-007">
+        <preConditions>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK-DERIVED_FIELD_EXPRESSION-USERS"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="DERIVED_FIELD_EXPRESSION"
+                                 constraintName="FK-DERIVED_FIELD_EXPRESSION-USERS"
+                                 deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="USER_ID" referencedTableName="USERS"/>
+    </changeSet>
+
+</databaseChangeLog>

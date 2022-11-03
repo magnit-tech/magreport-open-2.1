@@ -1,0 +1,9 @@
+### Tex ###
+*.aux
+*.log
+*.gz
+*.toc
+*.out
+*.idx
+*.ilg
+*.ing

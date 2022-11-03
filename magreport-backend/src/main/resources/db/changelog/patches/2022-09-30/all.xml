@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet author="artemenko_pa" id="DOMAIN_GROUP-001">
+        <preConditions>
+            <not>
+                <columnExists tableName="DOMAIN_GROUP" columnName="DOMAIN_ID"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="DOMAIN_GROUP">
+            <column name="DOMAIN_ID" type="INTEGER" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <update tableName="DOMAIN_GROUP">
+            <column name="DOMAIN_ID" valueComputed="SELECT DOMAIN_ID FROM ${default-schema}.DOMAINS WHERE NAME='CORP'"/>
+        </update>
+        <addForeignKeyConstraint baseColumnNames="DOMAIN_ID" baseTableName="DOMAIN_GROUP"
+                                 constraintName="FK-DOMAIN_GROUP-DOMAINS"
+                                 deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="DOMAIN_ID" referencedTableName="DOMAINS"/>
+
+    </changeSet>
+
+</databaseChangeLog>

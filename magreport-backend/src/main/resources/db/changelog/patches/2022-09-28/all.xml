@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet author="artemenko_pa" id="REPORT_JOB_STATUS-001">
+        <preConditions>
+            <rowCount tableName="REPORT_JOB_STATUS" expectedRows="7"/>
+        </preConditions>
+        <insert schemaName="REPOSITORY" tableName="REPORT_JOB_STATUS">
+            <column name="NAME" value="PENDING_DB_CONNECTION"/>
+            <column name="DESCRIPTION" value="Ожидает свободного коннекта к БД"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

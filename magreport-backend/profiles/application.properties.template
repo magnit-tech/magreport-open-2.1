@@ -1,0 +1,110 @@
+superuser-param-name=superuser
+superuser-param-email=superuser@example.com
+
+# Repository configuration
+spring.datasource.url=jdbc:h2:file:./db/db
+spring.datasource.initialization-mode=always
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+spring.datasource.hikari.maximum-pool-size=50
+spring.h2.console.enabled=true
+spring.h2.console.settings.web-allow-others=true
+
+
+# AD properties
+magreport.auth-config.default-domain=DOMAIN
+magreport.auth-config.domains.DOMAIN.type=
+magreport.auth-config.domains.DOMAIN.description=
+magreport.auth-config.domains.DOMAIN.url=
+magreport.auth-config.domains.DOMAIN.base=
+magreport.auth-config.domains.DOMAIN.user-base=
+magreport.auth-config.domains.DOMAIN.group-path=
+magreport.auth-config.domains.DOMAIN.user-path=
+magreport.auth-config.domains.DOMAIN.user-filter=
+magreport.auth-config.domains.DOMAIN.batch-size=1000
+
+
+# Jwt properties
+jwt.properties.validityDuration=864000000
+jwt.properties.secretKey=SecretKeyForIssuingJwtTokens2019
+
+
+# HTTPS properties
+# The path to the keystore containing the certificate
+server.ssl.key-store=
+# The password used to generate the certificate
+server.ssl.key-store-password=
+# The alias mapped to the certificate
+server.ssl.key-alias=
+server.port=
+
+#Excel template settings
+magreport.excel-template.folder=./excel-templates
+magreport.excel-template.nameDataList=data
+
+#Reports folder
+magreport.reports.folder=./data
+magreport.reports.rms-in-folder=./export
+magreport.reports.rms-out-folder=./export
+
+# JobEngine properties
+magreport.jobengine.thread-pool-size=10
+magreport.jobengine.thread-name-prefix=JobEngine-Worker-Thread
+magreport.jobengine.max-rows=1000000
+magreport.jobengine.max-rows-excel=10000000
+magreport.mvc.excel-exporter.thread-pool-size=20
+
+# Scheduled tasks executors
+spring.task.scheduling.pool.size=5
+
+#ASM settings
+magreport.asm.refresh-schedule=0 0 7 * * *
+
+# Job history clearing
+magreport.jobengine.history-clear-schedule=0 0 23 * * *
+magreport.jobengine.job-retention-time=336
+magreport.jobengine.clean-rms-out-folder=false
+
+# Schedule service settings
+magreport.host=
+magreport.scheduleengine.check-last-date-calendar = 0 0 0 1 * *
+magreport.schedule-user=MAG_SCHEDULE_USER
+magreport.schedule-mail-time-send-warning= 0 0 9 * * *
+magreport.schedule-days-send-warning= 10
+magreport.mail.file-size=
+
+# Maximum number of hierarchy levels
+# This parameter use for check ring path
+magreport.max-level-hierarchy = 128
+
+# Update user status service
+magreport.update-user-status.enable = true
+magreport.update-user-status.schedule = 0 0 5 * * *
+
+# Admin mail address
+mail.adminMailBox=
+
+# H2-console white list
+magreport.h2.console.whitelist=
+
+# OLAP settings
+magreport.olap.max-dop = 2
+magreport.olap.max-cache-size = 3
+magreport.olap.max-data-volume = 50000000
+
+# Logging options
+logging.magreport.file.name=
+logging.olap.file.name=
+logging.magreport.destination-error=
+
+#Events
+magreport.event-register.anonymous-allowed=true
+magreport.event-register.event-lifetime=0
+
+#Access job
+magreport.job-access.without-report=true
+magreport.job-access.share=true
+magreport.job-access.schedule=true
+
+

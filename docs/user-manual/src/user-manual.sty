@@ -1,0 +1,86 @@
+\ProvidesPackage{user-manual}
+
+\newenvironment{adminnote}{
+	\begin{center}
+		\begin{tabular}{|p{0.9\textwidth}|}
+			\hline
+			{\textbf{\textit{Администратору на заметку}}}\\
+			\\
+}
+{
+			\\
+			\hline
+			\end{tabular}
+	\end{center}
+	\smallskip
+}
+
+
+\newenvironment{devnote}{
+	\begin{center}
+		\begin{tabular}{|p{0.9\textwidth}|}
+			\hline
+			{\textbf{\textit{Разработчику на заметку}}}\\
+			\\
+		}
+		{
+			\\
+			\hline
+		\end{tabular}
+	\end{center}
+	\smallskip
+}
+
+\newenvironment{concept}{
+	\begin{shaded}
+		\noindent \textbf{\Large Почему так}
+		\medskip
+		
+}
+{
+	\end{shaded}
+	\smallskip	
+}
+
+\newenvironment{NB}{
+	\begin{center}
+		\begin{tabular}{|p{0.9\textwidth}|}
+			\hline
+			{\textbf{\textit{Важно!}}}\\
+			\\
+		}
+		{
+			\\
+			\hline
+		\end{tabular}
+	\end{center}
+	\smallskip
+}
+
+\newenvironment{modelExample}{
+	\begin{shaded}
+	\noindent \textbf{\Large Модельный пример}
+	\medskip
+	
+	\begin{spacing}{0.5}
+}
+{
+	\end{spacing}
+	\end{shaded}
+	\smallskip	
+}
+
+\newenvironment{boxed}{
+	\begin{center}
+		\begin{tabular}{|p{0.9\textwidth}|}
+			\hline
+			\\
+		}
+		{
+			\\\\
+			\hline
+		\end{tabular}
+	\end{center}
+	\smallskip
+}
+

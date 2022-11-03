@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet author="artemenko_pa" id="ADD_NEW_DATASOURCE_TYPE">
+        <insert tableName="DATASOURCE_TYPE">
+            <column name="NAME" value="SAP_HANA"/>
+            <column name="DESCRIPTION" value="SAP HANA DATABASE" />
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
