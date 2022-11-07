@@ -56,6 +56,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum.CANCELED;
+import static ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum.CANCELING;
+import static ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum.PENDING_DB_CONNECTION;
+import static ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum.SCHEDULED;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -95,7 +100,7 @@ public class JobDomainService {
     @Transactional
     public ReportJobData getNextScheduledJob() {
         var job = repository.getFirstByStatusIdAndStateIdOrderById(
-                ReportJobStatusEnum.SCHEDULED.getId(),
+                SCHEDULED.getId(),
                 ReportJobStateEnum.NORMAL.getId());
 
         return job == null ? null : reportJobDataMapper.from(job);
@@ -120,6 +125,11 @@ public class JobDomainService {
     public void setJobStatus(Long id, ReportJobStatusEnum status, Long rowCount, String errorMessage) {
 
         final var job = repository.getReferenceById(id);
+        final var jobStatus =  ReportJobStatusEnum.getById(job.getStatus().getId());
+
+        if ((jobStatus.equals(SCHEDULED) || jobStatus.equals(PENDING_DB_CONNECTION)) && status.equals(CANCELING))
+            status = CANCELED;
+
         if (checkFinalStatus(job.getStatus().getId())) {
             job.setStatus(new ReportJobStatus(status.getId()));
             job.setRowCount(rowCount);
@@ -163,7 +173,7 @@ public class JobDomainService {
         job.setReport(new Report(report.getId()));
         job.setReportJobFilters(jobFilters.stream().map(f -> reportJobFilterRepository.getReferenceById(f.getId())).toList());
         job.setUser(new User(userId));
-        job.setStatus(new ReportJobStatus(ReportJobStatusEnum.SCHEDULED.getId()));
+        job.setStatus(new ReportJobStatus(SCHEDULED.getId()));
         job.setState(new ReportJobState(ReportJobStateEnum.NORMAL.getId()));
         job.setRowCount(0L);
         job.getReportJobFilters().forEach(filter -> filter.setReportJob(job));
@@ -217,7 +227,7 @@ public class JobDomainService {
 
     @Transactional
     public void cancelJob(Long jobId) {
-        setJobStatus(jobId, ReportJobStatusEnum.CANCELING, -1L, null);
+        setJobStatus(jobId, CANCELING, -1L, null);
     }
 
     @Transactional
@@ -287,9 +297,9 @@ public class JobDomainService {
     @Transactional
     public void refreshStatusesAfterRestart() {
         final var runningJobs = repository.findAllByStatusIdAndStateId(ReportJobStatusEnum.RUNNING.getId(), ReportJobStateEnum.NORMAL.getId());
-        runningJobs.forEach(job -> job.setStatus(new ReportJobStatus(ReportJobStatusEnum.SCHEDULED.getId())));
+        runningJobs.forEach(job -> job.setStatus(new ReportJobStatus(SCHEDULED.getId())));
         repository.saveAll(runningJobs);
-        final var cancelingJobs = repository.findAllByStatusIdAndStateId(ReportJobStatusEnum.CANCELING.getId(), ReportJobStateEnum.NORMAL.getId());
+        final var cancelingJobs = repository.findAllByStatusIdAndStateId(CANCELING.getId(), ReportJobStateEnum.NORMAL.getId());
         cancelingJobs.forEach(job -> job.setStatus(new ReportJobStatus(ReportJobStatusEnum.CANCELED.getId())));
         repository.saveAll(cancelingJobs);
     }
@@ -335,7 +345,7 @@ public class JobDomainService {
     @Transactional
     public void restartPendingJobs() {
         final var updateBefore = LocalDateTime.now().minusSeconds(pendingRetryInterval);
-        repository.updatePendingJobs(ReportJobStatusEnum.PENDING_DB_CONNECTION.getId(), ReportJobStatusEnum.SCHEDULED.getId(), updateBefore);
+        repository.updatePendingJobs(PENDING_DB_CONNECTION.getId(), SCHEDULED.getId(), updateBefore);
     }
 
     @Transactional
