@@ -30,8 +30,11 @@ public class DestinationUserResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     DestinationTypeEnum type;
 
-    @JsonFormat(shape = JsonFormat.Shape.NUMBER_INT)
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     String userName;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    String domainName;
 
     @JsonFormat(pattern = ISO_DATE_TIME_PATTERN)
     LocalDateTime created;
