@@ -194,7 +194,7 @@ public class MailTextDomainService {
 
         result.addAll(destinationUsers.stream()
                 .filter(d -> d.getType().equals(destinationType))
-                .map(user -> userService.getUserResponse(new UserRequest().setUserName(user.getUserName())).getEmail())
+                .map(user -> userService.getUserResponse(new UserRequest(user.getUserName(),user.getDomainName())).getEmail())
                 .toList());
 
         return result;

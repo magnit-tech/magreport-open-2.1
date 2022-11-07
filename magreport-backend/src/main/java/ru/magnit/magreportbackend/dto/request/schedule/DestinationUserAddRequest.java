@@ -13,5 +13,6 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 public class DestinationUserAddRequest {
     String userName;
+    String domainName;
     Long typeId;
 }

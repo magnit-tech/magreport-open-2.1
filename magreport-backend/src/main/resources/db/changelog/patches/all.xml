@@ -29,5 +29,6 @@
     <include file="classpath:/db/changelog/patches/2022-10-21-02/all.xml"/>
     <include file="classpath:/db/changelog/patches/2022-10-25/all.xml"/>
     <include file="classpath:/db/changelog/patches/2022-11-03/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2022-11-07/all.xml"/>
 
 </databaseChangeLog>

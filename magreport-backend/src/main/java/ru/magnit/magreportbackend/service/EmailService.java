@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -54,11 +55,13 @@ public class EmailService {
             log.warn("The ability to send messages is disabled");
             return;
         }
+        var emails = checkAndFilterEmails(emailTo);
 
-        if (emailTo.isEmpty()){
+        if (emails.length == 0){
             log.warn("Destinations list is empty. Mail not send.");
             return;
         }
+
 
         var mailSender = getMailSender();
 
@@ -73,9 +76,9 @@ public class EmailService {
             mimeMessage.setText(textMessage, true);
 
             if (type.equals(Message.RecipientType.BCC))
-                mimeMessage.setBcc(checkAndFilterEmails(emailTo));
+                mimeMessage.setBcc(emails);
             else
-                mimeMessage.setTo(checkAndFilterEmails(emailTo));
+                mimeMessage.setTo(emails);
 
             attachments.forEach(attachment -> {
                 try {
@@ -145,12 +148,13 @@ public class EmailService {
     private String[] checkAndFilterEmails(List<String> emails) {
         var badEmail = emails
                 .stream()
+                .filter(Objects::nonNull)
                 .filter(s -> !s.matches("^[A-Za-z0-9+_.-]+@(.+)$"))
                 .distinct()
                 .toList();
 
         if (!badEmail.isEmpty()) {
-            log.error("These email addresses are invalid: " + String.join(", ", badEmail));
+            log.warn("These email addresses are invalid: " + String.join(", ", badEmail));
             emails.removeAll(badEmail);
         }
 
@@ -171,6 +175,6 @@ public class EmailService {
                     .toList();
 
 
-        return emails.stream().distinct().toList().toArray(new String[0]);
+      return emails.stream().filter(Objects::nonNull).distinct().toList().toArray(new String[0]);
     }
 }
