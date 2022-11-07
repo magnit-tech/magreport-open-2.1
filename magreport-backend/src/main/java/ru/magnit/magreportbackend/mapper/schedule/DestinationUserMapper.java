@@ -15,6 +15,7 @@ public class DestinationUserMapper implements Mapper<DestinationUser, Destinatio
     public DestinationUser from(DestinationUserAddRequest source) {
         return new DestinationUser()
                 .setType(source.getTypeId() == null ? new DestinationType(0L) : new DestinationType(source.getTypeId()))
+                .setDomainName(source.getDomainName())
                 .setValue(source.getUserName());
     }
 }
