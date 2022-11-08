@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class SubtractExpressionTest {
 
     @Test
-    void additionTest() {
+    void subtractTest() {
         final var sourceExpression = new FieldExpressionResponse()
             .setType(Expressions.SUBTRACT)
             .setParameters(List.of(
@@ -37,7 +37,33 @@ class SubtractExpressionTest {
         final var expression = sourceExpression.getType().init(sourceExpression);
         final var expressionResult = expression.calculate(0);
 
-        assertEquals("-6.5", expressionResult.getL());
+        assertEquals("8.5", expressionResult.getL());
         assertEquals(DataTypeEnum.DOUBLE, expressionResult.getR());
+    }
+
+    @Test
+    void subtractIntegerTest() {
+        final var sourceExpression = new FieldExpressionResponse()
+            .setType(Expressions.SUBTRACT)
+            .setParameters(List.of(
+                new FieldExpressionResponse()
+                    .setType(Expressions.CONSTANT_VALUE)
+                    .setConstantType(DataTypeEnum.INTEGER)
+                    .setConstantValue("15"),
+                new FieldExpressionResponse()
+                    .setType(Expressions.CONSTANT_VALUE)
+                    .setConstantType(DataTypeEnum.INTEGER)
+                    .setConstantValue("3"),
+                new FieldExpressionResponse()
+                    .setType(Expressions.CONSTANT_VALUE)
+                    .setConstantType(DataTypeEnum.INTEGER)
+                    .setConstantValue("-1")
+            ));
+
+        final var expression = sourceExpression.getType().init(sourceExpression);
+        final var expressionResult = expression.calculate(0);
+
+        assertEquals("13", expressionResult.getL());
+        assertEquals(DataTypeEnum.INTEGER, expressionResult.getR());
     }
 }
