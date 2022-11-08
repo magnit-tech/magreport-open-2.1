@@ -49,4 +49,23 @@ public enum DataTypeEnum {
        return valueOf(value).ordinal();
     }
 
+    public boolean notIn(DataTypeEnum... variants) {
+        for (final var variant: variants){
+            if (variant == this) return false;
+        }
+        return true;
+    }
+
+    public DataTypeEnum widerNumeric(DataTypeEnum other) {
+        return this == DataTypeEnum.DOUBLE || other == DataTypeEnum.DOUBLE ?
+            DataTypeEnum.DOUBLE : DataTypeEnum.INTEGER;
+    }
+
+    public String toTypedString(double value){
+        if (this == INTEGER) {
+            return String.valueOf((long) value);
+        } else {
+            return String.valueOf(value);
+        }
+    }
 }
