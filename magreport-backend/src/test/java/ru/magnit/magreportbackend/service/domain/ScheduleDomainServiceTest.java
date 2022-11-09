@@ -39,7 +39,6 @@ class ScheduleDomainServiceTest {
     @Test
     void addSchedule() {
 
-        final var request = new ScheduleAddRequest();
         final var currentUser = new UserView();
         final var schedule = spy(new Schedule());
         final var savedSchedule = new Schedule().setId(ID);
@@ -48,7 +47,7 @@ class ScheduleDomainServiceTest {
         when(scheduleMapper.from(any(ScheduleAddRequest.class))).thenReturn(schedule);
         when(repository.save(any())).thenReturn(savedSchedule);
 
-        var result = domainService.addSchedule(currentUser, request);
+        var result = domainService.addSchedule(currentUser, getScheduleAddRequest());
 
         assertEquals(ID, result);
 
@@ -58,6 +57,12 @@ class ScheduleDomainServiceTest {
         verify(repository).save(any());
 
         verifyNoMoreInteractions(repository, scheduleMapper);
+    }
+
+    private ScheduleAddRequest getScheduleAddRequest(){
+        return new ScheduleAddRequest()
+                .setScheduleTypeId(7L)
+                .setIntervalMinutes(10L);
     }
 
 }
