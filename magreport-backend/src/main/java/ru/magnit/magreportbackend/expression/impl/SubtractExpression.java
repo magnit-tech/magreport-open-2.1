@@ -3,19 +3,12 @@ package ru.magnit.magreportbackend.expression.impl;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
 import ru.magnit.magreportbackend.exception.InvalidExpression;
-import ru.magnit.magreportbackend.expression.BaseExpression;
+import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class SubtractExpression implements BaseExpression {
-    private final List<BaseExpression> parameters = new ArrayList<>();
-
+public class SubtractExpression extends ParameterizedExpression {
     public SubtractExpression(FieldExpressionResponse fieldExpression) {
-        for (var parameter : fieldExpression.getParameters()) {
-            parameters.add(parameter.getType().init(parameter));
-        }
+        super(fieldExpression);
     }
 
     @Override
