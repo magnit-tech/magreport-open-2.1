@@ -5,6 +5,9 @@ import ru.magnit.magreportbackend.exception.InvalidParametersException;
 import ru.magnit.magreportbackend.expression.BaseExpression;
 import ru.magnit.magreportbackend.expression.impl.AddExpression;
 import ru.magnit.magreportbackend.expression.impl.ConstantValueExpression;
+import ru.magnit.magreportbackend.expression.impl.DivideExpression;
+import ru.magnit.magreportbackend.expression.impl.ModuloExpression;
+import ru.magnit.magreportbackend.expression.impl.MultiplyExpression;
 import ru.magnit.magreportbackend.expression.impl.SubtractExpression;
 
 public enum Expressions {
@@ -24,9 +27,9 @@ public enum Expressions {
             case DERIVED_FIELD_VALUE -> throw new InvalidParametersException("Wrong type: " + this);
             case ADD -> new AddExpression(fieldExpression);
             case SUBTRACT -> new SubtractExpression(fieldExpression);
-            case MULTIPLY -> throw new InvalidParametersException("Wrong type: " + this);
-            case DIVIDE -> throw new InvalidParametersException("Wrong type: " + this);
-            case MODULO -> throw new InvalidParametersException("Wrong type: " + this);
+            case MULTIPLY -> new MultiplyExpression(fieldExpression);
+            case DIVIDE -> new DivideExpression(fieldExpression);
+            case MODULO -> new ModuloExpression(fieldExpression);
         };
     }
 }
