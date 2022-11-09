@@ -28,4 +28,5 @@ public class ScheduleAddRequest {
     private String name;
     private String description;
     private Long differenceTime;
+    private Long intervalMinutes;
 }
