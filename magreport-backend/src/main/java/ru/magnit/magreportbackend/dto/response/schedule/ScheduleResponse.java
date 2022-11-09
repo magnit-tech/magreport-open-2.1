@@ -36,6 +36,7 @@ public class ScheduleResponse {
     private Long dayEndMonth;
     private Long weekMonth;
     private Long weekEndMonth;
+    private Long intervalMinutes;
     private List<ScheduleTaskShortResponse> tasks;
 
     private String userName;

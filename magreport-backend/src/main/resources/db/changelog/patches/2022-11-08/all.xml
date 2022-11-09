@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="ADD-NEW_SCHEDULE_TYPE-001" author="vyushin_aa">
+
+    <insert tableName="SCHEDULE_TYPE" schemaName="REPOSITORY">
+        <column name="NAME" value="EVERY_N_MINUTES"/>
+        <column name="DESCRIPTION" value="Ежедневно,каждые n минут с указанного времени" />
+    </insert>
+    </changeSet>
+
+
+    <changeSet id="ADD-COLUMN-INTERVAL_MINUTES-001" author="vyushin_aa">
+
+        <addColumn tableName="SCHEDULE" schemaName="REPOSITORY">
+            <column name="INTERVAL_MINUTES" type="INT"/>
+        </addColumn>
+
+    </changeSet>
+
+</databaseChangeLog>
