@@ -10,19 +10,17 @@ import ru.magnit.magreportbackend.config.MailSenderFactory;
 import ru.magnit.magreportbackend.dto.request.mail.EmailSendRequest;
 import ru.magnit.magreportbackend.dto.request.mail.ListEmailsCheckRequest;
 import ru.magnit.magreportbackend.dto.response.mail.ListEmailsCheckResponse;
-import ru.magnit.magreportbackend.dto.response.user.UserResponse;
 import ru.magnit.magreportbackend.exception.InvalidApplicationSettings;
 import ru.magnit.magreportbackend.exception.InvalidParametersException;
 import ru.magnit.magreportbackend.util.Pair;
 
-import javax.mail.Message;
 import javax.mail.MessagingException;
-import java.io.File;
+import javax.mail.internet.MimeMessage;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -44,58 +42,18 @@ public class EmailService {
     @Value("${magreport.mail.tag-subject}")
     String tag;
 
+    @Value("${magreport.mail.party-size-users}")
+    Long partySize;
+
+    @Value("${magreport.mail.pause-between-send-party}")
+    Long pauseBetweenSendParty;
+
+
     private static final String ERROR_MESSAGE = "Error to send email";
 
-    public void sendMail(Message.RecipientType type, String emailTo, String subject, String textMessage, List<File> attachments) {
-        sendMailToList(type, Collections.singletonList(emailTo), subject, textMessage, attachments.stream().map(attachment -> new Pair<>(attachment.getName(),attachment)).toList());
-    }
-
-    public void sendMailToList(Message.RecipientType type, List<String> emailTo, String subject, String textMessage, List<Pair<String,File>> attachments) {
-        if(!sendEmails){
-            log.warn("The ability to send messages is disabled");
-            return;
-        }
-        var emails = checkAndFilterEmails(emailTo);
-
-        if (emails.length == 0){
-            log.warn("Destinations list is empty. Mail not send.");
-            return;
-        }
-
-
-        var mailSender = getMailSender();
-
-        var msg = mailSender.createMimeMessage();
-        var from = settingsService.getValueSetting(fromCode);
-
-
-        try {
-            var mimeMessage = new MimeMessageHelper(msg, true, "UTF-8");
-            mimeMessage.setFrom(from);
-            mimeMessage.setSubject(String.format("%s %s",tag,subject));
-            mimeMessage.setText(textMessage, true);
-
-            if (type.equals(Message.RecipientType.BCC))
-                mimeMessage.setBcc(emails);
-            else
-                mimeMessage.setTo(emails);
-
-            attachments.forEach(attachment -> {
-                try {
-                    mimeMessage.addAttachment(attachment.getL(), attachment.getR());
-                } catch (MessagingException e) {
-                    log.error(ERROR_MESSAGE, e);
-                }
-            });
-                 mailSender.send(msg);
-        } catch (MessagingException e) {
-            log.error(ERROR_MESSAGE, e);
-            throw new InvalidApplicationSettings("", e);
-        }
-    }
-
     public void sendMail(EmailSendRequest request) {
-        if(!sendEmails){
+
+        if (!sendEmails) {
             log.info("The ability to send messages is disabled");
             return;
         }
@@ -103,36 +61,73 @@ public class EmailService {
         if (request.checkItem()) {
             var mailSender = getMailSender();
 
-            var msg = mailSender.createMimeMessage();
             var from = settingsService.getValueSetting(fromCode);
 
-            var to = request.getTo().stream().map(UserResponse::getEmail).toList();
-            var cc = request.getCc().stream().map(UserResponse::getEmail).toList();
-            var bcc = request.getBcc().stream().map(UserResponse::getEmail).toList();
+            var to = new ArrayList<String>();
+            var cc = new ArrayList<String>();
+            var bcc = new ArrayList<String>();
 
-            try {
-                var mimeMessage = new MimeMessageHelper(msg, true, "UTF-8");
-                mimeMessage.setFrom(from);
-                mimeMessage.setSubject(String.format("%s %s",tag,request.getSubject()));
-                mimeMessage.setText(request.getBody(), true);
+            var destinations = checkAndFilterEmails(request.getTo()).stream().map(s -> new Pair<>(s, "TO")).collect(Collectors.toList());
+            destinations.addAll(checkAndFilterEmails(request.getCc()).stream().map(s -> new Pair<>(s, "CC")).toList());
+            destinations.addAll(checkAndFilterEmails(request.getBcc()).stream().map(s -> new Pair<>(s, "BCC")).toList());
 
-                mimeMessage.setTo(checkAndFilterEmails(to));
-                mimeMessage.setCc(checkAndFilterEmails(cc));
-                mimeMessage.setBcc(checkAndFilterEmails(bcc));
+            destinations.forEach(d -> {
 
-                mailSender.send(msg);
-            } catch (MessagingException e) {
-                log.error(ERROR_MESSAGE, e);
-            }
+                if (to.size() + cc.size() + bcc.size() == partySize) {
+                    send(request, mailSender, mailSender.createMimeMessage(), from, to, cc, bcc);
+                    to.clear();
+                    cc.clear();
+                    bcc.clear();
+
+
+                    try {
+                        Thread.sleep(pauseBetweenSendParty * 1000);
+                    } catch (InterruptedException e) {
+                        log.error(e.getMessage());
+                        Thread.currentThread().interrupt();
+                    }
+
+                }
+
+                switch (d.getR()) {
+                    case "TO" -> to.add(d.getL());
+                    case "CC" -> cc.add(d.getL());
+                    case "BCC" -> bcc.add(d.getL());
+                    default -> throw new IllegalStateException("Unexpected type destinations: " + d.getR());
+                }
+            });
+
+            if (!to.isEmpty() || !cc.isEmpty() || !bcc.isEmpty())
+                send(request, mailSender, mailSender.createMimeMessage(), from, to, cc, bcc);
+
         } else {
-            throw new InvalidParametersException("Request contains empty fields");
+            throw new InvalidParametersException("Request not contains destinations");
+        }
+    }
+
+
+    private void send(EmailSendRequest request, JavaMailSender mailSender, MimeMessage msg, String from, ArrayList<String> to, ArrayList<String> cc, ArrayList<String> bcc) {
+        try {
+            var mimeMessage = getMimeMessageHelper(request, msg, from);
+            mimeMessage.setTo(to.toArray(new String[0]));
+            mimeMessage.setCc(cc.toArray(new String[0]));
+            mimeMessage.setBcc(bcc.toArray(new String[0]));
+
+            mailSender.send(msg);
+
+
+        } catch (MessagingException e) {
+            log.error(ERROR_MESSAGE, e);
+            log.error("List emails TO: " + String.join(", ", to));
+            log.error("List emails CC: " + String.join(", ", cc));
+            log.error("List emails BCC: " + String.join(", ", bcc));
         }
     }
 
     public ListEmailsCheckResponse checkEmails(ListEmailsCheckRequest request) {
         var emails = new ArrayList<>(request.getEmails().stream().map(String::toLowerCase).toList());
         var goodEmails = checkAndFilterEmails(request.getEmails());
-        emails.removeAll(Arrays.stream(goodEmails).toList());
+        emails.removeAll(goodEmails);
         return new ListEmailsCheckResponse().setEmails(emails);
 
     }
@@ -145,7 +140,7 @@ public class EmailService {
         }
     }
 
-    private String[] checkAndFilterEmails(List<String> emails) {
+    private List<String> checkAndFilterEmails(List<String> emails) {
         var badEmail = emails
                 .stream()
                 .filter(Objects::nonNull)
@@ -159,12 +154,12 @@ public class EmailService {
         }
 
         var permittedDomains = Arrays.stream(
-                settingsService
-                        .getValueSetting(permittedDomainsCode)
-                        .replace(" ", "")
-                        .toLowerCase()
-                        .split(",")
-        )
+                        settingsService
+                                .getValueSetting(permittedDomainsCode)
+                                .replace(" ", "")
+                                .toLowerCase()
+                                .split(",")
+                )
                 .toList();
 
         if (!permittedDomains.get(0).isBlank())
@@ -175,6 +170,23 @@ public class EmailService {
                     .toList();
 
 
-      return emails.stream().filter(Objects::nonNull).distinct().toList().toArray(new String[0]);
+        return emails.stream().filter(Objects::nonNull).distinct().toList();
+    }
+
+    private MimeMessageHelper getMimeMessageHelper(EmailSendRequest request, MimeMessage msg, String from) throws MessagingException {
+        var mimeMessage = new MimeMessageHelper(msg, true, "UTF-8");
+        mimeMessage.setFrom(from);
+        mimeMessage.setSubject(String.format("%s %s", tag, request.getSubject()));
+        mimeMessage.setText(request.getBody(), true);
+
+        request.getAttachments().forEach(a -> {
+            try {
+                mimeMessage.addAttachment(a.getL(), a.getR());
+            } catch (MessagingException e) {
+                log.error(ERROR_MESSAGE, e);
+            }
+        });
+
+        return mimeMessage;
     }
 }

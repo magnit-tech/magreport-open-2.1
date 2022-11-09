@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.magnit.magreportbackend.domain.schedule.DestinationTypeEnum;
+import ru.magnit.magreportbackend.dto.request.mail.EmailSendRequest;
 import ru.magnit.magreportbackend.dto.request.user.RoleRequest;
 import ru.magnit.magreportbackend.dto.request.user.UserRequest;
 import ru.magnit.magreportbackend.dto.response.schedule.DestinationEmailResponse;
@@ -19,11 +20,9 @@ import ru.magnit.magreportbackend.service.SettingsService;
 import ru.magnit.magreportbackend.service.UserService;
 import ru.magnit.magreportbackend.util.Pair;
 
-import javax.mail.Message;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -60,13 +59,13 @@ public class MailTextDomainService {
         if (!warning.getL().isEmpty())
             warningText = updateTextForScheduleService(repository.findByCode(warning.getL()).getBody(), taskResponse, warning.getR(), "");
 
-        emailService.sendMailToList(
-                Message.RecipientType.TO,
-                getEmails(DestinationTypeEnum.REPORT, taskResponse.getDestinationEmails(), taskResponse.getDestinationUsers(), taskResponse.getDestinationRoles()),
-                updateTextForScheduleService(taskResponse.getReportTitleMail() == null ? mailText.getSubject() : taskResponse.getReportTitleMail(), taskResponse),
-                updateTextForScheduleService(taskResponse.getReportBodyMail(), taskResponse) + LINE_BREAK + warningText,
-                attachments
-        );
+        emailService.sendMail(
+                new EmailSendRequest(
+                        updateTextForScheduleService(taskResponse.getReportTitleMail() == null ? mailText.getSubject() : taskResponse.getReportTitleMail(), taskResponse),
+                        updateTextForScheduleService(taskResponse.getReportBodyMail(), taskResponse) + LINE_BREAK + warningText,
+                        getEmails(DestinationTypeEnum.REPORT, taskResponse.getDestinationEmails(), taskResponse.getDestinationUsers(), taskResponse.getDestinationRoles()),
+                        attachments
+                ));
     }
 
     public void sendScheduleMailBigExcel(String code, ScheduleTaskResponse taskResponse, Long reportJobId, String linkService, Pair<String, String> warning) {
@@ -79,12 +78,13 @@ public class MailTextDomainService {
             String token = jobTokenDomainService.createJobToken(reportJobId, taskResponse.getExcelTemplate().getId(), email);
             String fileLink = linkService.replace("{reportToken}", token);
 
+
             emailService.sendMail(
-                    Message.RecipientType.TO,
-                    email,
-                    updateTextForScheduleService(taskResponse.getReportTitleMail() == null ? mailText.getSubject() : taskResponse.getReportTitleMail(), taskResponse),
-                    updateTextForScheduleService(taskResponse.getReportBodyMail() + LINE_BREAK + mailText.getBody() + LINE_BREAK + warningText, taskResponse, warning.getR(), fileLink, reportJobId),
-                    new ArrayList<>()
+                    new EmailSendRequest(
+                            updateTextForScheduleService(taskResponse.getReportTitleMail() == null ? mailText.getSubject() : taskResponse.getReportTitleMail(), taskResponse),
+                            updateTextForScheduleService(taskResponse.getReportBodyMail() + LINE_BREAK + mailText.getBody() + LINE_BREAK + warningText, taskResponse, warning.getR(), fileLink, reportJobId),
+                            email
+                    )
             );
         });
     }
@@ -97,13 +97,12 @@ public class MailTextDomainService {
         if (!warning.getL().isEmpty())
             warningText = updateTextForScheduleService(repository.findByCode(warning.getL()).getBody(), taskResponse, warning.getR(), "", reportJobId);
 
-
-        emailService.sendMailToList(
-                Message.RecipientType.TO,
-                getEmails(DestinationTypeEnum.REPORT, taskResponse.getDestinationEmails(), taskResponse.getDestinationUsers(), taskResponse.getDestinationRoles()),
-                updateTextForScheduleService(taskResponse.getReportTitleMail() == null ? mailText.getSubject() : taskResponse.getReportTitleMail(), taskResponse, warning.getR().isEmpty() ? "" : warning.getR(), "", reportJobId),
-                updateTextForScheduleService(mailText.getBody(), taskResponse, warning.getR().isEmpty() ? "" : warning.getR(), "", reportJobId) + LINE_BREAK + warningText,
-                new ArrayList<>()
+        emailService.sendMail(
+                new EmailSendRequest(
+                        updateTextForScheduleService(taskResponse.getReportTitleMail() == null ? mailText.getSubject() : taskResponse.getReportTitleMail(), taskResponse, warning.getR().isEmpty() ? "" : warning.getR(), "", reportJobId),
+                        updateTextForScheduleService(mailText.getBody(), taskResponse, warning.getR().isEmpty() ? "" : warning.getR(), "", reportJobId) + LINE_BREAK + warningText,
+                        getEmails(DestinationTypeEnum.REPORT, taskResponse.getDestinationEmails(), taskResponse.getDestinationUsers(), taskResponse.getDestinationRoles())
+                )
         );
     }
 
@@ -111,26 +110,26 @@ public class MailTextDomainService {
 
         var mailText = repository.findByCode(code);
 
-        emailService.sendMailToList(
-                Message.RecipientType.TO,
-                getEmails(DestinationTypeEnum.REPORT, taskResponse.getDestinationEmails(), taskResponse.getDestinationUsers(), taskResponse.getDestinationRoles()),
-                updateTextForScheduleService(mailText.getSubject(), taskResponse),
-                updateTextForScheduleService(mailText.getBody(), taskResponse, link, ""),
-                new ArrayList<>()
+        emailService.sendMail(
+                new EmailSendRequest(
+                        updateTextForScheduleService(mailText.getSubject(), taskResponse),
+                        updateTextForScheduleService(mailText.getBody(), taskResponse, link, ""),
+                        getEmails(DestinationTypeEnum.REPORT, taskResponse.getDestinationEmails(), taskResponse.getDestinationUsers(), taskResponse.getDestinationRoles())
+                )
         );
+
     }
 
     public void sendScheduleMailChanged(ScheduleTaskResponse taskResponse) {
 
         var mailText = repository.findByCode(scheduleMailChanged);
 
-
         emailService.sendMail(
-                Message.RecipientType.TO,
-                settingsService.getValueSetting(adminMailBox),
-                updateTextForScheduleService(mailText.getSubject(), taskResponse),
-                updateTextForScheduleService(mailText.getBody(), taskResponse),
-                new ArrayList<>()
+                new EmailSendRequest(
+                        updateTextForScheduleService(mailText.getSubject(), taskResponse),
+                        updateTextForScheduleService(mailText.getBody(), taskResponse),
+                        settingsService.getValueSetting(adminMailBox)
+                )
         );
 
     }
@@ -141,36 +140,35 @@ public class MailTextDomainService {
         var userMailText = repository.findByCode(scheduleMailErrorUser);
 
         emailService.sendMail(
-                Message.RecipientType.TO,
-                settingsService.getValueSetting(adminMailBox),
-                updateTextForScheduleService(mailText.getSubject(), taskResponse, reportJobId, error),
-                updateTextForScheduleService(mailText.getBody(), taskResponse, reportJobId, error),
-                new ArrayList<>()
+                new EmailSendRequest(
+                        updateTextForScheduleService(mailText.getSubject(), taskResponse, reportJobId, error),
+                        updateTextForScheduleService(mailText.getBody(), taskResponse, reportJobId, error),
+                        settingsService.getValueSetting(adminMailBox)
+                )
         );
 
         var emails = getEmails(DestinationTypeEnum.ERROR, taskResponse.getDestinationEmails(), taskResponse.getDestinationUsers(), taskResponse.getDestinationRoles());
 
         if (!emails.isEmpty()) {
-            emailService.sendMailToList(
-                    Message.RecipientType.TO,
-                    emails,
-                    updateTextForScheduleService(taskResponse.getErrorTitleMail() == null ? userMailText.getSubject() : taskResponse.getErrorTitleMail(), taskResponse),
-                    updateTextForScheduleService(taskResponse.getErrorBodyMail() == null ? userMailText.getBody() : taskResponse.getErrorBodyMail(), taskResponse),
-                    new ArrayList<>()
+            emailService.sendMail(
+                    new EmailSendRequest(
+                            updateTextForScheduleService(taskResponse.getErrorTitleMail() == null ? userMailText.getSubject() : taskResponse.getErrorTitleMail(), taskResponse),
+                            updateTextForScheduleService(taskResponse.getErrorBodyMail() == null ? userMailText.getBody() : taskResponse.getErrorBodyMail(), taskResponse),
+                            emails
+                    )
             );
         }
-
     }
 
     public void sendScheduleMailDeadline(String code, ScheduleTaskResponse taskResponse, String prolongationLink) {
         var mailText = repository.findByCode(code);
 
-        emailService.sendMailToList(
-                Message.RecipientType.TO,
-                getEmails(DestinationTypeEnum.REPORT, taskResponse.getDestinationEmails(), taskResponse.getDestinationUsers(), taskResponse.getDestinationRoles()),
-                updateTextForScheduleService(mailText.getSubject(), taskResponse),
-                updateTextForScheduleService(mailText.getBody(), taskResponse, prolongationLink, ""),
-                new ArrayList<>()
+        emailService.sendMail(
+                new EmailSendRequest(
+                        updateTextForScheduleService(mailText.getSubject(), taskResponse),
+                        updateTextForScheduleService(mailText.getBody(), taskResponse, prolongationLink, ""),
+                        getEmails(DestinationTypeEnum.REPORT, taskResponse.getDestinationEmails(), taskResponse.getDestinationUsers(), taskResponse.getDestinationRoles())
+                )
         );
     }
 
@@ -194,7 +192,7 @@ public class MailTextDomainService {
 
         result.addAll(destinationUsers.stream()
                 .filter(d -> d.getType().equals(destinationType))
-                .map(user -> userService.getUserResponse(new UserRequest(user.getUserName(),user.getDomainName())).getEmail())
+                .map(user -> userService.getUserResponse(new UserRequest(user.getUserName(), user.getDomainName())).getEmail())
                 .toList());
 
         return result;
