@@ -6,8 +6,9 @@ import ru.magnit.magreportbackend.exception.InvalidExpression;
 import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
-public class AddExpression extends ParameterizedExpression {
-    public AddExpression(FieldExpressionResponse fieldExpression) {
+public class DivideExpression extends ParameterizedExpression {
+
+    public DivideExpression(FieldExpressionResponse fieldExpression) {
         super(fieldExpression);
     }
 
@@ -15,14 +16,22 @@ public class AddExpression extends ParameterizedExpression {
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
         var result = 0D;
         var resultType = DataTypeEnum.INTEGER;
+        var firstValue = true;
         for (var parameter: parameters) {
             final var parameterValue = parameter.calculate(rowNumber);
+
             if (parameterValue.getR().notIn(DataTypeEnum.INTEGER, DataTypeEnum.DOUBLE)){
-                throw new InvalidExpression("Функция ADD() не может принимать параметры типа " + parameterValue.getR());
+                throw new InvalidExpression("Функция DIVIDE() не может принимать параметры типа " + parameterValue.getR());
+            }
+            resultType = resultType.widerNumeric(parameterValue.getR());
+
+            if (firstValue) {
+                result = Double.parseDouble(parameterValue.getL());
+                firstValue = false;
+                continue;
             }
 
-            resultType = resultType.widerNumeric(parameterValue.getR());
-            result += Double.parseDouble(parameter.calculate(rowNumber).getL());
+            result /= Double.parseDouble(parameterValue.getL());
         }
         return new Pair<>(resultType.toTypedString(result), resultType);
     }
