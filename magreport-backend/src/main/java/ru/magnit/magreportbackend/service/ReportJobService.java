@@ -11,6 +11,7 @@ import ru.magnit.magreportbackend.domain.user.SystemRoles;
 import ru.magnit.magreportbackend.dto.inner.RoleView;
 import ru.magnit.magreportbackend.dto.request.reportjob.ExcelReportRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobAddRequest;
+import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobCommentRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobHistoryRequestFilter;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobShareRequest;
@@ -321,6 +322,11 @@ public class ReportJobService {
 
     public List<UserResponse> getUsersJob(ReportJobRequest request) {
         return reportJobUserDomainService.getUsersJob(request.getJobId());
+    }
+
+    public void addReportJobComment(ReportJobCommentRequest request) {
+        var currentUser =userDomainService.getCurrentUser();
+        jobDomainService.addReportJobComment(request.getJobId(), currentUser.getId(), request.getComment());
     }
 
     private List<ReportJobResponse> applyFilter(List<ReportJobResponse> source, ReportJobHistoryRequestFilter filter){
