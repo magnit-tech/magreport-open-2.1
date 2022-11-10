@@ -35,7 +35,6 @@ export default function ReportFiltersItemViewer({filterItem, reportFields}) {
 
     const [expanded, setExpanded] = useState(true);
 
-    console.log(filterItem)
     return (
         <Paper className={classes.root} elevation={3}>
             <div className={classes.devRepFilterHeader}>

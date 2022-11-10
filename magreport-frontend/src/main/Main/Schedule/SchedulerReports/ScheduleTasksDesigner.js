@@ -138,7 +138,7 @@ export default function ScheduleTasksDesigner(props) {
     }
 
     function handleUsersLoaded(data){
-        setUsersList(data.map((v) => ({id: v.id, name: v.name, email: v.email})))
+        setUsersList(data.map((v) => ({id: v.id, name: v.name, email: v.email, domainName: v.domain.name})))
     }
 
     function handleRunLinkLoaded(data){
@@ -341,13 +341,13 @@ export default function ScheduleTasksDesigner(props) {
 
     function handleSave() { 
         let destEmails =  taskTypeId === '0' ? data.destinationEmails.map(item=>({emailValue: item, typeId: 0})): [];
-        let destUsers = data.destinationUsers.map(item=>({userName: item, typeId: 0}));
+        let destUsers = usersList.filter(item => data.destinationUsers.indexOf(item.id)>=0).map(i=>({userName: i.name, domainName: i.domainName, typeId: 0}));
         let destRoles = data.destinationRoles.map(item=>({roleId: item.id, name: item.name, typeId: 0}));
         let dataToSave = {
             code: data.schedules.find(item  => schedulesList.filter(item=>item.type === 'MANUAL').map(item=>item.id).find(item1=>item1===item)) ? data.code : null,
             description: data.description,
             destinationEmails:  destEmails.concat( data.errEmails.map(item=>({emailValue: item, typeId: 1}))),
-            destinationUsers:  destUsers.concat( data.errUsers.map(item=>({userName: item, typeId: 1}))),
+            destinationUsers:  destUsers.concat( data.errUsers.map(item=>({userName: item, domainName: "", typeId: 1}))),
             destinationRoles : destRoles.concat( data.errRoles.map(item=>({roleId: item.id, name: item.name, typeId: 1}))),
             expirationDate: data.expirationDate,
             reportTitleMail:   data.reportTitleMail?.trim() === "" ? null : data.reportTitleMail,
@@ -618,9 +618,9 @@ export default function ScheduleTasksDesigner(props) {
                 <DesignerMultipleSelectField
                         // minWidth = {StyleConsts.designerTextFieldMinWidth}
                         label = "Пользователи"
-                        value = {usersList.filter(item => data.destinationUsers.indexOf(item.name)>=0 )}
+                        value = {usersList.filter(item => data.destinationUsers.indexOf(item.id)>=0 )}
                         data = {usersList}
-                        needName = {true}
+                        //needName = {true}
                         onChange = {data => {handleChange('destinationUsers', data)}}
                         displayBlock
                         fullWidth
