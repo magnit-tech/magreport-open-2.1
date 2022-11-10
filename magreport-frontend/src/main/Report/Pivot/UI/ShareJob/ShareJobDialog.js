@@ -35,9 +35,6 @@ export default function ShareJobDialog(props){
 	useEffect(() => {
 		if (props.usersWithAccess.length >0) {
 		handleCheckedUsers(props.usersWithAccess)
-		console.log('props.usersWithAccess');
-		console.log(props.usersWithAccess);
-
 		}
 	}, [props.usersWithAccess])
 
@@ -52,18 +49,11 @@ export default function ShareJobDialog(props){
 
 	// Создаем список пользователей имеющих доступ из массива отмеченных логинов
 	const handleCheckedUsers = ((arraySelectedUsers) => {
-		console.log('handleCheckedUsers');
-		console.log(arraySelectedUsers)
 
 		let mapArraySelectedUsers = new Set(arraySelectedUsers),
 			newArr = listOfUsers.current.filter(user =>mapArraySelectedUsers.has(user.id))
 
 			setSelectedUsersLogin(arraySelectedUsers)
-
-			console.log('newArr');
-			console.log(newArr);
-			console.log('mapArraySelectedUsers');
-			console.log(mapArraySelectedUsers)
 
 		return setListOfUsersWithAccess(newArr)
 	});

@@ -17,6 +17,7 @@ import {
     getScheduleTypeDescription,
     getWeekDayName,
     MANUAL,
+    EVERY_N_MINUTES,
     scheduleTypesInitial,
     WEEK_END_MONTH,
     WEEK_MONTH,
@@ -129,6 +130,16 @@ export default function ScheduleParametersViewer(props) {
                 label="Время"
                 value={timeString}
             />
+        );
+    }
+
+    if (scheduleTypeName === EVERY_N_MINUTES) {
+        fields.push(
+            <ViewerTextField
+                key={fields.length}
+                label="Количество минут"
+                value={data.intervalMinutes}
+        />
         );
     }
 
