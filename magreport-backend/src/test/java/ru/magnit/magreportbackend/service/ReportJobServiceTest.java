@@ -468,7 +468,8 @@ class ReportJobServiceTest {
                 LocalDateTime.now(),
                 Collections.emptyList(),
                 true,
-            0L);
+            0L,
+                "comment");
     }
 
     private ReportJobAddRequest getReportJobAddRequest() {

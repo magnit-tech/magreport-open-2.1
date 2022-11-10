@@ -1,5 +1,6 @@
 package ru.magnit.magreportbackend.service.domain;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,6 +26,7 @@ import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobAddRequest;
 import ru.magnit.magreportbackend.dto.response.report.ReportShortResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobResponse;
 import ru.magnit.magreportbackend.dto.response.user.UserShortResponse;
+import ru.magnit.magreportbackend.exception.InvalidParametersException;
 import ru.magnit.magreportbackend.mapper.reportjob.ReportJobDataMapper;
 import ru.magnit.magreportbackend.mapper.reportjob.ReportJobFilterResponseMapper;
 import ru.magnit.magreportbackend.mapper.reportjob.ReportJobMapper;
@@ -347,6 +349,28 @@ class JobDomainServiceTest {
         verifyNoMoreInteractions(repository);
     }
 
+    @Test
+    void addReportJobCommentTest1(){
+
+        when(repository.getReferenceById(anyLong())).thenReturn(getReportJob());
+
+        domainService.addReportJobComment(ID,ID, "");
+
+        verify(repository).getReferenceById(anyLong());
+        verify(repository).save(any());
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    void addReportJobCommentTest2(){
+        when(repository.getReferenceById(anyLong())).thenReturn(getReportJob());
+
+        Assertions.assertThrows(InvalidParametersException.class, () -> domainService.addReportJobComment(ID,2L, ""));
+
+        verify(repository).getReferenceById(anyLong());
+        verifyNoMoreInteractions(repository);
+    }
+
 
     private ReportJobData getReportJobData() {
         return new ReportJobData(
@@ -393,7 +417,8 @@ class JobDomainServiceTest {
                 NOW,
                 Collections.emptyList(),
                 false,
-            0L
+            0L,
+                "comment"
         );
     }
 

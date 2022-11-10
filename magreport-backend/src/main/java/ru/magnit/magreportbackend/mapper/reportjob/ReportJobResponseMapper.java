@@ -39,6 +39,7 @@ public class ReportJobResponseMapper implements Mapper<ReportJobResponse, Report
             source.getModifiedDateTime(),
             new ArrayList<>(),
                 false,
-            0L);
+            0L,
+                source.getComment());
     }
 }
