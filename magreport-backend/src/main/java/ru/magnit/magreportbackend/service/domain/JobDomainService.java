@@ -361,6 +361,20 @@ public class JobDomainService {
 
     }
 
+    @Transactional
+    public void addReportJobComment(Long jobId, Long userId, String comment){
+        var job = repository.getReferenceById(jobId);
+
+        if (!job.getUser().getId().equals(userId)){
+            throw new InvalidParametersException("Only owner job can write a comment!");
+        }
+
+        job.setComment(comment);
+        job.setModifiedDateTime(LocalDateTime.now());
+        repository.save(job);
+
+    }
+
     private boolean checkFinalStatus(Long status) {
         return !status.equals(ReportJobStatusEnum.FAILED.getId()) &&
                 !status.equals(ReportJobStatusEnum.COMPLETE.getId()) &&

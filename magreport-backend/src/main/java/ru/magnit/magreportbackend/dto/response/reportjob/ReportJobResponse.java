@@ -58,4 +58,7 @@ public class ReportJobResponse {
 
     @JsonFormat(shape = JsonFormat.Shape.NUMBER_INT)
     Long excelRowLimit;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    String comment;
 }
