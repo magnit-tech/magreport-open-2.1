@@ -6,6 +6,7 @@ export const DAY_END_MONTH = "DAY_END_MONTH";
 export const WEEK_MONTH = "WEEK_MONTH";
 export const WEEK_END_MONTH = "WEEK_END_MONTH";
 export const MANUAL = "MANUAL";
+export const EVERY_N_MINUTES = "EVERY_N_MINUTES"
 
 export const scheduleTypesInitial = [
     {id: 0, name: EVERY_DAY, description: "каждый день в заданное время"},
@@ -23,6 +24,7 @@ export const scheduleTypesInitial = [
         description: "по дню недели с соответствующим порядковым номером от конца месяца в заданное время"
     },
     {id: 6, name: MANUAL, description: "По требованию"},
+    {id: 7, name: EVERY_N_MINUTES, description: "Ежедневно,каждые n минут с указанного времени"}
 ];
 
 export const initialData = {
@@ -38,6 +40,7 @@ export const initialData = {
     weekEndMonth: 1,
     weekMonth: 1,
     differenceTime: 0,
+    intervalMinutes: 5
 };
 
 export const weekDays = [
