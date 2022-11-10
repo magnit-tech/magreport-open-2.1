@@ -554,13 +554,15 @@ export default function(props){
     }
 
     const conditionalFormatting = (cell) => {
-        if (cell.type === "metricValues" && (cell.conditionalFormatting && cell.conditionalFormatting.length > 0)) {
 
+        if (cell.type === "metricValues" && (cell.conditionalFormatting && cell.conditionalFormatting.length > 0)) {
+            console.log(cell);
             if (cell.conditionalFormatting.length === 1) {
+                console.log('conditionalFormatting');
                 return {backgroundColor: cell.conditionalFormatting[0].color}
             } 
             
-            const cellData = Number(cell.data)
+            const cellData = Number(cell.data.replace(/\s/g,'').replace('%', ''))
 
             for (let i = 0; i < cell.conditionalFormatting.length; i++) {
                 if (cellData < Number(cell.conditionalFormatting[i].valueTo)) {
