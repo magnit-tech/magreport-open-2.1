@@ -536,7 +536,7 @@ function PivotPanel(props){
 
     function handleDragEnd(result){
 
-        const { destination, source, draggableId } = result;
+        const { destination, source, draggableId } = result; // eslint-disable-line
 
         if (destination &&
                 (destination.droppableId !== source.droppableId 

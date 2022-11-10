@@ -15,7 +15,6 @@ import ListItem from '@material-ui/core/ListItem';
 import Box from '@material-ui/core/Box';
 import ListItemText from '@material-ui/core/ListItemText';
 import IconButton from '@material-ui/core/IconButton';
-import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 
 //local
 import {AggFunc} from '../../FolderContent/JobFilters/JobStatuses';
