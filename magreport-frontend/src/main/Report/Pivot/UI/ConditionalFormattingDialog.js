@@ -12,7 +12,8 @@ import { Dialog, DialogActions, DialogTitle, Paper, Box, TextField, Button, Icon
 
 // icons
 import Icon from '@mdi/react'
-import { mdiDeleteSweep, mdiChevronLeft, mdiChevronRight, mdiTextBoxRemoveOutline } from '@mdi/js';
+import { mdiDeleteSweep, mdiTextBoxRemoveOutline } from '@mdi/js';
+// import { mdiChevronLeft, mdiChevronRight } from '@mdi/js';
 
 // Color Picker
 import { CompactPicker } from 'react-color';
@@ -257,15 +258,15 @@ export default function FormattingDialog(props){
 	}
 
 	// Вычесление числа десятичных знаков (округление)
-	const handleChangeRounding = (action) => {
-		let number = active.rounding;
+	// const handleChangeRounding = (action) => {
+	// 	let number = active.rounding;
 
-		if (action === 'decrase' && number > 0) {
-			changeActiveAndRanges({rounding: --number} )
-		} else if (action === 'incrase' && (number >= 0 && number < 20)) {
-			changeActiveAndRanges({rounding: ++number})
-		}
-	}
+	// 	if (action === 'decrase' && number > 0) {
+	// 		changeActiveAndRanges({rounding: --number} )
+	// 	} else if (action === 'incrase' && (number >= 0 && number < 20)) {
+	// 		changeActiveAndRanges({rounding: ++number})
+	// 	}
+	// }
 
   	return (
         <Dialog
@@ -393,7 +394,7 @@ export default function FormattingDialog(props){
 
 						<Box>
 							{/* Число десятичных знаков */}
-							<Box className={classes.FD_wrapperForActionSections}>
+							{/* <Box className={classes.FD_wrapperForActionSections}>
 								<Box whiteSpace="nowrap">Число десятичных знаков:</Box>
 
 								<Box className={classes.FD_inputNumberWithArrows}>
@@ -418,7 +419,7 @@ export default function FormattingDialog(props){
 										<Icon path={mdiChevronRight} size={1} />
 									</IconButton>
 								</Box>
-							</Box>
+							</Box> */}
 							
 							{/* Начертание */}
 							<Box className={classes.FD_wrapperForActionSections}>
