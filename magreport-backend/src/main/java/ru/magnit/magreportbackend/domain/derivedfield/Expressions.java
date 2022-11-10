@@ -6,8 +6,12 @@ import ru.magnit.magreportbackend.expression.BaseExpression;
 import ru.magnit.magreportbackend.expression.impl.AddExpression;
 import ru.magnit.magreportbackend.expression.impl.ConstantValueExpression;
 import ru.magnit.magreportbackend.expression.impl.DivideExpression;
+import ru.magnit.magreportbackend.expression.impl.LeftSubstrExpression;
 import ru.magnit.magreportbackend.expression.impl.ModuloExpression;
 import ru.magnit.magreportbackend.expression.impl.MultiplyExpression;
+import ru.magnit.magreportbackend.expression.impl.RightSubstrExpression;
+import ru.magnit.magreportbackend.expression.impl.StrLenExpression;
+import ru.magnit.magreportbackend.expression.impl.SubstrExpression;
 import ru.magnit.magreportbackend.expression.impl.SubtractExpression;
 
 public enum Expressions {
@@ -18,7 +22,11 @@ public enum Expressions {
     SUBTRACT,
     MULTIPLY,
     DIVIDE,
-    MODULO;
+    MODULO,
+    STRLEN,
+    SUBSTR,
+    LEFT_SUBSTR,
+    RIGHT_SUBSTR;
 
     public BaseExpression init(FieldExpressionResponse fieldExpression){
         return switch (this){
@@ -30,6 +38,10 @@ public enum Expressions {
             case MULTIPLY -> new MultiplyExpression(fieldExpression);
             case DIVIDE -> new DivideExpression(fieldExpression);
             case MODULO -> new ModuloExpression(fieldExpression);
+            case STRLEN -> new StrLenExpression(fieldExpression);
+            case SUBSTR -> new SubstrExpression(fieldExpression);
+            case LEFT_SUBSTR -> new LeftSubstrExpression(fieldExpression);
+            case RIGHT_SUBSTR -> new RightSubstrExpression(fieldExpression);
         };
     }
 }
