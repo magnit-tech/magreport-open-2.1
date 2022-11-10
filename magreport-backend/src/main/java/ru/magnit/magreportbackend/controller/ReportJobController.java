@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.magnit.magreportbackend.dto.request.reportjob.ExcelReportRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobAddRequest;
+import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobCommentRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobHistoryRequestFilter;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobShareRequest;
@@ -57,6 +58,8 @@ public class ReportJobController {
     public static final String REPORT_JOB_GET_METADATA = "/api/v1/report-job/get-metadata";
     public static final String REPORT_JOB_SHARE = "/api/v1/report-job/share";
     public static final String REPORT_JOB_GET_USERS_JOB = "/api/v1/report-job/get-users-job";
+    public static final String REPORT_JOB_COMMENT = "/api/v1/report-job/add-comment";
+
 
     @Operation(summary = "Получение страницы отчета")
     @ResponseStatus(HttpStatus.OK)
@@ -330,6 +333,29 @@ public class ReportJobController {
                 .success(true)
                 .message("")
                 .data(service.getUsersJob(request))
+                .build();
+
+        LogHelper.logInfoUserMethodEnd();
+        return response;
+    }
+
+
+    @Operation(description = "Добавление комментария к заданию")
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping(value = REPORT_JOB_COMMENT,
+            consumes = APPLICATION_JSON_VALUE,
+            produces = APPLICATION_JSON_VALUE)
+    public ResponseBody<Object> addReportJobComment(
+            @RequestBody
+            ReportJobCommentRequest request) {
+        LogHelper.logInfoUserMethodStart();
+
+        service.addReportJobComment(request);
+
+        var response = ResponseBody.builder()
+                .success(true)
+                .message("Comment added succeeded")
+                .data(null)
                 .build();
 
         LogHelper.logInfoUserMethodEnd();

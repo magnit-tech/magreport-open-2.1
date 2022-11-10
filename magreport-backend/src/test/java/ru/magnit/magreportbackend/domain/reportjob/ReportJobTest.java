@@ -23,7 +23,7 @@ class ReportJobTest extends BaseEntityTest {
 
     @BeforeAll
     public void init() throws ClassNotFoundException {
-        checkNumberOfFields(13);
+        checkNumberOfFields(14);
     }
 
     @Test

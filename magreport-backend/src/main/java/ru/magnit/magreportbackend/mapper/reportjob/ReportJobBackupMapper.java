@@ -21,7 +21,8 @@ public class ReportJobBackupMapper implements Mapper<ReportJobBackupTuple, Repor
                 source.getMessage(),
                 source.getSqlQuery(),
                 source.getCreatedDateTime(),
-                source.getModifiedDateTime()
+                source.getModifiedDateTime(),
+                source.getComment()
         );
     }
 }
