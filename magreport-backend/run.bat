@@ -1,1 +1,1 @@
-java -jar magreport.jar
+cmd /c "E:\Program Files\jdk-16.0.1\bin\java"  -jar --enable-preview magreport-backend-2.0.jar
