@@ -511,29 +511,80 @@ export default function(props){
     }
 
     const CellData = ({cell}) => {
-        if (cell.type === "metricValues" && cell.fieldId && cell.hasOwnProperty('style') && cell.style) {
-            
-            return cell.style.filter((styleObj) => (styleObj.aggFuncName === cell.aggFuncName)).map((formatting) => {
-                return (
-                    <Box
-                        key={`${cell.columnName[0]} ${cell.rowName[0]}`}
-                        style = {
-                            {   
-                                margin: '2px',
-                                height: formatting.fontSize ? `${formatting.fontSize + 5}px` : 'auto',
-                                fontWeight: formatting.fontStyle === 'bold' ? 'bold' : '400',
-                                fontStyle: formatting.fontStyle === 'italic' ? 'italic' : 'inherit',
-                                textDecoration: formatting.fontStyle === 'underline' ? 'underline' : 'none',
-                                fontSize: formatting.fontSize + 'px',
-                                color: formatting.fontColor,
-                                whiteSpace: 'nowrap'
+        if (cell.type === "metricValues" && cell.fieldId) {
+
+            if (cell.conditionalFormatting && cell.conditionalFormatting.length > 0) {
+                if (cell.conditionalFormatting.length === 1) {
+                    return (
+                        <Box
+                            key={`${cell.columnName[0]} ${cell.rowName[0]}`}
+                            style = {
+                                {   
+                                    margin: '2px',
+                                    height: cell.conditionalFormatting[0].fontSize ? `${cell.conditionalFormatting[0].fontSize + 5}px` : 'auto',
+                                    fontWeight: cell.conditionalFormatting[0].fontStyle === 'bold' ? 'bold' : '400',
+                                    fontStyle: cell.conditionalFormatting[0].fontStyle === 'italic' ? 'italic' : 'inherit',
+                                    textDecoration: cell.conditionalFormatting[0].fontStyle === 'underline' ? 'underline' : 'none',
+                                    fontSize: cell.conditionalFormatting[0].fontSize + 'px',
+                                    color: cell.conditionalFormatting[0].fontColor,
+                                    whiteSpace: 'nowrap'
+                                }
                             }
-                        }
-                    >
-                        {cell.data}
-                    </Box>
-                )
-            })
+                        >
+                            {cell.data}
+                        </Box>
+                    )
+                } 
+                
+                const cellData = Number(cell.data.replace(/\s/g,'').replace('%', ''))
+    
+                for (let i = 0; i < cell.conditionalFormatting.length; i++) {
+                    if (cellData < Number(cell.conditionalFormatting[i].valueTo)) {
+                        return (
+                            <Box
+                                key={`${cell.columnName[0]} ${cell.rowName[0]}`}
+                                style = {
+                                    {   
+                                        margin: '2px',
+                                        height: cell.conditionalFormatting[i].fontSize ? `${cell.conditionalFormatting[i].fontSize + 5}px` : 'auto',
+                                        fontWeight: cell.conditionalFormatting[i].fontStyle === 'bold' ? 'bold' : '400',
+                                        fontStyle: cell.conditionalFormatting[i].fontStyle === 'italic' ? 'italic' : 'inherit',
+                                        textDecoration: cell.conditionalFormatting[i].fontStyle === 'underline' ? 'underline' : 'none',
+                                        fontSize: cell.conditionalFormatting[i].fontSize + 'px',
+                                        color: cell.conditionalFormatting[i].fontColor,
+                                        whiteSpace: 'nowrap'
+                                    }
+                                }
+                            >
+                                {cell.data}
+                            </Box>
+                        )
+                    }
+                }
+            } else if(cell.hasOwnProperty('style') && cell.style) {
+                return cell.style.filter((styleObj) => (styleObj.aggFuncName === cell.aggFuncName)).map((formatting) => {
+                    return (
+                        <Box
+                            key={`${cell.columnName[0]} ${cell.rowName[0]}`}
+                            style = {
+                                {   
+                                    margin: '2px',
+                                    height: formatting.fontSize ? `${formatting.fontSize + 5}px` : 'auto',
+                                    fontWeight: formatting.fontStyle === 'bold' ? 'bold' : '400',
+                                    fontStyle: formatting.fontStyle === 'italic' ? 'italic' : 'inherit',
+                                    textDecoration: formatting.fontStyle === 'underline' ? 'underline' : 'none',
+                                    fontSize: formatting.fontSize + 'px',
+                                    color: formatting.fontColor,
+                                    whiteSpace: 'nowrap'
+                                }
+                            }
+                        >
+                            {cell.data}
+                        </Box>
+                    )
+                })
+            }
+
         }
 
         return (
@@ -554,13 +605,14 @@ export default function(props){
     }
 
     const conditionalFormatting = (cell) => {
+
         if (cell.type === "metricValues" && (cell.conditionalFormatting && cell.conditionalFormatting.length > 0)) {
 
             if (cell.conditionalFormatting.length === 1) {
                 return {backgroundColor: cell.conditionalFormatting[0].color}
             } 
             
-            const cellData = Number(cell.data)
+            const cellData = Number(cell.data.replace(/\s/g,'').replace('%', ''))
 
             for (let i = 0; i < cell.conditionalFormatting.length; i++) {
                 if (cellData < Number(cell.conditionalFormatting[i].valueTo)) {
