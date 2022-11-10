@@ -8,10 +8,10 @@ import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
+import ru.magnit.magreportbackend.dto.request.mail.EmailSendRequest;
 import ru.magnit.magreportbackend.exception.InvalidParametersException;
 import ru.magnit.magreportbackend.service.EmailService;
 
-import javax.mail.Message;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -61,8 +61,7 @@ public class LogAppender extends UnsynchronizedAppenderBase<ILoggingEvent> imple
                         "<b>Лог:</b> %s"
                 , LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")), event.getMessage(), String.join("<br/>", logs));
 
-
-        emailService.sendMailToList(Message.RecipientType.TO, Arrays.stream(destinations).toList(), "Магрепорт: Ошибка сервиса", mes, Collections.emptyList());
+        emailService.sendMail(new EmailSendRequest( "Магрепорт: Ошибка сервиса", mes, Arrays.stream(destinations).toList()));
     }
 
     @Override

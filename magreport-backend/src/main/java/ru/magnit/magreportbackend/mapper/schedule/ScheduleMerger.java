@@ -27,7 +27,8 @@ public class ScheduleMerger implements Merger<Schedule, ScheduleAddRequest> {
                 .setWeekEndMonth(source.getWeekEndMonth())
                 .setDifferenceTime(source.getDifferenceTime())
                 .setName(source.getName())
-                .setDescription(source.getDescription());
+                .setDescription(source.getDescription())
+                .setIntervalMinutes(source.getIntervalMinutes());
 
     }
 }

@@ -5,8 +5,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import ru.magnit.magreportbackend.dto.response.user.UserResponse;
+import ru.magnit.magreportbackend.util.Pair;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,12 +21,47 @@ public class EmailSendRequest {
 
     private String subject;
     private String body;
-    private List<UserResponse> to = Collections.emptyList();
-    private List<UserResponse> cc = Collections.emptyList();
-    private List<UserResponse> bcc = Collections.emptyList();
+    private List<String> to = Collections.emptyList();
+    private List<String> cc = Collections.emptyList();
+    private List<String> bcc = Collections.emptyList();
+
+    private List<Pair<String, File>> attachments = Collections.emptyList();
 
     public boolean checkItem(){
-        return subject.length() > 0 && body.length() > 0 && !(to.isEmpty() && cc.isEmpty() && bcc.isEmpty());
+        return !subject.isEmpty() && !body.isEmpty() && !(to.isEmpty() && cc.isEmpty() && bcc.isEmpty());
+    }
+
+    public EmailSendRequest(String subject, String body) {
+        this.subject = subject;
+        this.body = body;
+    }
+
+    public EmailSendRequest(String subject, String body, List<String> to) {
+        this.subject = subject;
+        this.body = body;
+        this.to = to;
+    }
+
+    public EmailSendRequest(String subject, String body, String to) {
+        this.subject = subject;
+        this.body = body;
+        this.to = Collections.singletonList(to);
+    }
+
+    public EmailSendRequest(String subject, String body, List<String> to, List<String> cc, List<String> bcc, List<Pair<String,File>> attachments) {
+        this.subject = subject;
+        this.body = body;
+        this.to = to;
+        this.cc = cc;
+        this.bcc = bcc;
+        this.attachments = attachments;
+    }
+
+    public EmailSendRequest(String subject, String body, List<String> to,  List<Pair<String,File>> attachments) {
+        this.subject = subject;
+        this.body = body;
+        this.to = to;
+        this.attachments = attachments;
     }
 
 }

@@ -68,6 +68,9 @@ public class ReportJob extends BaseEntity {
     @Column(name = "MESSAGE")
     private String message;
 
+    @Column(name = "COMMENT")
+    private String comment;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "reportJob")
     private List<ReportJobUser> reportJobUsers = Collections.emptyList();
     public ReportJob(Long id) {
