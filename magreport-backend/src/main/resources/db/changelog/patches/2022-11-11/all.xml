@@ -10,7 +10,7 @@
         <insert tableName="SERVER_SETTINGS">
             <column name="FOLDER_ID"
                     valueComputed="SELECT SERVER_SETTINGS_FOLDER_ID FROM REPOSITORY.SERVER_SETTINGS_FOLDER WHERE CODE='EMAIL_CONFIG'"/>
-            <column name="ORDINAL" valueNumeric="9"/>
+            <column name="ORDINAL" valueNumeric="8"/>
             <column name="CODE" value="mailFileSize"/>
             <column name="NAME" value="Размер вложений письма"/>
             <column name="DESCRIPTION" value="Максимальный размер файла вложений"/>
@@ -20,7 +20,7 @@
         <insert tableName="SERVER_SETTINGS">
             <column name="FOLDER_ID"
                     valueComputed="SELECT SERVER_SETTINGS_FOLDER_ID FROM REPOSITORY.SERVER_SETTINGS_FOLDER WHERE CODE='EMAIL_CONFIG'"/>
-            <column name="ORDINAL" valueNumeric="10"/>
+            <column name="ORDINAL" valueNumeric="9"/>
             <column name="CODE" value="partySizeUsers"/>
             <column name="NAME" value="Размер группы получателей письма"/>
             <column name="DESCRIPTION" value="Максимальное кол-во адресатов в письме, без деления адресатов на партии"/>
