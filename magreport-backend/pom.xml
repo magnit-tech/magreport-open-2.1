@@ -312,6 +312,7 @@
                                 <mkdir dir="${MAGREPORT_HOME}/excel-export"/>
                                 <mkdir dir="${MAGREPORT_HOME}/excel-templates"/>
                                 <mkdir dir="${MAGREPORT_HOME}/jdbc"/>
+                                <mkdir dir="${MAGREPORT_HOME}/magreport-admin"/>
                                 
                                 <copy todir="${MAGREPORT_HOME}/excel-templates">
                                     <fileset dir="src/main/resources/templates">
