@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="ADD-EMAIL-SETTINGS-001" author="vyushin_aa">
+
+        <insert tableName="SERVER_SETTINGS">
+            <column name="FOLDER_ID"
+                    valueComputed="SELECT SERVER_SETTINGS_FOLDER_ID FROM REPOSITORY.SERVER_SETTINGS_FOLDER WHERE CODE='EMAIL_CONFIG'"/>
+            <column name="ORDINAL" valueNumeric="9"/>
+            <column name="CODE" value="mailFileSize"/>
+            <column name="NAME" value="Размер вложений письма"/>
+            <column name="DESCRIPTION" value="Максимальный размер файла вложений"/>
+            <column name="VAL" value="11000000"/>
+        </insert>
+
+        <insert tableName="SERVER_SETTINGS">
+            <column name="FOLDER_ID"
+                    valueComputed="SELECT SERVER_SETTINGS_FOLDER_ID FROM REPOSITORY.SERVER_SETTINGS_FOLDER WHERE CODE='EMAIL_CONFIG'"/>
+            <column name="ORDINAL" valueNumeric="10"/>
+            <column name="CODE" value="partySizeUsers"/>
+            <column name="NAME" value="Размер группы получателей письма"/>
+            <column name="DESCRIPTION" value="Максимальное кол-во адресатов в письме, без деления адресатов на партии"/>
+            <column name="VAL" value="300"/>
+        </insert>
+
+        <insert tableName="SERVER_SETTINGS">
+            <column name="FOLDER_ID"
+                    valueComputed="SELECT SERVER_SETTINGS_FOLDER_ID FROM REPOSITORY.SERVER_SETTINGS_FOLDER WHERE CODE='EMAIL_CONFIG'"/>
+            <column name="ORDINAL" valueNumeric="10"/>
+            <column name="CODE" value="pauseBetweenSendParty"/>
+            <column name="NAME" value="Длина паузы отправки писем"/>
+            <column name="DESCRIPTION" value="Длина задержки отправки писем между партиями адресатов в секундах"/>
+            <column name="VAL" value="1"/>
+        </insert>
+
+    </changeSet>
+</databaseChangeLog>
