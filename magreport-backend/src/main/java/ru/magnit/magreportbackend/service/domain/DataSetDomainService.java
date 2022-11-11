@@ -6,11 +6,13 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import ru.magnit.magreportbackend.domain.BaseEntity;
 import ru.magnit.magreportbackend.domain.dataset.DataSet;
+import ru.magnit.magreportbackend.domain.dataset.DataSetField;
 import ru.magnit.magreportbackend.domain.dataset.DataSetFolder;
 import ru.magnit.magreportbackend.domain.dataset.DataSetFolderRole;
 import ru.magnit.magreportbackend.domain.dataset.DataSetFolderRolePermission;
 import ru.magnit.magreportbackend.domain.dataset.DataSetType;
 import ru.magnit.magreportbackend.domain.dataset.DataSetTypeEnum;
+import ru.magnit.magreportbackend.domain.dataset.DataType;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.domain.folderreport.FolderAuthority;
 import ru.magnit.magreportbackend.domain.folderreport.FolderAuthorityEnum;
@@ -258,34 +260,21 @@ public class DataSetDomainService {
     @Transactional
     public List<DataSetFieldResponse> refreshDataSet(DataSetResponse dataSet, List<ObjectFieldResponse> objectFields) {
 
-        final var currentFields = dataSet.getFields().stream().map(DataSetFieldResponse::getName).map(String::toUpperCase).collect(Collectors.toSet());
+        final var currentFields = dataSetFieldRepository.getDataSetFieldsByDataSetId(dataSet.getId());
+        final var currentFieldNames = currentFields.stream().map(DataSetField::getName).map(String::toUpperCase).collect(Collectors.toSet());
         final var newFields = objectFields.stream().map(ObjectFieldResponse::getFieldName).map(String::toUpperCase).collect(Collectors.toSet());
+        final var insertedFNames = newFields.stream().filter(fn -> !currentFieldNames.contains(fn)).map(String::toUpperCase).collect(Collectors.toSet());
+        final var newFieldTypes = objectFields.stream().collect(Collectors.toMap(o -> o.getFieldName().toUpperCase(), o -> DataTypeEnum.valueOf(JDBCType.valueOf(o.getDataType())).name()));
+        final var newRemarks = objectFields.stream().collect(Collectors.toMap(o -> o.getFieldName().toUpperCase(), ObjectFieldResponse::getRemarks));
 
-        final var deletedFNames = currentFields.stream().filter(fn -> !newFields.contains(fn)).map(String::toUpperCase).collect(Collectors.toSet());
-        final var insertedFNames = newFields.stream().filter(fn -> !currentFields.contains(fn)).map(String::toUpperCase).collect(Collectors.toSet());
-
-        var newFieldTypes = objectFields.stream().collect(Collectors.toMap(o -> o.getFieldName().toUpperCase(), o -> DataTypeEnum.valueOf(JDBCType.valueOf(o.getDataType())).name()));
-
-        dataSet.getFields()
-                .stream()
-                .filter(field -> !field.getTypeName().equals(newFieldTypes.getOrDefault(field.getName(), field.getTypeName())))
-                .forEach(f -> {
-                    var typeId = DataTypeEnum.getDataTypeId(newFieldTypes.get(f.getName()));
-                    dataSetFieldRepository.updateDataTypeField(f.getId(), typeId);
-                });
-
-
-        dataSet
-                .getFields()
-                .stream()
-                .filter(field -> deletedFNames.contains(field.getName().toUpperCase()))
-                .forEach(field -> dataSetFieldRepository.markFieldSync(field.getId(), false));
-
-        dataSet
-                .getFields()
-                .stream()
-                .filter(field -> newFields.contains(field.getName().toUpperCase()))
-                .forEach(field -> dataSetFieldRepository.markFieldSync(field.getId(), true));
+        for (var field :currentFields) {
+            if (newFields.contains(field.getName().toUpperCase())) {
+                field.setType(new DataType(DataTypeEnum.getDataTypeId(newFieldTypes.get(field.getName().toUpperCase()))));
+                field.setDescription(newRemarks.get(field.getName()));
+                field.setIsSync(true);
+            } else
+                field.setIsSync(false);
+        }
 
         final var addedFields = objectFields
                 .stream()
@@ -296,7 +285,9 @@ public class DataSetDomainService {
 
         addedFields.forEach(field -> field.setDataSet(new DataSet(dataSet.getId())));
 
-        dataSetFieldRepository.saveAll(addedFields);
+        currentFields.addAll(addedFields);
+
+        dataSetFieldRepository.saveAll(currentFields);
 
         return dataSetFieldResponseMapper.from(addedFields);
     }
