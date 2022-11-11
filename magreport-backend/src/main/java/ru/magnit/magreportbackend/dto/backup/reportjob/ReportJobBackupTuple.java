@@ -13,6 +13,7 @@ public record ReportJobBackupTuple(
         String message,
         String sqlQuery,
         LocalDateTime created,
-        LocalDateTime modified
+        LocalDateTime modified,
+        String comment
 ) {
 }

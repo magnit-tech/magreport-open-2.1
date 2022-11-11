@@ -40,4 +40,30 @@ class AddExpressionTest {
         assertEquals("8.5", expressionResult.getL());
         assertEquals(DataTypeEnum.DOUBLE, expressionResult.getR());
     }
+
+    @Test
+    void additionIntegerTest() {
+        final var sourceExpression = new FieldExpressionResponse()
+            .setType(Expressions.ADD)
+            .setParameters(List.of(
+                new FieldExpressionResponse()
+                    .setType(Expressions.CONSTANT_VALUE)
+                    .setConstantType(DataTypeEnum.INTEGER)
+                    .setConstantValue("2"),
+                new FieldExpressionResponse()
+                    .setType(Expressions.CONSTANT_VALUE)
+                    .setConstantType(DataTypeEnum.INTEGER)
+                    .setConstantValue("3"),
+                new FieldExpressionResponse()
+                    .setType(Expressions.CONSTANT_VALUE)
+                    .setConstantType(DataTypeEnum.INTEGER)
+                    .setConstantValue("-1")
+            ));
+
+        final var expression = sourceExpression.getType().init(sourceExpression);
+        final var expressionResult = expression.calculate(0);
+
+        assertEquals("4", expressionResult.getL());
+        assertEquals(DataTypeEnum.INTEGER, expressionResult.getR());
+    }
 }

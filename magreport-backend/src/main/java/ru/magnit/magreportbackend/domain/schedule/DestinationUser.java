@@ -30,6 +30,9 @@ public class DestinationUser extends BaseEntity {
     @Column(name = "VAL")
     private String value;
 
+    @Column(name = "DOMAIN")
+    private String domainName;
+
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "DESTINATION_TYPE_ID")
     private DestinationType type;

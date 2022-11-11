@@ -48,6 +48,7 @@
         <h2.version>2.1.214</h2.version>
         <springdoc-openapi-ui.version>1.6.9</springdoc-openapi-ui.version>
         <org.json.version>20220320</org.json.version>
+        <spring-boot-admin-client.version>2.7.5</spring-boot-admin-client.version>
     </properties>
 
     <dependencies>
@@ -60,6 +61,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.codecentric</groupId>
+            <artifactId>spring-boot-admin-starter-client</artifactId>
+            <version>${spring-boot-admin-client.version}</version>
         </dependency>
         <dependency>
             <groupId>org.liquibase</groupId>
@@ -313,6 +319,7 @@
                                 <mkdir dir="${MAGREPORT_HOME}/excel-export"/>
                                 <mkdir dir="${MAGREPORT_HOME}/excel-templates"/>
                                 <mkdir dir="${MAGREPORT_HOME}/jdbc"/>
+                                <mkdir dir="${MAGREPORT_HOME}/magreport-admin"/>
                                 
                                 <copy todir="${MAGREPORT_HOME}/excel-templates">
                                     <fileset dir="src/main/resources/templates">

@@ -8,7 +8,8 @@ public enum ScheduleTypeEnum {
     DAY_END_MONTH,
     WEEK_MONTH,
     WEEK_END_MONTH,
-    MANUAL;
+    MANUAL,
+    EVERY_N_MINUTES;
 
     public Long getId() {
         return (long) this.ordinal();

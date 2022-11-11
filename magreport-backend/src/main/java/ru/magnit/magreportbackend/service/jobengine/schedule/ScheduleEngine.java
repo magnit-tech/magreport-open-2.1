@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import ru.magnit.magreportbackend.domain.reportjob.ReportJobUserTypeEnum;
 import ru.magnit.magreportbackend.domain.schedule.ScheduleTaskStatusEnum;
 import ru.magnit.magreportbackend.domain.schedule.ScheduleTaskTypeEnum;
+import ru.magnit.magreportbackend.domain.serversettings.ServerSettings;
 import ru.magnit.magreportbackend.dto.request.reportjob.ExcelReportRequest;
 import ru.magnit.magreportbackend.dto.request.schedule.ScheduleCalendarAddRequest;
 import ru.magnit.magreportbackend.dto.request.schedule.ScheduleTaskRequest;
@@ -22,6 +23,7 @@ import ru.magnit.magreportbackend.dto.response.user.UserResponse;
 import ru.magnit.magreportbackend.service.ReportJobService;
 import ru.magnit.magreportbackend.service.RoleService;
 import ru.magnit.magreportbackend.service.ScheduleService;
+import ru.magnit.magreportbackend.service.SettingsService;
 import ru.magnit.magreportbackend.service.UserService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
 import ru.magnit.magreportbackend.service.domain.JobTokenDomainService;
@@ -56,6 +58,7 @@ public class ScheduleEngine implements JobEngine, InitializingBean {
     private final MailTextDomainService mailTextDomainService;
     private final JobTokenDomainService jobTokenDomainService;
     private final ReportJobUserDomainService reportJobUserDomainService;
+    private final SettingsService settingsService;
 
 
     private final Map<Long, Long> jobRunners = new HashMap<>();
@@ -93,7 +96,7 @@ public class ScheduleEngine implements JobEngine, InitializingBean {
     private Long daysBeforeExpired;
 
     @Value("${magreport.mail.file-size}")
-    private Long maxFileSize;
+    private String maxFileSize;
 
     @Override
     @Scheduled(initialDelay = 5000, fixedDelay = 5000)
@@ -222,8 +225,9 @@ public class ScheduleEngine implements JobEngine, InitializingBean {
                     reportJobService.createExcelReport(excelTemplateRequest);
                     var excelReport = reportJobService.getPathToExcelReport(excelTemplateRequest).toFile();
 
+                    long fileSize = Long.parseLong(settingsService.getValueSetting(maxFileSize));
 
-                    if (excelReport.length() <= maxFileSize) {
+                    if (excelReport.length() <= fileSize) {
 
                         var nameFile = task.getReport().getName() + " " + LocalDate.now() + ".xlsm";
                         mailTextDomainService.sendScheduleMailExcel(scheduleMailCompleteExcel,

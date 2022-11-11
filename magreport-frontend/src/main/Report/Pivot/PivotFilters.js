@@ -97,7 +97,9 @@ function PivotFilters(props){
                 <FormControl className={classes.formControl} size="small">
                     <Select
                         value = {filterObject.filterType}
-                        children={ filterType.filter(i => i.type.findIndex(it => it === props.field?.type && props.field?.aggFuncName === '' || it === props.field?.dataType && props.field?.aggFuncName !== '') !== -1 
+                        children={ filterType.filter(i => i.type.findIndex(
+                                (it => it === props.field?.type && props.field?.aggFuncName === '') 
+                                || (it === props.field?.dataType && props.field?.aggFuncName !== '')) !== -1 
                             && ((props.field?.aggFuncName === '' && i.source === 'd' )
                                 || (props.field?.aggFuncName !== '' && i.source === 'm')
                                 || i.source === 'd/m')).map((value, index) =>

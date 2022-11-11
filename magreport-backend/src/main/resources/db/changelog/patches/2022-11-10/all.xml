@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet author="artemenko_pa" id="EXPRESSIONS-001">
+        <insert schemaName="REPOSITORY" tableName="EXPRESSIONS">
+            <column name="NAME" value="STRLEN"/>
+            <column name="DESCRIPTION" value="Вычисление длины строки"/>
+            <column name="NUM_PARAMS" value="1"/>
+            <column name="NUM_PARAM_TYPE_ID"
+                    valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID"
+                    valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+        <insert schemaName="REPOSITORY" tableName="EXPRESSIONS">
+            <column name="NAME" value="SUBSTR"/>
+            <column name="DESCRIPTION" value="Выделение подстроки"/>
+            <column name="NUM_PARAMS" value="3"/>
+            <column name="NUM_PARAM_TYPE_ID"
+                    valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID"
+                    valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+        <insert schemaName="REPOSITORY" tableName="EXPRESSIONS">
+            <column name="NAME" value="LEFT_SUBSTR"/>
+            <column name="DESCRIPTION" value="Выделение подстроки слева"/>
+            <column name="NUM_PARAMS" value="2"/>
+            <column name="NUM_PARAM_TYPE_ID"
+                    valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID"
+                    valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+        <insert schemaName="REPOSITORY" tableName="EXPRESSIONS">
+            <column name="NAME" value="RIGHT_SUBSTR"/>
+            <column name="DESCRIPTION" value="Выделение подстроки справа"/>
+            <column name="NUM_PARAMS" value="2"/>
+            <column name="NUM_PARAM_TYPE_ID"
+                    valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID"
+                    valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

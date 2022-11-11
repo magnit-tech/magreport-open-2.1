@@ -12,6 +12,7 @@ import {DesignerMultipleSelectFieldCSS} from './DesignerCSS';
  * @param {*} props.data - массив объектов {id, name}
  * @param {*} props.disabled - неактивно
  * @param {*} props.needName - если нужно передавать name
+ * @param {*} props.needIdName - если нужно передавать id и name
  */
 export default function DesignerMultipleSelectField(props){
     
