@@ -10,6 +10,7 @@ fi
 
 echo Stopping service...
 sudo service magreport2 stop
+sudo service magreport-admin stop
 
 if [ $? -eq 0 ]; then
     echo Backing up magreport database...
@@ -29,6 +30,7 @@ fi
 
 if [ $? -eq 0 ]; then
     echo Starting service...
+    sudo service magreport-admin start
     sudo service magreport2 start
 else
     echo Package upgrade failed.

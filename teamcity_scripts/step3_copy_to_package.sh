@@ -33,3 +33,13 @@ cp -f ./config/package/var/magreport2/logback.xml ./package/var/magreport2/logba
 cp -f ./magreport-backend/target/magreport-backend-2.1.jar ./package/var/magreport2/magreport2.jar
 
 echo $2 > ./package/var/magreport2/version
+
+# magreport-admin
+
+cp -f ./config/package/etc/sysconfig/magreport-admin ./package/etc/sysconfig/magreport-admin
+cp -f ./config/package/usr/lib/systemd/system/magreport-admin.service ./package/usr/lib/systemd/system/magreport-admin.service
+
+mkdir -p ./package/var/magreport2/magreport-admin
+cp -f ./magreport-admin/target/magreport-admin-0.0.1-SNAPSHOT.jar ./package/var/magreport2/magreport-admin/magreport-admin.jar
+cp -f ./config/package/var/magreport2/magreport-admin/application_$3.properties ./package/var/magreport2/magreport-admin/application.properties
+

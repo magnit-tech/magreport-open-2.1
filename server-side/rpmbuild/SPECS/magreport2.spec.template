@@ -23,9 +23,12 @@ getent group magreport2 > /dev/null || groupadd -g 3200 magreport2; getent passw
 
 %files
 %attr(-,magreport2,magreport2) /etc/sysconfig/magreport2
+%attr(-,magreport2,magreport2) /etc/sysconfig/magreport-admin
 %attr(-,magreport2,magreport2) /usr/lib/systemd/system/magreport2.service
+%attr(-,magreport2,magreport2) /usr/lib/systemd/system/magreport-admin.service
 %config(noreplace) %attr(-,magreport2,magreport2) /var/log/magreport2/magreport2.log
 %attr(-,magreport2,magreport2) /var/magreport2
+
 
 %post
 systemctl daemon-reload
