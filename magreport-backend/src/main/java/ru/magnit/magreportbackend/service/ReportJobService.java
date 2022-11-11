@@ -270,7 +270,7 @@ public class ReportJobService {
     public ReportPageResponse getReportPage(ReportPageRequest request) {
 
         var jobData = jobDomainService.getJobData(request.getJobId());
-        if (jobData.isComplete()) {
+        if (jobData.isReportReadyToDisplay()) {
             return avroReportDomainService.getPage(jobData, request.getPageNumber(), request.getRowsPerPage());
         }
 

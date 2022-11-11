@@ -1,5 +1,6 @@
 package ru.magnit.magreportbackend.dto.inner.reportjob;
 
+import ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum;
 import ru.magnit.magreportbackend.dto.inner.datasource.DataSourceData;
 
 import java.util.List;
@@ -50,6 +51,10 @@ public record ReportJobData(
 
     public boolean isFiltersHaveSettings(List<ReportFilterData> filters) {
         return filters.stream().anyMatch(filter -> isFilterParametersExists(filter.filterId()));
+    }
+
+    public boolean isReportReadyToDisplay(){
+        return statusId == ReportJobStatusEnum.EXPORT.getId() || statusId == ReportJobStatusEnum.COMPLETE.getId();
     }
 
     @Override
