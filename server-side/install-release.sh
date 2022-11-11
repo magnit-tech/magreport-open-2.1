@@ -22,7 +22,7 @@ fi
 
 if [ $? -eq 0 ]; then
     echo Upgrading package...
-    sudo yum upgrade $rpmfile
+    sudo yum -y upgrade $rpmfile
 else
     echo DB backup FAILED. Upgrade didnt install.
     exit -1
