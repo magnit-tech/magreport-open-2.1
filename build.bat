@@ -12,3 +12,5 @@ copy /y .\magreport-backend\target\magreport-backend-2.1.jar %MAGREPORT_HOME%\ma
 copy /y .\version %MAGREPORT_HOME%\version
 copy /y .\magreport-backend\run.bat %MAGREPORT_HOME%\run.bat
 copy /y .\docs\user-manual\src\user-manual.pdf %MAGREPORT_HOME%\user-manual.pdf
+copy /y .\magreport-admin\target\magreport-admin-0.0.1-SNAPSHOT.jar %MAGREPORT_HOME%\magreport-admin\magreport-admin.jar
+copy /y .\magreport-admin\run-magreport-admin.bat %MAGREPORT_HOME%\magreport-admin\run-magreport-admin.bat
