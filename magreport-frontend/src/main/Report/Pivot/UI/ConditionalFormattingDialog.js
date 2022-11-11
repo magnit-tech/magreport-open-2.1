@@ -209,52 +209,58 @@ export default function FormattingDialog(props){
 	function handleChangeValueFrom(event) {
 		setErrorValueTo(null)
 		setErrorValueFrom(null)
-		const value = Number(event.target.value)
+
+		const value = event.target.value 
 		const valueTo = active.valueTo
 		const valueFrom = ranges[ranges.findIndex(i => i.id === active.id) - 1].valueFrom 
 
-		if (value <= valueFrom && valueFrom !== 'Infinity') {
+		if (Number(value) <= Number(valueFrom) && valueFrom !== 'Infinity') {
 			setErrorValueFrom((<span>Макс. значение: {valueFrom}</span>))
-		} else if(value >= valueTo && valueTo !== 'Infinity') {
+		} else if(Number(value) >= Number(valueTo) && valueTo !== 'Infinity') {
 			setErrorValueFrom((<span>Мин. значение: {valueTo}</span>))
-		} else {
-			const arr = ranges.map(item => {
-				if (item.id === active.id) {
-					return { ...item, valueFrom: value }
-				} else {
-					return item
-				}
-			})
-			arr[ranges.findIndex(i => i.id === active.id) - 1].valueTo = value
-			setActive({...active, valueFrom: value})
-			setRanges(arr)
+		} else if (value === '-' || value === '+' || value.endsWith('.') || value.trim() === '') {
+			setErrorValueFrom((<span>Недопустимое значение</span>))
 		}
+
+		const arr = ranges.map(item => {
+			if (item.id === active.id) {
+				return { ...item, valueFrom: value }
+			} else {
+				return item
+			}
+		})
+		arr[ranges.findIndex(i => i.id === active.id) - 1].valueTo = value
+		setActive({...active, valueFrom: value})
+		setRanges(arr)
 	}
 
 	// Изменение поля "До:"
 	function handleChangeValueTo(event) {
 		setErrorValueTo(null)
 		setErrorValueFrom(null)
-		const value = Number(event.target.value)
+
+		const value = event.target.value
 		const valueFrom = active.valueFrom
 		const valueTo = ranges[ranges.findIndex(i => i.id === active.id) + 1].valueTo
 
-		if (value <= valueFrom && valueFrom !== 'Infinity') {
+		if (Number(value) <= Number(valueFrom) && valueFrom !== 'Infinity') {
 			setErrorValueTo((<span>Мин. значение: {valueFrom}</span>))
-		} else if(value >= valueTo && valueTo !== 'Infinity') {
+		} else if(Number(value) >= Number(valueTo) && valueTo !== 'Infinity') {
 			setErrorValueTo((<span>Макс. значение: {valueTo}</span>))
-		} else {
-			const arr = ranges.map(item => {
-				if (item.id === active.id) {
-					return { ...item, valueTo: value }
-				} else {
-					return item
-				}
-			})
-			arr[ranges.findIndex(i => i.id === active.id) + 1].valueFrom = value
-			setActive({...active, valueTo: value})
-			setRanges(arr)
+		} else if (value === '-' || value === '+' || value.endsWith('.') || value.trim() === '') {
+			setErrorValueTo((<span>Недопустимое значение</span>))
 		}
+
+		const arr = ranges.map(item => {
+			if (item.id === active.id) {
+				return { ...item, valueTo: value }
+			} else {
+				return item
+			}
+		})
+		arr[ranges.findIndex(i => i.id === active.id) + 1].valueFrom = value
+		setActive({...active, valueTo: value})
+		setRanges(arr)
 	}
 
 	// Вычесление числа десятичных знаков (округление)
@@ -267,6 +273,11 @@ export default function FormattingDialog(props){
 	// 		changeActiveAndRanges({rounding: ++number})
 	// 	}
 	// }
+
+	const handleValueInput = (e) => {
+		const onlyNums = e.target.value.replace(/[^-,0-9.]/g, '').replace(/(\..*?)\..*/g, '$1').replace(/^0[^.]/, '0');
+		e.target.value = onlyNums;
+    }
 
   	return (
         <Dialog
@@ -331,13 +342,14 @@ export default function FormattingDialog(props){
 										<TextField 
 											error={!!errorValueFrom}
 											label="От:" 
-											type="number" 
+											type="text" 
 											value={active.valueFrom} 
 											variant="outlined" 
 											margin="dense"
 											className={classes.textField}
+											onInput = {handleValueInput}
 											onChange={handleChangeValueFrom}
-										/>	
+										/>
 										{errorValueFrom}
 									</Box>
 								}
@@ -359,11 +371,12 @@ export default function FormattingDialog(props){
 										<TextField
 											error={!!errorValueTo}
 											label="До:" 
-											type="number" 
+											type="text" 
 											value={active.valueTo} 
 											variant="outlined" 
 											margin="dense"
 											className={classes.textField}
+											onInput = {handleValueInput}
 											onChange={handleChangeValueTo}
 										/>	
 										{errorValueTo}
