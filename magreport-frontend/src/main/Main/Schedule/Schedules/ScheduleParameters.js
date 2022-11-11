@@ -8,6 +8,7 @@ import dataHub from "ajax/DataHub";
 // local components
 import DataLoader from "main/DataLoader/DataLoader";
 import DesignerSelectField from "main/Main/Development/Designer/DesignerSelectField";
+import DesignerTextField from "main/Main/Development/Designer/DesignerTextField";
 import DesignerTimeField from "main/Main/Development/Designer/DesignerTimeField";
 
 import {
@@ -27,6 +28,7 @@ import {
     getScheduleTypesForSelect,
     initialData,
     MANUAL,
+    EVERY_N_MINUTES,
     scheduleTypesInitial,
     WEEK_END_MONTH,
     WEEK_MONTH,
@@ -116,7 +118,8 @@ export default function ScheduleParameters(props) {
             hour: data.hour,
             minute: data.minute,
             second: data.second,
-            differenceTime: data.differenceTime
+            differenceTime: data.differenceTime,
+            intervalMinutes: data.intervalMinutes
         };
 
         // parameters
@@ -144,6 +147,9 @@ export default function ScheduleParameters(props) {
                 break;
             case MANUAL:
                 newParameters = {...newParameters, hour: 0, minute: 0, second: 0, differenceTime: 0};
+                break;
+            case EVERY_N_MINUTES:
+                newParameters = {...newParameters, intervalMinutes: data.intervalMinutes};
                 break;
             default: 
                 break;
@@ -190,6 +196,8 @@ export default function ScheduleParameters(props) {
                 break;
             case MANUAL:
                 break;
+            case EVERY_N_MINUTES:
+                break;
             default:
                 break;
         }
@@ -229,6 +237,10 @@ export default function ScheduleParameters(props) {
             differenceTime: (-value.getTimezoneOffset() / 60) - serverUTCOffset
         };
         handleChange(parametersData);
+    }
+
+    function handleChangeNumMinutes(intervalMinutes) {
+        handleChange({intervalMinutes});
     }
 
     // building component
@@ -339,6 +351,19 @@ export default function ScheduleParameters(props) {
                 value={time}
                 onChange={handleChangeTime}
             />
+        );
+    }
+
+    if (scheduleTypeName === EVERY_N_MINUTES) {
+        fields.push(
+            <DesignerTextField
+                key={fields.length}
+                fullWidth
+                label="Количество минут"
+                value={data.intervalMinutes}
+                error={errors.intervalMinutes}
+                onChange={handleChangeNumMinutes}
+        />
         );
     }
 

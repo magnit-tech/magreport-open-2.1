@@ -1,6 +1,5 @@
 package ru.magnit.magreportbackend.service;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -58,7 +57,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
@@ -436,7 +434,7 @@ class ReportJobServiceTest {
                 5L,
                 4L,
                 "User",
-                1L,
+                isComplete ? ReportJobStatusEnum.COMPLETE.getId() : ReportJobStatusEnum.RUNNING.getId(),
                 2L,
                 3L,
                 isComplete,
@@ -468,7 +466,8 @@ class ReportJobServiceTest {
                 LocalDateTime.now(),
                 Collections.emptyList(),
                 true,
-            0L);
+            0L,
+                "comment");
     }
 
     private ReportJobAddRequest getReportJobAddRequest() {

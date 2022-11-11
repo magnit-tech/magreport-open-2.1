@@ -19,7 +19,6 @@ import DesignerTextField from '../../Development/Designer/DesignerTextField';
 import UserList from '../Users/UserList';
 import DomainGroupList from '../DomainGroups/DomainGroupList';
 import {FolderItemTypes} from '../../../../main/FolderContent/FolderItemTypes';
-import AsyncAutocomplete from '../../../../main/AsyncAutocomplete/AsyncAutocomplete';
 import PermittedFoldersList from './PermittedFoldersList';
 import DesignerFolderBrowser from '../../Development/Designer/DesignerFolderBrowser';
 
@@ -307,25 +306,7 @@ function RoleDesigner(props){
         tabdisabled: props.roleId === null || props.roleId === undefined ? true : false,
         tabcontent:
         <div style={{display: 'flex', flex: 1, flexDirection: 'column'}}>
-           {/* <div className={classes.userAddPanel}>
-                <div className={classes.roleAutocompleteDiv}>
-                    <AsyncAutocomplete 
-                        disabled = {false}
-                        typeOfEntity = {"user"}
-                       // filterOfEntity = {(item) => item.status !== "ARCHIVE"}
-                        onChange={handleOnChangeAddUserText}
-                    />
-                </div>
-                <Button 
-                    className={classes.addButton}
-                    color="primary"
-                    variant="outlined"
-                    disabled = {false}
-                    onClick={handleAddUserToRole}
-                >
-                    <AddIcon/>Добавить
-                </Button>
-            </div> */}
+
             <Paper elevation={3} className={classes.userListPaper}>
                 <DataLoader
                     loadFunc = {dataHub.roleController.getUsers}

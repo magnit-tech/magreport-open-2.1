@@ -80,6 +80,9 @@ public class Schedule extends EntityWithName {
     @Column(name = "DIFFERENCE_TIME")
     Long differenceTime;
 
+    @Column(name = "INTERVAL_MINUTES")
+    Long intervalMinutes;
+
     @ManyToMany(mappedBy = "scheduleList")
     private List<ScheduleTask> scheduleTasks = Collections.emptyList();
 

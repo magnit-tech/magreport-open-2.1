@@ -2,32 +2,36 @@ package ru.magnit.magreportbackend.expression.impl;
 
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
-import ru.magnit.magreportbackend.expression.BaseExpression;
+import ru.magnit.magreportbackend.exception.InvalidExpression;
+import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class SubtractExpression implements BaseExpression {
-    private final List<BaseExpression> parameters = new ArrayList<>();
-
+public class SubtractExpression extends ParameterizedExpression {
     public SubtractExpression(FieldExpressionResponse fieldExpression) {
-        for (var parameter : fieldExpression.getParameters()) {
-            parameters.add(parameter.getType().init(parameter));
-        }
+        super(fieldExpression);
     }
 
     @Override
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
         var result = 0D;
+        var resultType = DataTypeEnum.INTEGER;
         var firstValue = true;
         for (var parameter: parameters) {
-            if (firstValue) {
-                result = Double.parseDouble(parameter.calculate(rowNumber).getL());
-                firstValue = false;
+            final var parameterValue = parameter.calculate(rowNumber);
+
+            if (parameterValue.getR().notIn(DataTypeEnum.INTEGER, DataTypeEnum.DOUBLE)){
+                throw new InvalidExpression("Функция SUBTRACT() не может принимать параметры типа " + parameterValue.getR());
             }
-            result -= Double.parseDouble(parameter.calculate(rowNumber).getL());
+            resultType = resultType.widerNumeric(parameterValue.getR());
+
+            if (firstValue) {
+                result = Double.parseDouble(parameterValue.getL());
+                firstValue = false;
+                continue;
+            }
+
+            result -= Double.parseDouble(parameterValue.getL());
         }
-        return new Pair<>(String.valueOf(result), DataTypeEnum.DOUBLE);
+        return new Pair<>(resultType.toTypedString(result), resultType);
     }
 }

@@ -108,7 +108,7 @@ function EmailMenuView(_props) {
     }
 
     function send() {
-        dataHub.emailController.send(subject, body, TO, CC, BCC, saveResponse)
+        dataHub.emailController.send(subject, body, TO.map(e => e.email), CC.map(e => e.email), BCC.map(e => e.email), saveResponse)
     }
 
     function updateBody() {

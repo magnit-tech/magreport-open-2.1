@@ -55,11 +55,9 @@ import ru.magnit.magreportbackend.mapper.dataset.FolderNodeResponseDataSetFolder
 import ru.magnit.magreportbackend.repository.DataSetDataTypeRepository;
 import ru.magnit.magreportbackend.repository.DataSetFieldRepository;
 import ru.magnit.magreportbackend.repository.DataSetFolderRepository;
-import ru.magnit.magreportbackend.repository.DataSetFolderRolePermissionRepository;
 import ru.magnit.magreportbackend.repository.DataSetFolderRoleRepository;
 import ru.magnit.magreportbackend.repository.DataSetRepository;
 import ru.magnit.magreportbackend.repository.DataSetTypeRepository;
-import ru.magnit.magreportbackend.util.JsonUtils;
 
 import javax.transaction.Transactional;
 import java.sql.JDBCType;
@@ -84,8 +82,6 @@ public class DataSetDomainService {
     private final DataSetDataTypeRepository dataTypeRepository;
     private final DataSetFieldRepository dataSetFieldRepository;
     private final DataSetFolderRoleRepository dataSetFolderRoleRepository;
-    private final DataSetFolderRolePermissionRepository dataSetFolderRolePermissionRepository;
-
     private final FolderNodeResponseDataSetFolderMapper folderNodeMapper;
     private final DataSetFolderResponseMapper dataSetFolderResponseMapper;
     private final DataSetFolderMapper dataSetFolderMapper;

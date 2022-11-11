@@ -35,5 +35,6 @@
     <modules>
         <module>magreport-frontend</module>
         <module>magreport-backend</module>
+        <module>magreport-admin</module>
     </modules>
 </project>
