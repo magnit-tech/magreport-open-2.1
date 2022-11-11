@@ -6,7 +6,7 @@ After=syslog.target network.target
 [Service]
 Type=simple
 EnvironmentFile=/etc/sysconfig/magreport-admin
-WorkingDirectory=/var/magreport-admin
+WorkingDirectory=/var/magreport2/magreport-admin
 ExecStart=/bin/java -Xmx12144M $JAVA_OPTS $APP_ARGS -jar $JAR_FILE
 User=magreport2
 Restart=always
