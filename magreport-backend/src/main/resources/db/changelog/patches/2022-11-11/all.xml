@@ -30,11 +30,11 @@
         <insert tableName="SERVER_SETTINGS">
             <column name="FOLDER_ID"
                     valueComputed="SELECT SERVER_SETTINGS_FOLDER_ID FROM REPOSITORY.SERVER_SETTINGS_FOLDER WHERE CODE='EMAIL_CONFIG'"/>
-            <column name="ORDINAL" valueNumeric="10"/>
+            <column name="ORDINAL" valueNumeric="11"/>
             <column name="CODE" value="pauseBetweenSendParty"/>
             <column name="NAME" value="Длина паузы отправки писем"/>
             <column name="DESCRIPTION" value="Длина задержки отправки писем между партиями адресатов в секундах"/>
-            <column name="VAL" value="1"/>
+            <column name="VAL" value="11"/>
         </insert>
 
     </changeSet>
