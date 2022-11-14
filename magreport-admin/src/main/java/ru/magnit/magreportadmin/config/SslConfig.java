@@ -1,4 +1,4 @@
-package ru.magnit.magreportadmin;
+package ru.magnit.magreportadmin.config;
 
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
