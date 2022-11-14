@@ -589,7 +589,7 @@ export default function(props){
 
         return (
             <Box 
-                fontSize = { 10 } 
+                fontSize = { 14 } 
                 fontFamily = {"Arial"}
                 fontWeight = {
                     cell.type === "dimensionName" ||
@@ -606,8 +606,7 @@ export default function(props){
 
     const conditionalFormatting = (cell) => {
 
-        if (cell.type === "metricValues" && (cell.conditionalFormatting && cell.conditionalFormatting.length > 0)) {
-
+        if (cell.type === "metricValues" && (cell.conditionalFormatting && cell.conditionalFormatting.length > 0) && (!isNaN(cell.data) && cell.data.length !== 0)) {
             if (cell.conditionalFormatting.length === 1) {
                 return {backgroundColor: cell.conditionalFormatting[0].color}
             } 
