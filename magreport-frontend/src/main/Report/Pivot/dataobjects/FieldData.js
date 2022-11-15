@@ -80,17 +80,30 @@ export default function FieldData(fieldData){
 
                     if(this.dataType === 'INTEGER' || this.dataType === 'DOUBLE') {
                         if (item.personalSettings) {
+
+                            if (data === 'null') return data = ' '
+
+                            let generatedData = data.replace('%', '')
+
                             if (item.percent) {
-                                return data = Number(data * 100) + '%'
-                            } else if(item.numberWithSpaces) {
-                                if(item.rounding > 0) {
-                                    let parts = Number(data).toFixed(item.rounding).toString().split(".");
-                                    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-                                    return data = parts.join(".");
-                                }
-                                return data = data.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+                                generatedData = Number(generatedData) * 100
                             }
-                            return data = Number(data).toFixed(item.rounding)
+
+                            if (item.rounding) {
+                                generatedData = Number(generatedData).toFixed(item.rounding)
+                            }
+
+                            if(item.numberWithSpaces) {
+                                if(item.rounding > 0) {
+                                    let parts = generatedData.toString().split(".");
+                                    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+                                    generatedData = parts.join(".");
+                                }
+                                generatedData = generatedData.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+                            }
+
+                            return data = `${generatedData}${item.percent ? '%' : ''}`
+
                         } else {
                             if (this.dataType === 'DOUBLE') {
                                 item.rounding = 2;
