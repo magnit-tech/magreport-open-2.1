@@ -513,7 +513,7 @@ export default function(props){
     const CellData = ({cell}) => {
         if (cell.type === "metricValues" && cell.fieldId) {
 
-            if (cell.conditionalFormatting && cell.conditionalFormatting.length > 0) {
+            if (cell.conditionalFormatting && cell.conditionalFormatting.length > 0 && !cell.data.includes('%')) {
                 if (cell.conditionalFormatting.length === 1) {
                     return (
                         <Box
@@ -606,7 +606,7 @@ export default function(props){
 
     const conditionalFormatting = (cell) => {
 
-        if (cell.type === "metricValues" && (cell.conditionalFormatting && cell.conditionalFormatting.length > 0) && (!isNaN(cell.data) && cell.data.length !== 0)) {
+        if (cell.type === "metricValues" && (cell.conditionalFormatting && cell.conditionalFormatting.length > 0) && (!isNaN(cell.data) && cell.data.length !== 0) && cell.data.trim() !== '') {
             if (cell.conditionalFormatting.length === 1) {
                 return {backgroundColor: cell.conditionalFormatting[0].color}
             } 
