@@ -40,7 +40,8 @@ public interface ReportJobRepository extends JpaRepository<ReportJob, Long> {
             "       ET.EXCEL_TEMPLATE_ID," +
             "       ET.NAME," +
             "       ET.DESCRIPTION," +
-            "       RET.IS_DEFAULT " +
+            "       RET.IS_DEFAULT, " +
+            "       RJ.COMMENT, " +
             "FROM REPOSITORY.REPORT_JOB RJ" +
             "         JOIN REPOSITORY.REPORT R ON R.REPORT_ID = RJ.REPORT_ID" +
             "         JOIN REPOSITORY.USERS U ON U.USER_ID = RJ.USER_ID" +
