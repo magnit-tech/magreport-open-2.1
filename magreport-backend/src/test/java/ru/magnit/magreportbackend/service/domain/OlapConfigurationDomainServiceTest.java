@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.magnit.magreportbackend.domain.folderreport.FolderAuthorityEnum;
 import ru.magnit.magreportbackend.domain.olap.OlapConfiguration;
 import ru.magnit.magreportbackend.domain.olap.ReportOlapConfiguration;
 import ru.magnit.magreportbackend.domain.report.Report;
@@ -86,7 +87,7 @@ class OlapConfigurationDomainServiceTest {
         when(repository.save(any())).thenReturn(getOlapConfigurationData());
         when(reportOlapConfigurationRepository.save(any())).thenReturn(getReportOlapConfigurationData());
 
-        var result = domainService.updateReportOlapConfiguration(getReportOlapConfigAddRequest(true), USER_ID);
+        var result = domainService.updateReportOlapConfiguration(getReportOlapConfigAddRequest(true), USER_ID, FolderAuthorityEnum.WRITE);
 
         assertEquals(ID, result);
 
@@ -107,7 +108,7 @@ class OlapConfigurationDomainServiceTest {
         when(reportOlapConfigurationMerger.merge(any(), any())).thenReturn(getReportOlapConfigurationData());
         when(reportOlapConfigurationRepository.save(any())).thenReturn(getReportOlapConfigurationData());
 
-        var result = domainService.updateReportOlapConfiguration(getReportOlapConfigAddRequest(false).setReportOlapConfigId(ID), USER_ID);
+        var result = domainService.updateReportOlapConfiguration(getReportOlapConfigAddRequest(false).setReportOlapConfigId(ID), USER_ID, FolderAuthorityEnum.NONE);
 
         assertEquals(ID, result);
 
@@ -123,7 +124,7 @@ class OlapConfigurationDomainServiceTest {
 
         when(reportOlapConfigurationRepository.getReferenceById(anyLong())).thenReturn(getReportOlapConfigurationData());
         var roc = getReportOlapConfigAddRequest(false).setReportOlapConfigId(ID);
-        Assertions.assertThrows(InvalidParametersException.class, () -> domainService.updateReportOlapConfiguration(roc, ID));
+        Assertions.assertThrows(InvalidParametersException.class, () -> domainService.updateReportOlapConfiguration(roc, ID, FolderAuthorityEnum.NONE));
 
         verify(reportOlapConfigurationRepository).getReferenceById(any());
         verifyNoMoreInteractions(reportOlapConfigurationRepository);

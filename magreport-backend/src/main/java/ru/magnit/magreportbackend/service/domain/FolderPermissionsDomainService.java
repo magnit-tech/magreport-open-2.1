@@ -11,6 +11,8 @@ import ru.magnit.magreportbackend.domain.filtertemplate.FilterTemplateFolder;
 import ru.magnit.magreportbackend.domain.folderreport.FolderAuthorityEnum;
 import ru.magnit.magreportbackend.domain.securityfilter.SecurityFilterFolder;
 import ru.magnit.magreportbackend.domain.user.SystemRoles;
+import ru.magnit.magreportbackend.dto.inner.RoleView;
+import ru.magnit.magreportbackend.dto.request.folder.PermissionCheckRequest;
 import ru.magnit.magreportbackend.dto.request.folderreport.FolderPermissionSetRequest;
 import ru.magnit.magreportbackend.dto.response.folder.FolderRoleResponse;
 import ru.magnit.magreportbackend.dto.response.permission.DataSetFolderPermissionsResponse;
@@ -18,8 +20,10 @@ import ru.magnit.magreportbackend.dto.response.permission.DataSourceFolderPermis
 import ru.magnit.magreportbackend.dto.response.permission.ExcelTemplateFolderPermissionsResponse;
 import ru.magnit.magreportbackend.dto.response.permission.FilterInstanceFolderPermissionsResponse;
 import ru.magnit.magreportbackend.dto.response.permission.FilterTemplateFolderPermissionsResponse;
+import ru.magnit.magreportbackend.dto.response.permission.FolderPermissionCheckResponse;
 import ru.magnit.magreportbackend.dto.response.permission.FolderPermissionsResponse;
 import ru.magnit.magreportbackend.dto.response.permission.ReportFolderPermissionsResponse;
+import ru.magnit.magreportbackend.dto.response.permission.RolePermissionResponse;
 import ru.magnit.magreportbackend.dto.response.permission.SecurityFilterFolderPermissionsResponse;
 import ru.magnit.magreportbackend.mapper.dataset.DataSetFolderPermissionsResponseMapper;
 import ru.magnit.magreportbackend.mapper.dataset.DataSetFolderRoleMapper;
@@ -85,6 +89,8 @@ public class FolderPermissionsDomainService {
     private final SecurityFilterFolderRepository securityFilterFolderRepository;
     private final SecurityFilterFolderRoleRepository securityFilterFolderRoleRepository;
 
+    private final UserDomainService userDomainService;
+    private final RoleDomainService roleDomainService;
     private final FolderRoleMapper folderRoleMapper;
     private final FolderRoleViewMapper folderRoleViewMapper;
     private final ReportFolderRoleMapper reportFolderRoleMapper;
@@ -638,5 +644,46 @@ public class FolderPermissionsDomainService {
                 .toList();
     }
 
+    @Transactional
+    public FolderPermissionCheckResponse checkFolderPermission(PermissionCheckRequest request) {
+       var rolePermissions = switch (request.getFolderType()) {
+            case PUBLISHED_REPORT -> getFolderReportPermissions(request.getId()).rolePermissions();
+            case REPORT_FOLDER -> getReportFolderPermissions(request.getId()).rolePermissions();
+            case DATASOURCE -> getDataSourceFolderPermissions(request.getId()).rolePermissions();
+            case DATASET -> getDataSetFolderPermissions(request.getId()).rolePermissions();
+            case EXCEL_TEMPLATE -> getExcelTemplateFolderPermissions(request.getId()).rolePermissions();
+            case FILTER_INSTANCE -> getFilterInstanceFolderPermissions(request.getId()).rolePermissions();
+            case FILTER_TEMPLATE -> getFilterTemplateFolderPermissions(request.getId()).rolePermissions();
+            case SECURITY_FILTER -> getSecurityFilterFolderPermissions(request.getId()).rolePermissions();
+        };
+
+        return checkFolderPermissions(rolePermissions);
+    }
+
+    private FolderPermissionCheckResponse checkFolderPermissions(List<RolePermissionResponse> rolePermissions) {
+        final var currentUser = userDomainService.getCurrentUser();
+        final var userRoles = userDomainService.getUserRoles(currentUser.getName(), currentUser.getDomain().name(),null).stream().map(RoleView::getId).collect(Collectors.toSet());
+
+        if(userRoles.contains(SystemRoles.ADMIN.getId()))  return new FolderPermissionCheckResponse(FolderAuthorityEnum.WRITE);
+
+        var devRole = roleDomainService.getRoleByName(SystemRoles.DEVELOPER.name());
+
+        var canWrite = rolePermissions.stream()
+                .filter(rolePermission -> rolePermission.permissions().contains(FolderAuthorityEnum.WRITE))
+                .anyMatch(rolePermission -> userRoles.contains(rolePermission.role().getId()));
+
+        if (userRoles.contains(devRole.getId()) && canWrite ) return new FolderPermissionCheckResponse(FolderAuthorityEnum.WRITE);
+
+
+        var canRead = rolePermissions.stream()
+                .filter(rolePermission -> rolePermission.permissions().contains(FolderAuthorityEnum.READ))
+                .anyMatch(rolePermission -> userRoles.contains(rolePermission.role().getId()));
+
+
+        if (canRead) return new FolderPermissionCheckResponse(FolderAuthorityEnum.READ);
+
+
+        return new FolderPermissionCheckResponse(FolderAuthorityEnum.NONE);
+    }
 
 }
