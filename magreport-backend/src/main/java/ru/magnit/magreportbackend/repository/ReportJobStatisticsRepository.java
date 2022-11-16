@@ -25,4 +25,5 @@ public interface ReportJobStatisticsRepository extends JpaRepository<ReportJobSt
             nativeQuery = true)
     ReportJobStatistics getLastRecord (@Param("reportJobId") Long reportJobId);
 
+    List<ReportJobStatistics> getAllByReportJobIdOrderById(Long jobId);
 }
