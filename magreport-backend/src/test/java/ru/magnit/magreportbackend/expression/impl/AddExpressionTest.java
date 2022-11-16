@@ -7,7 +7,7 @@ import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionRespo
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class AddExpressionTest {
 
@@ -34,7 +34,7 @@ class AddExpressionTest {
                     .setConstantValue("-1")
             ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression);
+        final var expression = sourceExpression.getType().init(sourceExpression, null, null);
         final var expressionResult = expression.calculate(0);
 
         assertEquals("8.5", expressionResult.getL());
@@ -60,7 +60,7 @@ class AddExpressionTest {
                     .setConstantValue("-1")
             ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression);
+        final var expression = sourceExpression.getType().init(sourceExpression, null, null);
         final var expressionResult = expression.calculate(0);
 
         assertEquals("4", expressionResult.getL());

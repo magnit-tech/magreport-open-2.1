@@ -9,6 +9,7 @@ import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
 import ru.magnit.magreportbackend.dto.inner.olap.MetricResult;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportJobData;
 import ru.magnit.magreportbackend.dto.request.olap.FilterGroup;
+import ru.magnit.magreportbackend.dto.request.olap.FilterGroupNew;
 import ru.magnit.magreportbackend.dto.request.olap.MetricFilterGroup;
 import ru.magnit.magreportbackend.dto.response.olap.OlapInfoCubesResponse;
 import ru.magnit.magreportbackend.service.domain.filter.CubeFilters;

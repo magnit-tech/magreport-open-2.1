@@ -1,15 +1,19 @@
 package ru.magnit.magreportbackend.expression.impl;
 
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
+import ru.magnit.magreportbackend.dto.request.olap.FieldDefinition;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
 import ru.magnit.magreportbackend.exception.InvalidExpression;
 import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
+import java.util.Map;
+
 public class DivideExpression extends ParameterizedExpression {
 
-    public DivideExpression(FieldExpressionResponse fieldExpression) {
-        super(fieldExpression);
+    @SuppressWarnings("unused")
+    public DivideExpression(FieldExpressionResponse fieldExpression, Map<FieldDefinition, Pair<Integer, DataTypeEnum>> fieldIndexes, String[][] resultCube) {
+        super(fieldExpression, fieldIndexes, resultCube);
     }
 
     @Override
@@ -24,6 +28,8 @@ public class DivideExpression extends ParameterizedExpression {
                 throw new InvalidExpression("Функция DIVIDE() не может принимать параметры типа " + parameterValue.getR());
             }
             resultType = resultType.widerNumeric(parameterValue.getR());
+
+            if (parameterValue.getL() == null) continue;
 
             if (firstValue) {
                 result = Double.parseDouble(parameterValue.getL());

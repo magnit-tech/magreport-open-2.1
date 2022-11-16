@@ -3,6 +3,7 @@ package ru.magnit.magreportbackend.service.domain.filter;
 import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
 import ru.magnit.magreportbackend.dto.request.olap.FilterDefinition;
 import ru.magnit.magreportbackend.dto.request.olap.FilterGroup;
+import ru.magnit.magreportbackend.dto.request.olap.FilterGroupNew;
 
 public class CubeFilters {
     private CubeFilters() {
