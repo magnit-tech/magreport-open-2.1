@@ -20,16 +20,15 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(chain = true)
-public class MetricFilterGroup {
+public class FilterGroupNew {
     private BinaryBooleanOperations operationType;
     private boolean invertResult;
-    private List<MetricFilterGroup> childGroups = Collections.emptyList();
-    private List<MetricFilterDefinition> filters = Collections.emptyList();
+    private List<FilterGroupNew> childGroups = Collections.emptyList();
+    private List<FilterDefinitionNew> filters = Collections.emptyList();
 
-    public Set<Integer> getAllMetricIds(){
-        var result = filters.stream().map(MetricFilterDefinition::getMetricId).map(Long::intValue).collect(Collectors.toCollection(HashSet::new));
-        result.addAll(childGroups.stream().flatMap(g -> g.getAllMetricIds().stream()).collect(Collectors.toSet()));
+    public Set<FieldDefinition> getAllFields(){
+        var result = filters.stream().map(FilterDefinitionNew::getField).collect(Collectors.toCollection(HashSet::new));
+        result.addAll(childGroups.stream().flatMap(g -> g.getAllFields().stream()).collect(Collectors.toSet()));
         return result;
     }
-
 }

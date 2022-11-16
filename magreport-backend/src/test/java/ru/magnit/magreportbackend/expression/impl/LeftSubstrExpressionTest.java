@@ -26,7 +26,7 @@ class LeftSubstrExpressionTest {
                     .setConstantValue("4")
             ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression);
+        final var expression = sourceExpression.getType().init(sourceExpression, null, null);
         final var expressionResult = expression.calculate(0);
 
         assertEquals("Test", expressionResult.getL());
