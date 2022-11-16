@@ -16,6 +16,7 @@ import ru.magnit.magreportbackend.dto.inner.olap.OlapUserRequestLog;
 import ru.magnit.magreportbackend.dto.request.DatePeriodRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapConfigRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequest;
+import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequestNew;
 import ru.magnit.magreportbackend.dto.request.olap.OlapExportPivotTableRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldItemsRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapServiceRegisterInfo;
@@ -66,6 +67,7 @@ public class OlapController {
     private int maxDop;
 
     public static final String OLAP_GET_CUBE = "/api/v1/olap/get-cube";
+    public static final String OLAP_GET_CUBE_NEW = "/api/v1/olap/get-cube-new";
     public static final String OLAP_GET_FIELD_VALUES = "/api/v1/olap/get-field-values";
     public static final String OLAP_CONFIGURATION_UPDATE = "/api/v1/olap/configuration/update";
     public static final String OLAP_CONFIGURATION_REPORT_ADD = "/api/v1/olap/configuration/report-add";
@@ -127,6 +129,45 @@ public class OlapController {
                         .message("")
                         .data(olapService.getCube(request))
                         .build();
+            } catch (Exception ex) {
+                throw new OlapException("Error executing OLAP request: " + ex.getMessage(), ex);
+            } finally {
+                semaphore.release();
+            }
+        }
+
+        LogHelper.logInfoUserMethodEnd();
+        return response;
+    }
+
+    @Operation(summary = "Получение среза OLAP куба с производными полями")
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping(value = OLAP_GET_CUBE_NEW,
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE)
+    public ResponseBody<OlapCubeResponse> getCubeNew(
+        @RequestBody
+        OlapCubeRequestNew request) throws JsonProcessingException, InterruptedException {
+        ResponseBody<OlapCubeResponse> response;
+        LogHelper.logInfoUserMethodStart();
+
+        LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_GET_CUBE, request, userService.getCurrentUserName()));
+
+        if (outService) {
+            response = ResponseBody.<OlapCubeResponse>builder()
+                .success(true)
+                .message("")
+                .data(externalOlapService.getCubeNew(request))
+                .build();
+
+        } else {
+            semaphore.acquire();
+            try {
+                response = ResponseBody.<OlapCubeResponse>builder()
+                    .success(true)
+                    .message("")
+                    .data(olapService.getCubeNew(request))
+                    .build();
             } catch (Exception ex) {
                 throw new OlapException("Error executing OLAP request: " + ex.getMessage(), ex);
             } finally {
