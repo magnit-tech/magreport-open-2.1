@@ -71,4 +71,13 @@ public class DerivedFieldDomainService {
             .map(expressionResponseMapper::from)
             .toList();
     }
+
+    public List<DerivedFieldResponse> getDerivedFieldsForReport(long reportId) {
+        return derivedFieldRepository
+            .getAllByReportId(reportId)
+            .stream()
+            .map(derivedField -> new Pair<>(derivedField, fieldExpressionRepository.getByDerivedFieldIdAndParentFieldExpressionIsNull(derivedField.getId())))
+            .map(derivedFieldResponseMapper::from)
+            .toList();
+    }
 }

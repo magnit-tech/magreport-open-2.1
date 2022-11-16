@@ -34,7 +34,7 @@ class SubtractExpressionTest {
                     .setConstantValue("-1")
             ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression);
+        final var expression = sourceExpression.getType().init(sourceExpression, null, null);
         final var expressionResult = expression.calculate(0);
 
         assertEquals("8.5", expressionResult.getL());
@@ -60,7 +60,7 @@ class SubtractExpressionTest {
                     .setConstantValue("-1")
             ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression);
+        final var expression = sourceExpression.getType().init(sourceExpression, null, null);
         final var expressionResult = expression.calculate(0);
 
         assertEquals("13", expressionResult.getL());

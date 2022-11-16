@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import ru.magnit.magreportbackend.domain.olap.MetricFilterType;
+import ru.magnit.magreportbackend.domain.olap.FilterType;
 
 import java.util.Collections;
 import java.util.List;
@@ -17,10 +17,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Accessors(chain = true)
-public class MetricFilterDefinition {
-    private Long metricId;
-    private MetricFilterType filterType;
+public class FilterDefinitionNew {
+    private FieldDefinition field;
+    private FilterType filterType;
     private boolean invertResult;
     private int rounding;
+    private boolean canRounding;
     private List<String> values = Collections.emptyList();
 }
