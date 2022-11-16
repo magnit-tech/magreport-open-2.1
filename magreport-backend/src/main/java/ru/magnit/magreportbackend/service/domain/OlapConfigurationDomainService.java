@@ -3,6 +3,7 @@ package ru.magnit.magreportbackend.service.domain;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.magnit.magreportbackend.domain.folderreport.FolderAuthorityEnum;
 import ru.magnit.magreportbackend.domain.olap.OlapConfiguration;
 import ru.magnit.magreportbackend.domain.olap.ReportOlapConfiguration;
 import ru.magnit.magreportbackend.domain.reportjob.ReportJob;
@@ -51,16 +52,16 @@ public class OlapConfigurationDomainService {
     private final UserShortInfoResponseMapper userShortInfoResponseMapper;
 
     @Transactional
-    public Long updateReportOlapConfiguration(ReportOlapConfigAddRequest request, Long currentUser) {
+    public Long updateReportOlapConfiguration(ReportOlapConfigAddRequest request, Long currentUser, FolderAuthorityEnum permission) {
 
         ReportOlapConfiguration config;
 
         if (request.getReportOlapConfigId() != null) {
             var saveConfig = reportOlapConfigurationRepository.getReferenceById(request.getReportOlapConfigId());
 
-            if (saveConfig.getOlapConfiguration().getUser().getId().equals(currentUser))
+            if (saveConfig.getOlapConfiguration().getUser().getId().equals(currentUser) || permission.equals(FolderAuthorityEnum.WRITE))
                 config = reportOlapConfigurationMerger.merge(saveConfig, request);
-            else throw new InvalidParametersException("Only the creator can update the configuration");
+            else throw new InvalidParametersException("Configuration change denied");
 
         } else {
             config = reportOlapConfigurationMapper.from(request);

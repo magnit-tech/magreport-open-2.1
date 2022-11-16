@@ -3,6 +3,8 @@ package ru.magnit.magreportbackend.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.magnit.magreportbackend.dto.request.folder.FolderTypes;
+import ru.magnit.magreportbackend.dto.request.folder.PermissionCheckRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapConfigRequest;
 import ru.magnit.magreportbackend.dto.request.olap.ReportOlapConfigAddRequest;
 import ru.magnit.magreportbackend.dto.request.olap.ReportOlapConfigRequest;
@@ -12,8 +14,10 @@ import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobRequest;
 import ru.magnit.magreportbackend.dto.response.olap.OlapAvailableConfigurationsResponse;
 import ru.magnit.magreportbackend.dto.response.olap.ReportOlapConfigResponse;
 import ru.magnit.magreportbackend.dto.response.user.UserShortInfoResponse;
+import ru.magnit.magreportbackend.service.domain.FolderPermissionsDomainService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
 import ru.magnit.magreportbackend.service.domain.OlapConfigurationDomainService;
+import ru.magnit.magreportbackend.service.domain.ReportDomainService;
 import ru.magnit.magreportbackend.service.domain.UserDomainService;
 
 import java.util.List;
@@ -27,9 +31,25 @@ public class OlapConfigurationService {
     private final UserDomainService userDomainService;
     private final JobDomainService jobDomainService;
 
+    private final ReportDomainService reportDomainService;
+
+    private final FolderPermissionsDomainService folderPermissionsDomainService;
+
     public ReportOlapConfigResponse addOlapReportConfig(ReportOlapConfigAddRequest request) {
         var currentUser = userDomainService.getCurrentUser();
-        var id = olapConfigurationDomainService.updateReportOlapConfiguration(request, currentUser.getId());
+
+        Long folderId;
+        if (request.getJobId() != null) {
+            var job = jobDomainService.getJob(request.getJobId());
+             folderId = job.getReport().folderId();
+        }
+        else {
+           var report =  reportDomainService.getReport(request.getReportId());
+           folderId = report.getPath().get(report.getPath().size() - 1).id();
+        }
+        var currentFolderPermission = folderPermissionsDomainService.checkFolderPermission(new PermissionCheckRequest(FolderTypes.REPORT_FOLDER, folderId));
+
+        var id = olapConfigurationDomainService.updateReportOlapConfiguration(request, currentUser.getId(), currentFolderPermission.getAuthority());
         return olapConfigurationDomainService.getReportOlapConfiguration(id);
     }
     public ReportOlapConfigResponse getOlapReportConfig(ReportOlapConfigRequest request) {
