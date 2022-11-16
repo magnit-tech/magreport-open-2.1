@@ -28,6 +28,7 @@ import ru.magnit.magreportbackend.dto.response.permission.DataSourceFolderPermis
 import ru.magnit.magreportbackend.dto.response.permission.ExcelTemplateFolderPermissionsResponse;
 import ru.magnit.magreportbackend.dto.response.permission.FilterInstanceFolderPermissionsResponse;
 import ru.magnit.magreportbackend.dto.response.permission.FilterTemplateFolderPermissionsResponse;
+import ru.magnit.magreportbackend.dto.response.permission.FolderPermissionCheckResponse;
 import ru.magnit.magreportbackend.dto.response.permission.FolderPermissionsResponse;
 import ru.magnit.magreportbackend.dto.response.permission.ReportFolderPermissionsResponse;
 import ru.magnit.magreportbackend.dto.response.permission.SecurityFilterFolderPermissionsResponse;
@@ -302,166 +303,16 @@ class FolderPermissionsServiceTest {
     @Test
     void checkFolderReportPermission() {
 
-        when(domainService.getFolderReportPermissions(any())).thenReturn(new FolderPermissionsResponse(getFolderResponse(), Collections.emptyList()));
-        when(userDomainService.getCurrentUser()).thenReturn(getCurrentUser());
-        when(userDomainService.getUserRoles(any(), any(), any())).thenReturn(Collections.singletonList(new RoleView().setId(0L)));
+        when(domainService.checkFolderPermission(any())).thenReturn(new FolderPermissionCheckResponse().setAuthority(FolderAuthorityEnum.WRITE));
 
         var response = service.checkFolderPermission(getPermissionCheckRequest(FolderTypes.PUBLISHED_REPORT));
         assertEquals(FolderAuthorityEnum.WRITE, response.getAuthority());
 
-        when(userDomainService.getUserRoles(any(), any(), any())).thenReturn(Collections.singletonList(new RoleView().setId(8L)));
-        when(roleDomainService.getRoleByName("DEVELOPER")).thenReturn(new RoleResponse().setId(1L));
-        response = service.checkFolderPermission(getPermissionCheckRequest(FolderTypes.PUBLISHED_REPORT));
-        assertEquals(FolderAuthorityEnum.NONE, response.getAuthority());
-
-        verify(domainService, times(2)).getFolderReportPermissions(any());
-        verify(userDomainService, times(2)).getCurrentUser();
-        verify(userDomainService, times(2)).getUserRoles(any(), any(), any());
+        verify(domainService).checkFolderPermission(any());
         verifyNoMoreInteractions(domainService, userDomainService);
     }
 
-    @Test
-    void checkReportFolderPermission() {
-        when(domainService.getReportFolderPermissions(any())).thenReturn(new ReportFolderPermissionsResponse(getReportFolderResponse(), Collections.emptyList()));
-        when(userDomainService.getCurrentUser()).thenReturn(getCurrentUser());
-        when(roleDomainService.getRoleByName("DEVELOPER")).thenReturn(new RoleResponse().setId(1L));
-        when(userDomainService.getUserRoles(any(), any(), any())).thenReturn(Collections.singletonList(new RoleView().setId(0L)));
 
-        var response = service.checkFolderPermission(getPermissionCheckRequest(FolderTypes.REPORT_FOLDER));
-        assertEquals(FolderAuthorityEnum.WRITE, response.getAuthority());
-
-        when(userDomainService.getUserRoles(any(), any(), any())).thenReturn(Collections.singletonList(new RoleView().setId(8L)));
-        response = service.checkFolderPermission(getPermissionCheckRequest(FolderTypes.REPORT_FOLDER));
-        assertEquals(FolderAuthorityEnum.NONE, response.getAuthority());
-
-        verify(domainService, times(2)).getReportFolderPermissions(any());
-        verify(userDomainService, times(2)).getCurrentUser();
-        verify(userDomainService, times(2)).getUserRoles(any(), any(), any());
-        verifyNoMoreInteractions(domainService, userDomainService);
-
-    }
-
-    @Test
-    void checkDataSourceFolderPermission() {
-
-        when(domainService.getDataSourceFolderPermissions(any())).thenReturn(new DataSourceFolderPermissionsResponse(getDataSourceFolderResponse(), Collections.emptyList()));
-        when(userDomainService.getCurrentUser()).thenReturn(getCurrentUser());
-        when(roleDomainService.getRoleByName("DEVELOPER")).thenReturn(new RoleResponse().setId(1L));
-        when(userDomainService.getUserRoles(any(), any(), any())).thenReturn(Collections.singletonList(new RoleView().setId(0L)));
-
-        var response = service.checkFolderPermission(getPermissionCheckRequest(FolderTypes.DATASOURCE));
-        assertEquals(FolderAuthorityEnum.WRITE, response.getAuthority());
-
-        when(userDomainService.getUserRoles(any(), any(), any())).thenReturn(Collections.singletonList(new RoleView().setId(8L)));
-        response = service.checkFolderPermission(getPermissionCheckRequest(FolderTypes.DATASOURCE));
-        assertEquals(FolderAuthorityEnum.NONE, response.getAuthority());
-
-        verify(domainService, times(2)).getDataSourceFolderPermissions(any());
-        verify(userDomainService, times(2)).getCurrentUser();
-        verify(userDomainService, times(2)).getUserRoles(any(), any(), any());
-        verifyNoMoreInteractions(domainService, userDomainService);
-    }
-
-    @Test
-    void checkDataSetFolderPermission() {
-        when(domainService.getDataSetFolderPermissions(any())).thenReturn(new DataSetFolderPermissionsResponse(getDataSetFolderResponse(), Collections.emptyList()));
-        when(userDomainService.getCurrentUser()).thenReturn(getCurrentUser());
-        when(roleDomainService.getRoleByName("DEVELOPER")).thenReturn(new RoleResponse().setId(1L));
-        when(userDomainService.getUserRoles(any(), any(), any())).thenReturn(Collections.singletonList(new RoleView().setId(0L)));
-
-        var response = service.checkFolderPermission(getPermissionCheckRequest(FolderTypes.DATASET));
-        assertEquals(FolderAuthorityEnum.WRITE, response.getAuthority());
-
-        when(userDomainService.getUserRoles(any(), any(), any())).thenReturn(Collections.singletonList(new RoleView().setId(8L)));
-        response = service.checkFolderPermission(getPermissionCheckRequest(FolderTypes.DATASET));
-        assertEquals(FolderAuthorityEnum.NONE, response.getAuthority());
-
-        verify(domainService, times(2)).getDataSetFolderPermissions(any());
-        verify(userDomainService, times(2)).getCurrentUser();
-        verify(userDomainService, times(2)).getUserRoles(any(), any(), any());
-        verifyNoMoreInteractions(domainService, userDomainService);
-    }
-
-    @Test
-    void checkExcelTemplateFolderPermission() {
-        when(domainService.getExcelTemplateFolderPermissions(any())).thenReturn(new ExcelTemplateFolderPermissionsResponse(getExcelTemplateFolderResponse(), Collections.emptyList()));
-        when(userDomainService.getCurrentUser()).thenReturn(getCurrentUser());
-        when(userDomainService.getUserRoles(any(), any(), any())).thenReturn(Collections.singletonList(new RoleView().setId(0L)));
-
-        var response = service.checkFolderPermission(getPermissionCheckRequest(FolderTypes.EXCEL_TEMPLATE));
-        assertEquals(FolderAuthorityEnum.WRITE, response.getAuthority());
-
-        when(roleDomainService.getRoleByName("DEVELOPER")).thenReturn(new RoleResponse().setId(1L));
-        when(userDomainService.getUserRoles(any(), any(), any())).thenReturn(Collections.singletonList(new RoleView().setId(8L)));
-        response = service.checkFolderPermission(getPermissionCheckRequest(FolderTypes.EXCEL_TEMPLATE));
-        assertEquals(FolderAuthorityEnum.NONE, response.getAuthority());
-
-        verify(domainService, times(2)).getExcelTemplateFolderPermissions(any());
-        verify(userDomainService, times(2)).getCurrentUser();
-        verify(userDomainService, times(2)).getUserRoles(any(),any(), any());
-        verifyNoMoreInteractions(domainService, userDomainService);
-    }
-
-    @Test
-    void checkFilterInstanceFolderPermission() {
-        when(domainService.getFilterInstanceFolderPermissions(any())).thenReturn(new FilterInstanceFolderPermissionsResponse(getFilterInstanceFolderResponse(), Collections.emptyList()));
-        when(userDomainService.getCurrentUser()).thenReturn(getCurrentUser());
-        when(userDomainService.getUserRoles(any(), any(), any())).thenReturn(Collections.singletonList(new RoleView().setId(0L)));
-
-        var response = service.checkFolderPermission(getPermissionCheckRequest(FolderTypes.FILTER_INSTANCE));
-        assertEquals(FolderAuthorityEnum.WRITE, response.getAuthority());
-
-        when(userDomainService.getUserRoles(any(), any(), any())).thenReturn(Collections.singletonList(new RoleView().setId(8L)));
-        when(roleDomainService.getRoleByName("DEVELOPER")).thenReturn(new RoleResponse().setId(1L));
-        response = service.checkFolderPermission(getPermissionCheckRequest(FolderTypes.FILTER_INSTANCE));
-        assertEquals(FolderAuthorityEnum.NONE, response.getAuthority());
-
-        verify(domainService, times(2)).getFilterInstanceFolderPermissions(any());
-        verify(userDomainService, times(2)).getCurrentUser();
-        verify(userDomainService, times(2)).getUserRoles(any(), any(), any());
-        verifyNoMoreInteractions(domainService, userDomainService);
-    }
-
-    @Test
-    void checkFilterTemplateFolderPermission() {
-        when(domainService.getFilterTemplateFolderPermissions(any())).thenReturn(new FilterTemplateFolderPermissionsResponse(getFilterTemplateFolderResponse(), Collections.emptyList()));
-        when(userDomainService.getCurrentUser()).thenReturn(getCurrentUser());
-        when(userDomainService.getUserRoles(any(), any(), any())).thenReturn(Collections.singletonList(new RoleView().setId(0L)));
-
-        var response = service.checkFolderPermission(getPermissionCheckRequest(FolderTypes.FILTER_TEMPLATE));
-        assertEquals(FolderAuthorityEnum.WRITE, response.getAuthority());
-
-        when(userDomainService.getUserRoles(any(), any(), any())).thenReturn(Collections.singletonList(new RoleView().setId(8L)));
-        when(roleDomainService.getRoleByName("DEVELOPER")).thenReturn(new RoleResponse().setId(1L));
-        response = service.checkFolderPermission(getPermissionCheckRequest(FolderTypes.FILTER_TEMPLATE));
-        assertEquals(FolderAuthorityEnum.NONE, response.getAuthority());
-
-        verify(domainService, times(2)).getFilterTemplateFolderPermissions(any());
-        verify(userDomainService, times(2)).getCurrentUser();
-        verify(userDomainService, times(2)).getUserRoles(any(), any(), any());
-        verifyNoMoreInteractions(domainService, userDomainService);
-    }
-
-    @Test
-    void checkSecurityFilterFolderPermission() {
-        when(domainService.getSecurityFilterFolderPermissions(any())).thenReturn(new SecurityFilterFolderPermissionsResponse(getSecurityFilterFolderResponse(), Collections.emptyList()));
-        when(userDomainService.getCurrentUser()).thenReturn(getCurrentUser());
-        when(userDomainService.getUserRoles(any(), any(), any())).thenReturn(Collections.singletonList(new RoleView().setId(0L)));
-
-        var response = service.checkFolderPermission(getPermissionCheckRequest(FolderTypes.SECURITY_FILTER));
-        assertEquals(FolderAuthorityEnum.WRITE, response.getAuthority());
-
-        when(userDomainService.getUserRoles(any(),any(), any())).thenReturn(Collections.singletonList(new RoleView().setId(8L)));
-        when(roleDomainService.getRoleByName("DEVELOPER")).thenReturn(new RoleResponse().setId(1L));
-        response = service.checkFolderPermission(getPermissionCheckRequest(FolderTypes.SECURITY_FILTER));
-        assertEquals(FolderAuthorityEnum.NONE, response.getAuthority());
-
-        verify(domainService, times(2)).getSecurityFilterFolderPermissions(any());
-        verify(userDomainService, times(2)).getCurrentUser();
-        verify(userDomainService, times(2)).getUserRoles(any(), any(), any());
-        verifyNoMoreInteractions(domainService, userDomainService);
-
-    }
 
 
     private FolderResponse getFolderResponse() {

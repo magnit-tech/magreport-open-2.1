@@ -45,6 +45,7 @@ import ru.magnit.magreportbackend.repository.ReportFolderRepository;
 import ru.magnit.magreportbackend.repository.ReportRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -304,11 +305,11 @@ class ReportDomainServiceTest {
     void getReport() {
 
         when(reportRepository.getReferenceById(anyLong())).thenReturn(get_Report());
-        when(reportResponseMapper.from(any(Report.class))).thenReturn(new ReportResponse());
+        when(reportResponseMapper.from(any(Report.class))).thenReturn(new ReportResponse().setId(ID));
 
         assertNotNull(domainService.getReport(ID));
 
-        verify(reportRepository).getReferenceById(anyLong());
+        verify(reportRepository,times(2)).getReferenceById(anyLong());
         verify(reportResponseMapper).from(any(Report.class));
         verifyNoMoreInteractions(reportRepository, reportResponseMapper);
     }
