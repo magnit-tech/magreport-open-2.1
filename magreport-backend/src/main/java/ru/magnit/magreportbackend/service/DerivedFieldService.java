@@ -3,6 +3,7 @@ package ru.magnit.magreportbackend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportFieldData;
@@ -19,6 +20,8 @@ import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequestNew;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldTypes;
 import ru.magnit.magreportbackend.dto.response.derivedfield.DerivedFieldResponse;
 import ru.magnit.magreportbackend.dto.response.derivedfield.ExpressionResponse;
+import ru.magnit.magreportbackend.expression.BaseExpression;
+import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.service.domain.DerivedFieldDomainService;
 import ru.magnit.magreportbackend.service.domain.UserDomainService;
 import ru.magnit.magreportbackend.util.Pair;
@@ -94,24 +97,18 @@ public class DerivedFieldService {
         }
 
         final var processedCube = initResultCube(sourceCube, fieldCount);
+        final var exprContext = new ExpressionCreationContext(
+            fieldIndexes,
+            processedCube
+        );
         final var fieldExpressions = reqDerivedFields
             .stream()
             .map(field -> derivedFields.get(field.getFieldId()))
-            .map(field -> field.getExpression().getType().init(field.getExpression(), fieldIndexes, processedCube))
+            .map(field -> field.getExpression().getType().init(field.getExpression(), exprContext))
             .toList();
 
         // Рассчитываем значения всех полей и добавляем в куб
-        final var startColumn = sourceCube.data().length;
-        for (var rowIndex = 0; rowIndex < sourceCube.numRows(); rowIndex++) {
-            for (int columnIndex = 0; columnIndex < fieldExpressions.size(); columnIndex++) {
-                final var expResult = fieldExpressions.get(columnIndex).calculate(rowIndex);
-                if (rowIndex == 0) {
-                    final var fieldDefinition = reqDerivedFields.get(columnIndex);
-                    fieldIndexes.put(fieldDefinition, new Pair<>(fieldIndexes.get(fieldDefinition).getL(), expResult.getR()));
-                }
-                processedCube[startColumn + columnIndex][rowIndex] = expResult.getL().intern();
-            }
-        }
+        final int startColumn = processDerivedFields(sourceCube, reqDerivedFields, fieldIndexes, processedCube, fieldExpressions);
 
         final var resultCube = initResultCube(sourceCube, startColumn + reportDerivedFieldSet.size());
         var fieldNumber = 0;
@@ -119,36 +116,15 @@ public class DerivedFieldService {
             .stream()
             .map(ReportFieldData::id)
             .max(Long::compareTo).orElseThrow() + 1L;
+
         final var cubeFields = new ArrayList<>(sourceCube.reportMetaData().fields());
         final var derivedFieldsColumns = new HashMap<Long, Long>();
-        for (final var derivedField : reportDerivedFieldSet) {
-            resultCube[startColumn + fieldNumber] = processedCube[fieldIndexes.get(derivedField).getL()];
-            cubeFields.add(new ReportFieldData(
-                reportFieldIndex + fieldNumber,
-                (int)reportFieldIndex + fieldNumber,
-                true,
-                fieldIndexes.get(derivedField).getR(),
-                "",
-                derivedFields.get(derivedField.getFieldId()).getName(),
-                derivedFields.get(derivedField.getFieldId()).getDescription()));
-            derivedFieldsColumns.put(derivedField.getFieldId(), reportFieldIndex + fieldNumber);
-            fieldNumber++;
-        }
+        copyDataToResultCube(derivedFields, reportDerivedFieldSet, fieldIndexes, processedCube, startColumn, resultCube, fieldNumber, reportFieldIndex, cubeFields, derivedFieldsColumns);
+
         final var counter = new AtomicInteger(0);
         final var resultFieldIndexes = cubeFields.stream().collect(Collectors.toMap(ReportFieldData::id, o -> counter.getAndIncrement()));
 
-        final var processedRequest = new OlapCubeRequest()
-            .setJobId(request.getJobId())
-            .setColumnsInterval(request.getColumnsInterval())
-            .setRowsInterval(request.getRowsInterval())
-            .setColumnSort(request.getColumnSort())
-            .setRowSort(request.getRowSort())
-            .setMetricPlacement(request.getMetricPlacement())
-            .setColumnFields(columnsFromNew(request, derivedFieldsColumns))
-            .setRowFields(rowsFromNew(request, derivedFieldsColumns))
-            .setMetrics(fromNew(request.getMetrics(), derivedFieldsColumns))
-            .setFilterGroup(request.getFilterGroup() == null ? null : fromNew(request.getFilterGroup(), derivedFieldsColumns))
-            .setMetricFilterGroup(request.getMetricFilterGroup());
+        final OlapCubeRequest processedRequest = transformOlapRequest(request, derivedFieldsColumns);
 
         return new Pair<>(new CubeData(
             new ReportData(
@@ -166,22 +142,69 @@ public class DerivedFieldService {
         ), processedRequest);
     }
 
-    private static LinkedHashSet<Long> columnsFromNew(OlapCubeRequestNew request, Map<Long, Long> derivedFieldsColumns) {
+    private OlapCubeRequest transformOlapRequest(OlapCubeRequestNew request, HashMap<Long, Long> derivedFieldsColumns) {
+        return new OlapCubeRequest()
+            .setJobId(request.getJobId())
+            .setColumnsInterval(request.getColumnsInterval())
+            .setRowsInterval(request.getRowsInterval())
+            .setColumnSort(request.getColumnSort())
+            .setRowSort(request.getRowSort())
+            .setMetricPlacement(request.getMetricPlacement())
+            .setColumnFields(columnsFromNew(request, derivedFieldsColumns))
+            .setRowFields(rowsFromNew(request, derivedFieldsColumns))
+            .setMetrics(fromNew(request.getMetrics(), derivedFieldsColumns))
+            .setFilterGroup(request.getFilterGroup() == null ? null : fromNew(request.getFilterGroup(), derivedFieldsColumns))
+            .setMetricFilterGroup(request.getMetricFilterGroup());
+    }
+
+    @SuppressWarnings("java:S107")
+    private void copyDataToResultCube(Map<Long, DerivedFieldResponse> derivedFields, LinkedHashSet<FieldDefinition> reportDerivedFieldSet, Map<FieldDefinition, Pair<Integer, DataTypeEnum>> fieldIndexes, String[][] processedCube, int startColumn, String[][] resultCube, int fieldNumber, long reportFieldIndex, ArrayList<ReportFieldData> cubeFields, HashMap<Long, Long> derivedFieldsColumns) {
+        for (final var derivedField : reportDerivedFieldSet) {
+            resultCube[startColumn + fieldNumber] = processedCube[fieldIndexes.get(derivedField).getL()];
+            cubeFields.add(new ReportFieldData(
+                reportFieldIndex + fieldNumber,
+                (int) reportFieldIndex + fieldNumber,
+                true,
+                fieldIndexes.get(derivedField).getR(),
+                "",
+                derivedFields.get(derivedField.getFieldId()).getName(),
+                derivedFields.get(derivedField.getFieldId()).getDescription()));
+            derivedFieldsColumns.put(derivedField.getFieldId(), reportFieldIndex + fieldNumber);
+            fieldNumber++;
+        }
+    }
+
+    private int processDerivedFields(CubeData sourceCube, List<FieldDefinition> reqDerivedFields, Map<FieldDefinition, Pair<Integer, DataTypeEnum>> fieldIndexes, String[][] processedCube, List<BaseExpression> fieldExpressions) {
+        final var startColumn = sourceCube.data().length;
+        for (var rowIndex = 0; rowIndex < sourceCube.numRows(); rowIndex++) {
+            for (int columnIndex = 0; columnIndex < fieldExpressions.size(); columnIndex++) {
+                final var expResult = fieldExpressions.get(columnIndex).calculate(rowIndex);
+                if (rowIndex == 0) {
+                    final var fieldDefinition = reqDerivedFields.get(columnIndex);
+                    fieldIndexes.put(fieldDefinition, new Pair<>(fieldIndexes.get(fieldDefinition).getL(), expResult.getR()));
+                }
+                processedCube[startColumn + columnIndex][rowIndex] = expResult.getL().intern();
+            }
+        }
+        return startColumn;
+    }
+
+    private LinkedHashSet<Long> columnsFromNew(OlapCubeRequestNew request, Map<Long, Long> derivedFieldsColumns) {
         return request.getColumnFields().stream().map(field -> field.getFieldType() == OlapFieldTypes.REPORT_FIELD ? field.getFieldId() : derivedFieldsColumns.get(field.getFieldId())).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    private static LinkedHashSet<Long> rowsFromNew(OlapCubeRequestNew request, Map<Long, Long> derivedFieldsColumns) {
+    private LinkedHashSet<Long> rowsFromNew(OlapCubeRequestNew request, Map<Long, Long> derivedFieldsColumns) {
         return request.getRowFields().stream().map(field -> field.getFieldType() == OlapFieldTypes.REPORT_FIELD ? field.getFieldId() : derivedFieldsColumns.get(field.getFieldId())).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    private static List<MetricDefinition> fromNew(List<MetricDefinitionNew> metrics, Map<Long, Long> derivedFieldsColumns) {
+    private List<MetricDefinition> fromNew(List<MetricDefinitionNew> metrics, Map<Long, Long> derivedFieldsColumns) {
         return metrics
             .stream()
             .map(metric -> new MetricDefinition(metric.getField().getFieldType() == OlapFieldTypes.REPORT_FIELD ? metric.getField().getFieldId() : derivedFieldsColumns.get(metric.getField().getFieldId()), metric.getAggregationType()))
             .toList();
     }
 
-    private static FilterGroup fromNew(FilterGroupNew filterGroup, Map<Long, Long> derivedFieldsColumns) {
+    private FilterGroup fromNew(FilterGroupNew filterGroup, Map<Long, Long> derivedFieldsColumns) {
         return new FilterGroup(
             filterGroup.getOperationType(),
             filterGroup.isInvertResult(),
@@ -197,7 +220,7 @@ public class DerivedFieldService {
         );
     }
 
-    private static String[][] initResultCube(CubeData sourceCube, int fieldCount) {
+    private String[][] initResultCube(CubeData sourceCube, int fieldCount) {
         final var resultCube = new String[fieldCount][];
         System.arraycopy(sourceCube.data(), 0, resultCube, 0, sourceCube.data().length);
         for (int i = sourceCube.data().length; i < fieldCount; i++) {

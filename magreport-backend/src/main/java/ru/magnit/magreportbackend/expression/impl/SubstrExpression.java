@@ -1,17 +1,17 @@
 package ru.magnit.magreportbackend.expression.impl;
 
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
-import ru.magnit.magreportbackend.dto.request.olap.FieldDefinition;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
+import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
-import java.util.Map;
-
 public class SubstrExpression extends ParameterizedExpression {
+    private final Pair<String, DataTypeEnum> result = new Pair<>(null, DataTypeEnum.STRING);
+
     @SuppressWarnings("unused")
-    public SubstrExpression(FieldExpressionResponse fieldExpression, Map<FieldDefinition, Pair<Integer, DataTypeEnum>> fieldIndexes, String[][] resultCube) {
-        super(fieldExpression, fieldIndexes, resultCube);
+    public SubstrExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
+        super(fieldExpression, context);
     }
 
     @Override
@@ -20,6 +20,7 @@ public class SubstrExpression extends ParameterizedExpression {
         final var startPosition = Integer.parseInt(parameters.get(1).calculate(rowNumber).getL());
         final var length = Integer.parseInt(parameters.get(2).calculate(rowNumber).getL());
 
-        return new Pair<>(sourceString.substring(startPosition, startPosition+length), DataTypeEnum.STRING);
+        return result
+            .setL(sourceString.substring(startPosition, startPosition + length));
     }
 }
