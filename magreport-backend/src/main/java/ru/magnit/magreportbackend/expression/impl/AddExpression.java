@@ -1,22 +1,21 @@
 package ru.magnit.magreportbackend.expression.impl;
 
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
-import ru.magnit.magreportbackend.dto.request.olap.FieldDefinition;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
 import ru.magnit.magreportbackend.exception.InvalidExpression;
+import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
-import java.util.Map;
-
 public class AddExpression extends ParameterizedExpression {
-    public AddExpression(FieldExpressionResponse fieldExpression, Map<FieldDefinition, Pair<Integer, DataTypeEnum>> fieldIndexes, String[][] resultCube) {
-        super(fieldExpression, fieldIndexes, resultCube);
+    private final Pair<String, DataTypeEnum> result = new Pair<>();
+    public AddExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
+        super(fieldExpression, context);
     }
 
     @Override
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
-        var result = 0D;
+        var calcResult = 0D;
         var resultType = DataTypeEnum.INTEGER;
         for (var parameter: parameters) {
             final var parameterValue = parameter.calculate(rowNumber);
@@ -27,9 +26,11 @@ public class AddExpression extends ParameterizedExpression {
             resultType = resultType.widerNumeric(parameterValue.getR());
             final var paramResult = parameter.calculate(rowNumber).getL();
             if (paramResult != null) {
-                result += Double.parseDouble(paramResult);
+                calcResult += Double.parseDouble(paramResult);
             }
         }
-        return new Pair<>(resultType.toTypedString(result), resultType);
+        return result
+            .setL(resultType.toTypedString(calcResult))
+            .setR(resultType);
     }
 }
