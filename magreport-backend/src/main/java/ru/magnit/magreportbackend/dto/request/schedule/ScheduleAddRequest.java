@@ -6,6 +6,8 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
+import java.time.LocalTime;
+
 @Getter
 @Setter
 @Accessors(chain = true)
@@ -29,4 +31,5 @@ public class ScheduleAddRequest {
     private String description;
     private Long differenceTime;
     private Long intervalMinutes;
+    private LocalTime finishTime;
 }

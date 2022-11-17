@@ -16,6 +16,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import java.io.Serial;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -82,6 +83,9 @@ public class Schedule extends EntityWithName {
 
     @Column(name = "INTERVAL_MINUTES")
     Long intervalMinutes;
+
+    @Column(name = "FINISH_TIME")
+    LocalTime finishTime;
 
     @ManyToMany(mappedBy = "scheduleList")
     private List<ScheduleTask> scheduleTasks = Collections.emptyList();
