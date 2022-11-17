@@ -35,6 +35,7 @@ public class ScheduleResponseMapper implements Mapper<ScheduleResponse, Schedule
                 .setModified(source.getModifiedDateTime())
                 .setUserName(source.getUser().getName())
                 .setPlanStartDate(source.getPlanStartDate())
-                .setIntervalMinutes(source.getIntervalMinutes());
+                .setIntervalMinutes(source.getIntervalMinutes())
+                .setFinishTime(source.getFinishTime());
     }
 }
