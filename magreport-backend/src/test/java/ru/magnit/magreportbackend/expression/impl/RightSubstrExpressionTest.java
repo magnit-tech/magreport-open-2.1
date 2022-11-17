@@ -25,7 +25,7 @@ class RightSubstrExpressionTest {
                     .setConstantValue("4")
             ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression, null, null);
+        final var expression = sourceExpression.getType().init(sourceExpression, null);
         final var expressionResult = expression.calculate(0);
 
         assertEquals("ring", expressionResult.getL());

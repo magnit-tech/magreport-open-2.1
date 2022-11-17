@@ -1,17 +1,15 @@
 package ru.magnit.magreportbackend.expression.impl;
 
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
-import ru.magnit.magreportbackend.dto.request.olap.FieldDefinition;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
 import ru.magnit.magreportbackend.exception.InvalidExpression;
+import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
-import java.util.Map;
-
 public class AddExpression extends ParameterizedExpression {
-    public AddExpression(FieldExpressionResponse fieldExpression, Map<FieldDefinition, Pair<Integer, DataTypeEnum>> fieldIndexes, String[][] resultCube) {
-        super(fieldExpression, fieldIndexes, resultCube);
+    public AddExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
+        super(fieldExpression, context);
     }
 
     @Override
