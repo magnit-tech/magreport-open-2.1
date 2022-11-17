@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
@@ -49,8 +50,7 @@ class DerivedFieldServiceTest {
         when(domainService.getDerivedFieldsForReport(anyLong())).thenReturn(getDerivedFields());
 
         final var result = service.preProcessCube(cubeData, getOlapRequest());
-
-        log.debug("done");
+        assertNotNull(result);
     }
 
     private OlapCubeRequestNew getOlapRequest() {
@@ -144,8 +144,8 @@ class DerivedFieldServiceTest {
             new DerivedFieldResponse(
                 1L,
                 1L,
-                "Поле 1",
-                "Поле 1",
+                "Объем продаж",
+                "Объем продаж",
                 1L,
                 "superuser",
                 LocalDateTime.now(),
@@ -157,18 +157,48 @@ class DerivedFieldServiceTest {
                     null,
                     List.of(
                         new FieldExpressionResponse(
-                            Expressions.REPORT_FIELD_VALUE,
-                            7L,
+                            Expressions.NVL,
                             null,
                             null,
-                            Collections.emptyList()
+                            null,
+                            List.of(
+                                new FieldExpressionResponse(
+                                    Expressions.REPORT_FIELD_VALUE,
+                                    7L,
+                                    null,
+                                    null,
+                                    Collections.emptyList()
+                                ),
+                                new FieldExpressionResponse(
+                                    Expressions.CONSTANT_VALUE,
+                                    null,
+                                    "0",
+                                    DataTypeEnum.INTEGER,
+                                    Collections.emptyList()
+                                )
+                            )
                         ),
                         new FieldExpressionResponse(
-                            Expressions.REPORT_FIELD_VALUE,
-                            7L,
+                            Expressions.NVL,
                             null,
                             null,
-                            Collections.emptyList()
+                            null,
+                            List.of(
+                                new FieldExpressionResponse(
+                                    Expressions.REPORT_FIELD_VALUE,
+                                    8L,
+                                    null,
+                                    null,
+                                    Collections.emptyList()
+                                ),
+                                new FieldExpressionResponse(
+                                    Expressions.CONSTANT_VALUE,
+                                    null,
+                                    "0",
+                                    DataTypeEnum.DOUBLE,
+                                    Collections.emptyList()
+                                )
+                            )
                         )
                     )
                 )
@@ -221,11 +251,26 @@ class DerivedFieldServiceTest {
                     null,
                     List.of(
                         new FieldExpressionResponse(
-                            Expressions.REPORT_FIELD_VALUE,
-                            1L,
+                            Expressions.NVL,
                             null,
                             null,
-                            Collections.emptyList()
+                            null,
+                            List.of(
+                                new FieldExpressionResponse(
+                                    Expressions.REPORT_FIELD_VALUE,
+                                    1L,
+                                    null,
+                                    null,
+                                    Collections.emptyList()
+                                ),
+                                new FieldExpressionResponse(
+                                    Expressions.CONSTANT_VALUE,
+                                    null,
+                                    "null",
+                                    DataTypeEnum.STRING,
+                                    Collections.emptyList()
+                                )
+                            )
                         ),
                         new FieldExpressionResponse(
                             Expressions.CONSTANT_VALUE,
