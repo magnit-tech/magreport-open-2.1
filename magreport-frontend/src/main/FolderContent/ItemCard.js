@@ -465,7 +465,7 @@ function ItemCard(props){
                             { modifiedDateTime && 
                                 <TableCell align="right"padding="none">
                                     <Typography variant="caption">
-                                        {(props.itemType === FolderItemTypes.job || props.itemType === FolderItemTypes.userJobs) ? 'Завершен:': 'Изменён:'} {new Date(modifiedDateTime).toLocaleString('ru', options)}
+                                        {(props.itemType === FolderItemTypes.job || props.itemType === FolderItemTypes.userJobs) ? 'В статусе с:': 'Изменён:'} {new Date(modifiedDateTime).toLocaleString('ru', options)}
                                     </Typography>
                                 </TableCell>
                             }
