@@ -149,7 +149,7 @@ export default function ScheduleParameters(props) {
                 newParameters = {...newParameters, hour: 0, minute: 0, second: 0, differenceTime: 0};
                 break;
             case EVERY_N_MINUTES:
-                newParameters = {...newParameters, intervalMinutes: data.intervalMinutes};
+                newParameters = {...newParameters, finishTime: data.finishTime, intervalMinutes: data.intervalMinutes};
                 break;
             default: 
                 break;
@@ -241,6 +241,17 @@ export default function ScheduleParameters(props) {
 
     function handleChangeNumMinutes(intervalMinutes) {
         handleChange({intervalMinutes});
+    }
+
+
+    function handleChangeFinishTime(value) {
+
+        let hours =  value.getHours() > 10 ?  value.getHours() : "0"+ value.getHours()
+        let minutes =  value.getMinutes() > 10 ?  value.getMinutes() : "0"+ value.getMinutes()
+        let seconds =  value.getSeconds() > 10 ?  value.getSeconds() : "0"+ value.getSeconds()
+
+        let finishTime = hours + ":" + minutes + ":" + seconds
+        handleChange({finishTime});
     }
 
     // building component
@@ -355,6 +366,21 @@ export default function ScheduleParameters(props) {
     }
 
     if (scheduleTypeName === EVERY_N_MINUTES) {
+
+       let stringTime = data.finishTime.split(':')
+        let t = new Date()
+        t.setHours(+stringTime[0],+stringTime[1],+stringTime[2])
+
+
+        fields.push(
+            <DesignerTimeField
+                key={fields.length}
+                fullWidth
+                label="Время завершения"
+                value={t}
+                onChange={handleChangeFinishTime}
+            />);
+
         fields.push(
             <DesignerTextField
                 key={fields.length}
