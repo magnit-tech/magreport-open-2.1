@@ -10,18 +10,25 @@ import ru.magnit.magreportbackend.util.Pair;
 
 import java.util.Map;
 
-public class DerivedFieldValueExpression implements BaseExpression {
+public class DerivedFieldValueExpression extends BaseExpression {
     private final Map<FieldDefinition, Pair<Integer, DataTypeEnum>> fieldIndexes;
     private final FieldDefinition fieldDefinition;
     private final String[][] resultCube;
     private final Pair<String, DataTypeEnum> result;
 
     public DerivedFieldValueExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
+        super(fieldExpression, context);
         this.fieldIndexes = context.fieldIndexes();
         fieldDefinition = new FieldDefinition(fieldExpression.getReferenceId(), OlapFieldTypes.DERIVED_FIELD);
         this.resultCube = context.resultCube();
         /// !!! Для сокращения генерации мусора, не запускать параллельно
         this.result = new Pair<>(null, null);
+        this.expressionName = fieldExpression.getType().name();
+    }
+
+    @Override
+    public String toString() {
+        return expressionName + "(" + result.getL() + ", " + result.getR() + ")";
     }
 
     @Override

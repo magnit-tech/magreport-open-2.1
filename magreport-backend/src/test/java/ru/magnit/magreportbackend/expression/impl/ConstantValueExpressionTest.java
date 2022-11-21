@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.domain.derivedfield.Expressions;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
+import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -17,7 +18,7 @@ class ConstantValueExpressionTest {
                     .setConstantType(DataTypeEnum.INTEGER)
                     .setConstantValue("2");
 
-        final var expression = sourceExpression.getType().init(sourceExpression, null);
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
         final var expressionResult = expression.calculate(0);
 
         assertEquals("2", expressionResult.getL());
