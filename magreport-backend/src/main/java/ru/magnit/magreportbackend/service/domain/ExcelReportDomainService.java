@@ -262,4 +262,8 @@ public class ExcelReportDomainService {
     public Path getExcelReportPath(long jobId, long templateId) {
         return getReportPath(rmsOutFolder, jobId, templateId);
     }
+
+    public Path getExcelPivotPath(long jobId, long userId) {
+        return getPivotPath(rmsOutFolder, jobId, userId);
+    }
 }

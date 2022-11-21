@@ -32,12 +32,14 @@ import ru.magnit.magreportbackend.dto.response.olap.OlapFieldItemsResponse;
 import ru.magnit.magreportbackend.dto.response.olap.OlapInfoCubesResponse;
 import ru.magnit.magreportbackend.dto.response.olap.OlapMetricResponse;
 import ru.magnit.magreportbackend.dto.response.olap.OlapMetricResponse2;
+import ru.magnit.magreportbackend.dto.response.reportjob.TokenResponse;
 import ru.magnit.magreportbackend.exception.OlapMaxDataVolumeExceeded;
 import ru.magnit.magreportbackend.metrics_function.MetricsFunction;
 import ru.magnit.magreportbackend.service.domain.ExcelReportDomainService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
 import ru.magnit.magreportbackend.service.domain.OlapConfigurationDomainService;
 import ru.magnit.magreportbackend.service.domain.OlapDomainService;
+import ru.magnit.magreportbackend.service.domain.TokenService;
 import ru.magnit.magreportbackend.service.domain.UserDomainService;
 import ru.magnit.magreportbackend.util.Extensions;
 import ru.magnit.magreportbackend.util.Pair;
@@ -78,6 +80,8 @@ public class OlapService {
     private final UserDomainService userDomainService;
     private final DerivedFieldService derivedFieldService;
     private final ObjectMapper objectMapper;
+
+    private final TokenService tokenService;
 
     public OlapCubeResponse getCube(OlapCubeRequest request) {
         jobDomainService.checkAccessForJob(request.getJobId());
@@ -251,7 +255,7 @@ public class OlapService {
         return olapDomainService.getInfoAboutCubes();
     }
 
-    public Path exportPivotTableExcel(OlapExportPivotTableRequest request) throws JsonProcessingException {
+    public TokenResponse exportPivotTableExcel(OlapExportPivotTableRequest request) throws JsonProcessingException {
         request.getCubeRequest().getRowsInterval().setFrom(0).setCount(Integer.MAX_VALUE);
         request.getCubeRequest().getColumnsInterval().setFrom(0).setCount(Integer.MAX_VALUE);
 
@@ -261,8 +265,13 @@ public class OlapService {
         var metadata = jobDomainService.getJobMetaData(request.getCubeRequest().getJobId());
         var config = olapConfigurationDomainService.getReportOlapConfiguration(request.getConfiguration());
 
-        return excelReportDomainService.getExcelPivotTable(resultCube, metadata, objectMapper.readValue(config.getOlapConfig().getData(), HashMap.class), request, user.getId());
+         excelReportDomainService.getExcelPivotTable(resultCube, metadata, objectMapper.readValue(config.getOlapConfig().getData(), HashMap.class), request, user.getId());
 
+        return new TokenResponse(tokenService.getToken(request.getCubeRequest().getJobId(), user.getId()));
+    }
+
+    public Path getExcelPivotPath(Long jobId, Long userId){
+        return excelReportDomainService.getExcelPivotPath(jobId,userId);
     }
 
     private Pair<MeasureData, MeasureData> getRequestedMeasures(
