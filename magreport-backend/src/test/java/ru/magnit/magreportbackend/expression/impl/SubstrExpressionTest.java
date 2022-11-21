@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.domain.derivedfield.Expressions;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
+import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 
 import java.util.List;
 
@@ -30,7 +31,7 @@ class SubstrExpressionTest {
                     .setConstantValue("4")
             ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression, null);
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
         final var expressionResult = expression.calculate(0);
 
         assertEquals("Test", expressionResult.getL());
