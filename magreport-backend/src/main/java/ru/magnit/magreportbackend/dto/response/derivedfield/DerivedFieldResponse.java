@@ -42,4 +42,19 @@ public class DerivedFieldResponse {
             .map(FieldExpressionResponse::getReferenceId)
             .toList();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DerivedFieldResponse that = (DerivedFieldResponse) o;
+
+        return getId().equals(that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
+    }
 }

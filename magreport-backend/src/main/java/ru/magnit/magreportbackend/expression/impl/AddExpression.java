@@ -4,11 +4,13 @@ import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
 import ru.magnit.magreportbackend.exception.InvalidExpression;
 import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
+import ru.magnit.magreportbackend.expression.ExpressionExceptionUtils;
 import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
 public class AddExpression extends ParameterizedExpression {
     private final Pair<String, DataTypeEnum> result = new Pair<>();
+
     public AddExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
         super(fieldExpression, context);
     }
@@ -19,8 +21,12 @@ public class AddExpression extends ParameterizedExpression {
         var resultType = DataTypeEnum.INTEGER;
         for (var parameter: parameters) {
             final var parameterValue = parameter.calculate(rowNumber);
+
+            if (parameterValue.getL() == null) {
+                throw new InvalidExpression(ExpressionExceptionUtils.getParameterIsNullMessage(getRootExpression().getErrorPath(parameter), derivedField, expressionName));
+            }
             if (parameterValue.getR().notIn(DataTypeEnum.INTEGER, DataTypeEnum.DOUBLE)){
-                throw new InvalidExpression("Функция ADD() не может принимать параметры типа " + parameterValue.getR());
+                throw new InvalidExpression(getRootExpression().getErrorPath(parameter));
             }
 
             resultType = resultType.widerNumeric(parameterValue.getR());

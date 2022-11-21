@@ -97,14 +97,14 @@ public class DerivedFieldService {
         }
 
         final var processedCube = initResultCube(sourceCube, fieldCount);
-        final var exprContext = new ExpressionCreationContext(
-            fieldIndexes,
-            processedCube
-        );
         final var fieldExpressions = reqDerivedFields
             .stream()
             .map(field -> derivedFields.get(field.getFieldId()))
-            .map(field -> field.getExpression().getType().init(field.getExpression(), exprContext))
+            .map(field -> field.getExpression().getType().init(
+                    field.getExpression(),
+                    new ExpressionCreationContext(fieldIndexes, processedCube, field)
+                )
+            )
             .toList();
 
         // Рассчитываем значения всех полей и добавляем в куб
