@@ -134,6 +134,15 @@ export default function ScheduleParametersViewer(props) {
     }
 
     if (scheduleTypeName === EVERY_N_MINUTES) {
+
+        fields.push(
+            <ViewerTextField
+                key={fields.length}
+                label="Время завершения"
+                value={data.finishTime}
+            />
+        );
+
         fields.push(
             <ViewerTextField
                 key={fields.length}
