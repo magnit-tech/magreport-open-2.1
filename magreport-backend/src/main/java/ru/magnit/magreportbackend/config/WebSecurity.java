@@ -29,6 +29,7 @@ import static ru.magnit.magreportbackend.controller.FolderController.FOLDER_GET;
 import static ru.magnit.magreportbackend.controller.FolderController.FOLDER_SEARCH;
 import static ru.magnit.magreportbackend.controller.FolderPermissionsController.FOLDER_PERMISSION_CHECK;
 import static ru.magnit.magreportbackend.controller.OlapController.OLAP_GET_EXTERNAL_SERVICES;
+import static ru.magnit.magreportbackend.controller.OlapController.OLAP_GET_PIVOT_TABLE_EXCEL_GET;
 import static ru.magnit.magreportbackend.controller.OlapController.OLAP_REGISTER_EXTERNAL_SERVICE;
 import static ru.magnit.magreportbackend.controller.ReportController.REPORT_ADD_FAVORITES;
 import static ru.magnit.magreportbackend.controller.ReportController.REPORT_DELETE_FAVORITES;
@@ -62,51 +63,52 @@ public class WebSecurity {
     @Bean
     protected SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         final var jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager, userService, jwtPropertiesConfig);
-        final var jwtAuthorizationFilter = new JwtAuthorizationFilter(authenticationManager, userService, jwtPropertiesConfig, authConfig );
+        final var jwtAuthorizationFilter = new JwtAuthorizationFilter(authenticationManager, userService, jwtPropertiesConfig, authConfig);
 
         http
-            .headers().frameOptions().disable()
-            .and()
-            .cors().and().csrf().disable()
-            .authorizeRequests()
-            .antMatchers("/index.html").permitAll()
-            .antMatchers("/api/v1/users/authenticate").permitAll()
-            .antMatchers("/login").permitAll()
-            .antMatchers("/h2-console/**").access(getIpAccessString(adminIpArray))
-            .antMatchers(REPORT_JOB_GET_EXCEL_REPORT_GET).permitAll()
-            .antMatchers(OLAP_REGISTER_EXTERNAL_SERVICE).permitAll()
-            .antMatchers(OLAP_GET_EXTERNAL_SERVICES).hasAnyAuthority(ADMIN.name())
-            .antMatchers(DOMAIN_LIST_SERVICE).permitAll()
-            .antMatchers(EVENT_REGISTER).permitAll()
-            .antMatchers(SCHEDULE_TASK_PROLONGATION, SCHEDULE_TASK_GET_EXCEL_REPORT, SCHEDULE_TASK_MANUAL_START).permitAll()
-            .antMatchers(FOLDER_PERMISSION_CHECK).hasAnyAuthority(USER.name())
-            .antMatchers(FOLDER_PATH_SERVICE).hasAnyAuthority(USER.name())
-            .antMatchers(USERS_GET).authenticated()
-            .antMatchers(REPORT_JOB_GET_ALL_JOBS).hasAnyAuthority(ADMIN.name())
-            .antMatchers("/api/v1/report-job/**").hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
-            .antMatchers("/api/v1/olap/**").hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
-            .antMatchers(FOLDER_GET).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
-            .antMatchers(FOLDER_SEARCH).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
-            .antMatchers("/api/v1/folder/**").hasAnyAuthority(ADMIN.name(), DEVELOPER.name())
-            .antMatchers(REPORT_ADD_FAVORITES).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
-            .antMatchers(REPORT_DELETE_FAVORITES).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
-            .antMatchers(REPORT_GET_FAVORITES).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
-            .antMatchers(REPORT_GET).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
-            .antMatchers(USERS_WHO_AM_I).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
-            .antMatchers(USERS_GET_ONE).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
-            .antMatchers("/api/v1/users/**").hasAnyAuthority(ADMIN.name())
-            .antMatchers(REPORT_FILTER_CHECK_VALUES).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
-            .antMatchers(REPORT_FILTER_GET_CHILD_NODES).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
-            .antMatchers(FILTER_INSTANCE_GET_VALUES).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
-            .antMatchers(FILTER_INSTANCE_GET_CHILD_NODES).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
-            .antMatchers("/api/v1/**").hasAnyAuthority(ADMIN.name(), DEVELOPER.name())
-            .antMatchers("/**").permitAll()
-            .anyRequest().authenticated()
-            .and()
-            .authenticationManager(authenticationManager)
-            .addFilter(jwtAuthenticationFilter)
-            .addFilter(jwtAuthorizationFilter)
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .headers().frameOptions().disable()
+                .and()
+                .cors().and().csrf().disable()
+                .authorizeRequests()
+                .antMatchers("/index.html").permitAll()
+                .antMatchers("/api/v1/users/authenticate").permitAll()
+                .antMatchers("/login").permitAll()
+                .antMatchers("/h2-console/**").access(getIpAccessString(adminIpArray))
+                .antMatchers(REPORT_JOB_GET_EXCEL_REPORT_GET).permitAll()
+                .antMatchers(OLAP_GET_PIVOT_TABLE_EXCEL_GET).permitAll()
+                .antMatchers(OLAP_REGISTER_EXTERNAL_SERVICE).permitAll()
+                .antMatchers(OLAP_GET_EXTERNAL_SERVICES).hasAnyAuthority(ADMIN.name())
+                .antMatchers(DOMAIN_LIST_SERVICE).permitAll()
+                .antMatchers(EVENT_REGISTER).permitAll()
+                .antMatchers(SCHEDULE_TASK_PROLONGATION, SCHEDULE_TASK_GET_EXCEL_REPORT, SCHEDULE_TASK_MANUAL_START).permitAll()
+                .antMatchers(FOLDER_PERMISSION_CHECK).hasAnyAuthority(USER.name())
+                .antMatchers(FOLDER_PATH_SERVICE).hasAnyAuthority(USER.name())
+                .antMatchers(USERS_GET).authenticated()
+                .antMatchers(REPORT_JOB_GET_ALL_JOBS).hasAnyAuthority(ADMIN.name())
+                .antMatchers("/api/v1/report-job/**").hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
+                .antMatchers("/api/v1/olap/**").hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
+                .antMatchers(FOLDER_GET).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
+                .antMatchers(FOLDER_SEARCH).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
+                .antMatchers("/api/v1/folder/**").hasAnyAuthority(ADMIN.name(), DEVELOPER.name())
+                .antMatchers(REPORT_ADD_FAVORITES).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
+                .antMatchers(REPORT_DELETE_FAVORITES).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
+                .antMatchers(REPORT_GET_FAVORITES).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
+                .antMatchers(REPORT_GET).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
+                .antMatchers(USERS_WHO_AM_I).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
+                .antMatchers(USERS_GET_ONE).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
+                .antMatchers("/api/v1/users/**").hasAnyAuthority(ADMIN.name())
+                .antMatchers(REPORT_FILTER_CHECK_VALUES).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
+                .antMatchers(REPORT_FILTER_GET_CHILD_NODES).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
+                .antMatchers(FILTER_INSTANCE_GET_VALUES).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
+                .antMatchers(FILTER_INSTANCE_GET_CHILD_NODES).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
+                .antMatchers("/api/v1/**").hasAnyAuthority(ADMIN.name(), DEVELOPER.name())
+                .antMatchers("/**").permitAll()
+                .anyRequest().authenticated()
+                .and()
+                .authenticationManager(authenticationManager)
+                .addFilter(jwtAuthenticationFilter)
+                .addFilter(jwtAuthorizationFilter)
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         return http.build();
     }
@@ -127,9 +129,9 @@ public class WebSecurity {
 
     private static String getIpAccessString(String[] ipAddressArray) {
         String result = Stream
-            .of(ipAddressArray)
-            .map(ip -> "hasIpAddress('" + ip + "')")
-            .collect(Collectors.joining(" or "));
+                .of(ipAddressArray)
+                .map(ip -> "hasIpAddress('" + ip + "')")
+                .collect(Collectors.joining(" or "));
 
         result = "isAnonymous() and (" + result + ")";
 
