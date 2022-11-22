@@ -281,6 +281,7 @@ export default function DatasetDesigner(props){
     }
 
     let tabs = []    
+    console.log(data)
 
     tabs.push({tablabel:"Настройки",
         tabcontent:
@@ -311,7 +312,7 @@ export default function DatasetDesigner(props){
             <DesignerFolderItemPicker
                 minWidth = {StyleConsts.designerTextFieldMinWidth}
                 label = {fieldLabels.datasourceId}
-                value = {data.datasourceName}
+                value = {'id: ' + data.datasourceId + ', ' + data.datasourceName}
                 itemType = {FolderItemTypes.datasource}
                 onChange = {handleChangeDatasource}
                 displayBlock
