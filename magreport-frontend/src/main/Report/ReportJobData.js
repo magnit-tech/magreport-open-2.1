@@ -4,6 +4,7 @@ import PivotPanel from './Pivot/PivotPanel';
 
 /**
  * @param {Number} props.jobId - id задания
+ * @param {String} props.jobStatus - статус задания
  * @param {Number} props.reportId - id отчёта
  * @param {Number} props.folderId - id разработческой папки в которой находится отчет
  * @param {String} props.jobOwnerName - login владельца отчета
@@ -21,6 +22,7 @@ export default function ReportJobData(props){
         <div style={{ display: 'flex', flex: 1}}>
             { (viewType === 'PlainTable') ? 
                 <PlainTablePanel
+                    jobStatus = {props.jobStatus}
                     canExecute = {props.canExecute}
                     jobId = {props.jobId}
                     excelTemplates = {props.excelTemplates}

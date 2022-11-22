@@ -123,15 +123,16 @@ export default function ReportJob(props){
                         
                             <CircularProgress/>
 
-                    :jobStatus === JobStatus.SCHEDULED || jobStatus === JobStatus.RUNNING || jobStatus === JobStatus.EXPORT ?
+                    :jobStatus === JobStatus.SCHEDULED || jobStatus === JobStatus.RUNNING ?
                         <div className={classes.repExec}>
                             <Typography gutterBottom variant="h6">Отчет выполняется</Typography>
                             <Button color="secondary" onClick={handleCancelClick}>Отменить</Button>
                             <CircularProgress className = {classes.progress}/>
                         </div>
 
-                    :jobStatus === JobStatus.COMPLETE ?
+                    :jobStatus === JobStatus.COMPLETE || jobStatus === JobStatus.EXPORT ?
                         <ReportJobData
+                            jobStatus = {jobStatus}
                             canExecute = {jobData.current.canExecute}
                             reportId = {reportId.current}
                             folderId = {folderId.current}
