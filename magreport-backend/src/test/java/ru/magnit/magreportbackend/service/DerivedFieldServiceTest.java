@@ -48,6 +48,7 @@ class DerivedFieldServiceTest {
         final var cubeData = getTestCubeData();
 
         when(domainService.getDerivedFieldsForReport(anyLong())).thenReturn(getDerivedFields());
+        service.setMaxCallDepth(5L);
 
         final var result = service.preProcessCube(cubeData, getOlapRequest());
         assertNotNull(result);
