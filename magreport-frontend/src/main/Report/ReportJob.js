@@ -24,6 +24,7 @@ const JobStatus = {
     CANCELING: 5, 
     CANCELED: 6,
     EXPORT: 7,
+    PENDING_DB_CONNECTION: 8
 }
 
 const REQUEST_TIMEOUT_INTERVAL_MS = 1000;
@@ -123,7 +124,7 @@ export default function ReportJob(props){
                         
                             <CircularProgress/>
 
-                    :jobStatus === JobStatus.SCHEDULED || jobStatus === JobStatus.RUNNING ?
+                    :jobStatus === JobStatus.SCHEDULED || jobStatus === JobStatus.RUNNING || jobStatus === JobStatus.PENDING_DB_CONNECTION ?
                         <div className={classes.repExec}>
                             <Typography gutterBottom variant="h6">Отчет выполняется</Typography>
                             <Button color="secondary" onClick={handleCancelClick}>Отменить</Button>
