@@ -1,4 +1,4 @@
-import React, {useState, Fragment, useRef } from 'react';
+import React, {useState, Fragment, useRef, useEffect } from 'react';
 import Icon from '@mdi/react'
 import Measure from 'react-measure';
 import { Scrollbars } from 'react-custom-scrollbars'
@@ -55,6 +55,7 @@ export default function PlainTablePanel(props){
     const [rowsPerPage, setRowsPerPage] = useState(defaultRowsPerPage);
     const [rowCount, setRowCount] = useState(0);
     const [exportInProcess, setExportInProcess] = React.useState(false);
+    const [jobStatus, setJobStatus] = useState(props.jobStatus);
 
     const excelTemplates = props.excelTemplates;
 
@@ -70,6 +71,11 @@ export default function PlainTablePanel(props){
         </Fragment>
     );
     
+    useEffect(() => {
+        setJobStatus(props.jobStatus);
+    }, [props.jobStatus] // eslint-disable-line
+    );
+
     function handleChangePage(event, newPage){
         setPageNumber(newPage + 1);
     }
@@ -124,7 +130,7 @@ export default function PlainTablePanel(props){
 
         const classes = ReportDataCSS();
         const theme = useTheme();
-        const { count, page, rowsPerPage, onPageChange } = props;
+        const { count, page, rowsPerPage, onPageChange} = props;
 
         const handleFirstPageButtonClick = event => {
             onPageChange(event, 0);
@@ -207,9 +213,9 @@ export default function PlainTablePanel(props){
                             size="small"
                             aria-label="export"
                             onClick={handleExcelExport}
-                            disabled={exportInProcess || rowCount >= excelRowLimit}
+                            disabled={exportInProcess || rowCount >= excelRowLimit || jobStatus === 7}
                         >
-                            {exportInProcess 
+                            {exportInProcess || jobStatus === 7
                             ? 
                                 <CircularProgress size="20px" />
                             :
@@ -315,8 +321,7 @@ export default function PlainTablePanel(props){
                                     }}
                                     onPageChange={handleChangePage}
                                     onRowsPerPageChange={handleChangeRowsPerPage}
-                                    style={{minWidth: '730px'}}
-                    
+                                    style={{minWidth: '730px'}}                    
                                 />
                             </div>
                         }
