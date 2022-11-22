@@ -147,14 +147,14 @@ public class JobEngineImpl implements JobEngine, InitializingBean {
 
     private void getSecurityFilterSettings(ReportJobData scheduledJob) {
         final var userRoles = userService.getUserRoles(scheduledJob.userName(), "CORP", null)
-            .stream()
-            .map(RoleView::getId)
-            .collect(Collectors.toSet());
+                .stream()
+                .map(RoleView::getId)
+                .collect(Collectors.toSet());
 
         final var effectiveSettings = securityFilterService
-            .getEffectiveSettingsForReport(
-                scheduledJob.reportId(),
-                userRoles);
+                .getEffectiveSettingsForReport(
+                        scheduledJob.reportId(),
+                        userRoles);
 
         scheduledJob.securityFilterParameters().addAll(effectiveSettings);
     }
@@ -175,15 +175,15 @@ public class JobEngineImpl implements JobEngine, InitializingBean {
 
         // Get finished reports
         final var finishedReports = reportRunners.entrySet()
-            .stream()
-            .filter(o -> o.getValue().writer().isFinished())
-            .toList();
+                .stream()
+                .filter(o -> o.getValue().writer().isFinished())
+                .toList();
 
         // Stop readers if writers are finished
         finishedReports
-            .stream()
-            .filter(o -> !o.getValue().reader().isFinished())
-            .forEach(o -> o.getValue().reader().cancel());
+                .stream()
+                .filter(o -> !o.getValue().reader().isFinished())
+                .forEach(o -> o.getValue().reader().cancel());
 
         // Finish stopped reports
         finishedReports.forEach(this::finishJob);
@@ -194,18 +194,18 @@ public class JobEngineImpl implements JobEngine, InitializingBean {
         final var jobs = jobDomainService.getJobs(new ArrayList<>(reportRunners.keySet()));
 
         jobs
-            .stream()
-            .filter(job -> job.getStatus() == ReportJobStatusEnum.CANCELING)
-            .forEach(job -> {
-                reportRunners.get(job.getId()).writer().cancel();
-                reportRunners.get(job.getId()).reader().cancel();
-            });
+                .stream()
+                .filter(job -> job.getStatus() == ReportJobStatusEnum.CANCELING)
+                .forEach(job -> {
+                    reportRunners.get(job.getId()).writer().cancel();
+                    reportRunners.get(job.getId()).reader().cancel();
+                });
     }
 
     private void finishJob(Map.Entry<Long, ReportRunnerData> reportRunnerEntry) {
 
         log.debug("Job " + reportRunnerEntry.getKey() + " is finished.");
-        if (reportRunnerEntry.getValue().reader().isFailed() || reportRunnerEntry.getValue().writer().isFailed() || reportRunnerEntry.getValue().reader().getRowCount() != reportRunnerEntry.getValue().writer().getRowCount()) {
+        if (reportRunnerEntry.getValue().reader().isFailed() || reportRunnerEntry.getValue().writer().isFailed()) {
             jobDomainService.setJobStatus(reportRunnerEntry.getKey(), ReportJobStatusEnum.FAILED, 0L, getErrorDescription(reportRunnerEntry));
         } else {
             if (reportRunnerEntry.getValue().reader().isCanceled() || reportRunnerEntry.getValue().writer().isCanceled()) {
@@ -234,8 +234,8 @@ public class JobEngineImpl implements JobEngine, InitializingBean {
 
     private String getErrorDescription(Map.Entry<Long, ReportRunnerData> reportRunnerEntry) {
         return reportRunnerEntry.getValue().reader().isFailed() ?
-            reportRunnerEntry.getValue().reader().getErrorDescription() :
-            reportRunnerEntry.getValue().writer().getErrorDescription();
+                reportRunnerEntry.getValue().reader().getErrorDescription() :
+                reportRunnerEntry.getValue().writer().getErrorDescription();
     }
 
     private void checkJobExportStatuses() {
@@ -246,9 +246,9 @@ public class JobEngineImpl implements JobEngine, InitializingBean {
         }
 
         var finish = exportReportRunners.entrySet()
-            .stream()
-            .filter(o -> o.getValue().isDone())
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .stream()
+                .filter(o -> o.getValue().isDone())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         finish.forEach((key, value) -> {
             var job = jobDomainService.getJob(key);
