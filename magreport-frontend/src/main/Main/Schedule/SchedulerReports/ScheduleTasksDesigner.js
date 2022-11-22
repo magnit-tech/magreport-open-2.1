@@ -347,7 +347,7 @@ export default function ScheduleTasksDesigner(props) {
             code: data.schedules.find(item  => schedulesList.filter(item=>item.type === 'MANUAL').map(item=>item.id).find(item1=>item1===item)) ? data.code : null,
             description: data.description,
             destinationEmails:  destEmails.concat( data.errEmails.map(item=>({emailValue: item, typeId: 1}))),
-            destinationUsers:  destUsers.concat( data.errUsers.map(item=>({userName: item, domainName: "", typeId: 1}))),
+            destinationUsers:  destUsers.concat( usersList.filter(item => data.errUsers.indexOf(item.id)>=0).map(i=>({userName: i.name, domainName: i.domainName, typeId: 1}))),
             destinationRoles : destRoles.concat( data.errRoles.map(item=>({roleId: item.id, name: item.name, typeId: 1}))),
             expirationDate: data.expirationDate,
             reportTitleMail:   data.reportTitleMail?.trim() === "" ? null : data.reportTitleMail,
@@ -413,10 +413,10 @@ export default function ScheduleTasksDesigner(props) {
             code: loadedData.code,
             description: loadedData.description,
             destinationEmails: loadedData.destinationEmails.filter(item =>item.type === 'REPORT').map(item=>item.value),
-            destinationUsers: loadedData.destinationUsers.filter(item=>item.type === 'REPORT').map(item=>item.userName),
+            destinationUsers: loadedData.destinationUsers.filter(item=>item.type === 'REPORT').map(item=>item.id),
             destinationRoles: loadedData.destinationRoles.filter(item=>item.type === 'REPORT').map( item=>({id: item.roleId, name: item.name})),
             errEmails: loadedData.destinationEmails.filter(item=>item.type === 'ERROR').map(item=>item.value),
-            errUsers: loadedData.destinationUsers.filter(item=>item.type === 'ERROR').map(item=>item.userName),
+            errUsers: loadedData.destinationUsers.filter(item=>item.type === 'ERROR').map(item=>item.id),
             errRoles: loadedData.destinationRoles.filter(item=>item.type === 'ERROR').map( item=>({id: item.roleId, name: item.name})),
             expirationDate: loadedData.expirationDate,
             reportTitleMail: loadedData.reportTitleMail,
@@ -613,7 +613,7 @@ export default function ScheduleTasksDesigner(props) {
                         multiline
                         error = {errorField.destinationEmails}
                     />
-                }    
+                }
 
                 <DesignerMultipleSelectField
                         // minWidth = {StyleConsts.designerTextFieldMinWidth}
@@ -695,9 +695,9 @@ export default function ScheduleTasksDesigner(props) {
                     />  
                     <DesignerMultipleSelectField
                         label = "Пользователи"
-                        value = {usersList.filter(item => data.errUsers.indexOf(item.name)>=0 )}
+                        value = {usersList.filter(item => data.errUsers.indexOf(item.id)>=0 )}
                         data = {usersList}
-                        needName = {true}
+                        //needName = {true}
                         onChange = {data => {handleChange('errUsers', data)}}
                         displayBlock
                         fullWidth
