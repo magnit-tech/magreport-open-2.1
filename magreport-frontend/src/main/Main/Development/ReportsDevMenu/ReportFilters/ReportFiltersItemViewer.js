@@ -52,7 +52,7 @@ export default function ReportFiltersItemViewer({filterItem, reportFields}) {
                 </Tooltip>
                 <div className={classes.devRepFilterItemNameBlock}>
                     <Typography variant='h5'> {filterItem.name || "Название не указано" || " "} </Typography>
-                    <Typography varian='body' color='textSecondary'> {filterItem.description}</Typography>
+                    <Typography varian='body' color='textSecondary'> {filterItem.description + ' (id: ' + filterItem.filterInstanceId + ')'}</Typography>
                 </div>
 
                 <IconButton className={classes.btn}
