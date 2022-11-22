@@ -486,15 +486,28 @@ function PivotPanel(props){
             payload.cubeRequest.rowSort = pivotConfiguration.sortOrder.rowSort
         }
 
-        dataHub.olapController.getExcelPivotTable(payload, ({ok}) => {
+        enqueueSnackbar("Запущен экспорт в Excel. Формирование файла может происходить достаточно ДОЛГО " +
+        "в виду необходимости его криптографической обработки в целях информационной безопасности", {variant : "info"});
+        dataHub.olapController.createExcelPivotTable(payload, handleExcelFileResponseNew)
+    }
 
-            if (ok) {
-                return enqueueSnackbar('Сводная таблица успешно экспортирована ' , {variant : "success"});
-            }
-
-            return enqueueSnackbar('Не удалось экспортировать сводную таблицу', {variant : "error"});
-            })
+    function handleExcelFileResponseNew(resp){
+        if (resp.ok){
+            const url = resp.data.urlFile + resp.data.token
+            const link = document.createElement('a');
+            link.href = url;
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
         }
+        else {
+            enqueueSnackbar("Не удалось получить файл с сервера", {
+                variant: 'error',
+                persist: true
+            });
+        }
+    }
+
 
 
     /*
