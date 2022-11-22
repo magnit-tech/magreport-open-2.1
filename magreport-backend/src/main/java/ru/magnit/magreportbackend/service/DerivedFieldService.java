@@ -2,6 +2,8 @@ package ru.magnit.magreportbackend.service;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
@@ -20,6 +22,7 @@ import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequestNew;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldTypes;
 import ru.magnit.magreportbackend.dto.response.derivedfield.DerivedFieldResponse;
 import ru.magnit.magreportbackend.dto.response.derivedfield.ExpressionResponse;
+import ru.magnit.magreportbackend.exception.InvalidExpression;
 import ru.magnit.magreportbackend.expression.BaseExpression;
 import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.service.domain.DerivedFieldDomainService;
@@ -27,6 +30,8 @@ import ru.magnit.magreportbackend.service.domain.UserDomainService;
 import ru.magnit.magreportbackend.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -36,10 +41,14 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@Setter
 @RequiredArgsConstructor
 public class DerivedFieldService {
     private final DerivedFieldDomainService domainService;
     private final UserDomainService userDomainService;
+
+    @Value("${magreport.derived-fields.expression-max-call-depth}")
+    private Long maxCallDepth;
 
     public DerivedFieldResponse getDerivedField(DerivedFieldRequest request) {
         return domainService.getDerivedField(request.getId());
@@ -68,23 +77,35 @@ public class DerivedFieldService {
             .collect(Collectors.toMap(ReportFieldData::id, ReportFieldData::dataType));
 
         // Получаем набор производных полей, на которые есть прямые ссылки в запросе
-        final var reportDerivedFieldSet = request.getAllFields()
+        final var reqDerivedFieldSet = request.getAllFields()
             .stream()
             .filter(field -> field.getFieldType() == OlapFieldTypes.DERIVED_FIELD)
             .collect(Collectors.toCollection(LinkedHashSet::new));
+        final var requestDerivedFields = new LinkedHashSet<>(reqDerivedFieldSet);
 
         // Добавляем все поля, от которых зависят производные поля
-        final var reqDerivedFieldSet = new LinkedHashSet<FieldDefinition>();
-        reqDerivedFieldSet.addAll(reportDerivedFieldSet.stream()
-            .map(field -> derivedFields.get(field.getFieldId()))
-            .flatMap(field -> field.getUsedDerivedFieldIds().stream())
-            .map(fieldId -> new FieldDefinition()
-                .setFieldId(fieldId)
-                .setFieldType(OlapFieldTypes.DERIVED_FIELD))
-            .toList()
-        );
-        reqDerivedFieldSet.addAll(reportDerivedFieldSet);
-        final var reqDerivedFields = reqDerivedFieldSet.stream().toList();
+        var callDepth = maxCallDepth;
+        var prevStepFields = new LinkedHashSet<>(reqDerivedFieldSet);
+        while (callDepth-- > 0) {
+            final var currentStepFields = prevStepFields.stream()
+                .map(field -> derivedFields.get(field.getFieldId()))
+                .flatMap(field -> field.getUsedDerivedFieldIds().stream())
+                .map(fieldId -> new FieldDefinition()
+                    .setFieldId(fieldId)
+                    .setFieldType(OlapFieldTypes.DERIVED_FIELD))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+            if (currentStepFields.isEmpty()) break;
+            reqDerivedFieldSet.addAll(currentStepFields);
+            prevStepFields = currentStepFields;
+        }
+
+        checkCallDepth(prevStepFields, derivedFields);
+
+        var usedDerivedFields = new ArrayList<>(reqDerivedFieldSet);
+        Collections.reverse(usedDerivedFields);
+        reqDerivedFieldSet.clear();
+        reqDerivedFieldSet.addAll(usedDerivedFields);
 
         final var fieldIndexes = sourceCube.fieldIndexes().entrySet()
             .stream()
@@ -92,12 +113,12 @@ public class DerivedFieldService {
             .collect(Collectors.toMap(Pair::getL, entry -> new Pair<>(entry.getR(), fieldTypes.get(entry.getL().getFieldId()))));
 
         var fieldCount = fieldIndexes.keySet().size();
-        for (final var derivedField : reqDerivedFields) {
+        for (final var derivedField : usedDerivedFields) {
             fieldIndexes.put(derivedField, new Pair<>(fieldCount++, null));
         }
 
         final var processedCube = initResultCube(sourceCube, fieldCount);
-        final var fieldExpressions = reqDerivedFields
+        final var fieldExpressions = usedDerivedFields
             .stream()
             .map(field -> derivedFields.get(field.getFieldId()))
             .map(field -> field.getExpression().getType().init(
@@ -108,9 +129,9 @@ public class DerivedFieldService {
             .toList();
 
         // Рассчитываем значения всех полей и добавляем в куб
-        final int startColumn = processDerivedFields(sourceCube, reqDerivedFields, fieldIndexes, processedCube, fieldExpressions);
+        final int startColumn = processDerivedFields(sourceCube, usedDerivedFields, fieldIndexes, processedCube, fieldExpressions);
 
-        final var resultCube = initResultCube(sourceCube, startColumn + reportDerivedFieldSet.size());
+        final var resultCube = initResultCube(sourceCube, startColumn + requestDerivedFields.size());
         var fieldNumber = 0;
         final var reportFieldIndex = sourceCube.reportMetaData().fields()
             .stream()
@@ -119,7 +140,7 @@ public class DerivedFieldService {
 
         final var cubeFields = new ArrayList<>(sourceCube.reportMetaData().fields());
         final var derivedFieldsColumns = new HashMap<Long, Long>();
-        copyDataToResultCube(derivedFields, reportDerivedFieldSet, fieldIndexes, processedCube, startColumn, resultCube, fieldNumber, reportFieldIndex, cubeFields, derivedFieldsColumns);
+        copyDataToResultCube(derivedFields, requestDerivedFields, fieldIndexes, processedCube, startColumn, resultCube, fieldNumber, reportFieldIndex, cubeFields, derivedFieldsColumns);
 
         final var counter = new AtomicInteger(0);
         final var resultFieldIndexes = cubeFields.stream().collect(Collectors.toMap(ReportFieldData::id, o -> counter.getAndIncrement()));
@@ -140,6 +161,16 @@ public class DerivedFieldService {
             resultFieldIndexes,
             resultCube
         ), processedRequest);
+    }
+
+    private void checkCallDepth(Collection<FieldDefinition> prevStepFields, Map<Long, DerivedFieldResponse> derivedFields) {
+        final var depFieldCount = prevStepFields.stream()
+            .map(field -> derivedFields.get(field.getFieldId()))
+            .mapToLong(field -> field.getUsedDerivedFieldIds().size())
+            .sum();
+        if (depFieldCount > 0) {
+            throw new InvalidExpression("Глубина вложенности ссылок на производные поля превышает установленный максимум: " + maxCallDepth);
+        }
     }
 
     private OlapCubeRequest transformOlapRequest(OlapCubeRequestNew request, HashMap<Long, Long> derivedFieldsColumns) {
