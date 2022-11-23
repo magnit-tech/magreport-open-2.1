@@ -268,11 +268,15 @@ public class ScheduleEngine implements JobEngine, InitializingBean {
             } catch (Exception ex) {
                 log.error(" ScheduleTask with id: " + task.getId() + " complete error! ", ex);
                 scheduleService.updateStatusScheduleTask(task.getId(), ScheduleTaskStatusEnum.FAILED);
-                mailTextDomainService.sendScheduleMailFailed(
-                        scheduleMailFailed,
-                        task,
-                        taskRunners.get(task.getId()),
-                        new Pair<String, StackTraceElement[]>().setL(ex.getMessage()).setR(ex.getStackTrace()));
+                try {
+                    mailTextDomainService.sendScheduleMailFailed(
+                            scheduleMailFailed,
+                            task,
+                            taskRunners.get(task.getId()),
+                            new Pair<String, StackTraceElement[]>().setL(ex.getMessage()).setR(ex.getStackTrace()));
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                }
             }
 
             taskRunners.remove(task.getId());
