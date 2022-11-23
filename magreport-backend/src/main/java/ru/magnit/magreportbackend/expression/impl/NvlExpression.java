@@ -19,6 +19,8 @@ public class NvlExpression extends ParameterizedExpression {
         final var sourceValue = parameters.get(0).calculate(rowNumber);
         final var targetValue = parameters.get(1).calculate(rowNumber);
 
+        checkParameterNotNull(parameters.get(1), targetValue);
+
         return result
             .setL(sourceValue.getL() == null ? targetValue.getL() : sourceValue.getL())
             .setR(sourceValue.getR());
