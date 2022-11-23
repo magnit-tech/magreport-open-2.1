@@ -59,9 +59,13 @@ export function jobsMenuViewReducer(state = initialState, action){
                 else {
                     const tmp = [...state.currentFolderData.jobs]
                     let arr = tmp.filter(item => {
+                        let flagName = true
                         let flagStart = true
                         let flagEnd = true
                         let flagStatus = true
+                        if (action.filters.name && item.report.name.toLowerCase().indexOf(action.filters.name.toLowerCase()) === -1 ){
+                            flagName = false
+                        }
                         if (action.filters.periodStart && new Date(item.created) < action.filters.periodStart){
                             flagStart = false
                         }
@@ -71,7 +75,7 @@ export function jobsMenuViewReducer(state = initialState, action){
                         if (action.filters.selectedStatuses && !action.filters.selectedStatuses.includes(item.status)){
                             flagStatus = false
                         }
-                        return flagStart && flagEnd && flagStatus
+                        return flagStart && flagEnd && flagStatus && flagName
                     })
 
                     newState = {
