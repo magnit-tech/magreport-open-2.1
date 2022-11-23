@@ -16,11 +16,23 @@ public class SubstrExpression extends ParameterizedExpression {
 
     @Override
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
-        final var sourceString = parameters.get(0).calculate(rowNumber).getL();
-        final var startPosition = Integer.parseInt(parameters.get(1).calculate(rowNumber).getL());
-        final var length = Integer.parseInt(parameters.get(2).calculate(rowNumber).getL());
+        final var sourceString = parameters.get(0).calculate(rowNumber);
+        final var startPosition = parameters.get(1).calculate(rowNumber);
+        final var length = parameters.get(2).calculate(rowNumber);
 
-        return result
-            .setL(sourceString.substring(startPosition, startPosition + length));
+        checkParameterNotNull(parameters.get(0), sourceString);
+        checkParameterHasAnyType(parameters.get(0), sourceString, DataTypeEnum.STRING);
+
+        checkParameterNotNull(parameters.get(1), startPosition);
+        checkParameterHasAnyType(parameters.get(1), startPosition, DataTypeEnum.INTEGER);
+
+        checkParameterNotNull(parameters.get(2), length);
+        checkParameterHasAnyType(parameters.get(2), length, DataTypeEnum.INTEGER);
+
+        return result.setL(
+            sourceString.getL().substring(
+                Integer.parseInt(startPosition.getL()),
+                Integer.parseInt(startPosition.getL()) + Integer.parseInt(length.getL())
+            ));
     }
 }
