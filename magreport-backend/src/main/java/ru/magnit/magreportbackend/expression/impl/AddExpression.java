@@ -2,9 +2,7 @@ package ru.magnit.magreportbackend.expression.impl;
 
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
-import ru.magnit.magreportbackend.exception.InvalidExpression;
 import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
-import ru.magnit.magreportbackend.expression.ExpressionExceptionUtils;
 import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
@@ -22,12 +20,8 @@ public class AddExpression extends ParameterizedExpression {
         for (var parameter: parameters) {
             final var parameterValue = parameter.calculate(rowNumber);
 
-            if (parameterValue.getL() == null) {
-                throw new InvalidExpression(ExpressionExceptionUtils.getParameterIsNullMessage(getRootExpression().getErrorPath(parameter), derivedField, expressionName));
-            }
-            if (parameterValue.getR().notIn(DataTypeEnum.INTEGER, DataTypeEnum.DOUBLE)){
-                throw new InvalidExpression(getRootExpression().getErrorPath(parameter));
-            }
+            checkParameterNotNull(parameter, parameterValue);
+            checkParameterHasAnyType(parameter, parameterValue, DataTypeEnum.INTEGER, DataTypeEnum.DOUBLE);
 
             resultType = resultType.widerNumeric(parameterValue.getR());
             final var paramResult = parameter.calculate(rowNumber).getL();
