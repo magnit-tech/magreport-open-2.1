@@ -16,9 +16,12 @@ public class StrLenExpression extends ParameterizedExpression {
 
     @Override
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
-        final var sourceString = parameters.get(0).calculate(rowNumber).getL();
+        final var sourceString = parameters.get(0).calculate(rowNumber);
+
+        checkParameterNotNull(parameters.get(0), sourceString);
+        checkParameterHasAnyType(parameters.get(0), sourceString, DataTypeEnum.STRING);
 
         return result
-            .setL(String.valueOf(sourceString.length()));
+            .setL(String.valueOf(sourceString.getL().length()));
     }
 }

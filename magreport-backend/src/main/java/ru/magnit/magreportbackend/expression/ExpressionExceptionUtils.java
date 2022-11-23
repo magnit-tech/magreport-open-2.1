@@ -10,4 +10,11 @@ public interface ExpressionExceptionUtils {
             expressionStack +
             "\nФункция <" + functionName + "> не может принимать значения NULL;";
     }
+
+    static String getWrongParameterTypeMessage(String expressionStack, DerivedFieldResponse derivedField, String functionName, String parameterType) {
+        return "Ошибка при вычислении выражения производного поля \"" +
+            derivedField.getName() + "\"(Id: " + derivedField.getId() + "):\n" +
+            expressionStack +
+            "\nФункция <" + functionName + "> не может принимать значения типа '" + parameterType + "';";
+    }
 }
