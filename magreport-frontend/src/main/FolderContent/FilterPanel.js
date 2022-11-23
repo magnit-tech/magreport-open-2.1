@@ -24,6 +24,7 @@ import JobStatusSelect from './JobFilters/JobStatusSelect'
 import JobUsernameSelect from './JobFilters/JobUsernameSelect'
 import {FolderItemTypes} from './FolderItemTypes';
 import Slide from '@material-ui/core/Slide';
+import DesignerTextField from '../Main/Development/Designer/DesignerTextField';
 // styles
 import { TimeSlider, FolderContentCSS } from './FolderContentCSS';
 
@@ -120,7 +121,7 @@ export default function FilterPanel(props){
             if (value && key !== 'selectedStatuses' && key !=='isCleared') {
                 return acc+1
             }
-            if (key === 'selectedStatuses' && value.length !== 6){
+            if (key === 'selectedStatuses' && value.length !== 8){
                 return acc+1
             }
             return acc
@@ -208,6 +209,17 @@ export default function FilterPanel(props){
 								/>
 							</Grid>
 						}
+                        <Grid item className = {classes.itemStatusFilter}>
+                            <DesignerTextField
+                                margin = {'4px'}
+                                size = "small"
+                                label = "Название отчёта"
+                                value = {props.filters.name}
+                                fullWidth
+                                variant="filled"
+                                onChange={e => props.onFilterChange('name', e)}
+                            />
+                        </Grid>
 						<Grid item className = {classes.itemStatusFilter}>
 							<JobStatusSelect 
 								selectedStatuses={props.filters.selectedStatuses}

@@ -26,6 +26,7 @@ import SearchIcon from '@material-ui/icons/Search';
 
 //import CopyMoveFolderBrowser from './CopyMoveFolderBrowser';
 import DesignerFolderBrowser from 'main/Main/Development/Designer/DesignerFolderBrowser';
+import {JobStatuses} from './JobFilters/JobStatuses';
 
 // styles
 import { FolderContentCSS } from './FolderContentCSS';
@@ -88,7 +89,8 @@ import SortModalWindow from './ModalWindows/SortModalWindow';
 
 export default function FolderContent(props){
     const classes = FolderContentCSS();
-
+    
+    const defaultStatuses = Object.values(JobStatuses);
     const [searchOpen, setSearchOpen] = useState(false);
     const [panelOpen, setPanelOpen] = useState(false);
 
@@ -97,11 +99,12 @@ export default function FolderContent(props){
     const [windowData, setWindowData] = useState(null);
     const [page, setPage] = useState(1);
     const [elementsOnPage, setElementsOnPage] = useState(10)
-    const [countElement, setCountElement] = useState(100)
+    const [countElement, setCountElement] = useState(100);
     const [filterValues, setFilterValues] = useState(props.filters || {
+        name: null,
         periodStart: null,
         periodEnd: null, 
-        selectedStatuses: ['RUNNING','SCHEDULED','COMPLETE','FAILED','CANCELING','CANCELED'],
+        selectedStatuses: defaultStatuses
     })
     const [contextPosition, setContextPosition] = useState({
         mouseX: null,
@@ -493,9 +496,10 @@ export default function FolderContent(props){
         let filters = filterValues
         if (isCleared){
             filters = {
+                name: null,
                 periodStart: null,
                 periodEnd: null,
-                selectedStatuses: ['RUNNING','SCHEDULED','COMPLETE','FAILED','CANCELING','CANCELED'],
+                selectedStatuses: defaultStatuses,
                 isCleared: true
             }
             setFilterValues(filters)
