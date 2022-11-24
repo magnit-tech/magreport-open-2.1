@@ -117,7 +117,7 @@ export default function  TokenInput(props){
                 }
                 values.push({
                     value: idValue,
-                    label: nameValue
+                    label: '(' + idValue + ') ' + nameValue
                 });
             }
         }
@@ -166,7 +166,7 @@ export default function  TokenInput(props){
 
                 arr.push({
                     value: code,
-                    label: name        
+                    label: '(' + code + ') ' + name        
                 });
             };
             let sort_arr = arr.sort(
