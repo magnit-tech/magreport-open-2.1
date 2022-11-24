@@ -100,7 +100,7 @@ function ItemCard(props){
         username = props.data.user.name
         subheader = 
             <span className={classes.subHead}>{JobStatusMap.get(props.data.status)}
-                { ["RUNNING", "SCHEDULED"].indexOf(props.data.status) > -1 ? 
+                { ["RUNNING", "SCHEDULED","PENDING_DB_CONNECTION"].indexOf(props.data.status) > -1 ? 
                     props.data.waitCancelResponse ? 
                     <CircularProgress /> :
                     <Typography className={classes.cancel} variant="subtitle1" onClick={handleJobCancelClick}> Отменить </Typography> : ""
