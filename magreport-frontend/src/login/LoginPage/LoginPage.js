@@ -6,7 +6,7 @@ import Alerts from '../../main/Alerts/Alerts'
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Paper from '@material-ui/core/Paper';
 import Hidden from '@material-ui/core/Hidden';
-import Header from '../../header/Header/Header'
+import Header from '../../components/header/Header/Header'
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
