@@ -58,6 +58,11 @@ public class ScheduleTaskDomainService {
     }
 
     @Transactional
+    public void deleteScheduleTaskByReport(Long reportId){
+        repository.deleteByReportId(reportId);
+    }
+
+    @Transactional
     public List<ScheduleTaskShortResponse> getAllScheduleTask() {
         return scheduleTaskShortResponseMapper.from(repository.findAll());
     }

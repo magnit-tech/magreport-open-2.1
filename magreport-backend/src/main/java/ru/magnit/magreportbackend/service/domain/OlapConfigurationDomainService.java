@@ -161,6 +161,15 @@ public class OlapConfigurationDomainService {
     }
 
     @Transactional
+    public void deleteReportOlapConfigurationByReport(Long reportId){
+        var configs = reportOlapConfigurationRepository.getReportOlapConfigurationByReportId(reportId);
+        for (var config : configs){
+            reportOlapConfigurationRepository.delete(config);
+            repository.delete(config.getOlapConfiguration());
+        }
+    }
+
+    @Transactional
     public void updateSharedStatusOlapReportConfig(ReportOlapConfigSetShareRequest request, Long currentUser) {
         var config = reportOlapConfigurationRepository.getReferenceById(request.getReportOlapConfigId());
 
