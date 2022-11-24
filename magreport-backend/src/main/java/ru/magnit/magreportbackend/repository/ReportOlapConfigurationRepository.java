@@ -12,6 +12,7 @@ import java.util.Optional;
 
 public interface ReportOlapConfigurationRepository extends JpaRepository<ReportOlapConfiguration, Long> {
     List<ReportOlapConfiguration> getReportOlapConfigurationByCreatorIdAndCreatedDateTimeAfter(Long authorId, LocalDateTime dateTime);
+    List<ReportOlapConfiguration> getReportOlapConfigurationByReportId(Long reportId);
 
     @Modifying
     @Query(value = "update REPOSITORY.REPORT_OLAP_CONFIGURATION set IS_DEFAULT = false where REPORT_ID = :reportId and USER_ID = :userId and REPORT_JOB_ID is null and IS_DEFAULT = true ",
