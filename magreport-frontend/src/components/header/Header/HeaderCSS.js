@@ -1,6 +1,6 @@
 import { makeStyles } from '@material-ui/core/styles';
-import StyleConsts from '../../StyleConsts'; 
-import CatFingerPng from '../../images/catFinger.png'
+import StyleConsts from '../../../StyleConsts'; 
+import CatFingerPng from '../../../images/catFinger.png'
 
 export const HeaderCSS = makeStyles(theme => ({
     appBar: {
