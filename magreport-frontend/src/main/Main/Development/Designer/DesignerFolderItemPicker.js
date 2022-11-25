@@ -249,7 +249,7 @@ const mapStateToProps = (state, props) => {
     let s = null
     if (itemType === FolderItemTypes.filterTemplate) s = state.filtersMenuView
     if (itemType === FolderItemTypes.filterInstance) s = state.filterInstancesMenuView
-    if (itemType === FolderItemTypes.report) s = state.reportsMenuView
+    if (itemType === FolderItemTypes.reports) s = state.reportsMenuView
     if (itemType === FolderItemTypes.reportsDev) s = state.reportsDevMenuView
     if (itemType === FolderItemTypes.dataset) s = state.datasetsMenuView
     if (itemType === FolderItemTypes.datasource) s = state.datasourcesMenuView

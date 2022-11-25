@@ -155,7 +155,7 @@ export default function ReportController(dataHub){
 
     this.getFavorites = function (callback){
         const body = {};
-        return dataHub.requestService(REPORT_GET_FAVORITES, METHOD, body, callback, data => dataHub.localCache.setFolderData(FolderItemTypes.report, data));
+        return dataHub.requestService(REPORT_GET_FAVORITES, METHOD, body, callback, data => dataHub.localCache.setFolderData(FolderItemTypes.reports, data));
     }
 
     this.getDependencies = function (id, callback){

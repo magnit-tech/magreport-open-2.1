@@ -1,5 +1,5 @@
 import React from 'react';
-import {useNavigateBack} from "main/Main/Navbar/navbarHooks";
+import {useNavigateBack} from "components/Navbar/navbarHooks";
 import { connect } from 'react-redux';
 
 // dataHub

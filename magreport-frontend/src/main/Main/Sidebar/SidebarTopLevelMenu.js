@@ -1,6 +1,7 @@
-import React from 'react';
-import {useState} from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
+
+import { useLocation, useNavigate } from 'react-router-dom';
 
 // material-ui
 import List from '@material-ui/core/List';
@@ -29,11 +30,15 @@ function SidebarTopLevelMenu(props){
 
     const classes = SidebarCSS();
 
+    const location = useLocation()
+    const navigate = useNavigate()
+
     const[menuExpanded, setMenuExpanded] = useState(false);
 
     function handleClick(){
         if(!props.sidebarItem.subItems){
             props.actionSetSidebarItem(props.sidebarItem);
+            navigate(props.sidebarItem.folderItemType)
         }
     }
 
@@ -77,7 +82,7 @@ function SidebarTopLevelMenu(props){
 									key={item.key} 
 									drawerOpen={props.drawerOpen} 
                                     item={item}
-                                    focus={props.currentSidebarItemKey === item.key}
+                                    focus={location.pathname.slice(1) === item.folderItemType}
 									onClick={handleSubitemClick}/>
 							))}
 						</List>
@@ -100,6 +105,5 @@ const mapDispatchToProps = {
     foldersTreeToggle,
     actionSetSidebarItem
 }
-
 
 export default connect(mapStateToProps, mapDispatchToProps)(SidebarTopLevelMenu);

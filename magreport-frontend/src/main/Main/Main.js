@@ -1,25 +1,25 @@
 import React from 'react';
+
 import { Outlet } from 'react-router-dom'
 
-import {MainCSS} from './MainCSS'
+import { MainCSS } from './MainCSS'
+
+import Sidebar from './Sidebar/Sidebar';
 
 import Header from '../../components/header/Header/Header';
-import SnackbarInfo from '../SnackbarInfo/SnackbarInfo';
-import AlertDialog from '../AlertDialog/AlertDialog';
-import { connect } from 'react-redux';
-import { showSnackbar } from '../../redux/actions/actionSnackbar';
-import { showAlertDialog, hideAlertDialog } from '../../redux/actions/actionsAlertDialog';
-import Sidebar from './Sidebar/Sidebar';
-import SidebarItems from './Sidebar/SidebarItems';
-import Navbar from './Navbar/Navbar'
+import Navbar from '../../components/Navbar/Navbar'
+import SnackbarInfo from '../../components/SnackbarInfo/SnackbarInfo';
+import AlertDialog from '../../components/AlertDialog/AlertDialog';
+
+// import { connect } from 'react-redux';
+// import { showSnackbar } from '../../redux/actions/actionSnackbar';
+// import { showAlertDialog, hideAlertDialog } from '../../redux/actions/actionsAlertDialog';
 
 
 
-function Main(props){
+export default function Main(props){
 
     const classes = MainCSS();
-
-    const { currentSidebarItemKey } = props;
 
     return (
         <main className={classes.main}>
@@ -37,16 +37,16 @@ function Main(props){
     );
 }
 
-const mapStateToProps = state => {
-    return {
-        currentSidebarItemKey: state.currentSidebarItemKey
-    }
-}
+// const mapStateToProps = state => {
+//     return {
+//         currentSidebarItemKey: state.currentSidebarItemKey
+//     }
+// }
 
-const mapDispatchToProps = {
-    showAlertDialog,
-    hideAlertDialog,
-    showSnackbar,
-}
+// const mapDispatchToProps = {
+//     showAlertDialog,
+//     hideAlertDialog,
+//     showSnackbar,
+// }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Main);
+// export default connect(null, null)(Main);

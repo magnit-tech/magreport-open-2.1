@@ -358,8 +358,8 @@ function RoleDesigner(props){
         selectedPermittedFolder.toLowerCase().includes('datasource') ? FolderItemTypes.datasource:
         selectedPermittedFolder.toLowerCase().includes('dataset') ? FolderItemTypes.dataset:
         selectedPermittedFolder.toLowerCase().includes('devreport') ? FolderItemTypes.reportsDev:
-        selectedPermittedFolder.toLowerCase().includes('userreport') ? FolderItemTypes.report:
-        FolderItemTypes.report;
+        selectedPermittedFolder.toLowerCase().includes('userreport') ? FolderItemTypes.reports:
+        FolderItemTypes.reports;
 
     if (props.roleTypeId === 2 /*FOLDER_ROLES*/){
     tabs.push({tablabel:"Права",

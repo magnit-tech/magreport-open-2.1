@@ -34,7 +34,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 function LoginForm(props){
     const classes = LoginFormCSS();
 
-    // const dispatch = useDispatch()
     const location = useLocation()
     const navigate = useNavigate()
     const {signin} = useAuth()

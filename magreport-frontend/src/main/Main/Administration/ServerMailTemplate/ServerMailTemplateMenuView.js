@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { useNavigateBack} from "main/Main/Navbar/navbarHooks";
+import { useNavigateBack} from "components/Navbar/navbarHooks";
 
 // dataHub
 import dataHub from 'ajax/DataHub';
