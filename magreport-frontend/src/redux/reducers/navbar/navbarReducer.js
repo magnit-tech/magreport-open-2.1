@@ -61,7 +61,7 @@ function buildNavigationPathToFolder(itemsType, folderId, isLastPosition){
         }
     }
 
-    let sidebarItem = itemsType === FolderItemTypes.report ? SidebarItems.reports
+    let sidebarItem = itemsType === FolderItemTypes.reports ? SidebarItems.reports
                      :itemsType === FolderItemTypes.favorites ? SidebarItems.favorites
                      :itemsType === FolderItemTypes.datasource ? SidebarItems.development.subItems.datasources
                      :itemsType === FolderItemTypes.dataset ? SidebarItems.development.subItems.datasets
@@ -119,10 +119,10 @@ function buildNavigationPathToItem(itemType, itemId){
     else {
        // debugger
         let icon = <Edit/>;
-        if (itemType === FolderItemTypes.report) {
+        if (itemType === FolderItemTypes.reports) {
             icon = null;
         }
-        let service = itemType === FolderItemTypes.report ? localCache.getReportInfo
+        let service = itemType === FolderItemTypes.reports ? localCache.getReportInfo
                     : itemType === FolderItemTypes.favorites ? localCache.getReportInfo
                     : itemType === FolderItemTypes.dataset ? localCache.getDatasetInfo
                     : itemType === FolderItemTypes.reportsDev ? localCache.getReportInfo
@@ -273,7 +273,7 @@ export const navbarReducer = (state = initialState, action) => {
             if (action.itemType === FolderItemTypes.job || 
                 action.itemType === FolderItemTypes.userJobs || 
                 action.itemType === FolderItemTypes.favorites ||
-                action.itemType === FolderItemTypes.report ||
+                action.itemType === FolderItemTypes.reports ||
                 action.itemType === FolderItemTypes.reportsDev){
                 return {
                     items : buildNavigationPathToItem(action.itemType, action.itemId)

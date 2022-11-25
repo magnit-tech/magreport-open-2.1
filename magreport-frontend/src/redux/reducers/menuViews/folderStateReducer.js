@@ -24,7 +24,7 @@ import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
 import {FLOW_STATE_BROWSE_FOLDER} from './flowStates';    
 
 const getItemName = itemsType => {
-    return  itemsType === FolderItemTypes.report ? "reports" :
+    return  itemsType === FolderItemTypes.reports ? "reports" :
             itemsType === FolderItemTypes.favorites ? "reports" :
             itemsType === FolderItemTypes.job || itemsType === FolderItemTypes.userJobs ? "jobs" :
             itemsType === FolderItemTypes.datasource ? "dataSources" :

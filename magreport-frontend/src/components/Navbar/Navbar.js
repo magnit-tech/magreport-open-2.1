@@ -1,9 +1,10 @@
 import React from 'react';
-import Breadcrumbs from '@material-ui/core/Breadcrumbs';
+
 import {NavbarCSS} from './NavbarCSS'
-import Chip from '@material-ui/core/Chip';
+
 import { useDispatch, useSelector } from 'react-redux';
-import Paper from '@material-ui/core/Paper';
+
+import {Breadcrumbs, Chip, Paper} from '@material-ui/core';
 
 function Navbar (){
 
@@ -13,6 +14,7 @@ function Navbar (){
     const itemsData = useSelector(state => state.navbar.items)
 
     const items = []
+    
     itemsData.forEach((item, index) => {
         items.push(
             <Chip

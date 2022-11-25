@@ -73,7 +73,7 @@ function ItemCard(props){
     const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' };
     
     const data = props.data;
-    const userNameLabel = props.itemType === FolderItemTypes.report ? "Автор"
+    const userNameLabel = props.itemType === FolderItemTypes.reports ? "Автор"
                         : props.itemType === FolderItemTypes.reportsDev  ? "Разработчик"
                         : "Пользователь";
     let modifiedDateTime = props.data.modifiedDateTime;
@@ -89,7 +89,7 @@ function ItemCard(props){
         recipients = props.data.destinationEmails.map(item=>item.value).concat(props.data.destinationUsers.map(item=>item.userName)).concat(props.data.destinationRoles.map(item=>item.name)).join('; ');
     }
 
-    if ((props.itemType === FolderItemTypes.report || props.itemType === FolderItemTypes.reportsDev || props.itemType === FolderItemTypes.favorites) && props.data.userPublisher){
+    if ((props.itemType === FolderItemTypes.reports || props.itemType === FolderItemTypes.reportsDev || props.itemType === FolderItemTypes.favorites) && props.data.userPublisher){
         modifiedDateTime = props.data.modified;
         createdDateTime = props.data.created;
         username = props.data.userPublisher.name
@@ -230,7 +230,7 @@ function ItemCard(props){
         )
     };
 
-    if (props.itemType === FolderItemTypes.report || props.itemType === FolderItemTypes.favorites || props.itemType === FolderItemTypes.theme) {
+    if (props.itemType === FolderItemTypes.reports || props.itemType === FolderItemTypes.favorites || props.itemType === FolderItemTypes.theme) {
         actionBtns.push(
             <Tooltip key={2} title={props.data.favorite ? "Удалить из избранного" : "Добавить в избранное"}>
                 <IconButton
@@ -272,7 +272,7 @@ function ItemCard(props){
         );
     }
 
-    if (props.editButton && props.itemType !== FolderItemTypes.report) {
+    if (props.editButton && props.itemType !== FolderItemTypes.reports) {
         actionBtns.push(
             <Tooltip key={5} title="Редактировать">
                 <IconButton

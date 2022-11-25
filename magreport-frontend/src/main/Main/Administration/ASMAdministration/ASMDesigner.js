@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {connect} from "react-redux";
 import {useSnackbar} from "notistack";
-import {useNavigateBack} from "main/Main/Navbar/navbarHooks";
+import {useNavigateBack} from "components/Navbar/navbarHooks";
 
 // components
 import DesignerPage from "main/Main/Development/Designer/DesignerPage";

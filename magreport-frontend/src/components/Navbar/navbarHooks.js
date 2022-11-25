@@ -1,5 +1,5 @@
 import {useDispatch, useSelector} from "react-redux";
-import SidebarItems from '../Sidebar/SidebarItems.js'
+import SidebarItems from '../../main/Main/Sidebar/SidebarItems.js'
 
 export function useNavigateBack(sourceSidebarItemKey = null) {
     const dispatch = useDispatch()

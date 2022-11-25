@@ -1,4 +1,4 @@
-import React, {createContext, useState} from "react";
+import React, {createContext, useRef} from "react";
 
 import { useNavigate } from 'react-router-dom';
 
@@ -16,7 +16,7 @@ export const AuthProvider = ({children}) => {
     const dispatch = useDispatch();
     const navigate = useNavigate()
 
-	const [user, setUser] = useState(null)
+	const user = useRef(null)
 
 	// Авторизация
 	const signin = (userName, domainName, passWord, cb) => {
@@ -25,6 +25,8 @@ export const AuthProvider = ({children}) => {
 
             function handleLogin (magrepResponse){
                 if (magrepResponse.ok){
+
+                    user.current = {authtoken: magrepResponse.data.authtoken}
                     dataHub.userController.whoAmI(handleWhoAmI)                 
                 }
                 else {
@@ -40,9 +42,15 @@ export const AuthProvider = ({children}) => {
             
             function handleWhoAmI (magrepResponse){
                 if (magrepResponse.ok){
+                    
                     dispatch(hideLoader())
-                    // dispatch({type: APP_LOGGED_IN, userName})
-					setUser(magrepResponse.data)
+					user.current = {
+                        ...user.current, 
+                        name: magrepResponse.data.name,
+                        isAdmin: magrepResponse.data.isAdmin,
+                        isDeveloper: magrepResponse.data.isDeveloper,
+                    }
+                    localStorage.setItem('userData', JSON.stringify(user.current))
 					cb()
                 }
                 else {
@@ -66,11 +74,16 @@ export const AuthProvider = ({children}) => {
 
 	// Выход из аккаунта
 	const signout = () => {
-		setUser(null)
+        user.current = null
+        localStorage.removeItem('userData')
 		navigate('/login')
 	}
 
-	const value = {user, signin, signout}
+    const setUserData = (userData) => {
+        user.current = userData
+    }
+
+	const value = {user, signin, signout, setUserData}
 
 	return <AuthContext.Provider value={value}>
 		{children}

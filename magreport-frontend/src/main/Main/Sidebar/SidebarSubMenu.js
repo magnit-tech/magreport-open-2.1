@@ -1,5 +1,6 @@
 import React from 'react';
 import {useState} from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // material-ui
 import ListItem from '@material-ui/core/ListItem';
@@ -18,8 +19,10 @@ import { SidebarCSS } from './SidebarCSS';
  * @param {*} props.sidebarItem - объект пункта меню верхнего уровня в SidebarItems
  */
 function SidebarSubMenu(props){
-
+    
     const classes = SidebarCSS();
+
+    const navigate = useNavigate()
 
     const[menuExpanded, setMenuExpanded] = useState(false);
 
@@ -28,6 +31,7 @@ function SidebarSubMenu(props){
             setMenuExpanded(!menuExpanded)
         }
         props.onClick(item)
+        navigate(item.folderItemType)
     }
 
     return (

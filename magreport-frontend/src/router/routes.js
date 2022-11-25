@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Route, Routes } from "react-router-dom"
+import { Navigate, Route, Routes } from "react-router-dom"
 
 import { AuthProvider } from './AuthProvider';
 
@@ -30,40 +30,46 @@ import ThemesMenuView from '../main/Main/Administration/Theme/ThemesMenuView';
 import CubesMenuView from '../main/Main/Administration/Cubes/CubesMenuView';
 import { RequireAuth } from './RequireAuth';
 
-export default function AppRoutes() {
+export default function AppRoutes(props) {
 	return (
 		<AuthProvider>
 			<Routes>
-				<Route path="/login" element={<LoginPage />} />
-				
+				<Route path="/login" element={ <LoginPage version={props.version}/> }/>
+				<Route
+					path="*"
+					element={<Navigate to="/reports" replace />}
+				/>
 
-				<Route element={<RequireAuth><Main /></RequireAuth>} >
-						<Route path="/" element={<ReportsMenuView/>} />
-						<Route path="/favorites" element={<FavoritesMenuView/>} />
-						<Route path="/jobs" element={<JobsMenuView/>} />
-						<Route path="/jobs" element={<JobsMenuView/>} />
+				<Route element={ <RequireAuth><Main version={props.version}/></RequireAuth> }>
 
-						{/* Администрирование */}
-						<Route path="/jobs" element={<RolesMenuView/>} />
-						<Route path="/jobs" element={<UsersMenuView/>} />
-						<Route path="/jobs" element={<UserJobsMenuView/>} />
-						<Route path="/jobs" element={<SecurityFiltersMenuView/>} />
-						<Route path="/jobs" element={<ASMAdministrationMenuView/>} />
-						<Route path="/jobs" element={<LogsMenuView/>} />
-						<Route path="/jobs" element={<SettingsMenuView/>} />
-						<Route path="/jobs" element={<MailTemplatesMenuView/>} />
-						<Route path="/jobs" element={<EmailMenuView/>} />
-						<Route path="/jobs" element={<CubesMenuView/>} />
-						<Route path="/jobs" element={<ThemesMenuView/>} /> 
+					<Route path="/reports" element={<ReportsMenuView/>} />
+					<Route path="/favorites" element={<FavoritesMenuView/>} />
+					<Route path="/job" element={<JobsMenuView/>} />
 
-						{/* Разработка */}
-						<Route path="/jobs" element={<DatasourcesMenuView/>} />
-						<Route path="/jobs" element={<DatasetsMenuView/>} />
-						<Route path="/jobs" element={<FilterTemplatesMenuView/>} />
-						<Route path="/jobs" element={<FilterInstancesMenuView/>} />
-						<Route path="/jobs" element={<ReportsDevMenuView/>} />
-						<Route path="/jobs" element={<SchedulesMenuView/>} />
-						<Route path="/jobs" element={<ScheduleTasksMenuView/>} />
+					{/* Администрирование */}
+					<Route path="/roles" element={<RolesMenuView/>} />
+					<Route path="/users" element={<UsersMenuView/>} />
+					<Route path="/securityFilters" element={<SecurityFiltersMenuView/>} />
+					<Route path="/userJobs" element={<UserJobsMenuView/>} />
+					<Route path="/asm" element={<ASMAdministrationMenuView/>} />
+					<Route path="/logs" element={<LogsMenuView/>} />
+					<Route path="/settings" element={<SettingsMenuView/>} />
+					<Route path="/systemMailTemplates" element={<MailTemplatesMenuView/>} />
+					<Route path="/mailSender" element={<EmailMenuView/>} />
+					<Route path="/cubes" element={<CubesMenuView/>} />
+					<Route path="/theme" element={<ThemesMenuView/>} /> 
+
+					{/* Разработка */}
+					<Route path="/datasource" element={<DatasourcesMenuView/>} />
+					<Route path="/dataset" element={<DatasetsMenuView/>} />
+					<Route path="/filterTemplate" element={<FilterTemplatesMenuView/>} />
+					<Route path="/filterInstance" element={<FilterInstancesMenuView/>} />
+					<Route path="/reportsDev" element={<ReportsDevMenuView/>} />
+
+					{/* Расписание */}
+					<Route path="/schedules" element={<SchedulesMenuView/>} />
+					<Route path="/scheduleTasks" element={<ScheduleTasksMenuView/>} />
+					
 				</Route>
 
 			</Routes>	

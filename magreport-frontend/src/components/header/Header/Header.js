@@ -14,7 +14,6 @@ import HelpIcon from '@material-ui/icons/Help';
 import { HeaderCSS } from './HeaderCSS'
 
 import { connect } from 'react-redux';
-// import { appLogout } from '../../redux/actions/admin/actionThemeDesign'
 
 import Brightness5Icon from '@material-ui/icons/Brightness5';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
@@ -38,14 +37,13 @@ function PaperComponent(props) {
         <Paper {...props} />
       </Draggable>
     );
-  }
+}
 
 function Header(props){
+
     const classes = HeaderCSS();
 
     const {user, signout} = useAuth()
-
-    // const { userName } = props.userName;
 
     const themeLightness  = props.themeLightness;
     const tooltipTitle = props.themeLightness ? 'Светлый фон': 'Тёмный фон';
@@ -81,6 +79,7 @@ function Header(props){
         if  (themeLightness ) {props.setLightTheme() }
         else { props.setDarkTheme () }
     }
+
     return(
         <AppBar position="static" className={classes.appBar}>
             <Menu
@@ -136,8 +135,8 @@ function Header(props){
                         }
                     </IconButton> 
                 </Tooltip>         
-                <Typography variant="overline" className={classes.userNameClass}>{user ? user.name : ''}</Typography>
-                { user?.name ?
+                <Typography variant="overline" className={classes.userNameClass}>{user.current ? user.current.name : ''}</Typography>
+                { user.current?.name ?
                     <Tooltip title = 'Выйти'>
                         <IconButton 
                             className={classes.iconButton}

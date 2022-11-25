@@ -159,7 +159,7 @@ function handleDeleteItemAlertAnswer(answer, entityType, entity){
         }
         
         const itemData = dataHub.localCache.getItemData(entity.itemType, entity.itemId);
-        if (entity.itemType === FolderItemTypes.report){
+        if (entity.itemType === FolderItemTypes.reports){
             serviceCallFunction(entity.parentFolderId, entity.itemId, 
                 magrepResponse => {handleItemDeleted(entity.itemType, entity.parentFolderId, itemData, magrepResponse)});
         }

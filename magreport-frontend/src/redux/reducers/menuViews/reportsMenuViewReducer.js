@@ -13,7 +13,7 @@ const initialState = {
 export function reportsMenuViewReducer(state = initialState, action){
     switch(action.type){
         case FOLDER_CONTENT_ITEM_CLICK:
-            if(action.itemType === FolderItemTypes.report){
+            if(action.itemType === FolderItemTypes.reports){
                 return{
                     ...state,
                     flowState : reportsMenuViewFlowStates.startReport,
@@ -24,7 +24,7 @@ export function reportsMenuViewReducer(state = initialState, action){
                 return state;
             }
         case FOLDER_CONTENT_ADD_ITEM_CLICK:
-            if(action.itemsType === FolderItemTypes.report){
+            if(action.itemsType === FolderItemTypes.reports){
                 return{
                     ...state,
                     flowState : reportsMenuViewFlowStates.pudlishReportDesigner,
@@ -35,6 +35,6 @@ export function reportsMenuViewReducer(state = initialState, action){
                 return state;
             }
         default:
-            return folderStateReducer(state, action, SidebarItems.reports, FolderItemTypes.report);
+            return folderStateReducer(state, action, SidebarItems.reports, FolderItemTypes.reports);
     }
 }
