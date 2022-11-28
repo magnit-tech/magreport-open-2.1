@@ -90,8 +90,6 @@ export default function TokenInputFields(props){
     function handleDataLoadFailed(message){
 
     }
-    console.log('datasetData');
-    console.log(datasetData)
 
     return(
         <div>

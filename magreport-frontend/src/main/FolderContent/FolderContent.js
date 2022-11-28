@@ -81,7 +81,8 @@ import SortModalWindow from './ModalWindows/SortModalWindow';
  * @param {reportCallback}   props.onSortClick - действие при сортировке
  * @param {onAddToFavorites} props.onAddToFavorites - function(folderId, reportId) - действие при добавлении в избранное
  * @param {onAddToFavorites} props.onRefresh - function() - обновить отображение содержимого каталога
- * @param {Boolean}          props.showDialog - показать диалоговое окно
+ * @param {Boolean}          props.onShowSqlDialogClick - показать диалоговое окно с SQL - запросом
+ * @param {Boolean}          props.onShowHistoryStatusClick - показать диалоговое окно с историей статусов
  * @param {Boolean}          props.contextAllowed - разрешено показывать контекстное меню (сортировка)
  * @param {Boolean}          props.copyAndMoveAllowed - разрешено показывать контекстное меню для каталогов и объектов
  * @param {Boolean}          props.notAllowedForItems - запрешено показывать контекстное меню для объектов
@@ -414,7 +415,8 @@ export default function FolderContent(props){
                         onAddDeleteFavorites = {() => props.onAddDeleteFavorites(index, folderId, i.id, i.favorite)}
                         onLinkPathClick = {props.onFolderClick}
                         onDependenciesClick = {() => props.onDependenciesClick(i.id)}
-                        showDialog = {props.showDialog}
+                        onShowSqlDialogClick = {props.onShowSqlDialogClick}
+                        onShowHistoryStatusClick = {props.onShowHistoryStatusClick}
                         onContextMenu={handleContextClickObject}
                         
                     />

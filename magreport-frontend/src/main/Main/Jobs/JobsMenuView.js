@@ -7,7 +7,7 @@ import dataHub from 'ajax/DataHub';
 // redux
 import {FLOW_STATE_BROWSE_FOLDER, jobsMenuViewFlowStates} from 'redux/reducers/menuViews/flowStates';
 import {actionFolderLoaded, actionFolderLoadFailed, actionItemClick} from 'redux/actions/menuViews/folderActions';
-import {actionFilterJobs, actionJobCancel, showSqlDialog} from 'redux/actions/jobs/actionJobs';
+import {actionFilterJobs, actionJobCancel, showSqlDialog, actionShowStatusHistory} from 'redux/actions/jobs/actionJobs';
 import actionSetSidebarItem from 'redux/actions/sidebar/actionSetSidebarItem';
 import {startReport} from 'redux/actions/menuViews/reportActions';
 
@@ -61,7 +61,8 @@ function JobsMenuView(props){
                     onFilterClick = {filters => {props.actionFilterJobs(folderItemsType, filters)}}
                     onJobCancelClick = {(jobIndex, jobId) => {props.actionJobCancel(folderItemsType, jobIndex, jobId)}}
                     onRefreshClick = {handleRefreshFolder}
-                    showDialog = {props.showSqlDialog}
+                    onShowSqlDialogClick = {props.showSqlDialog}
+                    onShowHistoryStatusClick = {props.actionShowStatusHistory}
                 />
 
             </DataLoader>
@@ -105,7 +106,8 @@ const mapDispatchToProps = {
     actionSetSidebarItem,
     actionJobCancel,
     startReport,
-    showSqlDialog
+    showSqlDialog,
+    actionShowStatusHistory
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(JobsMenuView);
