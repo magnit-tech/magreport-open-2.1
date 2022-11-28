@@ -10,6 +10,7 @@ const JOB_CANCEL_URL = CONTROLLER_URL + '/cancel';
 const JOB_SQL_URL = CONTROLLER_URL + '/get-sql-query';
 const JOB_GET_SHARED_JOB_USERS = CONTROLLER_URL + '/get-users-job';
 const JOB_SHARE = CONTROLLER_URL + '/share';
+const GET_HISTORY = CONTROLLER_URL + '/get-history';
 
 export default function ReportJobController(dataHub){
 
@@ -112,5 +113,14 @@ export default function ReportJobController(dataHub){
         };
 
         return dataHub.requestService(JOB_SHARE, METHOD, body, callback); 
+    }
+
+    this.getHistory = (jobId, callback) => {
+        const body = {
+            jobId
+        };
+
+        return dataHub.requestService(GET_HISTORY, METHOD, body, callback)
+        
     }
 }
