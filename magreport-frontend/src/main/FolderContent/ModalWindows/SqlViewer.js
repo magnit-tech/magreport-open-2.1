@@ -1,4 +1,5 @@
 import React from 'react';
+import clsx from 'clsx';
 import { connect } from 'react-redux';
 import {FolderItemTypes} from  '../FolderItemTypes';
 //redux
@@ -14,7 +15,14 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
 
+import {SqlViewerCSS} from './ModalWindowsCSS';
 /**
  * 
  * @param {*} props.id - id задания
@@ -24,6 +32,9 @@ import DialogTitle from '@material-ui/core/DialogTitle';
  */
 function SqlViewer(props){
 
+    const classes = SqlViewerCSS();
+    const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'};
+
     const handleClose = event => {
         event.stopPropagation()
         props.hideSqlDialog(props.itemsType)
@@ -32,33 +43,57 @@ function SqlViewer(props){
     return (
         <div>
         {(props.itemsType === FolderItemTypes.job || props.itemsType === FolderItemTypes.userJobs) &&
-
-        
-        <Dialog
-            open={props.open}
-            onClose={handleClose}
-            aria-labelledby="SQL-dialog-title"
-            aria-describedby="SQL-dialog-description"
-        >
-            <DialogTitle id="SQL-dialog-title">{props.titleName}</DialogTitle>
-            <DialogContent>
-                <DialogContentText id="SQL-dialog-description">
-                    {props.data.sqlQuery}
-                </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-                <Button style={{margin: '16px'}}
-                    color="primary"
-                    autoFocus
-                    type="submit"
-                    variant="contained"
-                    size="small"
-                    onClick={handleClose}
-                >
-                    Закрыть
-                </Button>
-            </DialogActions>
-        </Dialog>
+            <Dialog
+                maxWidth = {props.data.sqlQuery ? 'md' : false}
+                open={props.open}
+                onClose={handleClose}
+                aria-labelledby="SQL-dialog-title"
+                aria-describedby="SQL-dialog-description"
+            >
+                <DialogTitle id="SQL-dialog-title">{props.titleName}</DialogTitle>
+                <DialogContent className = {clsx({[classes.flx]: props.data.history})}>
+               
+                    {    props.data.sqlQuery ?
+                        <DialogContentText id="SQL-dialog-description">  {props.data.sqlQuery} </DialogContentText>
+                        :
+						<TableContainer>
+							<Table stickyHeader size="small">
+								<TableHead>
+								    <TableRow>
+									    <TableCell>Статус</TableCell>
+									    <TableCell align="right">Состояние</TableCell>
+									    <TableCell align="right">Дата/время</TableCell>
+								    </TableRow>
+								</TableHead>
+								<TableBody>
+								    {props.data.history?.map((row) => (
+									    <TableRow key={row.status}>
+									        <TableCell component="th" scope="row">
+										        {row.status}
+									    </TableCell>
+									    <TableCell align="right">{row.state}</TableCell>
+									    <TableCell align="right">{new Date(row.created).toLocaleString('ru', options)}</TableCell>
+									    </TableRow>
+								    ))}
+								</TableBody>
+							</Table>
+						</TableContainer>
+                    }
+                
+                </DialogContent>
+                <DialogActions>
+                    <Button className={classes.closeBtn}
+                        color="primary"
+                        autoFocus
+                        type="submit"
+                        variant="contained"
+                        size="small"
+                        onClick={handleClose}
+                    >
+                        Закрыть
+                    </Button>
+                </DialogActions>
+            </Dialog>
         }
     </div>
     )
