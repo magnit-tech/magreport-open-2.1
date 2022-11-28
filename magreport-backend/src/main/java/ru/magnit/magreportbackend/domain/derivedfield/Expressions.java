@@ -12,6 +12,7 @@ import ru.magnit.magreportbackend.expression.impl.LeftSubstrExpression;
 import ru.magnit.magreportbackend.expression.impl.ModuloExpression;
 import ru.magnit.magreportbackend.expression.impl.MultiplyExpression;
 import ru.magnit.magreportbackend.expression.impl.NvlExpression;
+import ru.magnit.magreportbackend.expression.impl.ReplaceExpression;
 import ru.magnit.magreportbackend.expression.impl.ReportFieldValueExpression;
 import ru.magnit.magreportbackend.expression.impl.RightSubstrExpression;
 import ru.magnit.magreportbackend.expression.impl.StrLenExpression;
@@ -34,7 +35,8 @@ public enum Expressions {
     SUBSTR(SubstrExpression::new),
     LEFT_SUBSTR(LeftSubstrExpression::new),
     RIGHT_SUBSTR(RightSubstrExpression::new),
-    NVL(NvlExpression::new);
+    NVL(NvlExpression::new),
+    REPLACE(ReplaceExpression::new);
 
     private final BiFunction<FieldExpressionResponse, ExpressionCreationContext, BaseExpression> factory;
 
