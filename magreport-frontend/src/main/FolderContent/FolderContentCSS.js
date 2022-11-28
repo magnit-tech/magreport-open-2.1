@@ -165,6 +165,9 @@ export const ItemCardCSS = makeStyles(theme => ({
     }, 
     favoriteItem: {
         color: "orange",
+    },
+    btn: {
+        margin: '4px 0px 4px 8px'
     }
 }));
 

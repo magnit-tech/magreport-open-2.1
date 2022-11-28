@@ -280,8 +280,7 @@ export default function DatasetDesigner(props){
         }
     }
 
-    let tabs = []    
-    console.log(data)
+    let tabs = []
 
     tabs.push({tablabel:"Настройки",
         tabcontent:

@@ -19,6 +19,8 @@ import Link from '@material-ui/core/Link';
 import ViewComfyIcon from '@material-ui/icons/ViewComfy';
 import SettingsEthernetIcon from '@material-ui/icons/SettingsEthernet';
 import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizontalCircle';
+import Icon from '@mdi/react'
+import { mdiClipboardTextClockOutline } from '@mdi/js';
 
 // local
 import { JobStatusMap, ScheduleStatusMap } from './JobFilters/JobStatuses';
@@ -46,7 +48,8 @@ import { FolderItemTypes } from './FolderItemTypes';
  * @param {eventHandler} props.onAddDeleteFavorites - действие при нажатии на кнопку добавления/ удаления в избранное
  * @param {eventHandler} props.onLinkPathClick - действие при нажатии на ссылку, содержащую путь к отчету
  * @param {eventHandler} props.onDependenciesClick - действие при нажатии кнопку получения зависимостей
- * @param {eventHandler} props.showDialog - действие при нажатии на кнопку получения SQL-запроса
+ * @param {eventHandler} props.onShowSqlDialogClick - действие при нажатии на кнопку получения SQL-запроса
+ * @param {eventHandler} props.onShowHistoryStatusClick - действие при нажатии на кнопку получения истории статусов задания
  * @param {eventHandler} props.onContextMenu - действие при вызове контекстного меню
  * @param {eventHandler} props.onScheduleTaskSwitchClick - действие при нажатии на кнопку "Изменить статус" для отчетов на расписании
  */
@@ -198,9 +201,13 @@ function ItemCard(props){
 
     function handleShowSqlClick(event){
         event.stopPropagation()
-        //setSqlViewerOpen(true)
-        props.showDialog( props.itemType, `Просмотр SQL-запроса для задания  ${props.data.id}`, props.data.id)
+        props.onShowSqlDialogClick( props.itemType, `Просмотр SQL-запроса для задания  ${props.data.id}`, props.data.id)
 
+    }
+
+    function handleShowStatusHistoryClick(event){
+        event.stopPropagation()
+        props.onShowHistoryStatusClick( props.itemType, `История статусов задания  ${props.data.id}`, props.data.id)
     }
 
     function handleTruncate(str, wordsToCut) {
@@ -221,6 +228,8 @@ function ItemCard(props){
         actionBtns.push(
             <Tooltip key={1} title="Реестр требований">
                 <IconButton
+                    className={classes.btn}
+                    size="small"
                     fontSize="small"
                     onClick={handleReqLinkClick}
                 >
@@ -234,6 +243,8 @@ function ItemCard(props){
         actionBtns.push(
             <Tooltip key={2} title={props.data.favorite ? "Удалить из избранного" : "Добавить в избранное"}>
                 <IconButton
+                    className={classes.btn}
+                    size="small"
                     fontSize="small"
                     onClick={handleFavoritesClick}
                 >
@@ -250,6 +261,8 @@ function ItemCard(props){
         actionBtns.push(
             <Tooltip key={3} title="Показать зависимости">
                 <IconButton
+                    className={classes.btn}
+                    size="small"
                     fontSize="small"
                     onClick={handleDependenciesClick}
                 >
@@ -263,6 +276,8 @@ function ItemCard(props){
         actionBtns.push(
             <Tooltip key={4} title="Просмотр">
                 <IconButton
+                    className={classes.btn}
+                    size="small"
                     fontSize="small"
                     onClick={handleViewClick}
                 >
@@ -276,6 +291,8 @@ function ItemCard(props){
         actionBtns.push(
             <Tooltip key={5} title="Редактировать">
                 <IconButton
+                    className={classes.btn}
+                    size="small"
                     fontSize="small"
                     onClick={handleEditClick}
                 >
@@ -288,8 +305,10 @@ function ItemCard(props){
     if ((props.itemType === FolderItemTypes.job || props.itemType === FolderItemTypes.userJobs) 
         && (props.roleType.isAdmin || props.roleType.isDeveloper)) {
         actionBtns.push(
-            <Tooltip key={7} title="Показать SQL запрос">
+            <Tooltip key={6} title="Показать SQL запрос">
                 <IconButton
+                    className={classes.btn}
+                    size="small"
                     fontSize="small"
                     onClick={handleShowSqlClick}
                 >
@@ -302,8 +321,10 @@ function ItemCard(props){
     if (props.itemType === FolderItemTypes.job || props.itemType === FolderItemTypes.userJobs) {
         if(props.data.canExecute) {
             actionBtns.push(
-                <Tooltip  key={8} title="Запустить отчёт заново">
+                <Tooltip  key={7} title="Запустить отчёт заново">
                     <IconButton
+                        className={classes.btn}
+                        size="small"
                         fontSize="small"
                         onClick={handleRestartClick}
                     >
@@ -316,6 +337,8 @@ function ItemCard(props){
                 <Tooltip  key={8} title="У Вас нет прав" disabled>
                     <span>
                         <IconButton
+                            className={classes.btn}
+                            size="small"
                             fontSize="small"
                             disabled 
                         >
@@ -327,10 +350,28 @@ function ItemCard(props){
         }
     };
 
+    if ((props.itemType === FolderItemTypes.job || props.itemType === FolderItemTypes.userJobs) 
+        && (props.roleType.isAdmin || props.roleType.isDeveloper)) {
+        actionBtns.push(
+            <Tooltip key={9} title="История статусов">
+                <IconButton
+                    className={classes.btn} 
+                    size="small"
+                    aria-label="status-history"  
+                    onClick={handleShowStatusHistoryClick}  
+                >  
+                    <Icon path={mdiClipboardTextClockOutline} size={0.9} className = {invalidSuccessDefault}/>  
+                </IconButton>
+            </Tooltip>
+        )
+    };
+
     if (props.itemType === FolderItemTypes.scheduleTasks) {
         actionBtns.push(
-            <Tooltip  key={9} title="Запустить отчёт">
+            <Tooltip  key={10} title="Запустить отчёт">
                 <IconButton
+                    className={classes.btn}
+                    size="small"
                     fontSize="small"
                     onClick={handleScheduleTaskRunClick}
                 >
@@ -342,8 +383,10 @@ function ItemCard(props){
 
     if (props.itemType === FolderItemTypes.scheduleTasks && props.data.status !== 'CHANGED') {
         actionBtns.push(
-            <Tooltip  key={10} title="Изменить статус">
+            <Tooltip  key={11} title="Изменить статус">
                 <IconButton
+                    className={classes.btn}
+                    size="small"
                     fontSize="small"
                     onClick=  {handleScheduleTaskSwitchClick}
                 >
@@ -356,8 +399,10 @@ function ItemCard(props){
 
     if (props.deleteButton) {
         actionBtns.push(
-            <Tooltip key={6} title="Удалить">
+            <Tooltip key={12} title="Удалить">
                 <IconButton
+                    className={classes.btn}
+                    size="small"
                     fontSize="small"
                     onClick={handleDeleteClick}
                 >
