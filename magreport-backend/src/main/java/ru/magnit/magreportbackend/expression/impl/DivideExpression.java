@@ -9,7 +9,6 @@ import ru.magnit.magreportbackend.util.Pair;
 public class DivideExpression extends ParameterizedExpression {
     private final Pair<String, DataTypeEnum> result;
 
-    @SuppressWarnings("unused")
     public DivideExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
         super(fieldExpression, context);
         result = new Pair<>(null, DataTypeEnum.INTEGER);
