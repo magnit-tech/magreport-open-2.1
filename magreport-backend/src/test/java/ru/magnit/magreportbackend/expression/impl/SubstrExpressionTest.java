@@ -2,7 +2,7 @@ package ru.magnit.magreportbackend.expression.impl;
 
 import org.junit.jupiter.api.Test;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
-import ru.magnit.magreportbackend.domain.derivedfield.Expressions;
+import ru.magnit.magreportbackend.domain.enums.Expressions;
 import ru.magnit.magreportbackend.dto.response.derivedfield.DerivedFieldResponse;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
 import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
