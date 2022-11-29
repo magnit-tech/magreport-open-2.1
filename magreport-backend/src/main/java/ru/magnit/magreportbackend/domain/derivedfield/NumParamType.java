@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import ru.magnit.magreportbackend.domain.EntityWithName;
+import ru.magnit.magreportbackend.domain.enums.NumParamTypes;
 
 import javax.persistence.AttributeOverride;
 import javax.persistence.CascadeType;

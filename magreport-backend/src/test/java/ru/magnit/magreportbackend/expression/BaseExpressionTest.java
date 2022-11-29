@@ -3,7 +3,7 @@ package ru.magnit.magreportbackend.expression;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
-import ru.magnit.magreportbackend.domain.derivedfield.Expressions;
+import ru.magnit.magreportbackend.domain.enums.Expressions;
 import ru.magnit.magreportbackend.dto.request.olap.FieldDefinition;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldTypes;
 import ru.magnit.magreportbackend.dto.response.derivedfield.DerivedFieldResponse;
@@ -13,8 +13,6 @@ import ru.magnit.magreportbackend.util.Pair;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
 class BaseExpressionTest {
