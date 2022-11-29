@@ -1,4 +1,4 @@
-package ru.magnit.magreportbackend.domain.derivedfield;
+package ru.magnit.magreportbackend.domain.enums;
 
 import lombok.RequiredArgsConstructor;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
@@ -18,6 +18,7 @@ import ru.magnit.magreportbackend.expression.impl.RightSubstrExpression;
 import ru.magnit.magreportbackend.expression.impl.StrLenExpression;
 import ru.magnit.magreportbackend.expression.impl.SubstrExpression;
 import ru.magnit.magreportbackend.expression.impl.SubtractExpression;
+import ru.magnit.magreportbackend.expression.impl.ToStringExpression;
 
 import java.util.function.BiFunction;
 
@@ -36,7 +37,8 @@ public enum Expressions {
     LEFT_SUBSTR(LeftSubstrExpression::new),
     RIGHT_SUBSTR(RightSubstrExpression::new),
     NVL(NvlExpression::new),
-    REPLACE(ReplaceExpression::new);
+    REPLACE(ReplaceExpression::new),
+    TO_STRING(ToStringExpression::new);
 
     private final BiFunction<FieldExpressionResponse, ExpressionCreationContext, BaseExpression> factory;
 

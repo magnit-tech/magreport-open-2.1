@@ -9,7 +9,6 @@ import ru.magnit.magreportbackend.util.Pair;
 public class SubstrExpression extends ParameterizedExpression {
     private final Pair<String, DataTypeEnum> result = new Pair<>(null, DataTypeEnum.STRING);
 
-    @SuppressWarnings("unused")
     public SubstrExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
         super(fieldExpression, context);
     }

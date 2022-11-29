@@ -7,7 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
-import ru.magnit.magreportbackend.domain.derivedfield.Expressions;
+import ru.magnit.magreportbackend.domain.enums.Expressions;
 import ru.magnit.magreportbackend.domain.olap.AggregationType;
 import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportData;

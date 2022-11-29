@@ -9,7 +9,6 @@ import ru.magnit.magreportbackend.util.Pair;
 public class StrLenExpression extends ParameterizedExpression {
     private final Pair<String, DataTypeEnum> result = new Pair<>(null, DataTypeEnum.INTEGER);
 
-    @SuppressWarnings("unused")
     public StrLenExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
         super(fieldExpression, context);
     }

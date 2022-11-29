@@ -10,7 +10,6 @@ public class LeftSubstrExpression extends ParameterizedExpression {
 
     private final Pair<String, DataTypeEnum> result;
 
-    @SuppressWarnings("unused")
     public LeftSubstrExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
         super(fieldExpression, context);
         result = new Pair<>(null, DataTypeEnum.STRING);
