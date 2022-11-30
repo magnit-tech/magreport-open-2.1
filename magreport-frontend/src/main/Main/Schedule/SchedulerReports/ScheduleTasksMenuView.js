@@ -2,6 +2,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import {useNavigateBack} from "components/Navbar/navbarHooks";
 
+import { useNavigate } from 'react-router-dom'
+
 // dataHub
 import dataHub from 'ajax/DataHub';
 
@@ -34,6 +36,8 @@ import ScheduleTasksViewer from './ScheduleTasksViewer';
 
 function ScheduleTasksMenuView(props){
 
+    const navigate = useNavigate()
+
     const navigateBack = useNavigateBack();
 
     const state = props.state;
@@ -48,6 +52,19 @@ function ScheduleTasksMenuView(props){
 
     function handleExit() {
         navigateBack();
+    }
+
+    function handleItemClick(scheduleTaskId) {
+        props.actionItemClick(folderItemsType, scheduleTaskId)
+        navigate(`/scheduleTasks/${scheduleTaskId}`)
+    }
+    function handleAddItemClick(folderItemsType) {
+        props.actionAddItemClick(folderItemsType)
+        navigate(`/scheduleTasks/add`)
+    }
+    function handleEditItemClick(scheduleTaskId) {
+        props.actionEditItemClick(folderItemsType, scheduleTaskId)
+        navigate(`/scheduleTasks/${scheduleTaskId}/edit`)
     }
 
     let component;
@@ -71,15 +88,18 @@ function ScheduleTasksMenuView(props){
                     data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
                     searchParams={state.searchParams || {}} 
                     searchWithoutRecursive
-                    onItemClick={(scheduleTaskId) => {
-                        props.actionItemClick(folderItemsType, scheduleTaskId)
-                    }}
-                    onAddItemClick={() => {
-                        props.actionAddItemClick(folderItemsType)
-                    }}
-                    onEditItemClick={(scheduleTaskId) => {
-                        props.actionEditItemClick(folderItemsType, scheduleTaskId)
-                    }}
+                    // onItemClick={(scheduleTaskId) => {
+                    //     props.actionItemClick(folderItemsType, scheduleTaskId)
+                    // }}
+                    // onAddItemClick={() => {
+                    //     props.actionAddItemClick(folderItemsType)
+                    // }}
+                    // onEditItemClick={(scheduleTaskId) => {
+                    //     props.actionEditItemClick(folderItemsType, scheduleTaskId)
+                    // }}
+                    onItemClick={handleItemClick}
+                    onAddItemClick={handleAddItemClick}
+                    onEditItemClick={handleEditItemClick}
                     onDeleteItemClick={(scheduleTaskId) => {
                         props.actionDeleteItemClick(folderItemsType, null, scheduleTaskId)
                     }}

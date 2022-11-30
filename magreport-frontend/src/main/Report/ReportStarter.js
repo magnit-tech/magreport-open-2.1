@@ -1,9 +1,11 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {useSnackbar} from 'notistack';
 
+import { useParams } from 'react-router-dom'
+
 // mui
 import {Button} from '@material-ui/core';
-//import { Button, ThemeProvider } from '@material-ui/core';
+
 // dataHub
 import dataHub from 'ajax/DataHub';
 
@@ -28,8 +30,9 @@ import {ReportStarterCSS} from "./ReportCSS";
  * @param {*} props.onSaveScheduleTaskFilterData - для сохранения значений фильтра отчетов на расписании
  */
 export default function ReportStarter(props){
-
     const classes = ReportStarterCSS();
+
+    const {id} = useParams()
 
     const [flowState, setFlowState] = useState("filters");
     const [reportMetadata, setReportMetadata] = useState({});
@@ -55,6 +58,7 @@ export default function ReportStarter(props){
     const [filterToGroupMap, setFilterToGroupMap] = useState(new Map())
     const [excelTemplates, setExcelTemplates] = useState([])
     const [disabledSaveBtn, setDisabledSaveBtn] = useState(false)
+    
 
     function handleReportMetadataLoaded(data){
         setExcelTemplates(data.excelTemplates)
@@ -234,8 +238,10 @@ export default function ReportStarter(props){
     return (
         flowState === "filters" ? 
             <DataLoader
-                loadFunc = {props.onDataLoadFunction}
-                loadParams = {[props.reportId, props.scheduleTaskId !== undefined ? props.scheduleTaskId : lastParamJobId]}
+                // loadFunc = {props.onDataLoadFunction}
+                loadFunc = {dataHub.reportController.get}
+                // loadParams = {[props.reportId, props.scheduleTaskId !== undefined ? props.scheduleTaskId : lastParamJobId]}
+                loadParams = {id ? [Number(id), undefined] : [null]}
                 reload = {reloadReportMetadata}
                 onDataLoaded = {handleReportMetadataLoaded}
             >

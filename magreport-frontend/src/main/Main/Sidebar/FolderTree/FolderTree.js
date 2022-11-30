@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 // components
 import List from '@material-ui/core/List';
@@ -30,6 +31,8 @@ import dataHub from 'ajax/DataHub';
 function FolderTree(props){
 
     const classes = FolderTreeCSS();
+
+    const navigate = useNavigate()
 
     const entity = props.entity;
 
@@ -62,6 +65,8 @@ function FolderTree(props){
     function handleFolderClick(folderId){
         props.actionSetSidebarItem(entity)
         props.actionFolderClick(props.folderItemType, folderId)
+        navigate(`/${props.folderItemType}/${folderId}`)
+
     }
 
     function handleDropBefore(e, parentFolderId, folderId) {

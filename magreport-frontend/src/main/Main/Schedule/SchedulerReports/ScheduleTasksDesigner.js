@@ -2,6 +2,8 @@ import React, {useState} from "react";
 import {useSnackbar} from "notistack";
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 
+import { useParams, useNavigate } from 'react-router-dom'
+
 // dataHub
 import dataHub from "ajax/DataHub";
 
@@ -46,16 +48,18 @@ import {DesignerCSS} from '../../Development/Designer/DesignerCSS';
 /**
  * Компонент создания и редактирования отчетов на расписании
  * @param {Object} props - параметры компонента
- * @param {String} props.mode - "create" - создание; "edit" - редактирование
  * @param {String} props.status - статус задания. Если CHANGED, то переход на вкладку "Фильтры обязателен"
- * @param {Number} props.reportId - идентификатор отчета на расписании
+//  * @param {Number} props.reportId - идентификатор отчета на расписании
  * @param {onExit} props.onExit - callback, вызываемый при закрытии формы
  * @return {JSX.Element}
  * @constructor
  */
 export default function ScheduleTasksDesigner(props) {
     const classes = DesignerCSS();
- 
+    
+    const {id} = useParams()
+    const navigate = useNavigate();
+
     const {enqueueSnackbar} = useSnackbar();
 
     const [uploading, setUploading] = useState(false);
@@ -115,7 +119,6 @@ export default function ScheduleTasksDesigner(props) {
         ["maxFailedStarts " , "Количество падений"]
     ]); 
 
-    const [id, setId] = useState(props.scheduleId);
     const [scheduledReport, setScheduledReport] = useState([]);
     const [schedulesList, setSchedulesList] = useState([]);
     const [usersList, setUsersList] = useState([]);
@@ -127,7 +130,7 @@ export default function ScheduleTasksDesigner(props) {
     const [emailErrorStatus, setEmailErrorStatus] = useState('success');
     const [disableSave, setDisableSave] = useState(true);
     const [hideFilterTab, setHideFilterTab] = useState(false);
-    const pageName = props.mode === "create" ? "Добавление отчёта на расписание" : "Редактирование отчёта на расписании";
+    const pageName = id ? "Редактирование отчёта на расписании" : "Добавление отчёта на расписание";
     
     function handleSchedulesLoaded(data){
         setSchedulesList(data.map((v) => ({id: v.id, name: v.name, type: v.type})));
@@ -152,7 +155,7 @@ export default function ScheduleTasksDesigner(props) {
     let loadFuncRoles = dataHub.roleController.getAll;
     let loadFuncRunLink = dataHub.scheduleController.taskGetManualLink;
 
-    if (props.mode === "edit") {
+    if (id) {
         loadFunc = dataHub.scheduleController.taskGet;
         loadParams = [id];
     }
@@ -262,7 +265,6 @@ export default function ScheduleTasksDesigner(props) {
         setErrorField({...errorField, 'taskTypeId': false});
     }
 
-    
     function mandatoryFilters(data){
         let mg = mandatoryGroups(data)
         
@@ -366,7 +368,7 @@ export default function ScheduleTasksDesigner(props) {
 
         if(hasErrors()) {
             //enqueueSnackbar(`Форма содержит ошибки`, {variant: "error"});
-        } else if (props.mode === "create") {
+        } else if (!id) {
             dataHub.scheduleController.taskAdd(
                 dataToSave,
                 magResponse => handleAddedEdited(magResponse)
@@ -374,7 +376,7 @@ export default function ScheduleTasksDesigner(props) {
             setUploading(true);
         } else {
             dataHub.scheduleController.taskEdit(
-                {id: props.scheduleId, ...dataToSave },
+                {id: id, ...dataToSave },
                 magRepResponse => handleAddedEdited(magRepResponse)
             );
             setUploading(true);
@@ -383,18 +385,18 @@ export default function ScheduleTasksDesigner(props) {
 
     function handleAddedEdited(magRepResponse) {
         if (magRepResponse.ok) {
-            props.onExit();
+            handleCancel()
             enqueueSnackbar("Отчет на расписании успешно сохранен", {variant : "success"});
         } else {
             setUploading(false);
-            const actionWord = props.mode === "create" ? "создании" : "обновлении";
+            const actionWord = id ? "обновлении" : "создании";
             enqueueSnackbar(`При ${actionWord} возникла ошибка: ${magRepResponse.data}`,
                 {variant: "error"});
         }
     }
 
     function handleCancel() {
-        props.onExit();
+        navigate(-1)
     }
 
     function handleDataLoaded(loadedData) {
@@ -404,7 +406,7 @@ export default function ScheduleTasksDesigner(props) {
         let childGroups = loadedData.report.filterGroup.childGroups === null ? [] : loadedData.report.filterGroup.childGroups;
         let filters     = loadedData.report.filterGroup.filters     === null ? [] : loadedData.report.filterGroup.filters;
 
-        setId(loadedData.id);
+        // setId(loadedData.id);
         setScheduledReport({id: loadedData.report.id, name: loadedData.report.name});
         setTaskTypeId(tTask);
         setIsManual(loadedData.code ? true : false);
@@ -457,7 +459,7 @@ export default function ScheduleTasksDesigner(props) {
             <DesignerPage
                 disableSave = {disableSave}
                 onSaveClick={handleSave}
-                onCancelClick={handleCancel}
+                onCancelClick={() => navigate(-1)}
             >
                 <DesignerFolderItemPicker
                 //minWidth = {StyleConsts.designerTextFieldMinWidth}

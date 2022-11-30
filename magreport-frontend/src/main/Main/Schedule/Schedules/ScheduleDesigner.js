@@ -1,6 +1,8 @@
 import React, {useState} from "react";
 import {useSnackbar} from "notistack";
 
+import { useParams, useNavigate } from 'react-router-dom'
+
 // dataHub
 import dataHub from "ajax/DataHub";
 
@@ -24,34 +26,34 @@ import ScheduleParameters from "./ScheduleParameters";
  * @param {Object} props - параметры компонента
  * @param {String} props.mode - "create" - создание; "edit" - редактирование
  * @param {Number} props.scheduleId - идентификатор расписания
- * @param {onExit} props.onExit - callback, вызываемый при закрытии формы
  * @return {JSX.Element}
  * @constructor
  */
 export default function ScheduleDesigner(props) {
 
+    const {id} = useParams()
+    const navigate = useNavigate();
+
     const {enqueueSnackbar} = useSnackbar();
 
     const [uploading, setUploading] = useState(false);
 
-    const [id, setId] = useState(props.scheduleId);
     const [name, setName] = useState();
     const [description, setDescription] = useState();
     const [scheduleType, setScheduleType] = useState();
     const [parameters, setParameters] = useState({});
-    //const [tasks, setTasks] = useState([]);
+    // const [tasks, setTasks] = useState([]);
 
     const [nameError, setNameError] = useState(true);
     const [descriptionError, setDescriptionError] = useState(true);
     const [parametersErrors, setParametersErrors] = useState({scheduleTypeId: true})
 
-    const pageName = props.mode === "create" ? "Создание расписания" : "Редактирование расписания";
-
+    const pageName = id ? "Редактирование расписания" : "Создание расписания";
 
     let loadFunc;
     let loadParams = [];
 
-    if (props.mode === "edit") {
+    if (id) {
         loadFunc = dataHub.scheduleController.get;
         loadParams = [id];
     }
@@ -72,17 +74,13 @@ export default function ScheduleDesigner(props) {
         setDescriptionError(!Boolean(newDescription));
     }
 
-   /* function handleChangeTasks(newTasks) {
-        setTasks(newTasks || []);
-    }*/
-
     function handleChangeParameters(newParameters = {}, newErrors = {scheduleTypeId: true}) {
         setParameters(newParameters);
         setParametersErrors(newErrors);
     }
 
     function handleDataLoaded(loadedData) {
-        setId(loadedData.id);
+        // setId(loadedData.id);
         setScheduleType(loadedData.type);
         handleChangeName(loadedData.name);
         handleChangeDescription(loadedData.description);
@@ -100,7 +98,7 @@ export default function ScheduleDesigner(props) {
             enqueueSnackbar(`Форма содержит ошибки`, {variant: "error"});
             return;
         }
-        if (props.mode === "create") {
+        if (!id) {
             dataHub.scheduleController.add(
                 name,
                 description,
@@ -123,7 +121,7 @@ export default function ScheduleDesigner(props) {
     function handleAddedEdited(magRepResponse) {
         
         if (magRepResponse.ok) {
-            props.onExit();
+            navigate(-1)
             enqueueSnackbar("Расписание успешно сохранено", {variant : "success"});
         } else {
             setUploading(false);
@@ -131,10 +129,6 @@ export default function ScheduleDesigner(props) {
             enqueueSnackbar(`При ${actionWord} возникла ошибка: ${magRepResponse.data}`,
                 {variant: "error"});
         }
-    }
-
-    function handleCancel() {
-        props.onExit();
     }
 
     // building component
@@ -146,7 +140,7 @@ export default function ScheduleDesigner(props) {
         tabcontent: uploading ? <CircularProgress/> :
             <DesignerPage
                 onSaveClick={handleSave}
-                onCancelClick={handleCancel}
+                onCancelClick={() => navigate(-1)}
             >
                 <DesignerTextField
                     label="Название"

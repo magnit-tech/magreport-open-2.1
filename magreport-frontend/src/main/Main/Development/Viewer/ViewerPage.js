@@ -1,5 +1,8 @@
 import React from 'react'
 import {connect} from "react-redux";
+
+import { useNavigate } from 'react-router-dom'
+
 import clsx from 'clsx';
 
 import Button from '@material-ui/core/Button';
@@ -41,10 +44,14 @@ import {ViewerCSS} from './ViewerCSS';
  */
 function ViewerPage(props) {
 
+    const navigate = useNavigate()
+
     const classes = ViewerCSS();
 
     function onEditClick() {
         props.actionViewerEditItem(props.itemType, props.id, props.name)
+        navigate(`/${props.itemType}/${props.id}/edit`)
+
     }
 
     return (

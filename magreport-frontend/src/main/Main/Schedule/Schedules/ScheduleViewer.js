@@ -1,6 +1,8 @@
 import React, {useState} from "react";
 import {useSnackbar} from "notistack";
 
+import { useParams, useNavigate } from 'react-router-dom'
+
 // dataHub
 import dataHub from "ajax/DataHub";
 
@@ -24,22 +26,20 @@ import {FolderItemTypes} from "main/FolderContent/FolderItemTypes";
 /**
  * Компонент просмотра расписаний
  * @param {Object} props - параметры компонента
- * @param {Number} props.scheduleId - идентификатор расписания
  * @param {onOkClick} props.onOkClick - callback, вызываемый при нажатии кнопки ОК
  * @return {JSX.Element}
  * @constructor
  */
 export default function ScheduleViewer(props) {
+    
+    const {id} = useParams()
+    const navigate = useNavigate();
 
     const {enqueueSnackbar} = useSnackbar();
 
     const classes = ViewerCSS();
 
     const [data, setData] = useState({tasks: []});
-
-    const loadFunc = dataHub.scheduleController.get;
-    const loadParams = [props.scheduleId];
-
 
     function handleDataLoaded(loadedData) {
         setData(loadedData);
@@ -83,15 +83,16 @@ export default function ScheduleViewer(props) {
     })
 
     return <DataLoader
-        loadFunc={loadFunc}
-        loadParams={loadParams}
+        loadFunc={dataHub.scheduleController.get}
+        loadParams={[id]}
         onDataLoaded={handleDataLoaded}
         onDataLoadFailed={handleDataLoadFailed}
     >
         <ViewerPage
             itemType={FolderItemTypes.schedules}
-            id={props.scheduleId}
-            onOkClick={props.onOkClick}
+            id={id}
+            // onOkClick={props.onOkClick}
+            onOkClick={() => navigate(-1)}
             disabledPadding={true}
             readOnly={!hasRWRight}
         >

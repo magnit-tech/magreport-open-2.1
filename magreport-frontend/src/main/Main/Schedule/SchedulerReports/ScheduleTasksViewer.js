@@ -2,6 +2,8 @@ import React, {useState} from "react";
 import {useSnackbar} from "notistack";
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 
+import { useParams, useNavigate } from 'react-router-dom'
+
 // dataHub
 import dataHub from "ajax/DataHub";
 
@@ -41,14 +43,17 @@ import {createViewerPageName} from "main/Main/Development/Viewer/viewerHelpers";
  * Компонент создания и редактирования отчетов на расписании
  * @param {Object} props - параметры компонента
  * @param {Number} props.reportId - идентификатор отчета на расписании
- * @param {Number} props.scheduleId - идентификатор расписания
  * @param {onExit} props.onExit - callback, вызываемый при закрытии формы
  * @param {onOkClick} props.onOkClick - callback, вызываемый при нажатии кнопки ОК
  * @return {JSX.Element}
  * @constructor
  */
 export default function ScheduleTasksViewer(props) {
+
     const classes = ViewerCSS();
+
+    const {id} = useParams()
+    const navigate = useNavigate();
 
     const {enqueueSnackbar} = useSnackbar();
 
@@ -56,8 +61,8 @@ export default function ScheduleTasksViewer(props) {
     const [runLink, setRunLink] = useState('');
 
     let loadFuncRunLink = dataHub.scheduleController.taskGetManualLink;
-    let loadFunc = dataHub.scheduleController.taskGet;
-    let loadParams = [props.scheduleId];
+    // let loadFunc = dataHub.scheduleController.taskGet;
+    // let loadParams = [props.scheduleId];
 
     function handleDataLoaded(loadedData) {
         let childGroups = loadedData.report.filterGroup.childGroups === null ? [] : loadedData.report.filterGroup.childGroups;
@@ -307,7 +312,7 @@ export default function ScheduleTasksViewer(props) {
             </div>
     })
 
-   if (data.hasFilters){
+    if (data.hasFilters){
         tabs.push({
             tablabel: "Фильтры",
             tabdisabled: !(data.reportId && data.name && data.description) ,
@@ -320,9 +325,10 @@ export default function ScheduleTasksViewer(props) {
                     />
         })
     }
+
     return <DataLoader
-        loadFunc={loadFunc}
-        loadParams={loadParams}
+        loadFunc={dataHub.scheduleController.taskGet}
+        loadParams={[id]}
         onDataLoaded={handleDataLoaded}
         onDataLoadFailed={message => enqueueSnackbar(`Не удалось получить информацию об отчёте на расписании: ${message}`, {variant : "error"})}
     >
