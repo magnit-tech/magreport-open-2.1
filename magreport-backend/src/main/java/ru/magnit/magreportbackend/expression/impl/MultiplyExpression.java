@@ -9,7 +9,6 @@ import ru.magnit.magreportbackend.util.Pair;
 public class MultiplyExpression extends ParameterizedExpression {
     private final Pair<String, DataTypeEnum> result = new Pair<>(null, null);
 
-    @SuppressWarnings("unused")
     public MultiplyExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
         super(fieldExpression, context);
     }

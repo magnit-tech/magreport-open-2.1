@@ -10,23 +10,22 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class StrLenExpressionTest {
-
+class ToIntegerExpressionTest {
     @Test
-    void strlenTest() {
+    void toStringTest() {
         final var sourceExpression = new FieldExpressionResponse()
-            .setType(Expressions.STRLEN)
+            .setType(Expressions.TO_INTEGER)
             .setParameters(List.of(
                 new FieldExpressionResponse()
                     .setType(Expressions.CONSTANT_VALUE)
                     .setConstantType(DataTypeEnum.STRING)
-                    .setConstantValue("Test string")
+                    .setConstantValue("1234")
             ));
 
         final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
         final var expressionResult = expression.calculate(0);
 
-        assertEquals("11", expressionResult.getL());
+        assertEquals("1234", expressionResult.getL());
         assertEquals(DataTypeEnum.INTEGER, expressionResult.getR());
     }
 }

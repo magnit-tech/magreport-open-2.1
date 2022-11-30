@@ -6,32 +6,29 @@ import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
-public class SubstrExpression extends ParameterizedExpression {
+public class ReplaceExpression extends ParameterizedExpression {
     private final Pair<String, DataTypeEnum> result = new Pair<>(null, DataTypeEnum.STRING);
 
-    public SubstrExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
+    public ReplaceExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
         super(fieldExpression, context);
     }
 
     @Override
+    @SuppressWarnings("DuplicatedCode")
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
         final var sourceString = parameters.get(0).calculate(rowNumber);
-        final var startPosition = parameters.get(1).calculate(rowNumber);
-        final var length = parameters.get(2).calculate(rowNumber);
+        final var what = parameters.get(1).calculate(rowNumber);
+        final var replacement = parameters.get(2).calculate(rowNumber);
 
         checkParameterNotNull(parameters.get(0), sourceString);
         checkParameterHasAnyType(parameters.get(0), sourceString, DataTypeEnum.STRING);
 
-        checkParameterNotNull(parameters.get(1), startPosition);
-        checkParameterHasAnyType(parameters.get(1), startPosition, DataTypeEnum.INTEGER);
+        checkParameterNotNull(parameters.get(1), what);
+        checkParameterHasAnyType(parameters.get(1), what, DataTypeEnum.STRING);
 
-        checkParameterNotNull(parameters.get(2), length);
-        checkParameterHasAnyType(parameters.get(2), length, DataTypeEnum.INTEGER);
+        checkParameterNotNull(parameters.get(2), replacement);
+        checkParameterHasAnyType(parameters.get(2), replacement, DataTypeEnum.STRING);
 
-        return result.setL(
-            sourceString.getL().substring(
-                Integer.parseInt(startPosition.getL()),
-                Integer.parseInt(startPosition.getL()) + Integer.parseInt(length.getL())
-            ));
+        return result.setL(sourceString.getL().replace(what.getL(), replacement.getL()));
     }
 }

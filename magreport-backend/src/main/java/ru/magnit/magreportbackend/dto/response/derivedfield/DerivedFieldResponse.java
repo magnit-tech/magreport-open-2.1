@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import ru.magnit.magreportbackend.domain.derivedfield.Expressions;
+import ru.magnit.magreportbackend.domain.enums.Expressions;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
