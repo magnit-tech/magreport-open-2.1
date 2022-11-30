@@ -418,7 +418,7 @@ export default function FolderContent(props){
                         onShowSqlDialogClick = {props.onShowSqlDialogClick}
                         onShowHistoryStatusClick = {props.onShowHistoryStatusClick}
                         onContextMenu={handleContextClickObject}
-                        
+                        onJobAddComment={props.onJobAddComment}    
                     />
                 </Grid>
 

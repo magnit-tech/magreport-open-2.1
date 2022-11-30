@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 // material-ui
 import {Table, TableBody, TableRow, TableCell } from '@material-ui/core';
 import Card from '@material-ui/core/Card';
@@ -19,8 +19,10 @@ import Link from '@material-ui/core/Link';
 import ViewComfyIcon from '@material-ui/icons/ViewComfy';
 import SettingsEthernetIcon from '@material-ui/icons/SettingsEthernet';
 import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizontalCircle';
+import InputBase from '@material-ui/core/InputBase';
 import Icon from '@mdi/react'
 import { mdiClipboardTextClockOutline } from '@mdi/js';
+import { mdiCommentEditOutline } from '@mdi/js';
 
 // local
 import { JobStatusMap, ScheduleStatusMap } from './JobFilters/JobStatuses';
@@ -59,6 +61,7 @@ function ItemCard(props){
     //let [taskStatus, setTaskStatus] = useState(props.data.status);
 
     const classes = ItemCardCSS();
+    const [comment, setComment] = useState(props.data.comment||'');
 
     let isInvalid = (props.data.isValid !==undefined && !props.data.isValid) ||
     (props.itemType === FolderItemTypes.scheduleTasks && 
@@ -72,7 +75,6 @@ function ItemCard(props){
     let invalidSuccessDefault = isSuccess ? classes.successIcon : 
     isInvalid ? classes.errorIcon : classes.primaryIcon;
 
-   // const [sqlViewerOpen, setSqlViewerOpen] = React.useState(false)
     const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' };
     
     const data = props.data;
@@ -220,6 +222,21 @@ function ItemCard(props){
         }
 
         return str.split(" ").splice(0, wordsToCut).join(" ");
+    }
+
+    function handleChangeComment(event){
+        event.stopPropagation();
+        setComment(event.target.value);
+    }
+    
+    function handleSaveComment(event){
+        let resp = props.onJobAddComment(props.itemType, props.data.id, event.target.value);
+    }
+
+    function handleEditCommentClick(event){
+        event.stopPropagation();
+        const commentElement = document.getElementById(props.data.id)
+        commentElement.focus();
     }
 
     let actionBtns =[];
@@ -449,6 +466,31 @@ function ItemCard(props){
             <CardContent>
                 <Table>
                     <TableBody>
+                        {(props.itemType === FolderItemTypes.job)/* && props.data.comment */ &&
+                        <TableRow>
+                            <TableCell colSpan = {2} align="left"  padding="none">
+                                <InputBase
+                                    id = {props.data.id}
+                                    size = "small"
+                                    value = {comment}
+                                    multiline
+                                    onBlur = {handleSaveComment}
+                                    onChange = {handleChangeComment}
+                                    onClick = {(e)=>e.stopPropagation()}
+                                />
+                                <Tooltip key={9} title="Редактировать комментарий">
+                                    <IconButton
+                                        className = {classes.btn} 
+                                        size = "small"
+                                        aria-label = "comment edit"
+                                        onClick = {(e)=>handleEditCommentClick(e)} 
+                                    >  
+                                        <Icon path={mdiCommentEditOutline} size={0.9} className = {invalidSuccessDefault}/>  
+                                    </IconButton>
+                                </Tooltip>
+                            </TableCell>
+                        </TableRow>
+                        }
                         {(props.itemType === FolderItemTypes.scheduleTasks) &&
                             <>
                                 <TableRow>

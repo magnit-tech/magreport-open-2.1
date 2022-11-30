@@ -11,7 +11,7 @@ import { mainReducer } from './mainReducer'
 import { folderTreeReducer } from './sidebar/folderTreeReducer'
 import { rootMenuReducer } from './sidebar/rootMenuReducer'
 import { navbarReducer } from './navbar/navbarReducer'
-import { jobSqlReducer } from  './menuViews/jobSqlReducer'
+import { jobDialogReducer } from  './menuViews/jobDialogReducer'
 import { reportsMenuViewReducer } from './menuViews/reportsMenuViewReducer'
 import { jobsMenuViewReducer } from './menuViews/jobsMenuViewReducer'
 import { datasetsMenuViewReducer } from './menuViews/datasetsMenuViewReducer'
@@ -64,7 +64,7 @@ const appReducer = combineReducers({
     asmAdministrationMenuView : asmAdministrationMenuViewReducer,
     schedulesMenuView : schedulesMenuViewReducer,
     scheduleTasksMenuView: scheduleTasksMenuViewReducer,
-    jobSql: jobSqlReducer,
+    jobDialog: jobDialogReducer,
     mailTemplateMenuView: mailTemplatesMenuViewReducer,
     cubesMenuView: cubesMenuViewReducer,
     themesMenuView: themesMenuViewReducer,
