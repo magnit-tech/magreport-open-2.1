@@ -49,10 +49,10 @@ public class ReportJobResponseTupleMapper implements Mapper<ReportJobResponse, T
 
                 )),
                 false,
-            0L,
-                getClobMessage(source.get("COMMENT", Clob.class))
+                0L,
+                source.get("COMMENT", String.class)
 
-                );
+        );
     }
 
     @SneakyThrows
