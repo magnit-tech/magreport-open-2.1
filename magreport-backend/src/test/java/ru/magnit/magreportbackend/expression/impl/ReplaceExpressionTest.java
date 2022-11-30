@@ -11,12 +11,12 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SubstrExpressionTest {
+class ReplaceExpressionTest {
 
     @Test
-    void substrTest() {
+    void replaceTest() {
         final var sourceExpression = new FieldExpressionResponse()
-            .setType(Expressions.SUBSTR)
+            .setType(Expressions.REPLACE)
             .setParameters(List.of(
                 new FieldExpressionResponse()
                     .setType(Expressions.CONSTANT_VALUE)
@@ -24,18 +24,18 @@ class SubstrExpressionTest {
                     .setConstantValue("Test string"),
                 new FieldExpressionResponse()
                     .setType(Expressions.CONSTANT_VALUE)
-                    .setConstantType(DataTypeEnum.INTEGER)
-                    .setConstantValue("0"),
+                    .setConstantType(DataTypeEnum.STRING)
+                    .setConstantValue("string"),
                 new FieldExpressionResponse()
                     .setType(Expressions.CONSTANT_VALUE)
-                    .setConstantType(DataTypeEnum.INTEGER)
-                    .setConstantValue("4")
+                    .setConstantType(DataTypeEnum.STRING)
+                    .setConstantValue("word")
             ));
 
         final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, new DerivedFieldResponse().setId(1L).setName("Test field")));
         final var expressionResult = expression.calculate(0);
 
-        assertEquals("Test", expressionResult.getL());
+        assertEquals("Test word", expressionResult.getL());
         assertEquals(DataTypeEnum.STRING, expressionResult.getR());
     }
 }

@@ -9,7 +9,6 @@ import ru.magnit.magreportbackend.util.Pair;
 public class ConstantValueExpression extends BaseExpression {
     private final Pair<String, DataTypeEnum> value;
 
-    @SuppressWarnings("unused")
     public ConstantValueExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
         super(fieldExpression, context);
         value = new Pair<>(fieldExpression.getConstantValue(), fieldExpression.getConstantType());

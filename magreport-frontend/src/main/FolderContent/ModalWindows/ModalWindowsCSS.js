@@ -143,3 +143,13 @@ export const ChooserDestinationWindowCSS = makeStyles(theme => ({
         flex: 1
     }
 }));
+
+export const SqlViewerCSS = makeStyles(theme => ({
+    closeBtn: {
+        margin: '16px'
+    },
+    flx: {
+      //  padding: 0, 
+        display: 'flex'
+    }
+}));

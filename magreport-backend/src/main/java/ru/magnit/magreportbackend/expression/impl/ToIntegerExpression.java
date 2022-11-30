@@ -6,21 +6,17 @@ import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
-public class StrLenExpression extends ParameterizedExpression {
+public class ToIntegerExpression extends ParameterizedExpression {
     private final Pair<String, DataTypeEnum> result = new Pair<>(null, DataTypeEnum.INTEGER);
 
-    public StrLenExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
+    public ToIntegerExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
         super(fieldExpression, context);
     }
 
     @Override
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
-        final var sourceString = parameters.get(0).calculate(rowNumber);
+        final var parameter = parameters.get(0).calculate(rowNumber);
 
-        checkParameterNotNull(parameters.get(0), sourceString);
-        checkParameterHasAnyType(parameters.get(0), sourceString, DataTypeEnum.STRING);
-
-        return result
-            .setL(String.valueOf(sourceString.getL().length()));
+        return result.setL(parameter.getL());
     }
 }
