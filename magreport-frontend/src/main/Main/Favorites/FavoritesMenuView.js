@@ -1,6 +1,8 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
+import { useNavigate } from 'react-router-dom'
+
 // dataHub
 import dataHub from 'ajax/DataHub';
 
@@ -22,6 +24,8 @@ import ReportStarter from 'main/Report/ReportStarter';
 
 function FavoritesMenuView(props){
 
+    const navigate = useNavigate()
+
     const { enqueueSnackbar } = useSnackbar();
 
     let state = props.state;
@@ -37,7 +41,11 @@ function FavoritesMenuView(props){
     function handleFolderClick(folderId){
         props.actionSetSidebarItem(SidebarItems.reports);
         props.actionFolderClick(SidebarItems.reports.folderItemType, folderId)
-        
+    }
+
+    function handleItemClick(reportId) {
+        props.actionItemClick(folderItemsType, reportId)
+        navigate(`/report-starter/${reportId}`)
     }
 
     return(
@@ -60,7 +68,8 @@ function FavoritesMenuView(props){
                     showItemControls = {false}
                     pagination = {false}
                     onFolderClick = {handleFolderClick}
-                    onItemClick = {reportId => props.actionItemClick(folderItemsType, reportId)}
+                    // onItemClick = {reportId => props.actionItemClick(folderItemsType, reportId)}
+                    onItemClick = {handleItemClick}
                     onJobCancelClick = {(jobIndex, jobId) => props.actionJobCancel(folderItemsType, jobIndex, jobId)}
                     onAddDeleteFavorites = {(index, folderId, reportId, isFavorite) => props.actionAddDeleteFavorites(folderItemsType, index, folderId, reportId, isFavorite, enqueueSnackbar)}
                     contextAllowed
@@ -69,12 +78,12 @@ function FavoritesMenuView(props){
                 />
             </DataLoader>
 
-            : state.flowState === favoritesMenuViewFlowStates.startReport ?
-            <ReportStarter
-                reportId = {state.reportId}
-                onCancel = {handleReportCancel}
-                onDataLoadFunction={dataHub.reportController.get}
-            />
+            // : state.flowState === favoritesMenuViewFlowStates.startReport ?
+            // <ReportStarter
+            //     reportId = {state.reportId}
+            //     onCancel = {handleReportCancel}
+            //     onDataLoadFunction={dataHub.reportController.get}
+            // />
 
             : <p>Неизвестное состояние</p>
         }

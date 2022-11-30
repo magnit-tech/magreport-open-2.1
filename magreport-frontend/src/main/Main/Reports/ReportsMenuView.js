@@ -1,6 +1,8 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
+import {useParams, useNavigate} from 'react-router-dom'
+
 // dataHub
 import dataHub from 'ajax/DataHub';
 
@@ -23,11 +25,13 @@ import {FLOW_STATE_BROWSE_FOLDER, reportsMenuViewFlowStates} from 'redux/reducer
 import ReportStarter from 'main/Report/ReportStarter';
 
 function ReportsMenuView(props){
-
     let state = props.state;
+
+    const {id} = useParams()
+    const navigate = useNavigate()
     
     const { enqueueSnackbar } = useSnackbar();
-    
+
     let loadFunc = dataHub.folderController.getFolder;
 
     let reload = {needReload : state.needReload};
@@ -42,13 +46,23 @@ function ReportsMenuView(props){
         props.actionFolderClick(folderItemsType, state.currentFolderId);
     }
 
+    function handleFolderClick(folderId) {
+        props.actionFolderClick(folderItemsType, folderId)
+        navigate(`/${folderItemsType}/${folderId}`)
+    }
+    function handleItemClick(reportId) {
+        props.actionItemClick(folderItemsType, reportId)
+        navigate(`/report-starter/${reportId}`)
+    }
+
     return(
         <div style={{display: 'flex', flex: 1}}>
         {
             state.flowState === FLOW_STATE_BROWSE_FOLDER ?
                 <DataLoader
                     loadFunc = {loadFunc}
-                    loadParams = {[state.currentFolderId]}
+                    // loadParams = {[state.currentFolderId]}
+                    loadParams = {id ? [Number(id)] : [null]}
                     reload = {reload}
                     onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}}
                     onDataLoadFailed = {(message) => {props.actionFolderLoadFailed(folderItemsType, message)}}
@@ -60,8 +74,11 @@ function ReportsMenuView(props){
                         data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
                         searchParams = {state.searchParams || {}}
                         sortParams = {state.sortParams || {}}
-                        onFolderClick = {(folderId) => {props.actionFolderClick(folderItemsType, folderId)}}
-                        onItemClick = {(reportId) => {props.actionItemClick(folderItemsType, reportId)}}
+                        // onFolderClick = {(folderId) => {props.actionFolderClick(folderItemsType, folderId)}}
+                        onFolderClick = {handleFolderClick}
+                        // onItemClick = {(reportId) => {props.actionItemClick(folderItemsType, reportId)}}
+                        onItemClick = {handleItemClick}
+
                         onAddFolder = {(name, description) => {props.actionAddFolder(folderItemsType, state.currentFolderData.id, name, description)}}
                         onAddItemClick = {() => {props.actionAddItemClick(folderItemsType)}}
                         onEditFolderClick = {(folderId, name, description) => {props.actionEditFolder(folderItemsType, state.currentFolderData.id, folderId, name, description)}}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -27,13 +27,21 @@ import { SidebarCSS } from './SidebarCSS';
  * @param {*} props.sidebarItem - объект пункта меню верхнего уровня в SidebarItems
  */
 function SidebarTopLevelMenu(props){
-
     const classes = SidebarCSS();
 
     const location = useLocation()
     const navigate = useNavigate()
 
     const[menuExpanded, setMenuExpanded] = useState(false);
+
+    useEffect(() => {
+        const arr = props.sidebarItem.subItems ? Object.values(props.sidebarItem.subItems) : []
+        arr.forEach(item => {
+            if (item.folderItemType === location.pathname.slice(1)) {
+                return setMenuExpanded(true)
+            }
+        })
+    }, [location])
 
     function handleClick(){
         if(!props.sidebarItem.subItems){
@@ -61,7 +69,7 @@ function SidebarTopLevelMenu(props){
 			<List className={classes.listClassMain}>
 				<Paper key={props.sidebarItem.key} className={classes.paperRoot} elevation={5}>
 					<ListItem 
-						className={classes.listItem + ' ' + (props.currentSidebarItemKey === props.sidebarItem.key ? classes.folderListItemActive : null)} 
+						className={classes.listItem + ' ' + (location.pathname.slice(1) === props.sidebarItem.folderItemType ? classes.folderListItemActive : null)} 
 						onClick={(props.drawerOpen ? handleExpand : handleClick)} button key={props.sidebarItem.key}
 					>
 						{props.sidebarItem.icon && <ListItemIcon className={classes.listIconClass} >{props.sidebarItem.icon}</ListItemIcon>}

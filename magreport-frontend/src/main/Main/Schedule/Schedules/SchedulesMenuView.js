@@ -2,6 +2,8 @@ import React from 'react';
 import {connect} from 'react-redux';
 import {useNavigateBack} from "components/Navbar/navbarHooks";
 
+import { useNavigate } from 'react-router-dom'
+
 // dataHub
 import dataHub from 'ajax/DataHub';
 
@@ -86,6 +88,8 @@ import ScheduleViewer from "./ScheduleViewer";
  */
 function SchedulesMenuView(props) {
 
+    const navigate = useNavigate()
+
     const navigateBack = useNavigateBack();
 
     const state = props.state;
@@ -100,6 +104,19 @@ function SchedulesMenuView(props) {
 
     function handleExit() {
         navigateBack();
+    }
+
+    function handleItemClick(scheduleId) {
+        props.actionItemClick(folderItemsType, scheduleId)
+        navigate(`/schedules/${scheduleId}`)
+    }
+    function handleAddItemClick(folderItemsType) {
+        props.actionAddItemClick(folderItemsType)
+        navigate(`/schedules/add`)
+    }
+    function handleEditItemClick(scheduleId) {
+        props.actionEditItemClick(folderItemsType, scheduleId)
+        navigate(`/schedules/${scheduleId}/edit`)
     }
 
     let component;
@@ -124,22 +141,14 @@ function SchedulesMenuView(props) {
                     data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
                     searchParams={state.searchParams || {}}
                     searchWithoutRecursive
-                    onItemClick={(scheduleId) => {
-                        props.actionItemClick(folderItemsType, scheduleId)
-                    }}
-                    onAddItemClick={() => {
-                        props.actionAddItemClick(folderItemsType)
-                    }}
-                    onEditItemClick={(scheduleId) => {
-                        props.actionEditItemClick(folderItemsType, scheduleId)
-                    }}
-                    onDeleteItemClick={(scheduleId) => {
-                        props.actionDeleteItemClick(folderItemsType, null, scheduleId)
-                    }}
-                    onSearchClick ={searchParams => {props.actionSearchClick(folderItemsType, [], searchParams)}}
+                    onItemClick={handleItemClick}
+                    onAddItemClick={handleAddItemClick}
+                    onEditItemClick={handleEditItemClick}
+                    onDeleteItemClick={scheduleId => { props.actionDeleteItemClick(folderItemsType, null, scheduleId) }}
+                    onSearchClick ={searchParams => { props.actionSearchClick(folderItemsType, [], searchParams) }}
                     contextAllowed
                     sortParams = {state.sortParams || {}}
-                    onSortClick ={sortParams => {props.actionSortClick(folderItemsType, state.currentFolderId, sortParams)}}
+                    onSortClick ={sortParams => { props.actionSortClick(folderItemsType, state.currentFolderId, sortParams) }}
                 />
             </DataLoader>
         );

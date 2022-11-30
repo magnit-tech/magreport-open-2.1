@@ -90,6 +90,9 @@ export default function PlainTablePanel(props){
 
     function handleExcelExport(event, id){
         let excelTemplateId = id
+        console.log(excelTemplateId);
+console.log(props.jobId);
+        console.log(excelTemplates);
         if (id === null || id === undefined) excelTemplateId = excelTemplates.filter(i => i.default)[0].excelTemplateId
 
         // setErrorExport(0);

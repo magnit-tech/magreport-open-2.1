@@ -1,6 +1,8 @@
 import React, {useState} from 'react';
 import { connect } from 'react-redux';
 
+import { useNavigate } from 'react-router-dom'
+
 // dataHub
 import dataHub from 'ajax/DataHub';
 
@@ -20,7 +22,11 @@ import ReportJob from 'main/Report/ReportJob';
 import ReportStarter from 'main/Report/ReportStarter';
 
 function JobsMenuView(props){
+    
+    const navigate = useNavigate()
+
     let state = props.state;
+
     const [reload, setReload] = useState({needReload : false})
 
     let folderItemsType = SidebarItems.jobs.folderItemType;
@@ -35,6 +41,16 @@ function JobsMenuView(props){
 
     function handleRefreshFolder(){
         setReload({needReload : true})
+    }
+
+    function handleItemClick(jobId) {
+        props.actionItemClick(folderItemsType, jobId)
+        navigate(`/report/${jobId}`)
+    }
+
+    function handleReportRunClick(reportId, jobId) {
+        props.actionItemClick(folderItemsType, reportId)
+        navigate(`/report-starter/${reportId}?jobId=${jobId}`)
     }
 
     return(
@@ -56,7 +72,8 @@ function JobsMenuView(props){
                     showAddItem = {false}
                     showItemControls = {false}
                     pagination = {true}
-                    onItemClick = {jobId => {props.actionItemClick(folderItemsType, jobId)}}
+                    // onItemClick = {jobId => {props.actionItemClick(folderItemsType, jobId)}}
+                    onItemClick = {handleItemClick}
                     onReportRunClick = {(reportId, jobId) => {props.startReport(reportId, jobId, SidebarItems.jobs.key, SidebarItems.jobs.folderItemType)}}
                     onFilterClick = {filters => {props.actionFilterJobs(folderItemsType, filters)}}
                     onJobCancelClick = {(jobIndex, jobId) => {props.actionJobCancel(folderItemsType, jobIndex, jobId)}}

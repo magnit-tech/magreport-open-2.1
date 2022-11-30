@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSnackbar } from 'notistack';
 
+import { useParams } from 'react-router-dom'
+
 // dataHub
 import dataHub from 'ajax/DataHub';
 
@@ -36,6 +38,8 @@ const REQUEST_TIMEOUT_INTERVAL_MS = 1000;
  * @param {*} props.onRestartReportClick - function(reportId) - callback перезапуска отчёта
  */
 export default function ReportJob(props){
+    const {id} = useParams()
+
     const classes = ReportDataCSS();
 
     const [reload, setReload] = useState({needReload: true});
@@ -105,13 +109,14 @@ export default function ReportJob(props){
     }
 
     return (
-        !props.jobId || props.jobId === null ?
-            <div></div>
-            :
+        // !props.jobId || props.jobId === null ?
+            // <div></div>
+            // :
             <div className={classes.flexDiv}>
                 <DataLoader
                     loadFunc = {dataHub.reportJobController.get}
-                    loadParams = {[props.jobId]}
+                    // loadParams = {[props.jobId]}
+                    loadParams = {id ? [Number(id)] : [null]}
                     reload = {reload}
                     onDataLoaded = {handleJobInfoLoaded}
                     onDataLoadFailed = {message => {console.log(message)}}
@@ -137,7 +142,7 @@ export default function ReportJob(props){
                             canExecute = {jobData.current.canExecute}
                             reportId = {reportId.current}
                             folderId = {folderId.current}
-                            jobId = {props.jobId}
+                            jobId = {Number(id)}
                             jobOwnerName = {jobOwnerName.current}
                             excelRowLimit = {excelRowLimit.current}
                             excelTemplates = {props.excelTemplates}
