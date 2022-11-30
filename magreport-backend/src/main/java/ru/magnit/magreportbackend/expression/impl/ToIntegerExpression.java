@@ -6,10 +6,10 @@ import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
-public class ToStringExpression extends ParameterizedExpression {
-    private final Pair<String, DataTypeEnum> result = new Pair<>(null, DataTypeEnum.STRING);
+public class ToIntegerExpression extends ParameterizedExpression {
+    private final Pair<String, DataTypeEnum> result = new Pair<>(null, DataTypeEnum.INTEGER);
 
-    public ToStringExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
+    public ToIntegerExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
         super(fieldExpression, context);
     }
 

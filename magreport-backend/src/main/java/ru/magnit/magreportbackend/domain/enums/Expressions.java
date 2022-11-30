@@ -18,6 +18,7 @@ import ru.magnit.magreportbackend.expression.impl.RightSubstrExpression;
 import ru.magnit.magreportbackend.expression.impl.StrLenExpression;
 import ru.magnit.magreportbackend.expression.impl.SubstrExpression;
 import ru.magnit.magreportbackend.expression.impl.SubtractExpression;
+import ru.magnit.magreportbackend.expression.impl.ToIntegerExpression;
 import ru.magnit.magreportbackend.expression.impl.ToStringExpression;
 
 import java.util.function.BiFunction;
@@ -38,7 +39,8 @@ public enum Expressions {
     RIGHT_SUBSTR(RightSubstrExpression::new),
     NVL(NvlExpression::new),
     REPLACE(ReplaceExpression::new),
-    TO_STRING(ToStringExpression::new);
+    TO_STRING(ToStringExpression::new),
+    TO_INTEGER(ToIntegerExpression::new);
 
     private final BiFunction<FieldExpressionResponse, ExpressionCreationContext, BaseExpression> factory;
 
