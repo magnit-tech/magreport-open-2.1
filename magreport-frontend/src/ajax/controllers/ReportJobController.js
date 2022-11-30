@@ -10,7 +10,8 @@ const JOB_CANCEL_URL = CONTROLLER_URL + '/cancel';
 const JOB_SQL_URL = CONTROLLER_URL + '/get-sql-query';
 const JOB_GET_SHARED_JOB_USERS = CONTROLLER_URL + '/get-users-job';
 const JOB_SHARE = CONTROLLER_URL + '/share';
-const GET_HISTORY = CONTROLLER_URL + '/get-history';
+const JOB_GET_HISTORY = CONTROLLER_URL + '/get-history';
+const JOB_ADD_COMMENT = CONTROLLER_URL + '/add-comment';
 
 export default function ReportJobController(dataHub){
 
@@ -44,14 +45,6 @@ export default function ReportJobController(dataHub){
 
         return dataHub.requestService(JOB_GET_DATA_PAGE, METHOD, body, callback);   
     }
-
-    // this.getExcelReport = (jobId, callback) => {
-    //     const body = {
-    //         id : jobId
-    //     };
-
-    //     return dataHub.downloadFile(JOB_EXCEL_REPORT, METHOD, body, callback);          
-    // }
 
     this.getExcelReport = (excelTemplateId, jobId, callback) => {
         const body = {
@@ -120,7 +113,18 @@ export default function ReportJobController(dataHub){
             jobId
         };
 
-        return dataHub.requestService(GET_HISTORY, METHOD, body, callback)
+        return dataHub.requestService(JOB_GET_HISTORY, METHOD, body, callback)
         
     }
+
+    this.addComment = (jobId, comment, callback) => {
+        const body = {
+            jobId,
+            comment
+        };
+
+        return dataHub.requestService(JOB_ADD_COMMENT, METHOD, body, callback)
+        
+    }
+    
 }
