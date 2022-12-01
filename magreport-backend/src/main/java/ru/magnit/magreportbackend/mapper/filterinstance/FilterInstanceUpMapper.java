@@ -19,7 +19,7 @@ public class FilterInstanceUpMapper implements Mapper<FilterInstance, FilterInst
                 .setCode(source.code())
                 .setName(source.name())
                 .setDescription(source.description())
-                .setDataSet(new DataSet(source.datasetId()))
+                .setDataSet(source.datasetId() == null? null : new DataSet(source.datasetId()))
                 .setFilterTemplate(new FilterTemplate(source.filterTemplateId()))
                 .setFolder(new FilterInstanceFolder(source.filterInstanceFolderId()));
     }

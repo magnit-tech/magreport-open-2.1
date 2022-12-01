@@ -20,10 +20,8 @@ public class BackupUpRequest {
     List<Long> dataSources = Collections.emptyList();
     List<Long> reports = Collections.emptyList();
     List<Long> filterInstances = Collections.emptyList();
-    List<Long> filterTemplates = Collections.emptyList();
     List<Long> scheduleTasks = Collections.emptyList();
     List<Long> themes = Collections.emptyList();
-    List<Long> users = Collections.emptyList();
     List<Long> securityFilters = Collections.emptyList();
 
 }
