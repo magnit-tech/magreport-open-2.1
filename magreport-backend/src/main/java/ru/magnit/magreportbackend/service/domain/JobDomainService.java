@@ -194,7 +194,10 @@ public class JobDomainService {
     @Transactional
     public ReportJobResponse getJob(Long jobId) {
         var job = repository.findById(jobId);
-        return job.map(reportJobResponseMapper::from).orElse(null);
+        var response = job.map(reportJobResponseMapper::from).orElseThrow();
+        response.setExcelTemplates(excelTemplateService.getAllReportExcelTemplateToReport(new ReportIdRequest().setId(response.getReport().id())));
+
+        return response;
     }
 
     @Transactional
