@@ -9,6 +9,7 @@ import ru.magnit.magreportbackend.dto.inner.reportjob.ReportJobData;
 import ru.magnit.magreportbackend.dto.request.olap.CubeField;
 import ru.magnit.magreportbackend.dto.request.olap.OlapCubeOutRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequest;
+import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequestNew;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldItemsOutRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldItemsRequest;
 import ru.magnit.magreportbackend.dto.response.ExtOlapCubeResponse;
@@ -88,5 +89,9 @@ public class ExternalOlapService {
             .sorted(Comparator.comparingInt(ReportFieldData::ordinal))
             .map(f -> new CubeField(f.id(), f.dataType().name()))
             .toList();
+    }
+
+    public OlapCubeResponse getCubeNew(OlapCubeRequestNew request) {
+        return null;
     }
 }

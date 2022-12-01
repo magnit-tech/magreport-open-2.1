@@ -69,7 +69,7 @@ export default function TableRangeControl(props) {
                 fontSize={10} 
                 fontWeight={"fontWeightMedium"} 
             >
-                {props.position}        
+                {props.position + 1}        
             </Box>
                
             <Slider

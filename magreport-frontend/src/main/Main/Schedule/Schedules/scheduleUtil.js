@@ -40,7 +40,8 @@ export const initialData = {
     weekEndMonth: 1,
     weekMonth: 1,
     differenceTime: 0,
-    intervalMinutes: 5
+    intervalMinutes: 5,
+    finishTime: "00:00:00"
 };
 
 export const weekDays = [

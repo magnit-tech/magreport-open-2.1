@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -16,6 +18,7 @@ import ru.magnit.magreportbackend.dto.inner.olap.OlapUserRequestLog;
 import ru.magnit.magreportbackend.dto.request.DatePeriodRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapConfigRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequest;
+import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequestNew;
 import ru.magnit.magreportbackend.dto.request.olap.OlapExportPivotTableRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldItemsRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapServiceRegisterInfo;
@@ -34,6 +37,7 @@ import ru.magnit.magreportbackend.dto.response.olap.OlapFieldItemsResponse;
 import ru.magnit.magreportbackend.dto.response.olap.OlapInfoCubesResponse;
 import ru.magnit.magreportbackend.dto.response.olap.OlapRequestGeneralInfo;
 import ru.magnit.magreportbackend.dto.response.olap.ReportOlapConfigResponse;
+import ru.magnit.magreportbackend.dto.response.reportjob.TokenResponse;
 import ru.magnit.magreportbackend.dto.response.user.UserShortInfoResponse;
 import ru.magnit.magreportbackend.exception.OlapException;
 import ru.magnit.magreportbackend.service.ExternalOlapManager;
@@ -43,6 +47,7 @@ import ru.magnit.magreportbackend.service.OlapLogService;
 import ru.magnit.magreportbackend.service.OlapService;
 import ru.magnit.magreportbackend.service.ReportJobService;
 import ru.magnit.magreportbackend.service.UserService;
+import ru.magnit.magreportbackend.service.domain.TokenService;
 import ru.magnit.magreportbackend.util.LogHelper;
 import ru.magnit.magreportbackend.util.MultipartFileSender;
 
@@ -66,6 +71,7 @@ public class OlapController {
     private int maxDop;
 
     public static final String OLAP_GET_CUBE = "/api/v1/olap/get-cube";
+    public static final String OLAP_GET_CUBE_NEW = "/api/v1/olap/get-cube-new";
     public static final String OLAP_GET_FIELD_VALUES = "/api/v1/olap/get-field-values";
     public static final String OLAP_CONFIGURATION_UPDATE = "/api/v1/olap/configuration/update";
     public static final String OLAP_CONFIGURATION_REPORT_ADD = "/api/v1/olap/configuration/report-add";
@@ -81,7 +87,8 @@ public class OlapController {
     public static final String OLAP_GET_LOG_INFO = "/api/v1/olap/get-log-info";
     public static final String OLAP_REGISTER_EXTERNAL_SERVICE = "/api/v1/olap/register-service";
     public static final String OLAP_GET_EXTERNAL_SERVICES = "/api/v1/olap/get-external-services";
-    public static final String OLAP_GET_PIVOT_TABLE_EXCEL = "/api/v1/olap/get-excel-pivot-table";
+    public static final String OLAP_GET_PIVOT_TABLE_EXCEL = "/api/v1/olap/create-excel-pivot-table";
+    public static final String OLAP_GET_PIVOT_TABLE_EXCEL_GET = "/api/v1/olap/excel-pivot-table/{pivotToken}";
 
     private final OlapService olapService;
     private final ExternalOlapService externalOlapService;
@@ -91,6 +98,8 @@ public class OlapController {
     private final OlapLogService olapLogService;
     private final ExternalOlapManager externalOlapManager;
     private final ReportJobService reportJobService;
+
+    private final TokenService tokenService;
 
     private Semaphore semaphore;
 
@@ -127,6 +136,45 @@ public class OlapController {
                         .message("")
                         .data(olapService.getCube(request))
                         .build();
+            } catch (Exception ex) {
+                throw new OlapException("Error executing OLAP request: " + ex.getMessage(), ex);
+            } finally {
+                semaphore.release();
+            }
+        }
+
+        LogHelper.logInfoUserMethodEnd();
+        return response;
+    }
+
+    @Operation(summary = "Получение среза OLAP куба с производными полями")
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping(value = OLAP_GET_CUBE_NEW,
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE)
+    public ResponseBody<OlapCubeResponse> getCubeNew(
+        @RequestBody
+        OlapCubeRequestNew request) throws JsonProcessingException, InterruptedException {
+        ResponseBody<OlapCubeResponse> response;
+        LogHelper.logInfoUserMethodStart();
+
+        LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_GET_CUBE, request, userService.getCurrentUserName()));
+
+        if (outService) {
+            response = ResponseBody.<OlapCubeResponse>builder()
+                .success(true)
+                .message("")
+                .data(externalOlapService.getCubeNew(request))
+                .build();
+
+        } else {
+            semaphore.acquire();
+            try {
+                response = ResponseBody.<OlapCubeResponse>builder()
+                    .success(true)
+                    .message("")
+                    .data(olapService.getCubeNew(request))
+                    .build();
             } catch (Exception ex) {
                 throw new OlapException("Error executing OLAP request: " + ex.getMessage(), ex);
             } finally {
@@ -438,23 +486,48 @@ public class OlapController {
         return response;
     }
 
-    @Operation(description = "Выгрузка сводной таблицы в Excel")
+
+    @Operation(summary = "Получение сводной таблицы в Excel")
     @ResponseStatus(HttpStatus.OK)
-    @PostMapping(value = OLAP_GET_PIVOT_TABLE_EXCEL,
-            consumes = APPLICATION_JSON_VALUE,
-            produces = APPLICATION_JSON_VALUE)
-    public void exportPivotTableExcel(
-            @RequestBody
-            OlapExportPivotTableRequest dataRequest, HttpServletRequest request, HttpServletResponse response) throws Exception {
+    @GetMapping(value = OLAP_GET_PIVOT_TABLE_EXCEL_GET)
+    public void getExcelPivotTable(
+            @PathVariable
+            String pivotToken, HttpServletRequest request, HttpServletResponse response ) throws Exception {
         LogHelper.logInfoUserMethodStart();
 
-        final var fileName = reportJobService.getJob(dataRequest.getCubeRequest().getJobId()).getReport().name();
+        final var value = tokenService.getAssociatedValue(pivotToken);
+        final var jobId = value.getL();
+        final var userId = value.getR();
+        final var fileName = reportJobService.getJob(jobId).getReport().name();
 
         LogHelper.logInfoUserMethodEnd();
-        MultipartFileSender.fromPath(olapService.exportPivotTableExcel(dataRequest), fileName)
+
+        MultipartFileSender.fromPath(olapService.getExcelPivotPath(jobId,userId), fileName)
                 .with(request)
                 .with(response)
                 .serveResource();
+
+
+    }
+
+    @Operation(description = "Получение токена сводной таблицы в Excel")
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping(value = OLAP_GET_PIVOT_TABLE_EXCEL)
+    public ResponseBody<TokenResponse> exportPivotTableExcel(
+            @RequestBody
+            OlapExportPivotTableRequest dataRequest) throws Exception {
+        LogHelper.logInfoUserMethodStart();
+
+
+        var dataResponse = ResponseBody.<TokenResponse>builder()
+                .success(true)
+                .message("")
+                .data(olapService.exportPivotTableExcel(dataRequest))
+                .build();
+
+        LogHelper.logInfoUserMethodEnd();
+
+        return dataResponse;
     }
 
 }

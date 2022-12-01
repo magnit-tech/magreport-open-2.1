@@ -7,8 +7,9 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
-import ru.magnit.magreportbackend.domain.derivedfield.Expressions;
+import ru.magnit.magreportbackend.domain.enums.Expressions;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -23,4 +24,13 @@ public class FieldExpressionResponse {
     private String constantValue;
     private DataTypeEnum constantType;
     private List<FieldExpressionResponse> parameters;
+
+    public List<FieldExpressionResponse> getChildExpressions() {
+        final var result = new ArrayList<>(parameters);
+        for (final var parameter: parameters) {
+            result.addAll(parameter.getChildExpressions());
+        }
+
+        return result;
+    }
 }

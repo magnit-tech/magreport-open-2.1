@@ -18,6 +18,7 @@ import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobShareRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportPageRequest;
 import ru.magnit.magreportbackend.dto.response.filterreport.FilterReportResponse;
 import ru.magnit.magreportbackend.dto.response.report.ReportResponse;
+import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobHistoryResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobMetadataResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportPageResponse;
@@ -76,7 +77,6 @@ public class ReportJobService {
     private final UserDomainService userDomainService;
     private final TokenService tokenService;
     private final ReportJobUserDomainService reportJobUserDomainService;
-
     private final OlapConfigurationDomainService olapConfigurationDomainService;
 
     public TokenResponse createExcelReport(ExcelReportRequest request) {
@@ -341,5 +341,10 @@ public class ReportJobService {
         if (filter.getStatuses() != null && !filter.getStatuses().isEmpty() && !filter.getStatuses().contains(source.getStatus())) result = false;
         if (filter.getUsers() != null && !filter.getUsers().isEmpty() && !filter.getUsers().contains(source.getUser().name())) result = false;
         return result;
+    }
+
+    public ReportJobHistoryResponse getHistory(ReportJobRequest request) {
+        final var history = jobDomainService.getJobStatHistory(request.getJobId());
+        return new ReportJobHistoryResponse(request.getJobId(), history);
     }
 }
