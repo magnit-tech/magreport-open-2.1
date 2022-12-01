@@ -566,9 +566,10 @@ public class BackupService {
                     .filter(s -> s.length() > 1 && !s.contains("[]"))
                     .collect(Collectors.toMap(s -> s.substring(0, s.indexOf(":")).replaceAll("\"", ""), s -> s.substring(s.indexOf("["))));
 
-            loadDataSource(Collections.singletonList(15L), lines, resultMap);
-            loadDataSet(Collections.singletonList(243L), lines, resultMap);
-            loadReport(Collections.singletonList(129L), lines, resultMap);
+            //loadDataSource(Collections.singletonList(15L), lines, resultMap);
+            //loadDataSet(Collections.singletonList(243L), lines, resultMap);
+            //loadFilterInstance(Collections.singletonList(108L), lines, resultMap);
+            loadReport(Collections.singletonList(48L), lines, resultMap);
 
 
 
@@ -583,54 +584,29 @@ public class BackupService {
         var resultFolders = resultMap.get(DataSourceFolder.class);
         var resultDataSources = resultMap.get(DataSource.class);
 
-        listDataSourceId = listDataSourceId.stream().filter(id -> !resultDataSources.containsKey(id)).collect(Collectors.toList());
-
         var dataSources = Arrays.stream(objectMapper.readValue(linesBackup.get("DataSource"), DataSourceBackupTuple[].class))
                 .collect(Collectors.toMap(DataSourceBackupTuple::dataSourceId, o -> o));
 
-        var datasourceFolders = Arrays.stream(objectMapper.readValue(linesBackup.get("DataSourceFolder"), DataSourceFolderBackupTuple[].class))
-                .collect(Collectors.toMap(DataSourceFolderBackupTuple::dataSourceFolderId, o -> o));
-
-        listDataSourceId.stream().map(d -> dataSources.get(d).dataSourceFolderId()).distinct().forEach(d -> {
-            var listDataSourceFolderId = new ArrayList<Long>();
-
-            Long currentIdFolder = d;
-            while (currentIdFolder != null) {
-                listDataSourceFolderId.add(currentIdFolder);
-                var folder = datasourceFolders.get(currentIdFolder);
-                currentIdFolder = folder.parentId();
-            }
-            Collections.reverse(listDataSourceFolderId);
-
-            listDataSourceFolderId
-                    .stream()
-                    .map(datasourceFolders::get)
-                    .map(dataSourceFolderUpMapper::from)
-                    .forEach(dataSourceFolder -> {
-                        var oldId = dataSourceFolder.getId();
-                        var oldParentId = dataSourceFolder.getParentFolder().getId();
-                        dataSourceFolder.setId(null);
-                        dataSourceFolder.setParentFolder(resultFolders.containsKey(oldParentId) ? new DataSourceFolder().setId(resultFolders.get(oldParentId)) : null);
-
-                        resultFolders.put(oldId, dataSourceFolderRepository.save(dataSourceFolder).getId());
-                    });
-        });
-
         listDataSourceId
                 .stream()
+                .filter(id -> !resultDataSources.containsKey(id))
                 .map(dataSources::get)
                 .map(dataSourceUpMapper::from)
                 .forEach(dataSource -> {
                     var oldId = dataSource.getId();
-                    var oldFolderId = dataSource.getFolder().getId();
+
+                    if (!resultFolders.containsKey(dataSource.getFolder().getId()))
+                        loadDataSourceFolder(dataSource.getFolder().getId(), linesBackup, resultMap);
 
                     dataSource.setId(null);
-                    dataSource.setFolder(new DataSourceFolder(resultFolders.get(oldFolderId)));
+                    dataSource.setFolder(new DataSourceFolder(resultFolders.get(dataSource.getFolder().getId())));
                     dataSource.setUser(new User(userId));
+
                     resultDataSources.put(oldId, dataSourceRepository.save(dataSource).getId());
                 });
     }
-    private void loadDataSet(List<Long> listDataSet, Map<String, String> linesBackup,Map<Class<?>, Map<Long, Long>> resultMap) {
+
+    private void loadDataSet(List<Long> listDataSet, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap) {
         try {
 
             var userId = userDomainService.getCurrentUser().getId();
@@ -645,35 +621,7 @@ public class BackupService {
             var dataSets = Arrays.stream(objectMapper.readValue(linesBackup.get("DataSet"), DatasetBackupTuple[].class))
                     .collect(Collectors.toMap(DatasetBackupTuple::datasetId, o -> o));
 
-            var dataSetFolders = Arrays.stream(objectMapper.readValue(linesBackup.get("DataSetFolder"), DatasetFolderBackupTuple[].class))
-                    .collect(Collectors.toMap(DatasetFolderBackupTuple::datasetFolderId, o -> o));
-
             var dataSetFields = Arrays.stream(objectMapper.readValue(linesBackup.get("DataSetField"), DatasetFieldBackupTuple[].class)).toList();
-
-            listDataSet.stream().map(d -> dataSets.get(d).datasetFolderId()).distinct().forEach(d -> {
-                var listDataSetFolderId = new ArrayList<Long>();
-
-                Long currentIdFolder = d;
-                while (currentIdFolder != null) {
-                    listDataSetFolderId.add(currentIdFolder);
-                    var folder = dataSetFolders.get(currentIdFolder);
-                    currentIdFolder = folder.parentId();
-                }
-                Collections.reverse(listDataSetFolderId);
-
-                listDataSetFolderId
-                        .stream()
-                        .map(dataSetFolders::get)
-                        .map(dataSetFolderUpMapper::from)
-                        .forEach(dataSetFolder -> {
-                            var oldId = dataSetFolder.getId();
-                            var oldParentId = dataSetFolder.getParentFolder().getId();
-                            dataSetFolder.setId(null);
-                            dataSetFolder.setParentFolder(resultFolders.containsKey(oldParentId) ? new DataSetFolder(resultFolders.get(oldParentId)) : null);
-
-                            resultFolders.put(oldId, dataSetFolderRepository.save(dataSetFolder).getId());
-                        });
-            });
 
             listDataSet
                     .stream()
@@ -681,11 +629,9 @@ public class BackupService {
                     .map(dataSetUpMapper::from)
                     .forEach(dataSet -> {
                         var oldId = dataSet.getId();
-                        var oldFolderId = dataSet.getFolder().getId();
 
-                        dataSet.setId(null);
-                        dataSet.setFolder(new DataSetFolder(resultFolders.get(oldFolderId)));
-                        dataSet.setUser(new User(userId));
+                        if (!resultFolders.containsKey(dataSet.getFolder().getId()))
+                            loadDataSetFolder(dataSet.getFolder().getId(), linesBackup, resultMap);
 
                         if (!resultDataSources.containsKey(dataSet.getDataSource().getId())) {
                             try {
@@ -695,6 +641,9 @@ public class BackupService {
                             }
                         }
 
+                        dataSet.setId(null);
+                        dataSet.setFolder(new DataSetFolder(resultFolders.get(dataSet.getFolder().getId())));
+                        dataSet.setUser(new User(userId));
                         dataSet.setDataSource(new DataSource(resultDataSources.get(dataSet.getDataSource().getId())));
                         resultDataSets.put(oldId, dataSetRepository.save(dataSet).getId());
 
@@ -714,8 +663,86 @@ public class BackupService {
         } catch (JsonProcessingException e) {
             throw new JsonParseException(e.getMessage(), e.getCause());
         }
+    }
+
+    private void loadDataSourceFolder(Long dataSourceFolderId, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap){
+
+        try {
+
+            var resultFolders = resultMap.get(DataSetFolder.class);
+
+            var folders = Arrays.stream(objectMapper.readValue(linesBackup.get("DataSourceFolder"), DataSourceFolderBackupTuple[].class))
+                    .collect(Collectors.toMap(DataSourceFolderBackupTuple::dataSourceFolderId, o -> o));
+
+            var listDataSourceFolderId = new ArrayList<Long>();
+
+            Long currentIdFolder = dataSourceFolderId;
+            while (currentIdFolder != null) {
+                listDataSourceFolderId.add(currentIdFolder);
+                var folder = folders.get(currentIdFolder);
+                currentIdFolder = folder.parentId();
+            }
+            Collections.reverse(listDataSourceFolderId);
+
+            listDataSourceFolderId
+                    .stream()
+                    .map(folders::get)
+                    .filter(folder -> !resultFolders.containsKey(folder.dataSourceFolderId()))
+                    .map(dataSourceFolderUpMapper::from)
+                    .forEach(folder -> {
+                        var oldId = folder.getId();
+                        var oldParentId = folder.getParentFolder().getId();
+                        folder.setId(null);
+                        folder.setParentFolder(resultFolders.containsKey(oldParentId) ? new DataSourceFolder(resultFolders.get(oldParentId)) : null);
+
+                        resultFolders.put(oldId, dataSourceFolderRepository.save(folder).getId());
+                    });
+
+
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage(), e.getCause());
+        }
 
     }
+
+    private void loadDataSetFolder(Long datasetFolderId, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap) {
+        try {
+
+            var resultFolders = resultMap.get(DataSetFolder.class);
+
+            var datasetFolders = Arrays.stream(objectMapper.readValue(linesBackup.get("DataSetFolder"), DatasetFolderBackupTuple[].class))
+                    .collect(Collectors.toMap(DatasetFolderBackupTuple::datasetFolderId, o -> o));
+
+            var listDatasetFolderId = new ArrayList<Long>();
+
+            Long currentIdFolder = datasetFolderId;
+            while (currentIdFolder != null) {
+                listDatasetFolderId.add(currentIdFolder);
+                var folder = datasetFolders.get(currentIdFolder);
+                currentIdFolder = folder.parentId();
+            }
+            Collections.reverse(listDatasetFolderId);
+
+            listDatasetFolderId
+                    .stream()
+                    .map(datasetFolders::get)
+                    .filter(datasetFolder -> !resultFolders.containsKey(datasetFolder.datasetFolderId()))
+                    .map(dataSetFolderUpMapper::from)
+                    .forEach(dataSetFolder -> {
+                        var oldId = dataSetFolder.getId();
+                        var oldParentId = dataSetFolder.getParentFolder().getId();
+                        dataSetFolder.setId(null);
+                        dataSetFolder.setParentFolder(resultFolders.containsKey(oldParentId) ? new DataSetFolder(resultFolders.get(oldParentId)) : null);
+
+                        resultFolders.put(oldId, dataSetFolderRepository.save(dataSetFolder).getId());
+                    });
+
+
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage(), e.getCause());
+        }
+    }
+
     private void loadReport(List<Long> listReport, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap) throws JsonProcessingException {
 
         var userId = userDomainService.getCurrentUser().getId();
@@ -723,43 +750,11 @@ public class BackupService {
         var resultReports = resultMap.get(Report.class);
         var resultReportFolders = resultMap.get(ReportFolder.class);
         var resultDataSets = resultMap.get(DataSet.class);
-        var resultReportFields = resultMap.get(ReportField.class);
-        var resultDataSetFields = resultMap.get(DataSetField.class);
 
         listReport = listReport.stream().filter(id -> !resultReports.containsKey(id)).collect(Collectors.toList());
 
-        var reportFields = Arrays.stream(objectMapper.readValue(linesBackup.get("ReportField"), ReportFieldBackupTuple[].class)).toList();
-
         var reports = Arrays.stream(objectMapper.readValue(linesBackup.get("Report"), ReportBackupTuple[].class))
                 .collect(Collectors.toMap(ReportBackupTuple::reportId, o -> o));
-
-        var reportFolders = Arrays.stream(objectMapper.readValue(linesBackup.get("ReportFolder"), ReportFolderBackupTuple[].class))
-                .collect(Collectors.toMap(ReportFolderBackupTuple::reportFolderId, o -> o));
-
-        listReport.stream().map(r -> reports.get(r).reportFolderId()).distinct().forEach(r -> {
-            var listReportFolderId = new ArrayList<Long>();
-
-            Long currentIdFolder = r;
-            while (currentIdFolder != null) {
-                listReportFolderId.add(currentIdFolder);
-                var folder = reportFolders.get(currentIdFolder);
-                currentIdFolder = folder.parentId();
-            }
-            Collections.reverse(listReportFolderId);
-
-            listReportFolderId
-                    .stream()
-                    .map(reportFolders::get)
-                    .map(reportFolderUpMapper::from)
-                    .forEach(reportFolder -> {
-                        var oldId = reportFolder.getId();
-                        var oldParentId = reportFolder.getParentFolder().getId();
-                        reportFolder.setId(null);
-                        reportFolder.setParentFolder(resultReportFolders.containsKey(oldParentId) ? new ReportFolder(resultReportFolders.get(oldParentId)) : null);
-
-                        resultReportFolders.put(oldId, reportFolderRepository.save(reportFolder).getId());
-                    });
-        });
 
         listReport
                 .stream()
@@ -767,37 +762,26 @@ public class BackupService {
                 .map(reportUpMapper::from)
                 .forEach(report -> {
                     var oldId = report.getId();
-                    var oldFolderId = report.getFolder().getId();
 
-                    report.setId(null);
-                    report.setFolder(new ReportFolder(resultReportFolders.get(oldFolderId)));
-                    report.setUser(new User(userId));
+                    if(!resultReportFolders.containsKey(report.getFolder().getId()))
+                        loadReportFolder(report.getFolder().getId(), linesBackup, resultMap);
 
                     if (!resultDataSets.containsKey(report.getDataSet().getId()))
                         loadDataSet(Collections.singletonList(report.getDataSet().getId()), linesBackup, resultMap);
 
-
+                    report.setId(null);
+                    report.setFolder(new ReportFolder(resultReportFolders.get(report.getFolder().getId())));
+                    report.setUser(new User(userId));
                     report.setDataSet(new DataSet(resultDataSets.get(report.getDataSet().getId())));
 
                     resultReports.put(oldId, reportRepository.save(report).getId());
 
-                    reportFields
-                            .stream()
-                            .filter(rf -> rf.reportId().equals(oldId))
-                            .map(reportFieldUpMapper::from)
-                            .forEach(rf -> {
-                                var old = rf.getId();
-                                rf.setId(null);
-                                rf.setReport(new Report(resultReports.get(oldId)));
-                                rf.setDataSetField(new DataSetField(resultDataSetFields.get(rf.getDataSetField().getId())));
-
-                                resultReportFields.put(old, reportFieldRepository.save(rf).getId());
-                            });
-
+                    loadReportField(oldId, linesBackup, resultMap);
                     loadFilterReportGroup(oldId, linesBackup, resultMap);
 
                 });
     }
+
     private void loadFilterReportGroup(Long reportId, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap) {
 
         try {
@@ -833,7 +817,7 @@ public class BackupService {
                         f.setId(null);
                         f.setParentGroup(new FilterReportGroup(resultFRG.get(f.getParentGroup().getId())));
                         f.setReport(new Report(resultReport.get(reportId)));
-
+                        filterReportGroupIds.add(oldId);
                         resultFRG.put(oldId, filterReportGroupRepository.save(f).getId());
                         itr.remove();
                     }
@@ -846,6 +830,7 @@ public class BackupService {
             throw new JsonParseException(e.getMessage(), e.getCause());
         }
     }
+
     private void loadFilterReport(Long filterReportGroupId, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap) {
 
         try {
@@ -879,6 +864,7 @@ public class BackupService {
             throw new JsonParseException(e.getMessage(), e.getCause());
         }
     }
+
     private void loadFilterInstance(List<Long> filterInstanceIds, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap) {
         try {
             var userId = userDomainService.getCurrentUser().getId();
@@ -894,13 +880,13 @@ public class BackupService {
                         if (!resultFIFolder.containsKey(fi.getFolder().getId()))
                             loadFilterInstanceFolder(fi.getFolder().getId(), linesBackup, resultMap);
 
-                        if (!resultDataSets.containsKey(fi.getDataSet().getId()))
+                        if (fi.getDataSet() != null && !resultDataSets.containsKey(fi.getDataSet().getId()))
                             loadDataSet(Collections.singletonList(fi.getDataSet().getId()), linesBackup, resultMap);
 
                         var oldId = fi.getId();
                         fi.setId(null);
                         fi.setFolder(new FilterInstanceFolder(resultFIFolder.get(fi.getFolder().getId())));
-                        fi.setDataSet(new DataSet(resultDataSets.get(fi.getDataSet().getId())));
+                        fi.setDataSet(fi.getDataSet() == null ? null : new DataSet(resultDataSets.get(fi.getDataSet().getId())));
                         fi.setUser(new User(userId));
 
                         resultFI.put(oldId, filterInstanceRepository.save(fi).getId());
@@ -914,9 +900,8 @@ public class BackupService {
         }
 
     }
+
     private void loadFilterReportField(Long filterReportId, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap) {
-
-
         try {
             var resultFR = resultMap.get(FilterReport.class);
             var resultFRF = resultMap.get(FilterReportField.class);
@@ -942,6 +927,30 @@ public class BackupService {
         }
 
     }
+
+    private void loadReportField(Long reportId,  Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap){
+        try {
+            var resultReports = resultMap.get(Report.class);
+            var resultReportFields = resultMap.get(ReportField.class);
+            var resultDataSetFields = resultMap.get(DataSetField.class);
+
+        Arrays.stream(objectMapper.readValue(linesBackup.get("ReportField"), ReportFieldBackupTuple[].class))
+                .filter(rf -> rf.reportId().equals(reportId))
+                .map(reportFieldUpMapper::from)
+                .forEach(rf -> {
+                    var old = rf.getId();
+                    rf.setId(null);
+                    rf.setReport(new Report(resultReports.get(reportId)));
+                    rf.setDataSetField(new DataSetField(resultDataSetFields.get(rf.getDataSetField().getId())));
+
+                    resultReportFields.put(old, reportFieldRepository.save(rf).getId());
+                });
+
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage(), e.getCause());
+        }
+    }
+
     private void loadFilterInstanceField(Long filterInstanceId, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap) {
 
         try {
@@ -955,7 +964,7 @@ public class BackupService {
                     .forEach(fif -> {
                         var oldId = fif.getId();
                         fif.setId(null);
-                        fif.setDataSetField(new DataSetField(resultDataSetFields.get(fif.getDataSetField().getId())));
+                        fif.setDataSetField(fif.getDataSetField().getId() == null ?  null : new DataSetField(resultDataSetFields.get(fif.getDataSetField().getId())));
                         fif.setInstance(new FilterInstance(resultFI.get(fif.getInstance().getId())));
 
                         resultFIF.put(oldId, filterInstanceFieldRepository.save(fif).getId());
@@ -966,7 +975,8 @@ public class BackupService {
         }
 
     }
-    private void loadFilterInstanceFolder(Long filterInstanceId, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap) {
+
+    private void loadFilterInstanceFolder(Long filterInstanceFolderId, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap) {
 
         try {
             var resultFIFolder = resultMap.get(FilterInstanceFolder.class);
@@ -976,7 +986,7 @@ public class BackupService {
 
             var listFilterInstanceFolderId = new ArrayList<Long>();
 
-            Long currentIdFolder = filterInstanceId;
+            Long currentIdFolder = filterInstanceFolderId;
             while (currentIdFolder != null) {
                 listFilterInstanceFolderId.add(currentIdFolder);
                 var folder = filterInstanceFolders.get(currentIdFolder);
@@ -1003,8 +1013,42 @@ public class BackupService {
 
     }
 
-    private void writeRow(String nameObject, List<String> objects, BufferedWriter writer, boolean endRow) throws
-            IOException {
+    private void loadReportFolder(Long reportFolderId, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap){
+        try {
+            var resultFolder = resultMap.get(ReportFolder.class);
+
+            var filterInstanceFolders = Arrays.stream(objectMapper.readValue(linesBackup.get("ReportFolder"), ReportFolderBackupTuple[].class))
+                    .collect(Collectors.toMap(ReportFolderBackupTuple::reportFolderId, o -> o));
+
+            var listReportFolderId = new ArrayList<Long>();
+
+            Long currentIdFolder = reportFolderId;
+            while (currentIdFolder != null) {
+                listReportFolderId.add(currentIdFolder);
+                var folder = filterInstanceFolders.get(currentIdFolder);
+                currentIdFolder = folder.parentId();
+            }
+            Collections.reverse(listReportFolderId);
+
+            listReportFolderId
+                    .stream()
+                    .map(filterInstanceFolders::get)
+                    .filter(reportFolder -> !resultFolder.containsKey(reportFolder.reportFolderId()))
+                    .map(reportFolderUpMapper::from)
+                    .forEach(reportFolder -> {
+                        var oldId = reportFolder.getId();
+                        var oldParentId = reportFolder.getParentFolder().getId();
+                        reportFolder.setId(null);
+                        reportFolder.setParentFolder(resultFolder.containsKey(oldParentId) ? new ReportFolder(resultFolder.get(oldParentId)) : null);
+
+                        resultFolder.put(oldId, reportFolderRepository.save(reportFolder).getId());
+                    });
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage(), e.getCause());
+        }
+    }
+
+    private void writeRow(String nameObject, List<String> objects, BufferedWriter writer, boolean endRow) throws IOException {
         writer.write("\"" + nameObject + "\":" + objects + (endRow ? "" : ","));
         writer.newLine();
     }
