@@ -22,6 +22,7 @@ import ru.magnit.magreportbackend.dto.response.report.ReportResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobBaseStats;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobMetadataResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobResponse;
+import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobStatisticsResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobUserResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportSqlQueryResponse;
 import ru.magnit.magreportbackend.exception.FileSystemException;
@@ -33,6 +34,7 @@ import ru.magnit.magreportbackend.mapper.reportjob.ReportJobMapper;
 import ru.magnit.magreportbackend.mapper.reportjob.ReportJobMetadataResponseMapper;
 import ru.magnit.magreportbackend.mapper.reportjob.ReportJobResponseMapper;
 import ru.magnit.magreportbackend.mapper.reportjob.ReportJobResponseTupleMapper;
+import ru.magnit.magreportbackend.mapper.reportjob.ReportJobStatisticsResponseMapper;
 import ru.magnit.magreportbackend.mapper.reportjob.ReportJobUserResponseMapper;
 import ru.magnit.magreportbackend.repository.ReportJobFilterRepository;
 import ru.magnit.magreportbackend.repository.ReportJobRepository;
@@ -79,8 +81,8 @@ public class JobDomainService {
     private final ReportJobResponseTupleMapper reportJobResponseTupleMapper;
     private final ReportJobFilterResponseMapper reportJobFilterResponseMapper;
     private final ReportJobMetadataResponseMapper reportJobMetadataResponseMapper;
-
     private final ReportJobUserResponseMapper reportJobUserResponseMapper;
+    private final ReportJobStatisticsResponseMapper statisticsResponseMapper;
 
     @Value("${magreport.jobengine.job-retention-time}")
     private Long jobRetentionTime;
@@ -373,6 +375,15 @@ public class JobDomainService {
         job.setModifiedDateTime(LocalDateTime.now());
         repository.save(job);
 
+    }
+
+    @Transactional
+    public List<ReportJobStatisticsResponse> getJobStatHistory(Long jobId) {
+        return statisticsRepository
+            .getAllByReportJobIdOrderById(jobId)
+            .stream()
+            .map(statisticsResponseMapper::from)
+            .toList();
     }
 
     private boolean checkFinalStatus(Long status) {

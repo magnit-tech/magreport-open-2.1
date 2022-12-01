@@ -111,7 +111,10 @@ function DataHub(){
                                 let data = json.data
                                 if (serviceUrl === '/report-job/get-excel-report'){
                                     data.urlFile = `${BASE_URL}/report-job/excel-report/`
+                                } else if (serviceUrl === '/olap/create-excel-pivot-table') {
+                                    data.urlFile = `${BASE_URL}/olap/excel-pivot-table/`
                                 }
+
                                 callback(new MagrepResponse(true, data, requestId));
                             }
                             else{

@@ -45,6 +45,7 @@ import ru.magnit.magreportbackend.service.domain.FolderEntitySearchDomainService
 import ru.magnit.magreportbackend.service.domain.FolderPermissionsDomainService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
 import ru.magnit.magreportbackend.service.domain.MailTextDomainService;
+import ru.magnit.magreportbackend.service.domain.OlapConfigurationDomainService;
 import ru.magnit.magreportbackend.service.domain.ReportDomainService;
 import ru.magnit.magreportbackend.service.domain.ScheduleTaskDomainService;
 import ru.magnit.magreportbackend.service.domain.SecurityFilterDomainService;
@@ -79,6 +80,7 @@ public class ReportService {
     private final ReportResponseMapper reportResponseMapper;
     private final PermissionCheckerSystem permissionCheckerSystem;
     private final SecurityFilterDomainService securityFilterDomainService;
+    private final OlapConfigurationDomainService olapConfigurationDomainService;
 
     public ReportFolderResponse getFolder(FolderRequest request) {
 
@@ -170,13 +172,11 @@ public class ReportService {
     }
 
     public void deleteReport(ReportRequest request) {
-        reportDomainService.deleteReport(request.getId());
+        olapConfigurationDomainService.deleteReportOlapConfigurationByReport(request.getId());
+        scheduleTaskDomainService.deleteScheduleTaskByReport(request.getId());
         excelTemplateDomainService.removeReportExcelTemplate(request.getId());
-        scheduleTaskDomainService.findScheduleTaskByReport(request.getId())
-                .forEach(task -> {
-                    scheduleTaskDomainService.setStatusScheduleTask(task.getId(), ScheduleTaskStatusEnum.CHANGED);
-                    mailTextDomainService.sendScheduleMailChanged(task);
-                });
+        reportDomainService.deleteReport(request.getId());
+
     }
 
     public ReportResponse getReport(ReportRequest request) {

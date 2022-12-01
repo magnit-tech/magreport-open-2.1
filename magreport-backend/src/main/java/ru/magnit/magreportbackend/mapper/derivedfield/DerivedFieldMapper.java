@@ -6,7 +6,7 @@ import ru.magnit.magreportbackend.domain.dataset.DataType;
 import ru.magnit.magreportbackend.domain.derivedfield.DerivedField;
 import ru.magnit.magreportbackend.domain.derivedfield.DerivedFieldExpression;
 import ru.magnit.magreportbackend.domain.derivedfield.Expression;
-import ru.magnit.magreportbackend.domain.derivedfield.Expressions;
+import ru.magnit.magreportbackend.domain.enums.Expressions;
 import ru.magnit.magreportbackend.domain.report.Report;
 import ru.magnit.magreportbackend.domain.report.ReportField;
 import ru.magnit.magreportbackend.domain.user.User;

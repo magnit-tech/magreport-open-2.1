@@ -389,5 +389,10 @@
       "name": "magreport.jobengine.pending-connection-retry-interval",
       "type": "java.lang.Long",
       "description": "Интервал повторной постановки в очередь заданий на выполнение отчетов, остановленных при отсутствии свободных коннектов в пуле."
+    },
+    {
+      "name": "magreport.derived-fields.expression-max-call-depth",
+      "type": "java.lang.Long",
+      "description": "Максимальная вложенность ссылок на производные поля в выражениях расчета производных полей."
     }
   ] }

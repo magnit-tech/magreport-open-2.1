@@ -248,7 +248,9 @@ public class ReportDomainService {
 
     @Transactional
     public ReportResponse getReport(Long id) {
-        return reportResponseMapper.from(reportRepository.getReferenceById(id));
+        var response =  reportResponseMapper.from(reportRepository.getReferenceById(id));
+        response.setPath(getPathReport(response.getId()));
+        return response;
     }
 
     @Transactional

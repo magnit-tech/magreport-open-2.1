@@ -112,27 +112,14 @@ function PivotPanel(props){
     // Индекс поля для которого настраивается фильтрация в списке полей фильтрации
     const [filterFieldIndex, setFilterFieldIndex] = useState(undefined);
 
-    // Очистить всю сводную
-    function handleClearAllOlap() {
-        props.showAlertDialog('Очистить всю конфигурацию?', null, null, handleConfirmClearAllOlap)
-    }
-
-    function handleConfirmClearAllOlap(answer){
-        if (answer){
-            oldAndNewConfiguration.current.newConfiguration.clearAll()
-            setPivotConfiguration(oldAndNewConfiguration.current.newConfiguration);
-            handleSaveCurrentConfig(oldAndNewConfiguration.current.newConfiguration.stringify())
-            resetDataLoader()
-        }
-        props.hideAlertDialog()
-    }
-
     /*
         Данные и отображение данных
     */
 
     // Объект конфигурации
     const [pivotConfiguration, setPivotConfiguration] = useState(new PivotConfiguration());
+
+    const dataProvider = useRef()
 
     // Предоставление данных для таблицы - dataProvider
     const dataProviderRef = useRef(new PivotDataProvider(props.jobId, handleTableDataReady, handleTableDataLoadFailed/*, initialColumnCount, initialRowCount*/));
@@ -213,6 +200,7 @@ function PivotPanel(props){
     */
 
     function handleMetadataLoaded(data){
+        dataProvider.current = data
         let fieldIdToNameMapping = new Map();
         for(let v of data.fields){
             fieldIdToNameMapping[v.id] = v.name;
@@ -448,6 +436,78 @@ function PivotPanel(props){
             return enqueueSnackbar('Не удалось обновить конфигурацию "' + item.olapConfig.name + '"', {variant : "error"});
         })
     }
+
+    // Очистить всю сводную
+    function handleClearAllOlap() {
+        props.showAlertDialog('Очистить всю конфигурацию?', null, null, handleConfirmClearAllOlap)
+    }
+
+    // Очистить всю сводную после подтверждения
+    function handleConfirmClearAllOlap(answer){
+        if (answer){
+            oldAndNewConfiguration.current.newConfiguration.clearAll()
+            setPivotConfiguration(oldAndNewConfiguration.current.newConfiguration);
+            handleSaveCurrentConfig(oldAndNewConfiguration.current.newConfiguration.stringify())
+            resetDataLoader()
+        }
+        props.hideAlertDialog()
+    }
+
+    // Экспорт сводной в Excel
+    function handleExportToExcel() {
+        const payload = {
+            cubeRequest: {
+              jobId: props.jobId,
+              columnFields: pivotConfiguration.fieldsLists.columnFields.map( (v) => (v.fieldId)),
+              rowFields: pivotConfiguration.fieldsLists.rowFields.map( (v) => (v.fieldId)),
+              metrics: tableData.metrics.map( (v) => ({fieldId: v.fieldId, aggregationType : v.aggregationType}) ),
+              metricPlacement: pivotConfiguration.columnsMetricPlacement === true ? "COLUMNS" : "ROWS",
+              filterGroup: pivotConfiguration.filterGroup,
+              metricFilterGroup: pivotConfiguration.metricFilterGroup,
+              columnsInterval: {
+                from: pivotConfiguration.columnFrom,
+                count: 42
+              },
+              rowsInterval: {
+                from: pivotConfiguration.rowFrom,
+                count: 150
+              },
+              allFieldIds: pivotConfiguration.fieldsLists.allFields.map(item => item.id)
+            },
+            configuration: configOlap.current.configData.reportOlapConfigId,
+            stylePivotTable: false
+        }
+
+        if(pivotConfiguration.sortOrder?.columnSort) {
+            payload.cubeRequest.columnSort = pivotConfiguration.sortOrder.columnSort
+        }
+
+        if(pivotConfiguration.sortOrder?.rowSort) {
+            payload.cubeRequest.rowSort = pivotConfiguration.sortOrder.rowSort
+        }
+
+        enqueueSnackbar("Запущен экспорт в Excel. Формирование файла может происходить достаточно ДОЛГО " +
+        "в виду необходимости его криптографической обработки в целях информационной безопасности", {variant : "info"});
+        dataHub.olapController.createExcelPivotTable(payload, handleExcelFileResponseNew)
+    }
+
+    function handleExcelFileResponseNew(resp){
+        if (resp.ok){
+            const url = resp.data.urlFile + resp.data.token
+            const link = document.createElement('a');
+            link.href = url;
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+        }
+        else {
+            enqueueSnackbar("Не удалось получить файл с сервера", {
+                variant: 'error',
+                persist: true
+            });
+        }
+    }
+
 
 
     /*
@@ -1000,6 +1060,7 @@ function PivotPanel(props){
                                 showShareToolBtn = {showShareToolBtn}
                                 onSortingDialog = {handleShowSortingDialog}
                                 onClearAllOlap = {handleClearAllOlap}
+                                onExportToExcel = {handleExportToExcel}
                             />
                             {fieldsVisibility &&
                                 <PivotFieldsList

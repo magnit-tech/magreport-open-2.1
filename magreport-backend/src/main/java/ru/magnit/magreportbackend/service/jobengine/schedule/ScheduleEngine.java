@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import ru.magnit.magreportbackend.domain.reportjob.ReportJobUserTypeEnum;
 import ru.magnit.magreportbackend.domain.schedule.ScheduleTaskStatusEnum;
 import ru.magnit.magreportbackend.domain.schedule.ScheduleTaskTypeEnum;
-import ru.magnit.magreportbackend.domain.serversettings.ServerSettings;
 import ru.magnit.magreportbackend.dto.request.reportjob.ExcelReportRequest;
 import ru.magnit.magreportbackend.dto.request.schedule.ScheduleCalendarAddRequest;
 import ru.magnit.magreportbackend.dto.request.schedule.ScheduleTaskRequest;
@@ -166,7 +165,7 @@ public class ScheduleEngine implements JobEngine, InitializingBean {
             if (job != null) {
 
                 switch (job.getStatus()) {
-                    case SCHEDULED, RUNNING, EXPORT -> {}
+                    case SCHEDULED, RUNNING, EXPORT, PENDING_DB_CONNECTION-> {/*Wait finish job*/}
                     case COMPLETE -> {
                         scheduleService.updateStatusScheduleTask(jobRunners.get(idJob), ScheduleTaskStatusEnum.COMPLETE);
                         taskRunners.put(jobRunners.get(idJob), idJob);
@@ -194,7 +193,7 @@ public class ScheduleEngine implements JobEngine, InitializingBean {
                         scheduleService.updateStatusScheduleTask(jobRunners.get(idJob), ScheduleTaskStatusEnum.SCHEDULED);
                         forRemove.add(idJob);
                     }
-                    default -> throw new IllegalStateException("Unexpected value: " + job.getStatus());
+                    default -> throw new IllegalStateException("Unexpected status job: " + job.getStatus());
                 }
             } else {
                 scheduleService.updateStatusScheduleTask(jobRunners.get(idJob), ScheduleTaskStatusEnum.SCHEDULED);
@@ -210,7 +209,7 @@ public class ScheduleEngine implements JobEngine, InitializingBean {
         tasks.forEach(task -> {
             try {
                 var job = reportJobService.getJob(taskRunners.get(task.getId()));
-                if (job.getRowCount() == 0 && !task.getSendEmptyReport()) {
+                if (job.getRowCount() == 0 && Boolean.FALSE.equals(task.getSendEmptyReport())) {
                     scheduleService.updateStatusScheduleTask(task.getId(), ScheduleTaskStatusEnum.SCHEDULED);
                     log.debug("ScheduleTask with id: " + task.getId() + " completed successfully! Mail not send!");
                     taskRunners.remove(task.getId());
@@ -269,11 +268,15 @@ public class ScheduleEngine implements JobEngine, InitializingBean {
             } catch (Exception ex) {
                 log.error(" ScheduleTask with id: " + task.getId() + " complete error! ", ex);
                 scheduleService.updateStatusScheduleTask(task.getId(), ScheduleTaskStatusEnum.FAILED);
-                mailTextDomainService.sendScheduleMailFailed(
-                        scheduleMailFailed,
-                        task,
-                        taskRunners.get(task.getId()),
-                        new Pair<String, StackTraceElement[]>().setL(ex.getMessage()).setR(ex.getStackTrace()));
+                try {
+                    mailTextDomainService.sendScheduleMailFailed(
+                            scheduleMailFailed,
+                            task,
+                            taskRunners.get(task.getId()),
+                            new Pair<String, StackTraceElement[]>().setL(ex.getMessage()).setR(ex.getStackTrace()));
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                }
             }
 
             taskRunners.remove(task.getId());

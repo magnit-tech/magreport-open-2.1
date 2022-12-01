@@ -21,13 +21,9 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Accessors(chain = true)
 public class MetricFilterGroup {
-
     private BinaryBooleanOperations operationType;
-
     private boolean invertResult;
-
     private List<MetricFilterGroup> childGroups = Collections.emptyList();
-
     private List<MetricFilterDefinition> filters = Collections.emptyList();
 
     public Set<Integer> getAllMetricIds(){

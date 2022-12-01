@@ -26,6 +26,7 @@ import SearchIcon from '@material-ui/icons/Search';
 
 //import CopyMoveFolderBrowser from './CopyMoveFolderBrowser';
 import DesignerFolderBrowser from 'main/Main/Development/Designer/DesignerFolderBrowser';
+import {JobStatuses} from './JobFilters/JobStatuses';
 
 // styles
 import { FolderContentCSS } from './FolderContentCSS';
@@ -80,7 +81,8 @@ import SortModalWindow from './ModalWindows/SortModalWindow';
  * @param {reportCallback}   props.onSortClick - действие при сортировке
  * @param {onAddToFavorites} props.onAddToFavorites - function(folderId, reportId) - действие при добавлении в избранное
  * @param {onAddToFavorites} props.onRefresh - function() - обновить отображение содержимого каталога
- * @param {Boolean}          props.showDialog - показать диалоговое окно
+ * @param {Boolean}          props.onShowSqlDialogClick - показать диалоговое окно с SQL - запросом
+ * @param {Boolean}          props.onShowHistoryStatusClick - показать диалоговое окно с историей статусов
  * @param {Boolean}          props.contextAllowed - разрешено показывать контекстное меню (сортировка)
  * @param {Boolean}          props.copyAndMoveAllowed - разрешено показывать контекстное меню для каталогов и объектов
  * @param {Boolean}          props.notAllowedForItems - запрешено показывать контекстное меню для объектов
@@ -88,7 +90,8 @@ import SortModalWindow from './ModalWindows/SortModalWindow';
 
 export default function FolderContent(props){
     const classes = FolderContentCSS();
-
+    
+    const defaultStatuses = Object.values(JobStatuses);
     const [searchOpen, setSearchOpen] = useState(false);
     const [panelOpen, setPanelOpen] = useState(false);
 
@@ -97,11 +100,12 @@ export default function FolderContent(props){
     const [windowData, setWindowData] = useState(null);
     const [page, setPage] = useState(1);
     const [elementsOnPage, setElementsOnPage] = useState(10)
-    const [countElement, setCountElement] = useState(100)
+    const [countElement, setCountElement] = useState(100);
     const [filterValues, setFilterValues] = useState(props.filters || {
+        name: null,
         periodStart: null,
         periodEnd: null, 
-        selectedStatuses: ['RUNNING','SCHEDULED','COMPLETE','FAILED','CANCELING','CANCELED'],
+        selectedStatuses: defaultStatuses
     })
     const [contextPosition, setContextPosition] = useState({
         mouseX: null,
@@ -411,7 +415,8 @@ export default function FolderContent(props){
                         onAddDeleteFavorites = {() => props.onAddDeleteFavorites(index, folderId, i.id, i.favorite)}
                         onLinkPathClick = {props.onFolderClick}
                         onDependenciesClick = {() => props.onDependenciesClick(i.id)}
-                        showDialog = {props.showDialog}
+                        onShowSqlDialogClick = {props.onShowSqlDialogClick}
+                        onShowHistoryStatusClick = {props.onShowHistoryStatusClick}
                         onContextMenu={handleContextClickObject}
                         
                     />
@@ -493,9 +498,10 @@ export default function FolderContent(props){
         let filters = filterValues
         if (isCleared){
             filters = {
+                name: null,
                 periodStart: null,
                 periodEnd: null,
-                selectedStatuses: ['RUNNING','SCHEDULED','COMPLETE','FAILED','CANCELING','CANCELED'],
+                selectedStatuses: defaultStatuses,
                 isCleared: true
             }
             setFilterValues(filters)

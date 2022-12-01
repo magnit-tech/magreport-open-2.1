@@ -44,6 +44,9 @@ public class ExcelReportDomainService {
     @Value("${magreport.reports.rms-out-folder}")
     private String rmsOutFolder;
 
+    @Value(value = "${magreport.excel-template.folder}")
+    private String templatesPath;
+
     @Value("${magreport.excel-file-buffer}")
     private int bufferStream;
 
@@ -194,7 +197,7 @@ public class ExcelReportDomainService {
 
         try {
             var writer = writerFactory.createWriter(data, metadata, config, request, getPivotPath(reportFolder, request.getCubeRequest().getJobId(), userId));
-            writer.convert("");
+            writer.convert(templatesPath + "/pivot_template.xlsm");
         } catch (Exception ex) {
             try {
                 Files.deleteIfExists(getPath(request.getCubeRequest().getJobId(), "xlsm"));
@@ -261,5 +264,9 @@ public class ExcelReportDomainService {
 
     public Path getExcelReportPath(long jobId, long templateId) {
         return getReportPath(rmsOutFolder, jobId, templateId);
+    }
+
+    public Path getExcelPivotPath(long jobId, long userId) {
+        return getPivotPath(rmsOutFolder, jobId, userId);
     }
 }

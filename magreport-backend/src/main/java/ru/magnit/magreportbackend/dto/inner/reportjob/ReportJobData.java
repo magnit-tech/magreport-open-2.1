@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Objects;
 
 public record ReportJobData(
-
         long id,
         long reportId,
         long dataSetId,

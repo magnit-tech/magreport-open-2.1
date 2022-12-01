@@ -93,7 +93,7 @@ function RolesMenuView(props){
                         roleTypeId = {state.currentFolderId}
                         onExit = {handleExit}
                         sortParams = {state.sortParams || {}}
-                        folderName = {state.currentFolderData.name}
+                        folderName = {state.currentFolderData?.name}
                     />
 
                 : <div>Неизвестное состояние</div>
