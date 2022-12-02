@@ -7,7 +7,7 @@ import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
 public class SquareRootExpression extends ParameterizedExpression {
-    private final Pair<String, DataTypeEnum> result = new Pair<>(null, DataTypeEnum.INTEGER);
+    private final Pair<String, DataTypeEnum> result = new Pair<>(null, DataTypeEnum.DOUBLE);
 
     public SquareRootExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
         super(fieldExpression, context);
@@ -21,7 +21,6 @@ public class SquareRootExpression extends ParameterizedExpression {
         checkParameterNotNull(parameter, parameterValue);
         checkParameterHasAnyType(parameter, parameterValue, DataTypeEnum.INTEGER, DataTypeEnum.DOUBLE);
 
-        result.setR(DataTypeEnum.DOUBLE);
         result.setL(String.valueOf(Math.sqrt(Double.parseDouble(parameterValue.getL()))));
 
         return result;
