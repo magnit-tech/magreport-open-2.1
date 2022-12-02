@@ -3,7 +3,7 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.17.xsd">
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
 
     <changeSet id="SQUARE_ROOT_FUNCTION-001" author="artemenko_pa">
         <insert schemaName="REPOSITORY" tableName="EXPRESSIONS">
