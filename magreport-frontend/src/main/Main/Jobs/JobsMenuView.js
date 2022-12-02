@@ -49,8 +49,8 @@ function JobsMenuView(props){
     }
 
     function handleReportRunClick(reportId, jobId) {
-        props.actionItemClick(folderItemsType, reportId)
-        navigate(`/report-starter/${reportId}?jobId=${jobId}`)
+        props.startReport(reportId, jobId, SidebarItems.jobs.key, SidebarItems.jobs.folderItemType)
+        navigate(`/report/starter/${reportId}?jobId=${jobId}`)
     }
 
     return(
@@ -74,7 +74,9 @@ function JobsMenuView(props){
                     pagination = {true}
                     // onItemClick = {jobId => {props.actionItemClick(folderItemsType, jobId)}}
                     onItemClick = {handleItemClick}
-                    onReportRunClick = {(reportId, jobId) => {props.startReport(reportId, jobId, SidebarItems.jobs.key, SidebarItems.jobs.folderItemType)}}
+                    // onReportRunClick = {(reportId, jobId) => {props.startReport(reportId, jobId, SidebarItems.jobs.key, SidebarItems.jobs.folderItemType)}}
+                    onReportRunClick = {handleReportRunClick}
+
                     onFilterClick = {filters => {props.actionFilterJobs(folderItemsType, filters)}}
                     onJobCancelClick = {(jobIndex, jobId) => {props.actionJobCancel(folderItemsType, jobIndex, jobId)}}
                     onRefreshClick = {handleRefreshFolder}

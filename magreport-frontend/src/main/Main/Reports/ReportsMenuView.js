@@ -52,7 +52,7 @@ function ReportsMenuView(props){
     }
     function handleItemClick(reportId) {
         props.actionItemClick(folderItemsType, reportId)
-        navigate(`/report-starter/${reportId}`)
+        navigate(`/report/starter/${reportId}`)
     }
 
     return(

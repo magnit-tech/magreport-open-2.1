@@ -3,6 +3,8 @@ import {useState} from 'react';
 import { connect } from 'react-redux';
 import { useSnackbar } from 'notistack';
 
+import { useParams, useNavigate } from 'react-router-dom'
+
 // components
 import { CircularProgress, Tooltip } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
@@ -32,19 +34,19 @@ import { RolesCSS } from "./RolesCSS";
 // actions
 import { actionUsersLoaded, actionUsersLoadFailed } from 'redux/actions/admin/actionUsers';
 import { actionRoleSelectFolderType } from 'redux/actions/admin/actionRoles';
+
 /**
- * 
- * @param {*} props.mode : 'edit', 'create' - режим редактирования или создания нового объекта
- * @param {*} props.datasourceId : id объекта при редактировании (имеет значение только при mode == 'edit')
- * @param {*} props.folderId : id папки в которой размещается объект при создании (имеет значение только при mode == 'create')
  * @param {*} props.onExit : callback при выходе
  */
 function RoleDesigner(props){
 
+    const {id} = useParams()
+    const navigate = useNavigate();
+
     const classes = RolesCSS();
     const { enqueueSnackbar } = useSnackbar();
 
-    const [pageName, setPagename] = useState(props.mode === 'create' ? "Создание роли" : "Редактирование роли");
+    const [pageName, setPagename] = useState(id ? "Редактирование роли" : "Создание роли");
 
     const [uploading, setUploading] = useState(false);
     const [reload, setReload] = useState({ needReload: false });
@@ -73,11 +75,10 @@ function RoleDesigner(props){
 
     let loadFunc;
     let loadParams = [];
-    
 
-    if(props.mode === 'edit'){
+    if (id){
         loadFunc = dataHub.roleController.get;
-        loadParams = [props.roleId];
+        loadParams = [id];
     }
 
     /*
@@ -187,9 +188,9 @@ function RoleDesigner(props){
             setErrorField(errors);
         }
         else{
-            if(props.mode === 'create'){
+            if(id){
                 dataHub.roleController.add(
-                    props.roleId, 
+                    id, 
                     props.roleTypeId,
                     data.roleName, 
                     data.roleDescription,
@@ -197,7 +198,7 @@ function RoleDesigner(props){
             }
             else{
                 dataHub.roleController.edit(
-                    props.roleId,
+                    id,
                     props.roleTypeId,
                     data.roleName, 
                     data.roleDescription,
@@ -217,7 +218,7 @@ function RoleDesigner(props){
             props.onExit();
         }
         else{
-            let actionWord = props.mode === 'create' ? "создании" : "обновлении";
+            let actionWord = id ? "обновлении" : "создании";
             enqueueSnackbar("Ошибка при " + actionWord + " объекта: " + magrepResponse.data, {variant : "error"});
         }
     }
@@ -247,7 +248,7 @@ function RoleDesigner(props){
 
     /* Adding a folder role */
     function handleSubmit(folderId, roleType){
-        dataHub.roleController.addPermission(folderId, roleType, props.roleId, SelectedPermittedFolderType, handleAddRolePermissionAnswer);
+        dataHub.roleController.addPermission(folderId, roleType, id, SelectedPermittedFolderType, handleAddRolePermissionAnswer);
     }
     function handleAddRolePermissionAnswer(magrepResponse){
         if (magrepResponse.ok) {
@@ -262,7 +263,7 @@ function RoleDesigner(props){
 
     /* Deleting a folder role */
     function handleDeleteRolePermission(folderId){
-        dataHub.roleController.deletePermission(folderId, props.roleId, SelectedPermittedFolderType, handleDeleteRolePermissionAnswer);
+        dataHub.roleController.deletePermission(folderId, id, SelectedPermittedFolderType, handleDeleteRolePermissionAnswer);
     }
     function handleDeleteRolePermissionAnswer(magrepResponse){
         if (magrepResponse.ok) {
@@ -303,14 +304,14 @@ function RoleDesigner(props){
     });
 
     tabs.push({tablabel:"Пользователи",
-        tabdisabled: props.roleId === null || props.roleId === undefined ? true : false,
+        tabdisabled: id === null || id === undefined ? true : false,
         tabcontent:
         <div style={{display: 'flex', flex: 1, flexDirection: 'column'}}>
 
             <Paper elevation={3} className={classes.userListPaper}>
                 <DataLoader
                     loadFunc = {dataHub.roleController.getUsers}
-                    loadParams = {[props.roleId]}
+                    loadParams = {[id]}
                     reload = {reload}
                     onDataLoaded = {data => props.actionUsersLoaded(data, FolderItemTypes.roles)}
                     onDataLoadFailed = {props.actionUsersLoadFailed}
@@ -319,7 +320,7 @@ function RoleDesigner(props){
                         itemsType={FolderItemTypes.roles}
                         items={props.users.data}
                         showDeleteButton={true}
-                        roleId={props.roleId}
+                        roleId={id}
                         onNeedReload={enableRoleReload}
                     />
                 </DataLoader>
@@ -328,13 +329,13 @@ function RoleDesigner(props){
     });
 
     tabs.push({tablabel:"Доменные группы",
-        tabdisabled: props.roleId === null || props.roleId === undefined ? true : false,
+        tabdisabled: id === null || id === undefined ? true : false,
         tabcontent:
         <div style={{display: 'flex', flex: 1, flexDirection: 'column'}}>
             <Paper elevation={3} className={classes.userListPaper}>
                 <DataLoader
                     loadFunc = {dataHub.roleController.getDomainGroups}
-                    loadParams = {[props.roleId]}
+                    loadParams = {[id]}
                     reload = {reload}
                     onDataLoaded = {handleDomainGroupsDataLoaded}
                     onDataLoadFailed = {(message) => enqueueSnackbar(`При получении доменных групп из AD произошла ошибка: ${message}`, {variant: "error"})}
@@ -343,7 +344,7 @@ function RoleDesigner(props){
                         itemsType={FolderItemTypes.roles}
                         items={domainGroupsData.domainGroups}
                         showDeleteButton={true}
-                        roleId={props.roleId}
+                        roleId={id}
                         onNeedReload={enableRoleReload}
                     />
                 </DataLoader>
@@ -363,7 +364,7 @@ function RoleDesigner(props){
 
     if (props.roleTypeId === 2 /*FOLDER_ROLES*/){
     tabs.push({tablabel:"Права",
-        tabdisabled: props.roleId === null || props.roleId === undefined ? true : false,
+        tabdisabled: id === null || id === undefined ? true : false,
         tabcontent:
         <div style={{display: 'flex', flex: 1, flexDirection: 'column'}}>
             <div className={classes.userAddPanel}>
@@ -435,7 +436,7 @@ function RoleDesigner(props){
             <Paper elevation={3} className={classes.userListPaper}>
                 <DataLoader
                     loadFunc = {dataHub.roleController.getPertmittedFolders}
-                    loadParams = {[props.roleId]}
+                    loadParams = {[id]}
                     reload = {reload}
                     onDataLoaded = {handlePermittedFoldersLoaded}
                     onDataLoadFailed = {(message) => enqueueSnackbar(`При получении списка каталогов, к которым роль имеет доступ, возникла ошибка: ${message}`, {variant: "error"})}
@@ -449,7 +450,7 @@ function RoleDesigner(props){
                         onDelete={(folderId) => handleDeleteRolePermission(folderId)}
                         
                        // showDeleteButton={true}
-                      //  roleId={props.roleId}
+                      //  roleId={id}
                       //  onDeleteDomainGroupFromRoleResponse={handleDeleteDomainGroupFromRoleResponse}
                     />
                 </DataLoader>

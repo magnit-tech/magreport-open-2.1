@@ -2,6 +2,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { useNavigateBack} from "components/Navbar/navbarHooks";
 
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+
 // dataHub
 import dataHub from 'ajax/DataHub';
 
@@ -25,6 +27,10 @@ import ServerMailTemplateDesigner from "./ServerMailTemplateDesigner";
 
 function MailTemplatesMenuView(props){
 
+    const {id} = useParams()
+    const navigate = useNavigate()
+    const location = useLocation()
+
     const navigateBack = useNavigateBack();
 
     let state = props.state;
@@ -40,13 +46,31 @@ function MailTemplatesMenuView(props){
             navigateBack();
     }
 
+    function handleFolderClick(folderId) {
+        props.actionFolderClick(folderItemsType, folderId)
+        navigate(`/systemMailTemplates/${folderId}`)
+    }
+    function handleItemClick(templateId) {
+        props.actionItemClick(folderItemsType, templateId)
+        navigate(`/systemMailTemplates/view/${templateId}`, {state: location.pathname})
+    }
+    function handleEditItemClick(templateId) {
+        props.actionEditItemClick(folderItemsType, templateId)
+        navigate(`/systemMailTemplates/edit/${templateId}`)
+    }
+    function handleAddItemClick(folderItemsType) {
+        props.actionAddItemClick(folderItemsType)
+        navigate(`/systemMailTemplates/add`)
+    }
+
     return(
         <div  style={{display: 'flex', flex: 1}}>
             {
                 state.flowState === FLOW_STATE_BROWSE_FOLDER ?
                     <DataLoader
                         loadFunc = {loadFunc}
-                        loadParams = {[state.currentFolderId]}
+                        // loadParams = {[state.currentFolderId]}
+                        loadParams = {id ? [Number(id)] : [null]}
                         reload = {reload}
                         onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}}
                         onDataLoadFailed = {(message) => {props.actionFolderLoadFailed(folderItemsType, message)}}
@@ -58,11 +82,17 @@ function MailTemplatesMenuView(props){
                             searchParams = {state.searchParams || {}}
                             sortParams = {state.sortParams || {}}
                             data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
-                            onFolderClick = {(folderId) => {props.actionFolderClick(folderItemsType, folderId)}}
-                            onItemClick = {(templateId) => {props.actionItemClick(folderItemsType, templateId)}}
+                            // onFolderClick = {(folderId) => {props.actionFolderClick(folderItemsType, folderId)}}
+                            // onItemClick = {(templateId) => {props.actionItemClick(folderItemsType, templateId)}}
+                            // onEditItemClick = {(templateId) => {props.actionEditItemClick(folderItemsType, templateId)}}
+                            // onAddItemClick = {() => {props.actionAddItemClick(folderItemsType)}}
+                            
+                            onFolderClick = {handleFolderClick}
+                            onItemClick={handleItemClick}
+                            onEditItemClick={handleEditItemClick}
+                            onAddItemClick={handleAddItemClick}
+
                             onAddFolder = {(name, description) => {props.actionAddFolder(folderItemsType, state.currentFolderData.id, name, description)}}
-                            onAddItemClick = {() => {props.actionAddItemClick(folderItemsType)}}
-                            onEditItemClick = {(templateId) => {props.actionEditItemClick(folderItemsType, templateId)}}
                             onDeleteFolderClick = {(folderId) => {props.actionDeleteFolderClick(folderItemsType, state.currentFolderData.id, folderId)}}
                             onDeleteItemClick = {(roleId) => {props.actionDeleteItemClick(folderItemsType, state.currentFolderId, roleId)}}
                             onEditFolder = {(folderId, name, description) => {props.actionEditFolder(sidebarItemType, folderItemsType, state.currentFolderData.id, folderId, name, description)}}
