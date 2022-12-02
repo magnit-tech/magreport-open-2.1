@@ -108,16 +108,17 @@ function SchedulesMenuView(props) {
 
     function handleItemClick(scheduleId) {
         props.actionItemClick(folderItemsType, scheduleId)
-        navigate(`/schedules/${scheduleId}`)
+        navigate(`/schedules/view/${scheduleId}`)
+    }
+    function handleEditItemClick(scheduleId) {
+        props.actionEditItemClick(folderItemsType, scheduleId)
+        navigate(`/schedules/edit/${scheduleId}`)
     }
     function handleAddItemClick(folderItemsType) {
         props.actionAddItemClick(folderItemsType)
         navigate(`/schedules/add`)
     }
-    function handleEditItemClick(scheduleId) {
-        props.actionEditItemClick(folderItemsType, scheduleId)
-        navigate(`/schedules/${scheduleId}/edit`)
-    }
+
 
     let component;
 
@@ -152,17 +153,17 @@ function SchedulesMenuView(props) {
                 />
             </DataLoader>
         );
-    } else if (state.flowState === schedulesMenuViewFlowStates.scheduleDesigner) {
-        component = <ScheduleDesigner
-            mode={designerMode}
-            scheduleId={state.editScheduleId}
-            onExit={handleExit}
-        />;
-    } else if (state.flowState === schedulesMenuViewFlowStates.scheduleViewer) {
-        component = <ScheduleViewer
-            scheduleId={state.viewScheduleId}
-            onOkClick={handleExit}
-        />;
+    // } else if (state.flowState === schedulesMenuViewFlowStates.scheduleDesigner) {
+    //     component = <ScheduleDesigner
+    //         mode={designerMode}
+    //         scheduleId={state.editScheduleId}
+    //         onExit={handleExit}
+    //     />;
+    // } else if (state.flowState === schedulesMenuViewFlowStates.scheduleViewer) {
+    //     component = <ScheduleViewer
+    //         scheduleId={state.viewScheduleId}
+    //         onOkClick={handleExit}
+    //     />;
     } else {
         component = <div>Неизвестное состояние</div>;
     }

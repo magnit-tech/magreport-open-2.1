@@ -2,6 +2,9 @@ import React from "react";
 import {connect} from "react-redux";
 import {useNavigateBack} from "components/Navbar/navbarHooks";
 
+import { useParams, useNavigate } from 'react-router-dom'
+
+
 // data
 import DataLoader from "main/DataLoader/DataLoader";
 import dataHub from "ajax/DataHub";
@@ -38,7 +41,6 @@ import {createViewerPageName} from "main/Main/Development/Viewer/viewerHelpers";
 /**
  * Компонент просмотра объекта ASM
  * @param {Object} props - свойства компонента
- * @param {Object} props.asmId - ID просматриваемого компонента
  * @param {Object} props.state - asmDesigner State
  * @param {actionAsmDataLoaded} props.actionAsmDataLoaded - callback, добавляет в state успешно загруженные данных
  * @param {actionAsmDataLoadFailed} props.actionAsmDataLoadFailed - callback, добавляет в state загруженные данные
@@ -49,10 +51,13 @@ import {createViewerPageName} from "main/Main/Development/Viewer/viewerHelpers";
  */
 function ASMViewer(props) {
 
+    const {id} = useParams()
+    const navigate = useNavigate();
+
     const navigateBack = useNavigateBack();
 
     const loadFunc = dataHub.asmController.get;
-    const loadParams = [props.asmId];
+    const loadParams = [id];
 
     const classes = ViewerCSS();
 
@@ -88,7 +93,6 @@ function ASMViewer(props) {
             </div>
     })
 
-
     securitySources.forEach((securitySource, index) => {
         tabs.push({
             tablabel: "Настройка " + securitySource.sourceType,
@@ -100,6 +104,11 @@ function ASMViewer(props) {
                 />});
     })
 
+    function back() {
+        navigateBack()
+        navigate('/asm')
+    }
+
     return (
         <DataLoader
             loadFunc={loadFunc}
@@ -108,10 +117,10 @@ function ASMViewer(props) {
             onDataLoadFailed={(error) => props.actionAsmDataLoadFailed(error)}
         >
             <ViewerPage
-                id={props.asmId}
+                id={id}
                 itemType={FolderItemTypes.asm}
                 disabledPadding={true}
-                onOkClick={navigateBack}
+                onOkClick={back}
                 >
                 <PageTabs
                     tabsdata={tabs}

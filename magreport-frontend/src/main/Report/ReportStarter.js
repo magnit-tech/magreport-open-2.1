@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {useSnackbar} from 'notistack';
 
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 
 // mui
 import {Button} from '@material-ui/core';
@@ -22,7 +22,6 @@ import {ReportStarterCSS} from "./ReportCSS";
  * Запуск отчёта
  * @param {*} props.reportId - id отчёта
  * @param {*} props.parameters - фильтры отчета для отчетов на расписании
- * @param {*} props.jobId - id задания, из которого требуется получить параметры
  * @param {*} props.scheduleTaskId - id задания по расписанию, из которого требуется получить параметры
  * @param {*} props.onDataLoadFunction - функция загрузки отчета
  * @param {*} props.onSave - сохранение (для отчетов на расписании)
@@ -33,6 +32,10 @@ export default function ReportStarter(props){
     const classes = ReportStarterCSS();
 
     const {id} = useParams()
+    const navigate = useNavigate()
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    // console.log(searchParams.get('jobId'));
 
     const [flowState, setFlowState] = useState("filters");
     const [reportMetadata, setReportMetadata] = useState({});
@@ -40,11 +43,11 @@ export default function ReportStarter(props){
     const [reloadRunReport, setReloadRunReport] = useState({needReload:false}); // управление перезапуском отчёта
     const [toggleClearFilters, setToggleClearFilters] = useState(false); // переключатель очистки фильтра - если изменилось значение, надо очистить фильтры
     const [reportJobId, setReportJobId] = useState(null);
-    const [lastParamJobId, setLastParamJobId] = useState(props.jobId);
+    const [lastParamJobId, setLastParamJobId] = useState(searchParams.get('jobId'));
 
-    useEffect( () => {
-        setLastParamJobId(props.jobId);
-    }, [props.jobId])
+    // useEffect( () => {
+    //     setLastParamJobId(props.jobId);
+    // }, [props.jobId])
     
     const lastFilterValues = useRef(new FilterValues()); // Значения параметров предыдущего запуска отчёта
 
@@ -225,7 +228,10 @@ export default function ReportStarter(props){
 
     function handleReportStarted(data){
         // data - ответ от /report-job/add
-        setReportJobId(data.id);
+        // console.log(data.id);
+        // setReportJobId(data.id);
+        navigate(`/report/${data.id}`)
+
     }
 
     function handleRestartReportClick(reportId, jobId){
@@ -241,7 +247,8 @@ export default function ReportStarter(props){
                 // loadFunc = {props.onDataLoadFunction}
                 loadFunc = {dataHub.reportController.get}
                 // loadParams = {[props.reportId, props.scheduleTaskId !== undefined ? props.scheduleTaskId : lastParamJobId]}
-                loadParams = {id ? [Number(id), undefined] : [null]}
+                // loadParams = {id ? [Number(id), lastParamJobId] : [null]}
+                loadParams = {[Number(id), props.scheduleTaskId !== undefined ? props.scheduleTaskId : lastParamJobId]}
                 reload = {reloadReportMetadata}
                 onDataLoaded = {handleReportMetadataLoaded}
             >
@@ -276,12 +283,12 @@ export default function ReportStarter(props){
         : flowState === "reportJob" ?
             <DataLoader
                 loadFunc = {reportJobId === null ? dataHub.reportJobController.add : null}
-                loadParams = {[props.reportId, addJobParameters.current]}
+                loadParams = {[Number(id), addJobParameters.current]}
                 reload = {reloadRunReport}
                 onDataLoaded = {handleReportStarted}
             >
                 <ReportJob
-                    reportId = {props.reportId}
+                    reportId = {Number(id)}
                     jobId = {reportJobId}
                     excelTemplates = {excelTemplates}
                     onRestartReportClick = {handleRestartReportClick}

@@ -56,18 +56,19 @@ function ScheduleTasksMenuView(props){
 
     function handleItemClick(scheduleTaskId) {
         props.actionItemClick(folderItemsType, scheduleTaskId)
-        navigate(`/scheduleTasks/${scheduleTaskId}`)
+        navigate(`/scheduleTasks/view/${scheduleTaskId}`)
+    }
+    function handleEditItemClick(scheduleTaskId) {
+        props.actionEditItemClick(folderItemsType, scheduleTaskId)
+        navigate(`/scheduleTasks/edit/${scheduleTaskId}`)
     }
     function handleAddItemClick(folderItemsType) {
         props.actionAddItemClick(folderItemsType)
         navigate(`/scheduleTasks/add`)
     }
-    function handleEditItemClick(scheduleTaskId) {
-        props.actionEditItemClick(folderItemsType, scheduleTaskId)
-        navigate(`/scheduleTasks/${scheduleTaskId}/edit`)
-    }
 
     let component;
+    
     if (state.flowState === FLOW_STATE_BROWSE_FOLDER) {
         component = (
             <DataLoader
@@ -112,20 +113,20 @@ function ScheduleTasksMenuView(props){
                 />  
             </DataLoader>
         );
-    }
+    // }
     
-    else if (state.flowState === scheduleTasksMenuViewFlowStates.scheduleTasksDesigner) {
-        component = <ScheduleTasksDesigner
-            status={state.editScheduleTaskId ? state.currentFolderData.scheduleTasks?.find((item)=> item.id === state.editScheduleTaskId ).status : 'CHANGED'}
-            mode={designerMode}
-            scheduleId={state.editScheduleTaskId}
-            onExit={handleExit}
-        />;
-    } else if (state.flowState === scheduleTasksMenuViewFlowStates.scheduleTasksViewer) {
-        component = <ScheduleTasksViewer
-            scheduleId={state.viewScheduleTaskId}
-            onOkClick={handleExit}
-        />;
+    // else if (state.flowState === scheduleTasksMenuViewFlowStates.scheduleTasksDesigner) {
+    //     component = <ScheduleTasksDesigner
+    //         status={state.editScheduleTaskId ? state.currentFolderData.scheduleTasks?.find((item)=> item.id === state.editScheduleTaskId ).status : 'CHANGED'}
+    //         mode={designerMode}
+    //         scheduleId={state.editScheduleTaskId}
+    //         onExit={handleExit}
+    //     />;
+    // } else if (state.flowState === scheduleTasksMenuViewFlowStates.scheduleTasksViewer) {
+    //     component = <ScheduleTasksViewer
+    //         scheduleId={state.viewScheduleTaskId}
+    //         onOkClick={handleExit}
+    //     />;
     } else {
         component = <div>Неизвестное состояние</div>;
     }

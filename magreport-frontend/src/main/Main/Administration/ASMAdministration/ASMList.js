@@ -27,7 +27,7 @@ import {ASMCSS} from "./ASMCSS";
  * Список всех объектов ASM
  * @param {Object} props - component properties
  * @param {Array} props.data - начальное состояние компонента
- * @param {actionAsmAddItemClick} props.actionAsmAddItemClick - callback, вызываемый при нажатии кнопки "Добавить"
+//  * @param {actionAsmAddItemClick} props.actionAsmAddItemClick - callback, вызываемый при нажатии кнопки "Добавить"
  * @returns {JSX.Element}
  * @constructor
  */
@@ -50,9 +50,9 @@ function ASMList(props) {
         setIsSel(e);
     }
 
-    function handleAddButtonClick() {
-        props.actionAsmAddItemClick();
-    }
+    // function handleAddButtonClick() {
+    //     props.actionAsmAddItemClick();
+    // }
 
     function handleRefreshButtonClick() {
         const idList = data.filter(item => item.isSelected).map(item => item.id);
@@ -140,7 +140,8 @@ function ASMList(props) {
             <AddButton
                 showCreateItem = {true}
                 itemName = {"объект ASM"}
-                onAddItemClick = {handleAddButtonClick}
+                // onAddItemClick = {handleAddButtonClick}
+                onAddItemClick = {() => props.onAddAsmClick()}
             />
 
         </div>

@@ -16,20 +16,12 @@ import DesignerPage from "main/Main/Development/Designer/DesignerPage";
 import DesignerTextField from "main/Main/Development/Designer/DesignerTextField";
 import ScheduleParameters from "./ScheduleParameters";
 
-
-/**
- * @callback onExit
- */
-
 /**
  * Компонент создания и редактирования расписаний
- * @param {Object} props - параметры компонента
- * @param {String} props.mode - "create" - создание; "edit" - редактирование
- * @param {Number} props.scheduleId - идентификатор расписания
  * @return {JSX.Element}
  * @constructor
  */
-export default function ScheduleDesigner(props) {
+export default function ScheduleDesigner() {
 
     const {id} = useParams()
     const navigate = useNavigate();
@@ -121,11 +113,16 @@ export default function ScheduleDesigner(props) {
     function handleAddedEdited(magRepResponse) {
         
         if (magRepResponse.ok) {
-            navigate(-1)
+            if (id) {
+                navigate(`/schedules/view/${id}`)
+            } else {
+                navigate(`/schedules`)
+            }
+                
             enqueueSnackbar("Расписание успешно сохранено", {variant : "success"});
         } else {
             setUploading(false);
-            const actionWord = props.mode === "create" ? "создании" : "обновлении";
+            const actionWord = id ? "обновлении" : "создании";
             enqueueSnackbar(`При ${actionWord} возникла ошибка: ${magRepResponse.data}`,
                 {variant: "error"});
         }

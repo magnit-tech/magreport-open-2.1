@@ -1,6 +1,8 @@
 import React from "react";
 import {useSnackbar} from "notistack";
 
+import { useNavigate } from 'react-router-dom'
+
 import Card from "@material-ui/core/Card";
 import CardHeader from "@material-ui/core/CardHeader";
 import CardContent from "@material-ui/core/CardContent";
@@ -79,6 +81,9 @@ import {connect} from "react-redux";
  * @constructor
  */
 function ASMItemCard(props) {
+
+    const navigate = useNavigate()
+
     const {enqueueSnackbar} = useSnackbar();
     const classes = useStyles();
 
@@ -94,10 +99,12 @@ function ASMItemCard(props) {
     //event handlers
     function handleViewButtonClick() {
         props.actionAsmViewItemClick(id);
+        navigate(`/asm/view/${id}`)
     }
 
     function handleEditButtonClick() {
         props.actionAsmEditItemClick(id);
+        navigate(`/asm/edit/${id}`)
     }
 
     function handleDeleteButtonClick() {

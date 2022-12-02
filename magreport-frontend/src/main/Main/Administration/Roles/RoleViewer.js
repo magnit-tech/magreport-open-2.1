@@ -1,6 +1,8 @@
 import React, {useState} from "react";
 import {useSnackbar} from "notistack";
 
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+
 import dataHub from "ajax/DataHub";
 
 import DataLoader from "main/DataLoader/DataLoader";
@@ -24,18 +26,17 @@ import {
 
 
 /**
- * @callback onOkClick
- */
-/**
  * Компонент просмотра роли
  * @param {Object} props - параметры компонента
- * @param {Number} props.roleId - ID роли
- * @param {onOkClick} props.onOkClick - callback вызываемый при нажатии кнопки ОК
  * @constructor
  */
 export default function RoleViewer(props) {
 
     const classes = ViewerCSS();
+
+    const {id} = useParams()
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const {enqueueSnackbar} = useSnackbar();
 
@@ -49,7 +50,7 @@ export default function RoleViewer(props) {
     const [selectedPermittedFolder, setSelectedPermittedFolder] = useState('');
 
     let loadFunc = dataHub.roleController.get;
-    let loadParams = [props.roleId];
+    let loadParams = [id];
 
     function handleDataLoaded(loadedData) {
         setData(loadedData);
@@ -107,8 +108,6 @@ export default function RoleViewer(props) {
     let authority = data.authority
 
     let hasRWRight = isAdmin || (isDeveloper && authority === "WRITE");
-
-
     
     // build component
 
@@ -143,7 +142,7 @@ export default function RoleViewer(props) {
                             itemsType={FolderItemTypes.roles}
                             items={users}
                             showDeleteButton={false}
-                            roleId={props.roleId}
+                            roleId={id}
                         />
                     </DataLoader>
                 </Paper>
@@ -167,7 +166,7 @@ export default function RoleViewer(props) {
                             itemsType={FolderItemTypes.roles}
                             items={domainGroups}
                             showDeleteButton={false}
-                            roleId={props.roleId}
+                            roleId={id}
                         />
                     </DataLoader>
                 </Paper>
@@ -203,7 +202,7 @@ export default function RoleViewer(props) {
                 <Paper elevation={3} className={classes.permittedListPaper}>
                     <DataLoader
                         loadFunc = {dataHub.roleController.getPertmittedFolders}
-                        loadParams = {[props.roleId]}
+                        loadParams = {[id]}
                         reload = {/*reload*/ false}
                         onDataLoaded = {handlePermittedFoldersLoaded}
                         onDataLoadFailed = {(message) => enqueueSnackbar(`При получении данных возникла ошибка: ${message}`, {variant: "error"})}
@@ -217,7 +216,7 @@ export default function RoleViewer(props) {
                 </Paper>
 
             </div>
-        } : {};
+    } : {};
 
     // component
     return (
@@ -232,7 +231,7 @@ export default function RoleViewer(props) {
                 name={data.name}
                 itemType={FolderItemTypes.roles}
                 disabledPadding={true}
-                onOkClick={props.onOkClick}
+                onOkClick={() => location.state ? navigate(location.state) : navigate('/roles')}
                 readOnly={!hasRWRight}
             >
                 <PageTabs

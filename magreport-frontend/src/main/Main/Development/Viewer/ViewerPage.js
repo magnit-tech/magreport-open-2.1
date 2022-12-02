@@ -43,15 +43,14 @@ import {ViewerCSS} from './ViewerCSS';
  * @constructor
  */
 function ViewerPage(props) {
-
+    
     const navigate = useNavigate()
 
     const classes = ViewerCSS();
 
     function onEditClick() {
         props.actionViewerEditItem(props.itemType, props.id, props.name)
-        navigate(`/${props.itemType}/${props.id}/edit`)
-
+        navigate(`/${props.itemType}/edit/${props.id}`)
     }
 
     return (

@@ -1,5 +1,8 @@
 import React, {useState} from "react";
 import {useSnackbar} from "notistack";
+
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+
 //local
 import dataHub from "ajax/DataHub";
 import DataLoader from "main/DataLoader/DataLoader";
@@ -11,29 +14,28 @@ import ViewerFieldMapping from "main/Main/Development/Viewer/ViewerFieldMapping"
 import SecurityFilterRoles from "./SecurityFilterRoles";
 import {ViewerCSS} from "main/Main/Development/Viewer/ViewerCSS";
 
-import {createViewerTextFields,
-    createViewerPageName} from "main/Main/Development/Viewer/viewerHelpers";
+import {createViewerTextFields, createViewerPageName} from "main/Main/Development/Viewer/viewerHelpers";
 
-/**
- * @callback onOkClick
- */
 /**
  * Компонент просмотра фильтра безопасности
  * @param {Object} props - параметры компонента
- * @param {Number} props.securityFilterId - ID набора данных
- * @param {onOkClick} props.onOkClick - callback вызываемый при нажатии кнопки ОК
  * @constructor
  */
+
 export default function SecurityFilterViewer(props) {
 
     const classes = ViewerCSS();
+
+    const {id} = useParams()
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const {enqueueSnackbar} = useSnackbar();
 
     const [data, setData] = useState({});
 
     let loadFunc = dataHub.securityFilterController.get;
-    let loadParams = [props.securityFilterId];
+    let loadParams = [id];
 
     function handleDataLoaded(loadedData) {
         setData(loadedData);   
@@ -152,7 +154,7 @@ export default function SecurityFilterViewer(props) {
         //tabdisabled: data.securityFilterName && data.securityFilterDescription && selectedFilterInstance ? false: true,
         tabcontent:
             <SecurityFilterRoles 
-                securityFilterId={props.securityFilterId}
+                securityFilterId={id}
                 filterInstance={{...data.filterInstance}}
                 onExit={props.onExit}
                 mode='view'
@@ -180,7 +182,7 @@ export default function SecurityFilterViewer(props) {
                 id={data.id}
                 itemType={FolderItemTypes.securityFilters}
                 disabledPadding={true}
-                onOkClick={props.onOkClick}
+                onOkClick={() => location.state ? navigate(location.state) : navigate('/securityFilters')}
                 readOnly={!hasRWRight}
             >
                 {children}

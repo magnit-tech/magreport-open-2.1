@@ -1,6 +1,8 @@
 import React, {useState } from 'react';
 import { connect } from 'react-redux';
 
+import { useNavigate } from 'react-router-dom'
+
 // dataHub
 import dataHub from 'ajax/DataHub';
 
@@ -21,6 +23,8 @@ import ReportStarter from 'main/Report/ReportStarter';
 
 function UsersJobsMenuView(props){
 
+    const navigate = useNavigate()
+
     let state = props.state;
     const [reload, setReload] = useState({needReload : false})
 
@@ -36,6 +40,16 @@ function UsersJobsMenuView(props){
 
     function handleRestartReportClick(reportId, jobId){
         props.startReport(reportId, jobId, SidebarItems.admin.subItems.userJobs.key);
+    }
+
+    function handleItemClick(jobId) {
+        props.actionItemClick(folderItemsType, jobId)
+        navigate(`/report/${jobId}`)
+    }
+
+    function handleReportRunClick(reportId, jobId) {
+        props.startReport(reportId, jobId, SidebarItems.admin.subItems.userJobs.key, SidebarItems.admin.subItems.userJobs.folderItemType)
+        navigate(`/report/starter/${reportId}?jobId=${jobId}`)
     }
 
     return (
@@ -58,8 +72,10 @@ function UsersJobsMenuView(props){
                     showItemControls = {false}
                     pagination = {true}
                     dialog = {props.dialog}
-                    onItemClick = {jobId => {props.actionItemClick(folderItemsType, jobId)}}
-                    onReportRunClick = { (reportId, jobId) => {props.startReport(reportId, jobId, SidebarItems.admin.subItems.userJobs.key, SidebarItems.admin.subItems.userJobs.folderItemType)}}
+                    // onItemClick = {jobId => {props.actionItemClick(folderItemsType, jobId)}}
+                    onItemClick = {handleItemClick}
+                    // onReportRunClick = { (reportId, jobId) => {props.startReport(reportId, jobId, SidebarItems.admin.subItems.userJobs.key, SidebarItems.admin.subItems.userJobs.folderItemType)}}
+                    onReportRunClick = {handleReportRunClick}
                     onFilterClick = {filters => {props.actionFilterJobs(folderItemsType, filters)}}
                     onRefreshClick = {handleRefreshFolder}
                     onJobCancelClick = {(jobIndex, jobId) => {props.actionJobCancel(folderItemsType, jobIndex, jobId)}}

@@ -340,8 +340,8 @@ export default function ScheduleTasksViewer(props) {
         >
             <ViewerPage   
                 itemType={FolderItemTypes.scheduleTasks}
-                id={props.scheduleId}
-                onOkClick={props.onOkClick}
+                id={id}
+                onOkClick={() => navigate('/scheduleTasks')}
                 disabledPadding={true}
                 readOnly={!hasRWRight}
             >

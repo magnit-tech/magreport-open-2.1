@@ -2,6 +2,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { useNavigateBack} from "components/Navbar/navbarHooks";
 
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+
 // dataHub
 import dataHub from 'ajax/DataHub';
 
@@ -23,6 +25,11 @@ import RoleViewer from "./RoleViewer";
 import {FLOW_STATE_BROWSE_FOLDER, rolesMenuViewFlowStates} from 'redux/reducers/menuViews/flowStates';
 
 function RolesMenuView(props){
+
+    const {id} = useParams()
+    const navigate = useNavigate()
+    const location = useLocation()
+    
 
     const navigateBack = useNavigateBack();
 
@@ -47,6 +54,22 @@ function RolesMenuView(props){
             navigateBack();
         }
     }
+    function handleFolderClick(folderId) {
+        props.actionFolderClick(folderItemsType, folderId)
+        navigate(`/roles/${folderId}`)
+    }
+    function handleItemClick(roleId) {
+        props.actionItemClick(folderItemsType, roleId)
+        navigate(`/roles/view/${roleId}`, {state: location.pathname})
+    }
+    function handleEditItemClick(roleId) {
+        props.actionEditItemClick(folderItemsType, roleId)
+        navigate(`/roles/edit/${roleId}`)
+    }
+    function handleAddItemClick(folderItemsType) {
+        props.actionAddItemClick(folderItemsType)
+        navigate(`/roles/add`)
+    }
 
     return(
         <div  style={{display: 'flex', flex: 1}}>
@@ -54,7 +77,8 @@ function RolesMenuView(props){
                 state.flowState === FLOW_STATE_BROWSE_FOLDER ?
                     <DataLoader
                         loadFunc = {loadFunc}
-                        loadParams = {[state.currentFolderId]}
+                        // loadParams = {[state.currentFolderId]}
+                        loadParams = {id ? [Number(id)] : [null]}
                         reload = {reload}
                         onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}}
                         onDataLoadFailed = {(message) => {props.actionFolderLoadFailed(folderItemsType, message)}}
@@ -67,11 +91,17 @@ function RolesMenuView(props){
                             searchParams = {state.searchParams || {}}
                             sortParams = {state.sortParams || {}}
                             data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
-                            onFolderClick = {(folderId) => {props.actionFolderClick(folderItemsType, folderId)}}
-                            onItemClick = {(roleId) => {props.actionItemClick(folderItemsType, roleId)}}
+                            // onFolderClick = {(folderId) => {props.actionFolderClick(folderItemsType, folderId)}}
+                            // onItemClick = {(roleId) => {props.actionItemClick(folderItemsType, roleId)}}
+                            // onAddItemClick = {() => {props.actionAddItemClick(folderItemsType)}}
+                            // onEditItemClick = {(roleId) => {props.actionEditItemClick(folderItemsType, roleId)}}
+                            onFolderClick = {handleFolderClick}
+                            onItemClick={handleItemClick}
+                            onEditItemClick={handleEditItemClick}
+                            onAddItemClick={handleAddItemClick}
+
+
                             onAddFolder = {(name, description) => {props.actionAddFolder(folderItemsType, state.currentFolderData.id, name, description)}}
-                            onAddItemClick = {() => {props.actionAddItemClick(folderItemsType)}}
-                            onEditItemClick = {(roleId) => {props.actionEditItemClick(folderItemsType, roleId)}}
                             onDeleteFolderClick = {(folderId) => {props.actionDeleteFolderClick(folderItemsType, state.currentFolderData.id, folderId)}}
                             onDeleteItemClick = {(roleId) => {props.actionDeleteItemClick(folderItemsType, state.currentFolderId, roleId)}}
                             onEditFolder = {(folderId, name, description) => {props.actionEditFolder(sidebarItemType, folderItemsType, state.currentFolderData.id, folderId, name, description)}}

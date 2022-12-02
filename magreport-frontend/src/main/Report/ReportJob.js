@@ -91,9 +91,9 @@ export default function ReportJob(props){
         }
     }
 
-    function handleRestartReportClick(){
-        props.onRestartReportClick(jobData.current.report.id, jobData.current.id);
-    }
+    // function handleRestartReportClick(){
+    //     props.onRestartReportClick(jobData.current.report.id, jobData.current.id);
+    // }
 
     function setCustomErrorMessage(){
 
@@ -116,7 +116,7 @@ export default function ReportJob(props){
                 <DataLoader
                     loadFunc = {dataHub.reportJobController.get}
                     // loadParams = {[props.jobId]}
-                    loadParams = {id ? [Number(id)] : [null]}
+                    loadParams = {props.jobId ? [props.jobId] : [Number(id)]}
                     reload = {reload}
                     onDataLoaded = {handleJobInfoLoaded}
                     onDataLoadFailed = {message => {console.log(message)}}
@@ -145,8 +145,8 @@ export default function ReportJob(props){
                             jobId = {Number(id)}
                             jobOwnerName = {jobOwnerName.current}
                             excelRowLimit = {excelRowLimit.current}
-                            excelTemplates = {props.excelTemplates}
-                            onRestartReportClick = {handleRestartReportClick}
+                            excelTemplates = {jobData.current.excelTemplates}
+                            // onRestartReportClick = {handleRestartReportClick}
                         />
 
                     :jobStatus === JobStatus.CANCELING ?

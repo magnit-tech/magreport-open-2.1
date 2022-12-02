@@ -3,6 +3,8 @@ import {connect} from "react-redux";
 import {useSnackbar} from "notistack";
 import {useNavigateBack} from "components/Navbar/navbarHooks";
 
+import { useParams, useNavigate } from 'react-router-dom'
+
 // components
 import DesignerPage from "main/Main/Development/Designer/DesignerPage";
 import PageTabs from 'main/PageTabs/PageTabs';
@@ -38,6 +40,7 @@ import {
 import DataLoader from "main/DataLoader/DataLoader";
 import DesignerSelectField from "main/Main/Development/Designer/DesignerSelectField";
 import { ASMCSS as useStyles} from "./ASMCSS";
+
 
 /**
  * @callback actionAsmDesignerChangeRootData
@@ -90,8 +93,6 @@ import { ASMCSS as useStyles} from "./ASMCSS";
 /**
  * Дизайнер объекта ASM для создания нового/редактирования старого
  * @param {Object} props - component properties
- * @param {Number} props.asmId - ID редактируемого объекта ASM
- * @param {String} props.designerMode - режим дизайнера - значение константы из utils/asmConstants
  * @param {Object} props.state - asmDesigner State
  * @param {actionAsmDesignerChangeRootData} props.actionAsmDesignerChangeRootData - меняет значение полей редактируемого ExternalSecurity
  * @param {actionAsmListShow} props.actionAsmListShow - возврат в список всех ASM
@@ -108,9 +109,10 @@ import { ASMCSS as useStyles} from "./ASMCSS";
  */
 function ASMDesigner(props) {
 
-    const navigateBack = useNavigateBack();
+    const {id} = useParams()
+    const navigate = useNavigate();
 
-    const designerMode = props.designerMode;
+    const navigateBack = useNavigateBack();
 
     const {enqueueSnackbar} = useSnackbar();
     const classes = useStyles();
@@ -131,9 +133,10 @@ function ASMDesigner(props) {
 
     let loadFunc;
     let loadParams = [];
-    if(props.designerMode === ASM_DESIGNER_EDIT_MODE) {
+
+    if (id) {
         loadFunc = dataHub.asmController.get;
-        loadParams = [props.asmId];
+        loadParams = [id];
     }
 
     const sourceItems = [];
@@ -158,7 +161,7 @@ function ASMDesigner(props) {
             return;
         }
 
-        if (designerMode === ASM_DESIGNER_CREATE_MODE) {
+        if (!id) {
             dataHub.asmController.add(
                 roleTypeId,
                 name,
@@ -168,7 +171,7 @@ function ASMDesigner(props) {
                 magrepResponse => handleAddEditAnswer(needExit, magrepResponse)
             );
             setUploading(true);
-        } else if (designerMode === ASM_DESIGNER_EDIT_MODE) {
+        } else if (id) {
             dataHub.asmController.edit(
                 data.id,
                 roleTypeId,
@@ -180,7 +183,7 @@ function ASMDesigner(props) {
             );
             setUploading(true);
         } else {
-            enqueueSnackbar(`Неизвестный режим запуска дизайнера: ${designerMode}`, {variant: "error"});
+            enqueueSnackbar(`Неизвестный режим запуска дизайнера`, {variant: "error"});
         }
     }
 
@@ -189,9 +192,9 @@ function ASMDesigner(props) {
         
         if(magrepResponse.ok){
             if (needExit){
-                let actionWord = designerMode === ASM_DESIGNER_CREATE_MODE ? "создан" : "обновлён";
+                let actionWord = id ? "обновлён" : "создан";
                 enqueueSnackbar(`ASM ${name} ${actionWord} успешно`, {variant: "success"});
-                if(designerMode === ASM_DESIGNER_CREATE_MODE) {
+                if (!id) {
                     props.actionAsmListShow();
                 } else {
                     navigateBack();
@@ -203,7 +206,7 @@ function ASMDesigner(props) {
             */ 
         }
         else{
-            let actionWord = designerMode === ASM_DESIGNER_CREATE_MODE ? "создании" : "обновлении";
+            let actionWord = id ? "обновлении" : "создании";
             enqueueSnackbar("Ошибка при " + actionWord + " объекта: " + magrepResponse.data, {variant : "error"});
         }
     }
@@ -211,10 +214,12 @@ function ASMDesigner(props) {
     function handleCancelButtonClick(e) {
         const handleAlertDialogAction = (isOk) => {
             if (isOk) {
-                if(designerMode === ASM_DESIGNER_CREATE_MODE) {
+                if (!id) {
                     props.actionAsmListShow();
+                    navigate('/asm')
                 } else {
                     navigateBack();
+                    navigate(`/asm/view/${id}`)
                 }
             }
             props.hideAlertDialog();
@@ -266,7 +271,6 @@ function ASMDesigner(props) {
         </DesignerPage>
     })
 
-
     securitySources.forEach((securitySource, index) => {
         tabs.push({
             tablabel: "Настройка " + securitySource.sourceType,
@@ -304,7 +308,7 @@ function ASMDesigner(props) {
                     <PageTabs
                         tabsdata={tabs}
                         onTabChange={handleTabChange}
-                        pageName={designerMode === ASM_DESIGNER_CREATE_MODE ? "Создание объекта ASM" : "Редактирование объекта ASM: " + name}
+                        pageName={id ? "Редактирование объекта ASM: " + name : "Создание объекта ASM"}
                     />
                 </DataLoader>
             </DataLoader>

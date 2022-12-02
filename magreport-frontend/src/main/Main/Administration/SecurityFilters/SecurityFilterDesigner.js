@@ -2,6 +2,8 @@ import React from 'react';
 import {useState} from 'react';
 import { useSnackbar } from 'notistack';
 
+import { useParams, useNavigate } from 'react-router-dom'
+
 // components
 import { CircularProgress } from '@material-ui/core';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
@@ -36,6 +38,9 @@ import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
  */
 export default function SecurityFilterDesigner(props){
 
+    const {id} = useParams()
+    const navigate = useNavigate();
+
     // const filterDetailsTabIndex = 0;
     // const dataSetsTabIndex = 1;
     const rolesTabIndex = 2;
@@ -69,9 +74,13 @@ export default function SecurityFilterDesigner(props){
     let loadFunc;
     let loadParams = [];
 
-    if(props.mode === 'edit'){
+    // if(props.mode === 'edit'){
+        
+    //     loadParams = [SFId];
+    // }
+    if(id){
         loadFunc = dataHub.securityFilterController.get;
-        loadParams = [SFId];
+        loadParams = [id];
     }
 
     /*

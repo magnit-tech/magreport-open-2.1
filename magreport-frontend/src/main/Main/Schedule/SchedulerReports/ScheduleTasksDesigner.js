@@ -396,7 +396,11 @@ export default function ScheduleTasksDesigner(props) {
     }
 
     function handleCancel() {
-        navigate(-1)
+        if (id) {
+            navigate(`/scheduleTasks/view/${id}`)
+        } else {
+            navigate(`/scheduleTasks`)
+        }
     }
 
     function handleDataLoaded(loadedData) {
@@ -502,7 +506,6 @@ export default function ScheduleTasksDesigner(props) {
             
             </DesignerPage>
     })
-
     tabs.push({
         tablabel: "Расписания",
         tabdisabled: !(data.reportId && data.name && data.description) ,
@@ -581,9 +584,102 @@ export default function ScheduleTasksDesigner(props) {
                 
             </DesignerPage>
     })
-
     tabs.push({
-        tablabel: "Рассылка",
+    tablabel: "Рассылка",
+    tabdisabled: !(data.reportId && data.name && data.description) ,
+    tabcontent: uploading ? <CircularProgress/> :
+        <DesignerPage
+            disableSave = {disableSave}
+            onSaveClick={handleSave}
+            onCancelClick={handleCancel}
+        >
+            <FormControl component="fieldset" style={{margin: '8px 0px'}}>
+                <FormLabel component="legend">Тип рассылки:</FormLabel>
+                    <RadioGroup row aria-label="taskType" name="taskType" 
+                        value={taskTypeId} 
+                        defaultValue = {taskTypeId}
+                        onChange={(event) => handleChangeTaskTypeId( event.target.value)}
+                    >
+                        <FormControlLabel value= '0' control={<Radio />} label="E-mail" />
+                        <FormControlLabel value= '1' control={<Radio />} label="Задания" />
+                    </RadioGroup>
+            </FormControl>
+            
+            {taskTypeId === '0' &&
+                <DesignerTextFieldWithSeparator
+                    label = "Адреса"
+                    source = "destinationEmails"
+                    value = {data.destinationEmails}
+                    onChange = {handleChangeEmails}
+                    mandatory = {taskTypeId === '0'}
+                    displayblock 
+                    fullWidth
+                    multiline
+                    error = {errorField.destinationEmails}
+                />
+            }
+
+            <DesignerMultipleSelectField
+                    // minWidth = {StyleConsts.designerTextFieldMinWidth}
+                    label = "Пользователи"
+                    value = {usersList.filter(item => data.destinationUsers.indexOf(item.id)>=0 )}
+                    data = {usersList}
+                    //needName = {true}
+                    onChange = {data => {handleChange('destinationUsers', data)}}
+                    displayBlock
+                    fullWidth
+                    error = {errorField.destinationUsers}
+                />
+            <DesignerMultipleSelectField
+                    // minWidth = {StyleConsts.designerTextFieldMinWidth}
+                    label = "Роли"
+                    value = {rolesList.filter(item => data.destinationRoles.map(item => item.id).indexOf(item.id)>=0 )}
+                    data = {rolesList}
+                    needIdName = {true}
+                    onChange = {data => {handleChange('destinationRoles', data )}}
+                    displayBlock
+                    fullWidth
+                    error = {errorField.destinationRoles}
+            />
+            {taskTypeId === '0' &&
+                <DesignerTextField
+                    label="Тема письма"
+                    value={data.reportTitleMail}
+                    onChange={data => {handleChange('reportTitleMail', data)}}
+                    multiline
+                    displayBlock
+                    fullWidth
+                    error = {errorField.reportTitleMail}
+                />
+            } 
+            {taskTypeId === '0' &&
+                <DesignerTextField
+                    label="Тело письма"
+                    value={data.reportBodyMail}
+                    onChange={data => {handleChange('reportBodyMail', data)}}
+                    multiline
+                    displayBlock
+                    fullWidth
+                    error = {errorField.reportBodyMail}
+                />
+            }
+            {taskTypeId === '0' &&
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={data.sendEmptyReport}
+                            onChange={event => {handleChange('sendEmptyReport', event.target.checked)}}
+                            name="sendEmptyReport"
+                            color="primary"
+                        />
+                    }
+                    label="Отправлять пустой отчёт?"
+                />
+            }
+        </DesignerPage>
+    })
+    tabs.push({
+        tablabel: "Падение рассылки",
         tabdisabled: !(data.reportId && data.name && data.description) ,
         tabcontent: uploading ? <CircularProgress/> :
             <DesignerPage
@@ -591,172 +687,79 @@ export default function ScheduleTasksDesigner(props) {
                 onSaveClick={handleSave}
                 onCancelClick={handleCancel}
             >
-                <FormControl component="fieldset" style={{margin: '8px 0px'}}>
-                    <FormLabel component="legend">Тип рассылки:</FormLabel>
-                        <RadioGroup row aria-label="taskType" name="taskType" 
-                            value={taskTypeId} 
-                            defaultValue = {taskTypeId}
-                            onChange={(event) => handleChangeTaskTypeId( event.target.value)}
-                        >
-                            <FormControlLabel value= '0' control={<Radio />} label="E-mail" />
-                            <FormControlLabel value= '1' control={<Radio />} label="Задания" />
-                        </RadioGroup>
-                </FormControl>
-                
-                {taskTypeId === '0' &&
-                    <DesignerTextFieldWithSeparator
+                <DesignerTextFieldWithSeparator
                         label = "Адреса"
-                        source = "destinationEmails"
-                        value = {data.destinationEmails}
+                        source = "errEmails"
+                        value = {data.errEmails}
                         onChange = {handleChangeEmails}
-                        mandatory = {taskTypeId === '0'}
                         displayblock 
                         fullWidth
                         multiline
-                        error = {errorField.destinationEmails}
-                    />
-                }
-
+                        error = {errorField.errEmails}
+                />  
                 <DesignerMultipleSelectField
-                        // minWidth = {StyleConsts.designerTextFieldMinWidth}
-                        label = "Пользователи"
-                        value = {usersList.filter(item => data.destinationUsers.indexOf(item.id)>=0 )}
-                        data = {usersList}
-                        //needName = {true}
-                        onChange = {data => {handleChange('destinationUsers', data)}}
-                        displayBlock
-                        fullWidth
-                        error = {errorField.destinationUsers}
-                    />
-                <DesignerMultipleSelectField
-                        // minWidth = {StyleConsts.designerTextFieldMinWidth}
-                        label = "Роли"
-                        value = {rolesList.filter(item => data.destinationRoles.map(item => item.id).indexOf(item.id)>=0 )}
-                        data = {rolesList}
-                        needIdName = {true}
-                        onChange = {data => {handleChange('destinationRoles', data )}}
-                        displayBlock
-                        fullWidth
-                        error = {errorField.destinationRoles}
+                    label = "Пользователи"
+                    value = {usersList.filter(item => data.errUsers.indexOf(item.id)>=0 )}
+                    data = {usersList}
+                    //needName = {true}
+                    onChange = {data => {handleChange('errUsers', data)}}
+                    displayBlock
+                    fullWidth
+                    error = {errorField.errUsers}
                 />
-                {taskTypeId === '0' &&
-                    <DesignerTextField
+                <DesignerMultipleSelectField
+                    label = "Роли"
+                    value = {rolesList.filter(item => data.errRoles.map(item => item.id).indexOf(item.id)>=0 )}
+                    data = {rolesList}
+                    needIdName = {true}
+                    onChange = {data => {handleChange('errRoles', data )}}
+                    displayBlock
+                    fullWidth
+                    error = {errorField.errRoles}
+            />
+                <DesignerTextField
                         label="Тема письма"
-                        value={data.reportTitleMail}
-                        onChange={data => {handleChange('reportTitleMail', data)}}
+                        value={data.errorTitleMail}
+                        onChange={data => {handleChange('errorTitleMail', data)}}
                         multiline
                         displayBlock
                         fullWidth
-                        error = {errorField.reportTitleMail}
-                    />
-                } 
-                {taskTypeId === '0' &&
-                    <DesignerTextField
-                        label="Тело письма"
-                        value={data.reportBodyMail}
-                        onChange={data => {handleChange('reportBodyMail', data)}}
-                        multiline
-                        displayBlock
-                        fullWidth
-                        error = {errorField.reportBodyMail}
-                    />
-                }
-                {taskTypeId === '0' &&
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={data.sendEmptyReport}
-                                onChange={event => {handleChange('sendEmptyReport', event.target.checked)}}
-                                name="sendEmptyReport"
-                                color="primary"
-                            />
-                        }
-                        label="Отправлять пустой отчёт?"
-                    />
-                }
-            </DesignerPage>
-        })
-        tabs.push({
-            tablabel: "Падение рассылки",
-            tabdisabled: !(data.reportId && data.name && data.description) ,
-            tabcontent: uploading ? <CircularProgress/> :
-                <DesignerPage
-                    disableSave = {disableSave}
-                    onSaveClick={handleSave}
-                    onCancelClick={handleCancel}
-                >
-                    <DesignerTextFieldWithSeparator
-                            label = "Адреса"
-                            source = "errEmails"
-                            value = {data.errEmails}
-                            onChange = {handleChangeEmails}
-                            displayblock 
-                            fullWidth
-                            multiline
-                            error = {errorField.errEmails}
-                    />  
-                    <DesignerMultipleSelectField
-                        label = "Пользователи"
-                        value = {usersList.filter(item => data.errUsers.indexOf(item.id)>=0 )}
-                        data = {usersList}
-                        //needName = {true}
-                        onChange = {data => {handleChange('errUsers', data)}}
-                        displayBlock
-                        fullWidth
-                        error = {errorField.errUsers}
-                    />
-                    <DesignerMultipleSelectField
-                        label = "Роли"
-                        value = {rolesList.filter(item => data.errRoles.map(item => item.id).indexOf(item.id)>=0 )}
-                        data = {rolesList}
-                        needIdName = {true}
-                        onChange = {data => {handleChange('errRoles', data )}}
-                        displayBlock
-                        fullWidth
-                        error = {errorField.errRoles}
+                        error = {errorField.errorTitleMail}
                 />
-                  <DesignerTextField
-                            label="Тема письма"
-                            value={data.errorTitleMail}
-                            onChange={data => {handleChange('errorTitleMail', data)}}
-                            multiline
-                            displayBlock
-                            fullWidth
-                            error = {errorField.errorTitleMail}
-                    />
+                <DesignerTextField
+                        label="Тело письма"
+                        value={data.errorBodyMail}
+                        onChange={data => {handleChange('errorBodyMail', data)}}
+                        multiline
+                        displayBlock
+                        fullWidth
+                        error = {errorField.errorBodyMail}
+                />
+                <div style={{display: 'flex'}}> 
                     <DesignerTextField
-                            label="Тело письма"
-                            value={data.errorBodyMail}
-                            onChange={data => {handleChange('errorBodyMail', data)}}
-                            multiline
-                            displayBlock
-                            fullWidth
-                            error = {errorField.errorBodyMail}
+                        label="Количество падений"
+                        helperText = {`после которых задание изменит статус на ${ScheduleStatusMap.get('FAILED')}`}
+                        value={data.maxFailedStarts}
+                        minWidth = {`calc(50% - 16px)`}
+                        onChange={data => {handleChange('maxFailedStarts', data)}}
+                        type='number'
+                        error = {errorField.maxFailedStarts}
+                    /> 
+                    <DesignerTextField
+                        margin ={'8px 0px 0px 16px'}
+                        minWidth = {'50%'}
+                        label="Количество фактических падений"
+                        value={data.failedStart}
+                        onChange={data => {handleChange('failedStart', data)}}
+                        disabled
+                        type='number'
+                        error = {errorField.failedStart}
                     />
-                    <div style={{display: 'flex'}}> 
-                        <DesignerTextField
-                            label="Количество падений"
-                            helperText = {`после которых задание изменит статус на ${ScheduleStatusMap.get('FAILED')}`}
-                            value={data.maxFailedStarts}
-                            minWidth = {`calc(50% - 16px)`}
-                            onChange={data => {handleChange('maxFailedStarts', data)}}
-                            type='number'
-                            error = {errorField.maxFailedStarts}
-                        /> 
-                        <DesignerTextField
-                            margin ={'8px 0px 0px 16px'}
-                            minWidth = {'50%'}
-                            label="Количество фактических падений"
-                            value={data.failedStart}
-                            onChange={data => {handleChange('failedStart', data)}}
-                            disabled
-                            type='number'
-                            error = {errorField.failedStart}
-                        />
-                    </div>
-    
-                </DesignerPage>
-            })
+                </div>
+
+            </DesignerPage>
+    })
+
     if (!hideFilterTab){
         tabs.push({
             tablabel: "Фильтры",

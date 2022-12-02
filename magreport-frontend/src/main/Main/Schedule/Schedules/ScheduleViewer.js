@@ -20,17 +20,14 @@ import {createViewerPageName} from "main/Main/Development/Viewer/viewerHelpers";
 // constants
 import {FolderItemTypes} from "main/FolderContent/FolderItemTypes";
 
-/**
- * @callback onOkClick
- */
+
 /**
  * Компонент просмотра расписаний
- * @param {Object} props - параметры компонента
- * @param {onOkClick} props.onOkClick - callback, вызываемый при нажатии кнопки ОК
  * @return {JSX.Element}
  * @constructor
  */
-export default function ScheduleViewer(props) {
+
+export default function ScheduleViewer() {
     
     const {id} = useParams()
     const navigate = useNavigate();
@@ -91,8 +88,7 @@ export default function ScheduleViewer(props) {
         <ViewerPage
             itemType={FolderItemTypes.schedules}
             id={id}
-            // onOkClick={props.onOkClick}
-            onOkClick={() => navigate(-1)}
+            onOkClick={() => navigate('/schedules')}
             disabledPadding={true}
             readOnly={!hasRWRight}
         >
