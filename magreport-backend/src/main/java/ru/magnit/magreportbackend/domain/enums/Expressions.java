@@ -17,6 +17,7 @@ import ru.magnit.magreportbackend.expression.impl.ReplaceExpression;
 import ru.magnit.magreportbackend.expression.impl.ReportFieldValueExpression;
 import ru.magnit.magreportbackend.expression.impl.RightSubstrExpression;
 import ru.magnit.magreportbackend.expression.impl.RowNumberExpression;
+import ru.magnit.magreportbackend.expression.impl.SquareRootExpression;
 import ru.magnit.magreportbackend.expression.impl.StrLenExpression;
 import ru.magnit.magreportbackend.expression.impl.SubstrExpression;
 import ru.magnit.magreportbackend.expression.impl.SubtractExpression;
@@ -46,7 +47,8 @@ public enum Expressions {
     TO_INTEGER(ToIntegerExpression::new),
     TO_DOUBLE(ToDoubleExpression::new),
     CURRENT_DATE(CurrentDateExpression::new),
-    ROW_NUMBER(RowNumberExpression::new);
+    ROW_NUMBER(RowNumberExpression::new),
+    SQUARE_ROOT(SquareRootExpression::new);
 
     private final BiFunction<FieldExpressionResponse, ExpressionCreationContext, BaseExpression> factory;
 
