@@ -478,12 +478,12 @@ function PivotPanel(props){
             stylePivotTable: false
         }
 
-        if(pivotConfiguration.sortOrder?.columnSort) {
-            payload.cubeRequest.columnSort = pivotConfiguration.sortOrder.columnSort
+        if(pivotConfiguration.sortOrder?.columnSort && pivotConfiguration.sortOrder.columnSort.data[0].order.trim() !== '') {
+            payload.cubeRequest.columnSort = [pivotConfiguration.sortOrder.columnSort.data[0]]
         }
 
-        if(pivotConfiguration.sortOrder?.rowSort) {
-            payload.cubeRequest.rowSort = pivotConfiguration.sortOrder.rowSort
+        if(pivotConfiguration.sortOrder?.rowSort && pivotConfiguration.sortOrder.rowSort.data[0].order.trim() !== '') {
+            payload.cubeRequest.rowSort = [pivotConfiguration.sortOrder.rowSort.data[0]]
         }
 
         enqueueSnackbar("Запущен экспорт в Excel. Формирование файла может происходить достаточно ДОЛГО " +
@@ -501,10 +501,7 @@ function PivotPanel(props){
             link.parentNode.removeChild(link);
         }
         else {
-            enqueueSnackbar("Не удалось получить файл с сервера", {
-                variant: 'error',
-                persist: true
-            });
+            enqueueSnackbar("Не удалось получить файл с сервера", { variant: 'error'});
         }
     }
 
