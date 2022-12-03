@@ -1,6 +1,6 @@
 default:
   tags: 
-    - BI
+    - bi
   image: itm-orkhd-team-docker-images.repo.corp.tander.ru/bigdata/tanderjava16
 
 variables:
