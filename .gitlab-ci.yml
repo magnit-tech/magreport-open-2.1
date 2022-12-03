@@ -1,0 +1,85 @@
+default:
+  tags: 
+    - magreport_docker
+  image: itm-orkhd-team-docker-images.repo.corp.tander.ru/bigdata/tanderjava16
+
+variables:
+  CI_DEBUG_TRACE: $TRACE
+  MAGREPORT_HOME: "~/magreport2.1"
+  REACT_APP_VERSION: 'cat version'
+    
+stages:
+  - build
+  - test
+  - package
+  - copy_files
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH == "release-prod"
+    - if: $CI_COMMIT_BRANCH == "main"
+
+build:
+  stage: build
+  script:
+    - mvn -U clean compile
+  cache:
+    paths:
+      - ./target
+      - ./.m2
+      - node_modules
+
+test:
+  stage: test
+  script:
+    - mvn test
+  cache:
+    paths:
+      - ./target
+      - ./.m2
+      - node_modules
+
+package:
+  stage: package
+  script:
+    - mvn package
+  artifacts:
+    paths:
+      - ./target/*.jar
+    expire_in: 1 day
+  cache:
+    policy: pull
+    paths:
+      - ./target
+      - ./.m2
+      - node_modules
+
+copy_files:
+  stage: copy_files
+  script:
+    - if [ $CI_COMMIT_BRANCH == "main" ]; then REACT_APP_VERSION='"$REACT_APP_VERSION"."$CI_RUNNER_ID"t'; else REACT_APP_VERSION="$REACT_APP_VERSION."$CI_RUNNER_ID""; fi
+    - if [ $CI_COMMIT_BRANCH == "main" ]; then ENVIRONMENT='test'; else ENVIRONMENT="prod"; fi
+    - cd  "$CI_BUILDS_DIR"
+    - rm -rf ./package
+    - mkdir -p ./package
+    - mkdir -p ./package/etc/sysconfig
+    - cp -f ./config/package/etc/sysconfig/magreport2 ./package/etc/sysconfig/magreport2
+    - mkdir -p ./package/usr/lib/systemd/system
+    - cp -f ./config/package/usr/lib/systemd/system/magreport2_"$ENVIRONMENT".service ./package/usr/lib/systemd/system/magreport2.service 
+    - mkdir -p ./package/var/log/magreport2
+    - touch ./package/var/log/magreport2/magreport2.log
+    - mkdir -p ./package/var/magreport2/excel-templates
+    - cp -rf  ./magreport-backend/src/main/resources/templates/* ./package/var/magreport2/excel-templates
+    - mkdir -p ./package/var/magreport2
+    - cp -rf ./config/package/var/magreport2/keystore ./package/var/magreport2
+    - mkdir -p ./package/var/magreport2/jdbc
+    - cp -rf ./magreport-backend/jdbc/* ./package/var/magreport2/jdbc
+    - cp -f ./config/package/var/magreport2/application_"$ENVIRONMENT".properties ./package/var/magreport2/application.properties
+    - cp -f ./config/package/var/magreport2/logback.xml ./package/var/magreport2/logback.xml
+    - cp -f ./magreport-backend/target/magreport-backend-2.1.jar ./package/var/magreport2/magreport2.jar
+    - echo "$REACT_APP_VERSION" > ./package/var/magreport2/version
+    - cp -f ./config/package/etc/sysconfig/magreport-admin ./package/etc/sysconfig/magreport-admin
+    - cp -f ./config/package/usr/lib/systemd/system/magreport-admin.service ./package/usr/lib/systemd/system/magreport-admin.service
+    - mkdir -p ./package/var/magreport2/magreport-admin
+    - cp -f ./magreport-admin/target/magreport-admin-0.0.1-SNAPSHOT.jar ./package/var/magreport2/magreport-admin/magreport-admin.jar
+    - cp -f ./config/package/var/magreport2/magreport-admin/application_"$ENVIRONMENT".properties ./package/var/magreport2/magreport-admin/application.properties
