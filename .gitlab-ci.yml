@@ -21,7 +21,7 @@ workflow:
 package:
   stage: package
   script:
-    - mvn clean package
+    - mvn clean package -X
   artifacts:
     paths:
       - ./target/*.jar
