@@ -9,8 +9,6 @@ variables:
   REACT_APP_VERSION: 'cat version'
     
 stages:
-  - build
-  - test
   - package
   - copy_files
 
@@ -19,30 +17,11 @@ workflow:
     - if: $CI_COMMIT_BRANCH == "release-prod"
     - if: $CI_COMMIT_BRANCH == "main"
 
-build:
-  stage: build
-  script:
-    - mvn -U clean compile
-  cache:
-    paths:
-      - ./target
-      - ./.m2
-      - node_modules
-
-test:
-  stage: test
-  script:
-    - mvn test
-  cache:
-    paths:
-      - ./target
-      - ./.m2
-      - node_modules
 
 package:
   stage: package
   script:
-    - mvn package
+    - mvn clean package
   artifacts:
     paths:
       - ./target/*.jar
