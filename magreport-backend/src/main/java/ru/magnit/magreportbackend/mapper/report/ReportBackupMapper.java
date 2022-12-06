@@ -15,6 +15,7 @@ public class ReportBackupMapper implements Mapper<ReportBackupTuple, Report> {
                 source.getId(),
                 source.getFolder().getId(),
                 source.getDataSet().getId(),
+                source.getUser().getId(),
                 source.getRequirementsLink(),
                 source.getName(),
                 source.getDescription(),

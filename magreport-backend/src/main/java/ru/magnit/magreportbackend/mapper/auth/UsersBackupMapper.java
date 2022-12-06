@@ -13,6 +13,7 @@ public class UsersBackupMapper implements Mapper<UsersBackupTuple, User> {
     public UsersBackupTuple from(User source) {
         return new UsersBackupTuple(
                 source.getId(),
+                source.getDomain().getId(),
                 source.getUserStatus().getId(),
                 source.getName(),
                 source.getFirstName(),

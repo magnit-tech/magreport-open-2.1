@@ -2,7 +2,7 @@ package ru.magnit.magreportbackend.dto.backup.dataset;
 
 import java.time.LocalDateTime;
 
-public record DatasetFolderBackupTuple (
+public record DataSetFolderBackupTuple(
 
     Long datasetFolderId,
     Long parentId,

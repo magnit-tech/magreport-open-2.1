@@ -29,9 +29,9 @@ import ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum;
 import ru.magnit.magreportbackend.dto.backup.BackupRequest;
 import ru.magnit.magreportbackend.dto.backup.BackupRestoreRequest;
 import ru.magnit.magreportbackend.dto.backup.RestoreMappingObject;
-import ru.magnit.magreportbackend.dto.backup.dataset.DatasetBackupTuple;
-import ru.magnit.magreportbackend.dto.backup.dataset.DatasetFieldBackupTuple;
-import ru.magnit.magreportbackend.dto.backup.dataset.DatasetFolderBackupTuple;
+import ru.magnit.magreportbackend.dto.backup.dataset.DataSetBackupTuple;
+import ru.magnit.magreportbackend.dto.backup.dataset.DataSetFieldBackupTuple;
+import ru.magnit.magreportbackend.dto.backup.dataset.DataSetFolderBackupTuple;
 import ru.magnit.magreportbackend.dto.backup.datasource.DataSourceBackupTuple;
 import ru.magnit.magreportbackend.dto.backup.datasource.DataSourceFolderBackupTuple;
 import ru.magnit.magreportbackend.dto.backup.filterinstance.FilterInstanceBackupTuple;
@@ -691,10 +691,10 @@ public class BackupService {
             listDataSet = listDataSet.stream().filter(id -> !mappingDataSets.containsKey(id)).collect(Collectors.toList());
 
 
-            var dataSets = Arrays.stream(objectMapper.readValue(linesBackup.get("DataSet"), DatasetBackupTuple[].class))
-                    .collect(Collectors.toMap(DatasetBackupTuple::datasetId, o -> o));
+            var dataSets = Arrays.stream(objectMapper.readValue(linesBackup.get("DataSet"), DataSetBackupTuple[].class))
+                    .collect(Collectors.toMap(DataSetBackupTuple::datasetId, o -> o));
 
-            var dataSetFields = Arrays.stream(objectMapper.readValue(linesBackup.get("DataSetField"), DatasetFieldBackupTuple[].class)).toList();
+            var dataSetFields = Arrays.stream(objectMapper.readValue(linesBackup.get("DataSetField"), DataSetFieldBackupTuple[].class)).toList();
 
             listDataSet
                     .stream()
@@ -779,8 +779,8 @@ public class BackupService {
 
             var mappingFolders = mapping.get(DATASET_FOLDER);
 
-            var datasetFolders = Arrays.stream(objectMapper.readValue(linesBackup.get("DataSetFolder"), DatasetFolderBackupTuple[].class))
-                    .collect(Collectors.toMap(DatasetFolderBackupTuple::datasetFolderId, o -> o));
+            var datasetFolders = Arrays.stream(objectMapper.readValue(linesBackup.get("DataSetFolder"), DataSetFolderBackupTuple[].class))
+                    .collect(Collectors.toMap(DataSetFolderBackupTuple::datasetFolderId, o -> o));
 
             var listDatasetFolderId = new ArrayList<Long>();
 
@@ -1271,9 +1271,9 @@ public class BackupService {
     private void restoreDataSetField(Long dataSetFieldId, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
         try {
             restoreDataSet(
-                    Arrays.stream(objectMapper.readValue(linesBackup.get("DataSetField"), DatasetFieldBackupTuple[].class))
+                    Arrays.stream(objectMapper.readValue(linesBackup.get("DataSetField"), DataSetFieldBackupTuple[].class))
                             .filter(dsf -> dsf.datasetFieldId().equals(dataSetFieldId))
-                            .map(DatasetFieldBackupTuple::datasetId)
+                            .map(DataSetFieldBackupTuple::datasetId)
                             .toList(),
                     linesBackup,
                     mapping);

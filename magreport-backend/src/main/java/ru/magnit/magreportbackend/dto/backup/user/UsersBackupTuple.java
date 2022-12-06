@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 public record UsersBackupTuple(
         Long userId,
+        Long domainId,
         Long userStatusId,
         String name,
         String firstName,
