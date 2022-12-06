@@ -22,7 +22,12 @@ import ReportStarter from 'main/Report/ReportStarter';
 function UsersJobsMenuView(props){
 
     let state = props.state;
-    const [reload, setReload] = useState({needReload : false})
+    let params = [props.filters?.periodStart ?? null, 
+        props.filters?.periodEnd ?? null, 
+        props.filters?.selectedStatuses ?? null,
+        props.filters?.users ?? null
+    ]
+    const [reload, setReload] = useState({needReload : false});
 
     let folderItemsType = SidebarItems.admin.subItems.userJobs.folderItemType;
 
@@ -44,14 +49,14 @@ function UsersJobsMenuView(props){
             state.flowState === FLOW_STATE_BROWSE_FOLDER ?
             <DataLoader
                 loadFunc = {dataHub.reportJobController.getAllUsersJobs}
-                loadParams = {[]}
+                loadParams = {params}
                 reload = {reload}
                 onDataLoaded = {data => {props.actionFolderLoaded(folderItemsType, data)}}
                 onDataLoadFailed = {message => {props.actionFolderLoadFailed(folderItemsType, message)}}
             >
                 <FolderContent
                     itemsType = {folderItemsType}
-                    data = {props.filteredJobs ? props.filteredJobs : props.currentFolderData}
+                    data = {props.currentFolderData}
                     filters = {props.filters}
                     showAddFolder = {false}
                     showAddItem = {false}

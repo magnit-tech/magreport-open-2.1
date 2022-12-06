@@ -23,8 +23,13 @@ export default function ReportJobController(dataHub){
         return dataHub.requestService(JOB_ADD_URL, METHOD, body, callback);
     }        
 
-    this.getMyJobs = (callback) => {
-        const body = {};
+    this.getMyJobs = (from, to, statuses, callback) => {
+        const body = {
+            from, 
+            to, 
+            statuses
+        };
+        
         return dataHub.requestService(JOB_GET_USER_JOBS_URL, METHOD, body , magrepResponse => handleExtReponse(magrepResponse, callback));
     }
 
@@ -54,8 +59,13 @@ export default function ReportJobController(dataHub){
         return dataHub.requestService(JOB_EXCEL_REPORT, METHOD, body, callback);          
     }
 
-    this.getAllUsersJobs = (callback) => {
-        const body = {};
+    this.getAllUsersJobs = (from, to, statuses, users, callback) => {
+        const body = {
+            from, 
+            to, 
+            statuses,
+            users
+        };
         return dataHub.requestService(JOB_GET_ALL_USER_JOBS_URL, METHOD, body , magrepResponse => handleExtReponse(magrepResponse, callback));   
     }
 
