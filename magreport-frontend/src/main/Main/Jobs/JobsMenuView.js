@@ -56,6 +56,7 @@ function JobsMenuView(props){
                     showAddItem = {false}
                     showItemControls = {false}
                     pagination = {true}
+                    currentUser = {props.currentUser}
                     onItemClick = {jobId => {props.actionItemClick(folderItemsType, jobId)}}
                     onReportRunClick = {(reportId, jobId) => {props.startReport(reportId, jobId, SidebarItems.jobs.key, SidebarItems.jobs.folderItemType)}}
                     onFilterClick = {filters => {props.actionFilterJobs(folderItemsType, filters)}}
@@ -95,7 +96,8 @@ const mapStateToProps = state => {
         state : state.jobsMenuView,
         currentFolderData : state.jobsMenuView.currentFolderData,
         filteredJobs : state.jobsMenuView.filteredJobs,
-        filters : state.jobsMenuView.filters
+        filters : state.jobsMenuView.filters,
+        currentUser: state.login.userName
     }
 }
 
