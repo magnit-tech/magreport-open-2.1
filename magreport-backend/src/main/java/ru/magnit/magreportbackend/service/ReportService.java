@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import ru.magnit.magreportbackend.domain.filtertemplate.FilterFieldTypeEnum;
 import ru.magnit.magreportbackend.domain.filtertemplate.FilterTypeEnum;
 import ru.magnit.magreportbackend.domain.folderreport.FolderAuthorityEnum;
-import ru.magnit.magreportbackend.domain.schedule.ScheduleTaskStatusEnum;
 import ru.magnit.magreportbackend.domain.user.SystemRoles;
 import ru.magnit.magreportbackend.dto.inner.RoleView;
 import ru.magnit.magreportbackend.dto.inner.filter.FilterRequestData;
@@ -23,7 +22,6 @@ import ru.magnit.magreportbackend.dto.request.folderreport.RoleAddPermissionRequ
 import ru.magnit.magreportbackend.dto.request.report.ReportAddFavoritesRequest;
 import ru.magnit.magreportbackend.dto.request.report.ReportAddRequest;
 import ru.magnit.magreportbackend.dto.request.report.ReportEditRequest;
-import ru.magnit.magreportbackend.dto.request.report.ReportFieldEditRequest;
 import ru.magnit.magreportbackend.dto.request.report.ReportIdRequest;
 import ru.magnit.magreportbackend.dto.request.report.ReportRequest;
 import ru.magnit.magreportbackend.dto.request.report.ScheduleReportRequest;
@@ -52,11 +50,9 @@ import ru.magnit.magreportbackend.service.domain.SecurityFilterDomainService;
 import ru.magnit.magreportbackend.service.domain.UserDomainService;
 import ru.magnit.magreportbackend.service.jobengine.filter.FilterQueryExecutor;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Slf4j

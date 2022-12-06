@@ -1,6 +1,7 @@
 package ru.magnit.magreportbackend.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
@@ -12,11 +13,13 @@ import ru.magnit.magreportbackend.dto.inner.RoleView;
 import ru.magnit.magreportbackend.dto.request.reportjob.ExcelReportRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobAddRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobCommentRequest;
+import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobFilterRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobHistoryRequestFilter;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobShareRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportPageRequest;
 import ru.magnit.magreportbackend.dto.response.filterreport.FilterReportResponse;
+import ru.magnit.magreportbackend.dto.response.report.ReportJobFilterResponse;
 import ru.magnit.magreportbackend.dto.response.report.ReportResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobHistoryResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobMetadataResponse;
@@ -44,9 +47,11 @@ import ru.magnit.magreportbackend.service.domain.UserDomainService;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static ru.magnit.magreportbackend.domain.user.SystemRoles.UNBOUNDED_JOB_ACCESS;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReportJobService {
@@ -144,10 +149,39 @@ public class ReportJobService {
         stripEmptyFilters(request);
         checkMandatoryFilters(request, report);
         checkDateParameters(request, report);
+        checkSameReportAlreadyRunning(request);
 
         Long jobId = jobDomainService.addJob(request);
 
         return jobDomainService.getJob(jobId);
+    }
+
+    private void checkSameReportAlreadyRunning(ReportJobAddRequest request) {
+        final var currentParameters = request.getParameters();
+        final var currentUser = userDomainService.getCurrentUser();
+        final var activeJobs = jobDomainService.getActiveJobs(
+            request.getReportId(),
+            currentUser.getId(),
+            List.of(
+                ReportJobStatusEnum.RUNNING.getId(),
+                ReportJobStatusEnum.EXPORT.getId(),
+                ReportJobStatusEnum.CANCELING.getId(),
+                ReportJobStatusEnum.PENDING_DB_CONNECTION.getId(),
+                ReportJobStatusEnum.SCHEDULED.getId()
+            )
+        );
+        activeJobs.forEach(job -> {
+            final var jobParameters = jobDomainService.getJobParameters(job.getId());
+            if (isSameParameters(currentParameters, jobParameters)) {
+                throw new InvalidParametersException("Отчет с такими параметрами Вами уже запущен.");
+            }
+        });
+    }
+
+    private boolean isSameParameters(List<ReportJobFilterRequest> requestParams, List<ReportJobFilterResponse> responseParams){
+        if (requestParams.size() != responseParams.size()) return false;
+        final var reqParamMap = requestParams.stream().collect(Collectors.toMap(ReportJobFilterRequest::getFilterId, ReportJobFilterRequest::getParameters));
+        return responseParams.stream().allMatch(parameter -> parameter.getParameters().equals(reqParamMap.get(parameter.getFilterId())));
     }
 
     private boolean checkReportPermission(Long reportId) {
