@@ -401,6 +401,7 @@ export default function FolderContent(props){
                     <ItemCard
                         itemType = {props.itemsType}
                         data = {i}
+                        currentUser = {props.currentUser}
                         roleType={{isAdmin: isAdmin, isDeveloper: isDeveloper}}
                         isSearched = {isSearched}
                         editButton = {hasRWRight && !(props.showItemControls === false)}
