@@ -1,7 +1,7 @@
 default:
   tags: 
     - bi
-  image: itm-orkhd-team-docker-images.repo.corp.tander.ru/bigdata/tanderjava16
+  image: itm-orkhd-team-docker-images.repo.corp.tander.ru/bigdata/magreportjava16
 
 variables:
   CI_DEBUG_TRACE: $TRACE
