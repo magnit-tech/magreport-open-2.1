@@ -6,7 +6,7 @@ import {folderInitialState} from './folderInitialState';
 import {folderStateReducer} from './folderStateReducer';
 import SidebarItems from 'main/Main/Sidebar/SidebarItems';
 
-import {REPORT_START, FOLDER_CONTENT_ITEM_CLICK, JOBS_FILTER, JOB_CANCEL, JOB_CANCELED, JOB_CANCEL_FAILED} from 'redux/reduxTypes';
+import {REPORT_START, FOLDER_CONTENT_ITEM_CLICK, JOBS_FILTER, JOB_CANCEL, JOB_CANCELED, JOB_CANCEL_FAILED, JOB_ADD_COMMENT_SUCCESS} from 'redux/reduxTypes';
 
 const initialState = {
     ...folderInitialState,
@@ -162,7 +162,21 @@ export function jobsMenuViewReducer(state = initialState, action){
             else {
                 return state;
             }
-
+        case JOB_ADD_COMMENT_SUCCESS:
+            if(action.itemsType === FolderItemTypes.job){
+                let newState = {...state}
+                const fullArr = [...state.currentFolderData.jobs]
+    
+                let newTask = {};
+                    newTask = {...fullArr[action.jobIndex], comment: action.comment}
+                    fullArr.splice(action.jobIndex, 1, newTask)
+    
+                    newState.currentFolderData.jobs = fullArr;
+                    return newState
+            }
+            else {
+                return state;
+            } 
         default:
             return folderStateReducer(state, action, SidebarItems.jobs, FolderItemTypes.job);
     }
