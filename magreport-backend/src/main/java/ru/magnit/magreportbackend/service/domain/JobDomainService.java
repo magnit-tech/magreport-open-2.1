@@ -52,6 +52,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -387,6 +388,11 @@ public class JobDomainService {
             .stream()
             .map(statisticsResponseMapper::from)
             .toList();
+    }
+
+    @Transactional
+    public List<ReportJobResponse> getActiveJobs(Long reportId, Long userId, Collection<Long> statuses) {
+        return reportJobResponseMapper.from(repository.getAllByReportIdAndUserIdAndStatusIdIn(reportId, userId, statuses));
     }
 
     private boolean checkFinalStatus(Long status) {
