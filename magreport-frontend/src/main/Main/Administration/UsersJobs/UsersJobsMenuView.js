@@ -1,7 +1,7 @@
 import React, {useState } from 'react';
 import { connect } from 'react-redux';
 
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 // dataHub
 import dataHub from 'ajax/DataHub';
@@ -24,6 +24,7 @@ import ReportStarter from 'main/Report/ReportStarter';
 function UsersJobsMenuView(props){
 
     const navigate = useNavigate()
+    const location = useLocation()
 
     let state = props.state;
     const [reload, setReload] = useState({needReload : false})
@@ -49,7 +50,7 @@ function UsersJobsMenuView(props){
 
     function handleReportRunClick(reportId, jobId) {
         props.startReport(reportId, jobId, SidebarItems.admin.subItems.userJobs.key, SidebarItems.admin.subItems.userJobs.folderItemType)
-        navigate(`/report/starter/${reportId}?jobId=${jobId}`)
+        navigate(`/report/starter/${reportId}?jobId=${jobId}`, {state: location.pathname})
     }
 
     return (

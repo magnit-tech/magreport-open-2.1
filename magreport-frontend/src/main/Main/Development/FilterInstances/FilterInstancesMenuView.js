@@ -2,6 +2,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import {useNavigateBack} from "components/Navbar/navbarHooks";
 
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+
 // dataHub
 import dataHub from 'ajax/DataHub';
 
@@ -24,12 +26,16 @@ import DependencyViewer from '../DependencyViewer';
 
 function FilterInstancesMenuView(props){
 
+    const {id} = useParams()
+    const navigate = useNavigate()
+    const location = useLocation()
+
     const navigateBack = useNavigateBack();
 
     let state = props.state;
-    let designerMode = props.state.editFilterInstanceId === null ? 'create' : 'edit';
+    // let designerMode = props.state.editFilterInstanceId === null ? 'create' : 'edit';
 
-    let loadFunc = dataHub.filterInstanceController.getFolder;
+    // let loadFunc = dataHub.filterInstanceController.getFolder;
 
     let reload = {needReload : state.needReload};
     let folderItemsType = SidebarItems.development.subItems.filterInstances.folderItemType;
@@ -44,13 +50,34 @@ function FilterInstancesMenuView(props){
         props.actionFolderClick(argFolderItemsType, folderId)
     }
 
+    function handleFolderClick(folderId) {
+        props.actionFolderClick(folderItemsType, folderId)
+        navigate(`/filterInstance/${folderId}`)
+    }
+    function handleItemClick(filterInstanceId) {
+        props.actionItemClick(folderItemsType, filterInstanceId)
+        navigate(`/filterInstance/${id}/view/${filterInstanceId}`, {state: location.pathname})
+    }
+    function handleEditItemClick(filterInstanceId) {
+        props.actionEditItemClick(folderItemsType, filterInstanceId)
+        navigate(`/filterInstance/${id}/edit/${filterInstanceId}`, {state: location.pathname})
+    }
+    function handleDependenciesClick(filterInstanceId) {
+        props.actionGetDependencies(folderItemsType, filterInstanceId)
+        // navigate(`/filterInstance/dependencies/${filterInstanceId}`)
+    }
+    function handleAddItemClick(folderItemsType) {
+        props.actionAddItemClick(folderItemsType)
+        navigate(`/filterInstance/${id}/add`, {state: location.pathname})
+    }
+
     return(
         <div style={{display: 'flex', flex: 1}}>
         {
         state.flowState === FLOW_STATE_BROWSE_FOLDER ?
             <DataLoader
-                loadFunc = {loadFunc}
-                loadParams = {[state.currentFolderId]}
+                loadFunc = {dataHub.filterInstanceController.getFolder}
+                loadParams = {id ? [Number(id)] : [null]}
                 reload = {reload}
                 onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}}
                 onDataLoadFailed = {(message) => {props.actionFolderLoadFailed(folderItemsType, message)}}
@@ -62,15 +89,23 @@ function FilterInstancesMenuView(props){
                     data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
                     searchParams = {state.searchParams || {}}
                     sortParams = {state.sortParams || {}}
-                    onFolderClick = {(folderId) => {props.actionFolderClick(folderItemsType, folderId)}}
-                    onItemClick = {(filterInstanceId) => {props.actionItemClick(folderItemsType, filterInstanceId)}}
+
+                    onFolderClick = {handleFolderClick}
+                    onItemClick={handleItemClick}
+                    onEditItemClick={handleEditItemClick}
+                    onDependenciesClick = {handleDependenciesClick}
+                    onAddItemClick={handleAddItemClick}
+
+                    // onFolderClick = {(folderId) => {props.actionFolderClick(folderItemsType, folderId)}}
+                    // onItemClick = {(filterInstanceId) => {props.actionItemClick(folderItemsType, filterInstanceId)}}
+                    // onEditItemClick = {(filterInstanceId) => {props.actionEditItemClick(folderItemsType, filterInstanceId)}}
+                    // onDependenciesClick = {filterInstanceId => props.actionGetDependencies(folderItemsType, filterInstanceId)}
+                    // onAddItemClick = {() => {props.actionAddItemClick(folderItemsType)}}
+
                     onAddFolder = {(name, description) => {props.actionAddFolder(folderItemsType, state.currentFolderData.id, name, description)}}
-                    onAddItemClick = {() => {props.actionAddItemClick(folderItemsType)}}
                     onEditFolderClick = {(folderId, name, description) => {props.actionEditFolder(folderItemsType, state.currentFolderData.id, folderId, name, description)}}
-                    onEditItemClick = {(filterInstanceId) => {props.actionEditItemClick(folderItemsType, filterInstanceId)}}
                     onDeleteFolderClick = {(folderId) => {props.actionDeleteFolderClick(folderItemsType, state.currentFolderData.id, folderId)}}
                     onDeleteItemClick = {(filterInstanceId) => {props.actionDeleteItemClick(folderItemsType, state.currentFolderId, filterInstanceId)}}
-                    onDependenciesClick = {filterInstanceId => props.actionGetDependencies(folderItemsType, filterInstanceId)}
                     onSearchClick ={searchParams => {props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)}}
                     onSortClick ={sortParams => {props.actionSortClick(folderItemsType, state.currentFolderId, sortParams)}}
                     contextAllowed
@@ -82,18 +117,18 @@ function FilterInstancesMenuView(props){
                 />
             </DataLoader>
 
-            : state.flowState === filterInstancesMenuViewFlowStates.filterInstancesDesigner ?
-            <FilterInstancesDesigner
-                mode = {designerMode}
-                filterInstanceId = {state.editFilterInstanceId}
-                folderId = {state.currentFolderId}
-                onExit = {handleDesignerExit}
-            />
-            : state.flowState === filterInstancesMenuViewFlowStates.filterInstancesViewer ?
-            <FilterInstanceViewer
-                filterInstanceId = {state.viewFilterInstanceId}
-                onOkClick = {handleDesignerExit}
-            />
+            // : state.flowState === filterInstancesMenuViewFlowStates.filterInstancesDesigner ?
+            // <FilterInstancesDesigner
+            //     mode = {designerMode}
+            //     filterInstanceId = {state.editFilterInstanceId}
+            //     folderId = {state.currentFolderId}
+            //     onExit = {handleDesignerExit}
+            // />
+            // : state.flowState === filterInstancesMenuViewFlowStates.filterInstancesViewer ?
+            // <FilterInstanceViewer
+            //     filterInstanceId = {state.viewFilterInstanceId}
+            //     onOkClick = {handleDesignerExit}
+            // />
             : state.flowState === filterInstancesMenuViewFlowStates.filterInstanceDependenciesView ?
                 <DependencyViewer
                     itemsType = {folderItemsType}

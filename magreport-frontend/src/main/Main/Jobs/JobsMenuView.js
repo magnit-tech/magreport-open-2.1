@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import { connect } from 'react-redux';
 
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 // dataHub
 import dataHub from 'ajax/DataHub';
@@ -24,6 +24,7 @@ import ReportStarter from 'main/Report/ReportStarter';
 function JobsMenuView(props){
     
     const navigate = useNavigate()
+    const location = useLocation()
 
     let state = props.state;
 
@@ -50,7 +51,7 @@ function JobsMenuView(props){
 
     function handleReportRunClick(reportId, jobId) {
         props.startReport(reportId, jobId, SidebarItems.jobs.key, SidebarItems.jobs.folderItemType)
-        navigate(`/report/starter/${reportId}?jobId=${jobId}`)
+        navigate(`/report/starter/${reportId}?jobId=${jobId}`, {state: location.pathname})
     }
 
     return(
@@ -72,9 +73,11 @@ function JobsMenuView(props){
                     showAddItem = {false}
                     showItemControls = {false}
                     pagination = {true}
+
                     // onItemClick = {jobId => {props.actionItemClick(folderItemsType, jobId)}}
-                    onItemClick = {handleItemClick}
                     // onReportRunClick = {(reportId, jobId) => {props.startReport(reportId, jobId, SidebarItems.jobs.key, SidebarItems.jobs.folderItemType)}}
+
+                    onItemClick = {handleItemClick}
                     onReportRunClick = {handleReportRunClick}
 
                     onFilterClick = {filters => {props.actionFilterJobs(folderItemsType, filters)}}
@@ -86,21 +89,21 @@ function JobsMenuView(props){
 
             </DataLoader>
 
-            : state.flowState === jobsMenuViewFlowStates.reportJob ?
-            <div style={{display: 'flex', flex: 1, flexDirection: 'column', overflow: 'auto'}}>
-                <ReportJob
-                    jobId = {state.jobId}
-                    excelTemplates={state.excelTemplates}
-                    onRestartReportClick = {handleRestartReportClick}
-                />
-            </div>
-            : state.flowState === jobsMenuViewFlowStates.startReport ?
-                <ReportStarter
-                    reportId = {state.reportId}
-                    jobId = {state.jobId}
-                    onCancel = {handleReportCancel}
-                    onDataLoadFunction={dataHub.reportController.get}
-                />
+            // : state.flowState === jobsMenuViewFlowStates.reportJob ?
+            // <div style={{display: 'flex', flex: 1, flexDirection: 'column', overflow: 'auto'}}>
+            //     <ReportJob
+            //         jobId = {state.jobId}
+            //         excelTemplates={state.excelTemplates}
+            //         onRestartReportClick = {handleRestartReportClick}
+            //     />
+            // </div>
+            // : state.flowState === jobsMenuViewFlowStates.startReport ?
+            //     <ReportStarter
+            //         reportId = {state.reportId}
+            //         jobId = {state.jobId}
+            //         onCancel = {handleReportCancel}
+            //         onDataLoadFunction={dataHub.reportController.get}
+            //     />
 
             : <div>Неизвестное состояние</div>
         }

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate} from 'react-router-dom';
+
+import { routesName } from 'router/routes';
 
 // material-ui
 import List from '@material-ui/core/List';
@@ -21,30 +23,45 @@ import SidebarSubMenu from './SidebarSubMenu'
 
 // css
 import { SidebarCSS } from './SidebarCSS';
+import { useRef } from 'react';
 
 /**
  * 
  * @param {*} props.sidebarItem - объект пункта меню верхнего уровня в SidebarItems
  */
 function SidebarTopLevelMenu(props){
+
     const classes = SidebarCSS();
 
     const location = useLocation()
     const navigate = useNavigate()
+    const locationName = useRef(null)
 
-    const[menuExpanded, setMenuExpanded] = useState(false);
+    const [menuExpanded, setMenuExpanded] = useState(false);
+
 
     useEffect(() => {
         const arr = props.sidebarItem.subItems ? Object.values(props.sidebarItem.subItems) : []
-        arr.forEach(item => {
-            if (item.folderItemType === location.pathname.slice(1)) {
-                return setMenuExpanded(true)
+
+        routesName.forEach(name => {
+            if (location.pathname.indexOf(name) !== -1) {
+                locationName.current = name
             }
         })
-    }, [location])
+        if (props.sidebarItem.folderItemType === locationName.current) {
+            return setMenuExpanded(true)
+        } else {
+            arr.forEach(item => {
+                if (item.folderItemType === locationName.current) {
+                    return setMenuExpanded(true)
+                }
+            })
+        }
+
+    }, [props.sidebarItem, props.sidebarItem.subItems, location])
 
     function handleClick(){
-        if(!props.sidebarItem.subItems){
+        if(!props.sidebarItem.subItems && locationName.current !== props.sidebarItem.folderItemType){
             props.actionSetSidebarItem(props.sidebarItem);
             navigate(props.sidebarItem.folderItemType)
         }
@@ -58,18 +75,20 @@ function SidebarTopLevelMenu(props){
         if(props.sidebarItem.folderTree){
             foldersTreeToggle(props.sidebarItem.key, []);
         }
-        if(props.sidebarItem.folderTree || props.sidebarItem.subItems){
+        if (props.sidebarItem.folderTree || props.sidebarItem.subItems){
             setMenuExpanded(!menuExpanded);
         }
+        
         handleClick();
     }
-
+    
     return (
         <React.Fragment>       
 			<List className={classes.listClassMain}>
 				<Paper key={props.sidebarItem.key} className={classes.paperRoot} elevation={5}>
 					<ListItem 
-						className={classes.listItem + ' ' + (location.pathname.slice(1) === props.sidebarItem.folderItemType ? classes.folderListItemActive : null)} 
+						// className={classes.listItem + ' ' + (location.pathname.indexOf(locationName.current) !== -1 ? classes.folderListItemActive : null)} 
+						className={classes.listItem + ' '} 
 						onClick={(props.drawerOpen ? handleExpand : handleClick)} button key={props.sidebarItem.key}
 					>
 						{props.sidebarItem.icon && <ListItemIcon className={classes.listIconClass} >{props.sidebarItem.icon}</ListItemIcon>}
@@ -90,7 +109,7 @@ function SidebarTopLevelMenu(props){
 									key={item.key} 
 									drawerOpen={props.drawerOpen} 
                                     item={item}
-                                    focus={location.pathname.slice(1) === item.folderItemType}
+                                    focus={menuExpanded}
 									onClick={handleSubitemClick}/>
 							))}
 						</List>

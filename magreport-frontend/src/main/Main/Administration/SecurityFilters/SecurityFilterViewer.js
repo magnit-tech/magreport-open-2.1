@@ -26,7 +26,7 @@ export default function SecurityFilterViewer(props) {
 
     const classes = ViewerCSS();
 
-    const {id} = useParams()
+    const { id, folderId } = useParams()
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -34,8 +34,6 @@ export default function SecurityFilterViewer(props) {
 
     const [data, setData] = useState({});
 
-    let loadFunc = dataHub.securityFilterController.get;
-    let loadParams = [id];
 
     function handleDataLoaded(loadedData) {
         setData(loadedData);   
@@ -173,16 +171,17 @@ export default function SecurityFilterViewer(props) {
 
     return (
         <DataLoader
-            loadFunc={loadFunc}
-            loadParams={loadParams}
+            loadFunc={dataHub.securityFilterController.get}
+            loadParams={[id]}
             onDataLoaded={handleDataLoaded}
             onDataLoadFailed={handleDataLoadFailed}
         >
             <ViewerPage
                 id={data.id}
+                folderId = {folderId}
                 itemType={FolderItemTypes.securityFilters}
                 disabledPadding={true}
-                onOkClick={() => location.state ? navigate(location.state) : navigate('/securityFilters')}
+                onOkClick={() => location.state ? navigate(location.state) : navigate(`/securityFilters/${folderId}`)}
                 readOnly={!hasRWRight}
             >
                 {children}

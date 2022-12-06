@@ -1,5 +1,6 @@
 import React, {useState} from "react";
 
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 
 import DataLoader from "main/DataLoader/DataLoader";
 import dataHub from "../../../../ajax/DataHub";
@@ -16,19 +17,16 @@ import Grid from "@material-ui/core/Grid";
 
 
 /**
- * @callback onOkClick
- */
-/**
  * Компонент просмотра расписаний
  * @param {Object} props - параметры компонента
- * @param {Number} props.serverMailTemplateId- идентификатор шаблона
- * @param {onOkClick} props.onOkClick - callback, вызываемый при нажатии кнопки ОК
- * @param {onEditClick} props.onEditClick - callback, вызываемый при нажатии кнопки Редактировать
- * @param {onExitClick} props.onExitClick - callback, вызываемый при нажатии кнопки ОК
  * @return {JSX.Element}
  * @constructor
  */
 export default function ServerMailTemplateDesigner(props) {
+
+    const { id, folderId } = useParams()
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const {enqueueSnackbar} = useSnackbar();
     const [data, setData] = useState({});
@@ -77,17 +75,14 @@ export default function ServerMailTemplateDesigner(props) {
             )
     }
 
-    function handleCancel() {
-        props.onExitClick()
-    }
-
     function handleEdited(response) {
 
         if (!response.ok) {
             enqueueSnackbar(`При обновлении шаблона возникла ошибка: ${response.data}`,
                 {variant: "error"});
         } else {
-            props.onOkClick()
+            location.state ? navigate(location.state) : navigate(`/systemMailTemplates/${folderId}`)
+            enqueueSnackbar("Шаблон письма успешно сохранен", {variant : "success"});
         }
     }
 
@@ -108,8 +103,6 @@ export default function ServerMailTemplateDesigner(props) {
             }
         }
     }
-
-
 
     function getTags(type) {
         switch (type) {
@@ -146,7 +139,7 @@ export default function ServerMailTemplateDesigner(props) {
 
     return (<DataLoader
         loadFunc={dataHub.serverMailTemplateController.getMailTemplate}
-        loadParams={[props.serverMailTemplateId]}
+        loadParams={[id]}
         reload={false}
         onDataLoaded={(data) => {
             actionLoaded(data)
@@ -157,7 +150,7 @@ export default function ServerMailTemplateDesigner(props) {
     >
         <DesignerPage
             onSaveClick={handleSave}
-            onCancelClick={handleCancel}
+            onCancelClick={() => location.state ? navigate(location.state) : navigate(`/systemMailTemplates/${folderId}`)}
             name={'Редактирование письма отправки: ' + data.code}
         >
             <DesignerTextField

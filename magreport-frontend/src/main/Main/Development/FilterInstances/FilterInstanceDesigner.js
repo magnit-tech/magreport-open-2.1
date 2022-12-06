@@ -2,6 +2,8 @@ import React from 'react';
 import {useState} from 'react';
 import { useSnackbar } from 'notistack';
 
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+
 // material ui
 import { CircularProgress } from '@material-ui/core';
 
@@ -24,23 +26,21 @@ import RangeFields from './TypeSpecificFields/RangeFields';
 import DateValueFields from './TypeSpecificFields/DateValueFields';
 import TupleListFields from './TypeSpecificFields/TupleListFields';
 
-/**
- * 
- * @param {*} props.mode : 'edit', 'create' - режим редактирования или создания нового объекта
- * @param {*} props.filterInstanceId : id объекта при редактировании (имеет значение только при mode == 'edit')
- * @param {*} props.folderId : id папки в которой размещается объект при создании (имеет значение только при mode == 'create')
- * @param {*} props.onExit : callback при выходе
- */
-export default function FilterInstanceDesigner(props){
+
+export default function FilterInstanceDesigner(){
+
+    const { id, folderId } = useParams()
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const { enqueueSnackbar } = useSnackbar();
 
-    const [pageName, setPagename] = useState(props.mode === 'create' ? "Создание экземпляра фильтра" : "Редактирование экземпляра фильтра");
+    const [pageName, setPagename] = useState(id ? "Редактирование экземпляра фильтра" : "Создание экземпляра фильтра");
 
     const [uploading, setUploading] = useState(false);
     const [filterInstanceData, setFilterInstanceData] = useState({
-        id: props.filterInstanceId,
-        folderId: props.folderId,
+        id: id,
+        folderId: folderId,
         templateId: 0,
         name: '',
         code: "",
@@ -69,10 +69,10 @@ export default function FilterInstanceDesigner(props){
     let loadFuncFilterTemplate;
     let loadParams = [];
     
-    if(props.mode === 'edit'){
+    if(id){
         loadFunc = dataHub.filterInstanceController.get;
         loadFuncFilterTemplate = dataHub.filterTemplateController.get;
-        loadParams = [props.filterInstanceId];
+        loadParams = [id];
     }
 
     function handleFilterInstanceDataLoaded(filterInstanceData){
@@ -90,12 +90,12 @@ export default function FilterInstanceDesigner(props){
         
     }
 
-    function handleChangeFilterTemplate(filterTemplateId, filterTemplateData, folderId){
+    function handleChangeFilterTemplate(filterTemplateId, filterTemplateData){
         if(filterTemplateId !== filterInstanceData.templateId){
             setFilterTemplateData(filterTemplateData);
             setFilterInstanceData({
-                id: props.filterInstanceId,
-                folderId: props.folderId,
+                id: id,
+                folderId: folderId,
                 templateId: filterTemplateId,
                 type: filterTemplateData.type,
                 name: filterInstanceData.name,
@@ -197,24 +197,20 @@ export default function FilterInstanceDesigner(props){
             setErrorFields(errors);
         }
         else{
-            let func = props.mode === 'create' ? dataHub.filterInstanceController.add : dataHub.filterInstanceController.edit;
+            let func = id ? dataHub.filterInstanceController.edit : dataHub.filterInstanceController.add;
             setUploading(true);
             func(filterInstanceData, handleAddEditResult);
         }
     }
 
-    function handleCancel(){
-        props.onExit();
-    }
-
     function handleAddEditResult(magrepResponse){
         if(magrepResponse.ok){
-            props.onExit();
+            location.state ? navigate(location.state) : navigate(`/filterInstance/${folderId}`)
             enqueueSnackbar("Экземпляр фильтра успешно сохранен", {variant : "success"});
         }
         else{
             setUploading(false);
-            let word = (props.mode === 'create') ? 'создания' : 'редактирования';
+            let word = id ? 'редактирования' : 'создания';
             enqueueSnackbar("Ошибка " + word + " экземпляра фильтра: " + magrepResponse.data, {variant : "error"});
         }
     }
@@ -236,7 +232,7 @@ export default function FilterInstanceDesigner(props){
 
                     <DesignerPage 
                         onSaveClick={handleSave}
-                        onCancelClick={handleCancel}
+                        onCancelClick={() => location.state ? navigate(location.state) : navigate(`/filterInstance/${folderId}`)}
                         name = {pageName}
                     >
                         <DesignerTextField

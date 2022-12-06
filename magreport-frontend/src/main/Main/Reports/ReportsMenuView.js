@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import {useParams, useNavigate} from 'react-router-dom'
+import {useParams, useNavigate, useLocation} from 'react-router-dom'
 
 // dataHub
 import dataHub from 'ajax/DataHub';
@@ -29,6 +29,7 @@ function ReportsMenuView(props){
 
     const {id} = useParams()
     const navigate = useNavigate()
+    const location = useLocation()
     
     const { enqueueSnackbar } = useSnackbar();
 
@@ -52,7 +53,7 @@ function ReportsMenuView(props){
     }
     function handleItemClick(reportId) {
         props.actionItemClick(folderItemsType, reportId)
-        navigate(`/report/starter/${reportId}`)
+        navigate(`/report/starter/${reportId}`, {state: location.pathname})
     }
 
     return(
@@ -61,7 +62,6 @@ function ReportsMenuView(props){
             state.flowState === FLOW_STATE_BROWSE_FOLDER ?
                 <DataLoader
                     loadFunc = {loadFunc}
-                    // loadParams = {[state.currentFolderId]}
                     loadParams = {id ? [Number(id)] : [null]}
                     reload = {reload}
                     onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}}
@@ -74,9 +74,8 @@ function ReportsMenuView(props){
                         data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
                         searchParams = {state.searchParams || {}}
                         sortParams = {state.sortParams || {}}
-                        // onFolderClick = {(folderId) => {props.actionFolderClick(folderItemsType, folderId)}}
+                        
                         onFolderClick = {handleFolderClick}
-                        // onItemClick = {(reportId) => {props.actionItemClick(folderItemsType, reportId)}}
                         onItemClick = {handleItemClick}
 
                         onAddFolder = {(name, description) => {props.actionAddFolder(folderItemsType, state.currentFolderData.id, name, description)}}
@@ -98,18 +97,18 @@ function ReportsMenuView(props){
 
                 
 
-            : state.flowState === reportsMenuViewFlowStates.pudlishReportDesigner ?
-                <PublishReportDesigner
-                    folderId = {state.currentFolderId}
-                    onExit = {handleDesignerExit}
-                />
+            // : state.flowState === reportsMenuViewFlowStates.pudlishReportDesigner ?
+            //     <PublishReportDesigner
+            //         folderId = {state.currentFolderId}
+            //         onExit = {handleDesignerExit}
+            //     />
 
-            : state.flowState === reportsMenuViewFlowStates.startReport ?
-                <ReportStarter
-                    reportId = {state.reportId}
-                    onCancel = {handleReportCancel}
-                    onDataLoadFunction={dataHub.reportController.get}
-                />
+            // : state.flowState === reportsMenuViewFlowStates.startReport ?
+            //     <ReportStarter
+            //         reportId = {state.reportId}
+            //         onCancel = {handleReportCancel}
+            //         onDataLoadFunction={dataHub.reportController.get}
+            //     />
 
             : <div>Неизвестное состояние</div>            
         }

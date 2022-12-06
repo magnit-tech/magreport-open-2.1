@@ -1,6 +1,6 @@
 import React, {useState, Fragment, useRef, useEffect } from 'react';
 
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import Icon from '@mdi/react'
 import Measure from 'react-measure';
@@ -46,6 +46,7 @@ import { ReportDataCSS } from "./ReportCSS";
 export default function PlainTablePanel(props){
 
     const navigate = useNavigate()
+    const location = useLocation()
 
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     const ScrollbarsRef = useRef(null);
@@ -96,10 +97,6 @@ export default function PlainTablePanel(props){
     function handleExcelExport(event, id){
         let excelTemplateId = id
 
-        console.log(excelTemplateId);
-        console.log(props.jobId);
-        console.log(excelTemplates);
-
         if (id === null || id === undefined) excelTemplateId = excelTemplates.filter(i => i.default)[0].excelTemplateId
 
         // setErrorExport(0);
@@ -129,9 +126,8 @@ export default function PlainTablePanel(props){
     }
 
     function handleRestartReport(){
-        navigate(`/report/starter/${props.reportId}?jobId=${props.jobId}`)
+        navigate(`/report/starter/${props.reportId}?jobId=${props.jobId}`, {state: location.pathname})
         // props.onRestartReportClick();
-
     }
 
     function handleViewTypeChange(){

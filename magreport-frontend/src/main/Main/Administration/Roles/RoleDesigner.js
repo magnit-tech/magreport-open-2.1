@@ -3,7 +3,7 @@ import {useState} from 'react';
 import { connect } from 'react-redux';
 import { useSnackbar } from 'notistack';
 
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 
 // components
 import { CircularProgress, Tooltip } from '@material-ui/core';
@@ -35,13 +35,12 @@ import { RolesCSS } from "./RolesCSS";
 import { actionUsersLoaded, actionUsersLoadFailed } from 'redux/actions/admin/actionUsers';
 import { actionRoleSelectFolderType } from 'redux/actions/admin/actionRoles';
 
-/**
- * @param {*} props.onExit : callback при выходе
- */
+
 function RoleDesigner(props){
 
-    const {id} = useParams()
+    const {id, folderId} = useParams()
     const navigate = useNavigate();
+    const location = useLocation();
 
     const classes = RolesCSS();
     const { enqueueSnackbar } = useSnackbar();
@@ -188,18 +187,18 @@ function RoleDesigner(props){
             setErrorField(errors);
         }
         else{
-            if(id){
+            if(!id){
                 dataHub.roleController.add(
-                    id, 
-                    props.roleTypeId,
+                    Number(id), 
+                    Number(folderId),
                     data.roleName, 
                     data.roleDescription,
                     handleAddEditAnswer);
             }
             else{
                 dataHub.roleController.edit(
-                    id,
-                    props.roleTypeId,
+                    Number(id),
+                    Number(folderId),
                     data.roleName, 
                     data.roleDescription,
                     handleAddEditAnswer);
@@ -208,14 +207,10 @@ function RoleDesigner(props){
         }
     }
 
-    function handleCancel(){
-        props.onExit();
-    }
-
     function handleAddEditAnswer(magrepResponse){
         setUploading(false);
         if(magrepResponse.ok){
-            props.onExit();
+            location.state ? navigate(location.state) : navigate(`/roles/${folderId}`)
         }
         else{
             let actionWord = id ? "обновлении" : "создании";
@@ -281,7 +276,7 @@ function RoleDesigner(props){
         tabcontent:
         <DesignerPage 
             onSaveClick={handleSave}
-            onCancelClick={handleCancel}
+            onCancelClick={() => location.state ? navigate(location.state) : navigate(`/roles/${folderId}`)}
         >
             <DesignerTextField
                 label = {fieldLabels.roleName}
@@ -362,7 +357,7 @@ function RoleDesigner(props){
         selectedPermittedFolder.toLowerCase().includes('userreport') ? FolderItemTypes.reports:
         FolderItemTypes.reports;
 
-    if (props.roleTypeId === 2 /*FOLDER_ROLES*/){
+    if (Number(folderId) === 2 /*FOLDER_ROLES*/){
     tabs.push({tablabel:"Права",
         tabdisabled: id === null || id === undefined ? true : false,
         tabcontent:

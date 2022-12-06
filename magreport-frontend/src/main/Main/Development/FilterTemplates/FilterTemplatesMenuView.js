@@ -2,6 +2,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import {useNavigateBack} from "components/Navbar/navbarHooks";
 
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+
 // dataHub
 import dataHub from 'ajax/DataHub';
 
@@ -66,13 +68,18 @@ import {FLOW_STATE_BROWSE_FOLDER, filterTemplatesMenuViewFlowStates} from 'redux
  * @return {JSX.Element}
  * @constructor
  */
+
 function FilterTemplatesMenuView(props){
+
+    const {id} = useParams()
+    const navigate = useNavigate()
+    const location = useLocation()
 
     const navigateBack = useNavigateBack();
 
     let state = props.state;
 
-    let loadFunc = dataHub.filterTemplateController.getFolder;
+    // let loadFunc = dataHub.filterTemplateController.getFolder;
 
     let reload = {needReload : state.needReload};
     let folderItemsType = SidebarItems.development.subItems.filterTemplates.folderItemType;
@@ -81,13 +88,34 @@ function FilterTemplatesMenuView(props){
         navigateBack();
     }
 
+    function handleFolderClick(folderId) {
+        props.actionFolderClick(folderItemsType, folderId)
+        navigate(`/filterTemplate/${folderId}`)
+    }
+    function handleItemClick(filterTemplateId) {
+        props.actionItemClick(folderItemsType, filterTemplateId)
+        navigate(`/filterTemplate/${id}/view/${filterTemplateId}`, {state: location.pathname})
+    }
+    // function handleEditItemClick(filterTemplateId) {
+    //     props.actionEditItemClick(folderItemsType, filterTemplateId)
+    //     navigate(`/filterTemplate/${id}/edit/${filterTemplateId}`, {state: location.pathname})
+    // }
+    // function handleDependenciesClick(filterTemplateId) {
+    //     props.actionGetDependencies(folderItemsType, filterTemplateId)
+    //     // navigate(`/filterTemplate/dependencies/${datasetId}`)
+    // }
+    // function handleAddItemClick(folderItemsType) {
+    //     props.actionAddItemClick(folderItemsType)
+    //     navigate(`/filterTemplate/${id}/add`, {state: location.pathname})
+    // }
+
     return(
         <div style={{display: 'flex', flex: 1}}>
         {
         state.flowState === FLOW_STATE_BROWSE_FOLDER ?
             <DataLoader
-                loadFunc = {loadFunc}
-                loadParams = {[state.currentFolderId]}
+                loadFunc = {dataHub.filterTemplateController.getFolder}
+                loadParams = {id ? [Number(id)] : [null]}
                 reload = {reload}
                 onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data)}}
                 onDataLoadFailed = {(message) => {props.actionFolderLoadFailed(folderItemsType, message)}}
@@ -99,8 +127,15 @@ function FilterTemplatesMenuView(props){
                     showItemControls={false}
                     data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
                     searchParams = {state.searchParams || {}}
-                    onFolderClick = {(folderId) => {props.actionFolderClick(folderItemsType, folderId)}}
-                    onItemClick = {(filterTemplateId) => {props.actionItemClick(folderItemsType, filterTemplateId)}}
+
+                    onFolderClick = {handleFolderClick}
+                    onItemClick={handleItemClick}
+                    // onEditItemClick={handleEditItemClick}
+                    // onDependenciesClick = {handleDependenciesClick}
+                    // onAddItemClick={handleAddItemClick}
+
+                    // onFolderClick = {(folderId) => {props.actionFolderClick(folderItemsType, folderId)}}
+                    // onItemClick = {(filterTemplateId) => {props.actionItemClick(folderItemsType, filterTemplateId)}}
                     onSearchClick ={searchParams => {props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)}}
                 />
             </DataLoader>

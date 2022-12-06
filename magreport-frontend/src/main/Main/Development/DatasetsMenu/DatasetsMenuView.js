@@ -2,6 +2,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import {useNavigateBack} from "components/Navbar/navbarHooks";
 
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+
 // dataHub
 import dataHub from 'ajax/DataHub';
 
@@ -27,15 +29,15 @@ import {FLOW_STATE_BROWSE_FOLDER, datasetsMenuViewFlowStates} from 'redux/reduce
 
 function DatasetsMenuView(props){
 
+    const {id} = useParams()
+    const navigate = useNavigate()
+    const location = useLocation()
+
     let folderItemsType = SidebarItems.development.subItems.datasets.folderItemType;
 
     const navigateBack = useNavigateBack(SidebarItems.development.subItems.datasets.key);
 
     let state = props.state;
-
-    let designerMode = props.state.editDatasetId === null ? 'create' : 'edit';
-
-    let loadFunc = dataHub.datasetController.getFolder;
 
     let reload = {needReload : state.needReload};
 
@@ -50,13 +52,34 @@ function DatasetsMenuView(props){
         navigateBack();
     }
 
+    function handleFolderClick(folderId) {
+        props.actionFolderClick(folderItemsType, folderId)
+        navigate(`/dataset/${folderId}`)
+    }
+    function handleItemClick(datasetId) {
+        props.actionItemClick(folderItemsType, datasetId)
+        navigate(`/dataset/${id}/view/${datasetId}`, {state: location.pathname})
+    }
+    function handleEditItemClick(datasetId) {
+        props.actionEditItemClick(folderItemsType, datasetId)
+        navigate(`/dataset/${id}/edit/${datasetId}`, {state: location.pathname})
+    }
+    function handleDependenciesClick(datasetId) {
+        props.actionGetDependencies(folderItemsType, datasetId)
+        // navigate(`/dataset/dependencies/${datasetId}`)
+    }
+    function handleAddItemClick(folderItemsType) {
+        props.actionAddItemClick(folderItemsType)
+        navigate(`/dataset/${id}/add`, {state: location.pathname})
+    }
+
     return(
         <div style={{display: 'flex', flex: 1}}>
         {
             state.flowState === FLOW_STATE_BROWSE_FOLDER ?
             <DataLoader
-                loadFunc = {loadFunc}
-                loadParams = {[state.currentFolderId]}
+                loadFunc = {dataHub.datasetController.getFolder}
+                loadParams = {id ? [Number(id)] : [null]}
                 reload = {reload}
                 onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}}
                 onDataLoadFailed = {(message) => {props.actionFolderLoadFailed(folderItemsType, message)}}
@@ -68,15 +91,24 @@ function DatasetsMenuView(props){
                     sortParams = {state.sortParams || {}}
                     showAddFolder = {true}
                     showAddItem = {true}
-                    onFolderClick = {(folderId) => {props.actionFolderClick(folderItemsType, folderId)}}
-                    onItemClick = {(datasetId) => {props.actionItemClick(folderItemsType, datasetId)}}
+
+                    onFolderClick = {handleFolderClick}
+                    onItemClick={handleItemClick}
+                    onEditItemClick={handleEditItemClick}
+                    onDependenciesClick = {handleDependenciesClick}
+                    onAddItemClick={handleAddItemClick}
+
+                    // onFolderClick = {(folderId) => {props.actionFolderClick(folderItemsType, folderId)}}
+                    // onItemClick = {(datasetId) => {props.actionItemClick(folderItemsType, datasetId)}}
+                    // onEditItemClick = {(datasetId) => {props.actionEditItemClick(folderItemsType, datasetId)}}
+                    // onDependenciesClick = {datasetId => props.actionGetDependencies(folderItemsType, datasetId)}
+                    // onAddItemClick = {() => {props.actionAddItemClick(folderItemsType)}}
+
+
                     onAddFolder = {(name, description) => {props.actionAddFolder(folderItemsType, state.currentFolderData.id, name, description)}}
-                    onAddItemClick = {() => {props.actionAddItemClick(folderItemsType)}}
                     onEditFolderClick = {(folderId, name, description) => {props.actionEditFolder(folderItemsType, state.currentFolderData.id, folderId, name, description)}}
-                    onEditItemClick = {(datasetId) => {props.actionEditItemClick(folderItemsType, datasetId)}}
                     onDeleteFolderClick = {(folderId) => {props.actionDeleteFolderClick(folderItemsType, state.currentFolderData.id, folderId)}}
                     onDeleteItemClick = {(datasetId) => {props.actionDeleteItemClick(folderItemsType, state.currentFolderId, datasetId)}}
-                    onDependenciesClick = {datasetId => props.actionGetDependencies(folderItemsType, datasetId)}
                     onSearchClick ={searchParams => {props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)}}
                     onSortClick ={sortParams => {props.actionSortClick(folderItemsType, state.currentFolderId, sortParams)}}
                     contextAllowed
@@ -87,18 +119,18 @@ function DatasetsMenuView(props){
                     onCopyFolderItem = {(itemsType, destFolderId, objIds, textForSnackbar) => props.actionCopyFolderItem(itemsType, destFolderId, objIds, textForSnackbar)}
                 />
             </DataLoader>
-            : state.flowState === datasetsMenuViewFlowStates.datasetViewer ?
-            <DatasetViewer
-                datasetId = {state.viewDatasetId}
-                onOkClick = {handleExit}
-            />
-            : state.flowState === datasetsMenuViewFlowStates.datasetDesigner ?
-            <DatasetDesigner
-                mode = {designerMode}
-                datasetId = {state.editDatasetId}
-                folderId = {state.currentFolderId}
-                onExit = {handleExit}
-            />
+            // : state.flowState === datasetsMenuViewFlowStates.datasetViewer ?
+            // <DatasetViewer
+            //     datasetId = {state.viewDatasetId}
+            //     onOkClick = {handleExit}
+            // />
+            // : state.flowState === datasetsMenuViewFlowStates.datasetDesigner ?
+            // <DatasetDesigner
+            //     mode = {designerMode}
+            //     datasetId = {state.editDatasetId}
+            //     folderId = {state.currentFolderId}
+            //     onExit = {handleExit}
+            // />
             : state.flowState === datasetsMenuViewFlowStates.datasetDependenciewView ?
             <DependencyViewer 
                 itemSType = {folderItemsType}

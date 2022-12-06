@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 // dataHub
 import dataHub from 'ajax/DataHub';
@@ -25,6 +25,7 @@ import ReportStarter from 'main/Report/ReportStarter';
 function FavoritesMenuView(props){
 
     const navigate = useNavigate()
+    const location = useLocation()
 
     const { enqueueSnackbar } = useSnackbar();
 
@@ -45,7 +46,7 @@ function FavoritesMenuView(props){
 
     function handleItemClick(reportId) {
         props.actionItemClick(folderItemsType, reportId)
-        navigate(`/report-starter/${reportId}`)
+        navigate(`/report/starter/${reportId}`, {state: location.pathname})
     }
 
     return(
@@ -68,8 +69,10 @@ function FavoritesMenuView(props){
                     showItemControls = {false}
                     pagination = {false}
                     onFolderClick = {handleFolderClick}
+                    
                     // onItemClick = {reportId => props.actionItemClick(folderItemsType, reportId)}
                     onItemClick = {handleItemClick}
+
                     onJobCancelClick = {(jobIndex, jobId) => props.actionJobCancel(folderItemsType, jobIndex, jobId)}
                     onAddDeleteFavorites = {(index, folderId, reportId, isFavorite) => props.actionAddDeleteFavorites(folderItemsType, index, folderId, reportId, isFavorite, enqueueSnackbar)}
                     contextAllowed

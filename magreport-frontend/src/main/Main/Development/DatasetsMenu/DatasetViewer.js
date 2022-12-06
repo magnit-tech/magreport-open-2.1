@@ -1,6 +1,8 @@
 import React, {useState} from "react";
 import {useSnackbar} from "notistack";
 
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+
 import dataHub from "ajax/DataHub";
 import DataLoader from "main/DataLoader/DataLoader";
 
@@ -17,19 +19,13 @@ import {createViewerTextFields,
     createViewerPageName} from "main/Main/Development/Viewer/viewerHelpers";
 
 
-/**
- * @callback onOkClick
- */
-/**
- * Компонент просмотра набора данных
- * @param {Object} props - параметры компонента
- * @param {Number} props.datasetId - ID набора данных
- * @param {onOkClick} props.onOkClick - callback вызываемый при нажатии кнопки ОК
- * @constructor
- */
-export default function DatasetViewer(props) {
+export default function DatasetViewer() {
 
     const classes = ViewerCSS();
+
+    const { id, folderId } = useParams()
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const {enqueueSnackbar} = useSnackbar();
 
@@ -37,8 +33,6 @@ export default function DatasetViewer(props) {
 
     const [typeById, setTypeById] = useState({});
 
-    let loadFunc = dataHub.datasetController.get;
-    let loadParams = [props.datasetId];
 
     function handleDataLoaded(loadedData) {
         setData(loadedData);
@@ -121,8 +115,8 @@ export default function DatasetViewer(props) {
     // component
     return (
         <DataLoader
-            loadFunc={loadFunc}
-            loadParams={loadParams}
+            loadFunc={dataHub.datasetController.get}
+            loadParams={[id]}
             onDataLoaded={handleDataLoaded}
             onDataLoadFailed={handleDataLoadFailed}
         >
@@ -135,9 +129,10 @@ export default function DatasetViewer(props) {
                 <ViewerPage
                     id={data.id}
                     name={data.name}
+                    folderId = {folderId}
                     itemType={FolderItemTypes.dataset}
                     disabledPadding={true}
-                    onOkClick={props.onOkClick}
+                    onOkClick={() => location.state ? navigate(location.state) : navigate(`/dataset/${folderId}`)}
                     readOnly={!hasRWRight}
                 >
                     <PageTabs

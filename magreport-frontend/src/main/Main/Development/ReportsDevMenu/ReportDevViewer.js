@@ -2,6 +2,8 @@ import React, {useState} from 'react';
 import {connect} from "react-redux";
 import {useSnackbar} from 'notistack';
 
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+
 // local
 import ViewerPage from 'main/Main/Development/Viewer/ViewerPage';
 import ViewerTextField from 'main/Main/Development/Viewer/ViewerTextField';
@@ -23,9 +25,7 @@ import {actionLoaded, actionLoadedFailed} from "redux/actions/developer/actionRe
 // functions
 import {createViewerPageName} from "../Viewer/viewerHelpers";
 
-/**
- * @callback onOkClick
- */
+
 /**
  * @callback actionLoaded
  * @param {Number} id
@@ -40,25 +40,21 @@ import {createViewerPageName} from "../Viewer/viewerHelpers";
 /**
  * Компонент просмотра объекта-отчета
  * @param {Object } props - параметры компонента
- * @param {Number} props.reportId - id просматриваемого объекта
- * @param {onOkClick} props.onOkClick - callback, вызываемый при нажатии кнопки ОК
  * @param {actionLoaded} props.actionLoaded - action, вызываемый при загрузке данных отчета
  * @param {actionLoadedFailed} props.actionLoadedFailed - action, вызываемый при ошибке загрузки данных отчета
  */
-function ReportDevViewer({reportId = -1, onOkClick = f => f, actionLoaded = f=>f, actionLoadedFailed = f=>f}) {
+
+function ReportDevViewer({actionLoaded = f=>f, actionLoadedFailed = f=>f}) {
+
+    const { id, folderId } = useParams()
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const {enqueueSnackbar} = useSnackbar();
     const classes = ViewerCSS();
 
     const [data, setData] = useState({});
     const [dataSet, setDataSet] = useState({});
-
-    /*
-        Data loading
-    */
-
-    let loadFunc = dataHub.reportController.get;
-    let loadParams = [reportId, undefined];
 
     function handleDataLoaded(loadedData) {
         setData({
@@ -130,7 +126,7 @@ function ReportDevViewer({reportId = -1, onOkClick = f => f, actionLoaded = f=>f
             <div className={classes.viewerTabPage}>
                 <ReportFiltersViewerTab
                     childGroupInfo={data.filterGroup || {}}
-                    reportId={reportId}
+                    reportId={id}
                     reportFields={data.fields || []}
                 />
             </div>
@@ -142,15 +138,15 @@ function ReportDevViewer({reportId = -1, onOkClick = f => f, actionLoaded = f=>f
         tabcontent:
             <div className={classes.viewerTabPage}>
                 <ReportTemplatesViewer
-                    reportId={reportId}
+                    reportId={id}
                 />
             </div>
     });
 
     return (
         <DataLoader
-            loadFunc={loadFunc}
-            loadParams={loadParams}
+            loadFunc={dataHub.reportController.get}
+            loadParams={[id, undefined]}
             onDataLoaded={handleDataLoaded}
             onDataLoadFailed={handleDataLoadFailed}
         >
@@ -162,14 +158,15 @@ function ReportDevViewer({reportId = -1, onOkClick = f => f, actionLoaded = f=>f
             >
                 <DataLoader
                     loadFunc={dataHub.excelTemplateController.get}
-                    loadParams={[reportId]}
-                    onDataLoaded={loadedData => actionLoaded(reportId, loadedData)}
-                    onDataLoadFailed={loadedData => actionLoadedFailed(reportId, loadedData)}
+                    loadParams={[id]}
+                    onDataLoaded={loadedData => actionLoaded(id, loadedData)}
+                    onDataLoadFailed={loadedData => actionLoadedFailed(id, loadedData)}
                 >
                 <ViewerPage
                     id={data.id}
+                    folderId = {folderId}
                     itemType={FolderItemTypes.reportsDev}
-                    onOkClick={onOkClick}
+                    onOkClick={() => location.state ? navigate(location.state) : navigate(`/reportsDev/${folderId}`)}
                     disabledPadding={true}
                 >
                     <PageTabs

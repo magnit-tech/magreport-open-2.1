@@ -1,6 +1,8 @@
 import React, {useState} from "react";
 import {useSnackbar} from "notistack";
 
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+
 import dataHub from "ajax/DataHub";
 import { connect } from 'react-redux';
 import { showAlert, hideAlert } from '../../../../redux/actions/actionsAlert'
@@ -22,25 +24,22 @@ import { mdiCheckDecagram } from '@mdi/js';
 
 
 /**
- * @callback onOkClick
- */
-/**
  * Компонент просмотра источника данных
  * @param {Object} props - параметры компонента
- * @param {Number} props.datasourceId - ID источника данных
- * @param {onOkClick} props.onOkClick - callback вызываемый при нажатии кнопки ОК
  * @constructor
  */
 function DatasourceViewer(props) {
 
     const classes = ViewerCSS();
 
+    const { id, folderId } = useParams()
+    const navigate = useNavigate();
+    const location = useLocation();
+
     const {enqueueSnackbar} = useSnackbar();
 
     const [data, setData] = useState({});
-
-    let loadFunc = dataHub.datasourceController.get;
-    let loadParams = [props.datasourceId];
+    
 
     function handleDataLoaded(loadedData) {
         setData(loadedData);
@@ -94,17 +93,18 @@ function DatasourceViewer(props) {
 
     return (
         <DataLoader
-            loadFunc={loadFunc}
-            loadParams={loadParams}
+            loadFunc={dataHub.datasourceController.get}
+            loadParams={[id]}
             onDataLoaded={handleDataLoaded}
             onDataLoadFailed={handleDataLoadFailed}
         >
             <ViewerPage
                 id={data.id}
                 name={data.name}
+                folderId = {folderId}
                 itemType={FolderItemTypes.datasource}
                 disabledPadding={true}
-                onOkClick={props.onOkClick}
+                onOkClick={() => location.state ? navigate(location.state) : navigate(`/datasource/${folderId}`)}
                 pageName = {`Просмотр источника данных: ${data.name}`}
                 readOnly={!hasRWRight}
             >

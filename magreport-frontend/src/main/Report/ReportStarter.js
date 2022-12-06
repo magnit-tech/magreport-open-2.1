@@ -1,7 +1,7 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useRef, useState} from 'react';
 import {useSnackbar} from 'notistack';
 
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
+import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 
 // mui
 import {Button} from '@material-ui/core';
@@ -32,7 +32,8 @@ export default function ReportStarter(props){
     const classes = ReportStarterCSS();
 
     const {id} = useParams()
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const location = useLocation();
     const [searchParams, setSearchParams] = useSearchParams();
 
     // console.log(searchParams.get('jobId'));
@@ -183,7 +184,7 @@ export default function ReportStarter(props){
     }
 
     function handleCancel(){
-        props.onCancel();
+        location.state ? navigate(location.state) : navigate('/reports')
     }
 
     function handleChangeFilterValue(newFilterValue){

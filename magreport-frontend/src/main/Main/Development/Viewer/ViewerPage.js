@@ -1,7 +1,7 @@
 import React from 'react'
 import {connect} from "react-redux";
 
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 import clsx from 'clsx';
 
@@ -34,6 +34,7 @@ import {ViewerCSS} from './ViewerCSS';
  * @param {String} [props.pageName=""] - опционально. Имя страницы
  * @param {Number} props.id - ID объекта
  * @param {String} props.itemType - тип объекта из FolderItemTypes
+ * @param {String} props.folderId - id папки в которой размещается объект
  * @param {Array} props.children - вложенные компоненты
  * @param {boolean} [props.disabledPadding=false] - опционально. true - отключает отступы внутрь контейнера
  * @param {boolean} [props.readOnly=false] - опционально. true - компонент только для чтения, скрывается кнопка "Редактировать"
@@ -42,15 +43,17 @@ import {ViewerCSS} from './ViewerCSS';
  * @returns {JSX.Element}
  * @constructor
  */
+
 function ViewerPage(props) {
-    
+
     const navigate = useNavigate()
+    const location = useLocation();
 
     const classes = ViewerCSS();
 
     function onEditClick() {
         props.actionViewerEditItem(props.itemType, props.id, props.name)
-        navigate(`/${props.itemType}/edit/${props.id}`)
+        navigate(`/${props.itemType}/${props.folderId ? props.folderId + '/' : ''}edit/${props.id}`, {state: location.pathname})
     }
 
     return (

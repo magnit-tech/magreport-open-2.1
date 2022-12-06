@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Navigate, Route, Routes, useLocation } from "react-router-dom"
+import { Navigate, Route, Routes } from "react-router-dom"
 
 import { AuthProvider } from './AuthProvider';
 import { RequireAuth } from './RequireAuth';
@@ -39,10 +39,24 @@ import ThemesMenuView from '../main/Main/Administration/Theme/ThemesMenuView';
 
 // Разработка
 import DatasourcesMenuView from '../main/Main/Development/DatasourcesMenu/DatasourcesMenuView';
+import DatasourceViewer from '../main/Main/Development/DatasourcesMenu/DatasourceViewer';
+import DatasourceDesigner from '../main/Main/Development/DatasourcesMenu/DatasourceDesigner';
+import DependencyViewer from '../main/Main/Development/DependencyViewer';
+
 import DatasetsMenuView from '../main/Main/Development/DatasetsMenu/DatasetsMenuView';
+import DatasetViewer from '../main/Main/Development/DatasetsMenu/DatasetViewer';
+import DatasetDesigner from '../main/Main/Development/DatasetsMenu/DatasetDesigner';
+
 import FilterTemplatesMenuView from '../main/Main/Development/FilterTemplates/FilterTemplatesMenuView';
+import FilterTemplatesViewer from '../main/Main/Development/FilterTemplates/FilterTemplatesViewer';
+
 import FilterInstancesMenuView from '../main/Main/Development/FilterInstances/FilterInstancesMenuView';
+import FilterInstanceViewer from '../main/Main/Development/FilterInstances/FilterInstanceViewer';
+import FilterInstanceDesigner from '../main/Main/Development/FilterInstances/FilterInstanceDesigner';
+
 import ReportsDevMenuView from '../main/Main/Development/ReportsDevMenu/ReportsDevMenuView';
+import ReportDevViewer from '../main/Main/Development/ReportsDevMenu/ReportDevViewer';
+import ReportDevDesigner from '../main/Main/Development/ReportsDevMenu/ReportDevDesigner';
 
 // Расписание
 import SchedulesMenuView from "../main/Main/Schedule/Schedules/SchedulesMenuView";
@@ -56,7 +70,9 @@ import ReportJob from '../main/Report/ReportJob';
 import ReportStarter from '../main/Report/ReportStarter';
 
 
-
+export const routesName = ['reports', 'favorites', 'job', 'roles', 'users', 'securityFilters', 'userJobs', 'asm', 'logs', 'settings', 
+					'systemMailTemplates', 'mailSender', 'cubes', 'theme', 'datasource', 'dataset', 'filterTemplate', 'filterInstance', 
+					'reportsDev', 'schedules', 'scheduleTasks']
 
 export default function AppRoutes(props) {
 
@@ -70,26 +86,26 @@ export default function AppRoutes(props) {
 				/>
 
 				<Route element={ <RequireAuth><Main version={props.version}/></RequireAuth> }>
-
+			
 					<Route path="/reports" element={<ReportsMenuView/>} />
 					<Route path="/reports/:id" element={<ReportsMenuView/>} />
 					<Route path="/favorites" element={<FavoritesMenuView/>} />
 					<Route path="/job" element={<JobsMenuView/>} />
 
-					{/* Администрирование */}
+					{/********** Администрирование **********/}
 					<Route path="/roles" element={<RolesMenuView/>} />
 					<Route path="/roles/:id" element={<RolesMenuView/>} />
-					<Route path="/roles/view/:id" element={<RoleViewer/>} />
-					<Route path="/roles/edit/:id" element={<RoleDesigner/>} />
-					<Route path="/roles/add" element={<RoleDesigner/>} />
+					<Route path="/roles/:folderId/view/:id" element={<RoleViewer/>} />
+					<Route path="/roles/:folderId/edit/:id" element={<RoleDesigner/>} />
+					<Route path="/roles/:folderId/add" element={<RoleDesigner/>} />
 
 					<Route path="/users" element={<UsersMenuView/>} />
 
 					<Route path="/securityFilters" element={<SecurityFiltersMenuView/>} />
 					<Route path="/securityFilters/:id" element={<SecurityFiltersMenuView/>} />
-					<Route path="/securityFilters/view/:id" element={<SecurityFilterViewer/>} />
-					{/* <Route path="/securityFilters/edit/:id" element={<SecurityFilterDesigner/>} />
-					<Route path="/securityFilters/add" element={<SecurityFilterDesigner/>} /> */}
+					<Route path="/securityFilters/:folderId/view/:id" element={<SecurityFilterViewer/>} />
+					<Route path="/securityFilters/:folderId/edit/:id" element={<SecurityFilterDesigner/>} />
+					<Route path="/securityFilters/:folderId/add" element={<SecurityFilterDesigner/>} />
 
 					<Route path="/userJobs" element={<UserJobsMenuView/>} />
 
@@ -103,28 +119,44 @@ export default function AppRoutes(props) {
 
 					<Route path="/systemMailTemplates" element={<ServerMailTemplateMenuView/>} />
 					<Route path="/systemMailTemplates/:id" element={<ServerMailTemplateMenuView/>} />
-					{/* <Route path="/systemMailTemplates/view/:id" element={<ServerMailTemplateView/>} />
-					<Route path="/systemMailTemplates/edit/:id" element={<ServerMailTemplateDesigner/>} />
-					<Route path="/systemMailTemplates/add" element={<ServerMailTemplateDesigner/>} /> */}
+					<Route path="/systemMailTemplates/:folderId/view/:id" element={<ServerMailTemplateView/>} />
+					<Route path="/systemMailTemplates/:folderId/edit/:id" element={<ServerMailTemplateDesigner/>} />
 
 					<Route path="/mailSender" element={<EmailMenuView/>} />
 					<Route path="/cubes" element={<CubesMenuView/>} />
 					<Route path="/theme" element={<ThemesMenuView/>} /> 
 
-					{/* Разработка */}
-					<Route path="/datasource" element={<DatasourcesMenuView/>} />
-					<Route path="/datasource/:id" element={<RolesMenuView/>} />
-					<Route path="/datasource/view/:id" element={<RoleViewer/>} />
-					<Route path="/datasource/edit/:id" element={<RoleDesigner/>} />
-					<Route path="/datasource/dependencies/:id" element={<RoleDesigner/>} />
-					<Route path="/datasource/add" element={<RoleDesigner/>} />
+					{/********** Разработка **********/}
+					<Route path="/datasource" element={<DatasourcesMenuView />} />
+					<Route path="/datasource/:id" element={<DatasourcesMenuView/>} />
+					<Route path="/datasource/:folderId/view/:id" element={<DatasourceViewer/>} />
+					<Route path="/datasource/:folderId/edit/:id" element={<DatasourceDesigner/>} />
+					{/* <Route path="/datasource/dependencies/:id" element={<DependencyViewer/>} /> */}
+					<Route path="/datasource/:folderId/add" element={<DatasourceDesigner/>} />
 
 					<Route path="/dataset" element={<DatasetsMenuView/>} />
-					<Route path="/filterTemplate" element={<FilterTemplatesMenuView/>} />
-					<Route path="/filterInstance" element={<FilterInstancesMenuView/>} />
-					<Route path="/reportsDev" element={<ReportsDevMenuView/>} />
+					<Route path="/dataset/:id" element={<DatasetsMenuView/>} />
+					<Route path="/dataset/:folderId/view/:id" element={<DatasetViewer/>} />
+					<Route path="/dataset/:folderId/edit/:id" element={<DatasetDesigner/>} />
+					<Route path="/dataset/:folderId/add" element={<DatasetDesigner/>} />
 
-					{/* Расписание */}
+					<Route path="/filterTemplate" element={<FilterTemplatesMenuView/>} />
+					<Route path="/filterTemplate/:id" element={<FilterTemplatesMenuView/>} />
+					<Route path="/filterTemplate/:folderId/view/:id" element={<FilterTemplatesViewer/>} />
+
+					<Route path="/filterInstance" element={<FilterInstancesMenuView/>} />
+					<Route path="/filterInstance/:id" element={<FilterInstancesMenuView/>} />
+					<Route path="/filterInstance/:folderId/view/:id" element={<FilterInstanceViewer/>} />
+					<Route path="/filterInstance/:folderId/edit/:id" element={<FilterInstanceDesigner/>} />
+					<Route path="/filterInstance/:folderId/add" element={<FilterInstanceDesigner/>} />
+
+					<Route path="/reportsDev" element={<ReportsDevMenuView/>} />
+					<Route path="/reportsDev/:id" element={<ReportsDevMenuView/>} />
+					<Route path="/reportsDev/:folderId/view/:id" element={<ReportDevViewer/>} />
+					<Route path="/reportsDev/:folderId/edit/:id" element={<ReportDevDesigner/>} />
+					<Route path="/reportsDev/:folderId/add" element={<ReportDevDesigner/>} />
+
+					{/********** Расписание **********/}
 					<Route path="/schedules" element={<SchedulesMenuView/>} />
 					<Route path="/schedules/view/:id" element={<ScheduleViewer/>} />
 					<Route path="/schedules/edit/:id" element={<ScheduleDesigner/>} />
@@ -135,7 +167,7 @@ export default function AppRoutes(props) {
 					<Route path="/scheduleTasks/edit/:id" element={<ScheduleTasksDesigner/>} />
 					<Route path="/scheduleTasks/add" element={<ScheduleTasksDesigner/>} />
 
-					{/* Отчёт */}
+					{/********** Отчёт **********/}
 					<Route path="/report/:id" element={<ReportJob/>} />
 					<Route path="/report/starter/:id" element={<ReportStarter/>} />
 					

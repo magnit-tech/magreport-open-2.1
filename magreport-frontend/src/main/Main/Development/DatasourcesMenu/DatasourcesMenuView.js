@@ -2,6 +2,8 @@ import React from 'react';
 import { connect } from 'react-redux';
 import {useNavigateBack} from "components/Navbar/navbarHooks";
 
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+
 // dataHub
 import dataHub from 'ajax/DataHub';
 
@@ -27,10 +29,14 @@ function DatasourcesMenuView(props){
 
     const navigateBack = useNavigateBack();
 
-    const state = props.state;
-    let designerMode = props.state.editDatasourceId === null ? 'create' : 'edit';
+    const {id} = useParams()
+    const navigate = useNavigate()
+    const location = useLocation()
 
-    let loadFunc = dataHub.datasourceController.getFolder;
+    const state = props.state;
+    // let designerMode = props.state.editDatasourceId === null ? 'create' : 'edit';
+
+    // let loadFunc = dataHub.datasourceController.getFolder;
 
     let reload = {needReload : state.needReload};
     let folderItemsType = SidebarItems.development.subItems.datasources.folderItemType;
@@ -45,14 +51,36 @@ function DatasourcesMenuView(props){
         props.actionFolderClick(argFolderItemsType, folderId)
     }
 
+    function handleFolderClick(folderId) {
+        props.actionFolderClick(folderItemsType, folderId)
+        navigate(`/datasource/${folderId}`)
+    }
+    function handleItemClick(datasourceId) {
+        props.actionItemClick(folderItemsType, datasourceId)
+        navigate(`/datasource/${id}/view/${datasourceId}`, {state: location.pathname})
+    }
+    function handleEditItemClick(datasourceId) {
+        props.actionEditItemClick(folderItemsType, datasourceId)
+        navigate(`/datasource/${id}/edit/${datasourceId}`, {state: location.pathname})
+    }
+    function handleDependenciesClick(datasourceId) {
+        props.actionGetDependencies(folderItemsType, datasourceId)
+        // navigate(`/datasource/dependencies/${datasourceId}`)
+    }
+    function handleAddItemClick(folderItemsType) {
+        props.actionAddItemClick(folderItemsType)
+        navigate(`/datasource/${id}/add`, {state: location.pathname})
+    }
+
+
     return(
         <div style={{display: 'flex', flex: 1}}>
         {
         state.flowState === FLOW_STATE_BROWSE_FOLDER ?
             (
             <DataLoader
-                loadFunc = {loadFunc}
-                loadParams = {[state.currentFolderId]}
+                loadFunc = {dataHub.datasourceController.getFolder}
+                loadParams = {id ? [Number(id)] : [null]}
                 reload = {reload}
                 onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}}
                 onDataLoadFailed = {(message) => {props.actionFolderLoadFailed(folderItemsType, message)}}
@@ -64,15 +92,22 @@ function DatasourcesMenuView(props){
                     sortParams = {state.sortParams || {}}
                     showAddFolder = {true}
                     showAddItem = {true}
-                    onFolderClick = {(folderId) => {props.actionFolderClick(folderItemsType, folderId)}}
-                    onItemClick = {(datasourceId) => {props.actionItemClick(folderItemsType, datasourceId)}}
-                    onAddFolder = {(name, description) => {props.actionAddFolder(folderItemsType, state.currentFolderData.id, name, description)}}
-                    onAddItemClick = {() => {props.actionAddItemClick(folderItemsType)}}
+                    // onFolderClick = {(folderId) => {props.actionFolderClick(folderItemsType, folderId)}}
+                    // onItemClick = {(datasourceId) => {props.actionItemClick(folderItemsType, datasourceId)}}
+                    // onEditItemClick = {(datasourceId) => {props.actionEditItemClick(folderItemsType, datasourceId)}}
+                    // onDependenciesClick = {datasourcetId => props.actionGetDependencies(folderItemsType, datasourcetId)}
+                    // onAddItemClick = {() => {props.actionAddItemClick(folderItemsType)}}
+                    
+                    onFolderClick = {handleFolderClick}
+                    onItemClick={handleItemClick}
+                    onEditItemClick={handleEditItemClick}
+                    onDependenciesClick = {handleDependenciesClick}
+                    onAddItemClick={handleAddItemClick}
+
                     onEditFolderClick = {(folderId, name, description) => {props.actionEditFolder(folderItemsType, state.currentFolderData.id, folderId, name, description)}}
-                    onEditItemClick = {(datasourceId) => {props.actionEditItemClick(folderItemsType, datasourceId)}}
+                    onAddFolder = {(name, description) => {props.actionAddFolder(folderItemsType, state.currentFolderData.id, name, description)}}
                     onDeleteFolderClick = {(folderId) => {props.actionDeleteFolderClick(folderItemsType, state.currentFolderData.id, folderId)}}
                     onDeleteItemClick = {(datasourceId) => {props.actionDeleteItemClick(folderItemsType, state.currentFolderId, datasourceId)}}
-                    onDependenciesClick = {datasourcetId => props.actionGetDependencies(folderItemsType, datasourcetId)}
                     onSearchClick ={searchParams => {props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)}}
                     onSortClick ={sortParams => {props.actionSortClick(folderItemsType, state.currentFolderId, sortParams)}}
                     contextAllowed
@@ -84,18 +119,18 @@ function DatasourcesMenuView(props){
                 />
             </DataLoader>
             )
-        : state.flowState === datasourcesMenuViewFlowStates.datasourceViewer ?
-        <DatasourceViewer
-            datasourceId={state.viewDatasourceId}
-            onOkClick={handleExit}
-        />
-        : state.flowState === datasourcesMenuViewFlowStates.datasourceDesigner ?
-        <DatasourceDesigner
-            mode = {designerMode}
-            datasourceId = {state.editDatasourceId}
-            folderId = {state.currentFolderId}
-            onExit = {handleExit}
-        />
+        // : state.flowState === datasourcesMenuViewFlowStates.datasourceViewer ?
+        // <DatasourceViewer
+        //     datasourceId={state.viewDatasourceId}
+        //     onOkClick={handleExit}
+        // />
+        // : state.flowState === datasourcesMenuViewFlowStates.datasourceDesigner ?
+        // <DatasourceDesigner
+        //     mode = {designerMode}
+        //     datasourceId = {state.editDatasourceId}
+        //     folderId = {state.currentFolderId}
+        //     onExit = {handleExit}
+        // />
         : state.flowState === datasourcesMenuViewFlowStates.datasourceDependenciesView ?
             <DependencyViewer 
                 itemsType={folderItemsType}
@@ -106,6 +141,7 @@ function DatasourcesMenuView(props){
             />
         : <div>Неизвестное состояние</div>
         }
+
         </div>
     )
 }
