@@ -144,7 +144,7 @@ export const ChooserDestinationWindowCSS = makeStyles(theme => ({
     }
 }));
 
-export const SqlViewerCSS = makeStyles(theme => ({
+export const ItemCardDialogViewerCSS = makeStyles(theme => ({
     closeBtn: {
         margin: '16px'
     },
