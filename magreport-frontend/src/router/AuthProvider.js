@@ -25,8 +25,7 @@ export const AuthProvider = ({children}) => {
 
             function handleLogin (magrepResponse){
                 if (magrepResponse.ok){
-
-                    user.current = {authtoken: magrepResponse.data.authtoken}
+                    user.current = {authtoken: magrepResponse.data.authtoken.replace('Bearer ', '')}
                     dataHub.userController.whoAmI(handleWhoAmI)                 
                 }
                 else {

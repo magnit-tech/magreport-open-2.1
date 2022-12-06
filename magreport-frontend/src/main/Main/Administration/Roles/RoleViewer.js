@@ -25,16 +25,11 @@ import {
 } from "main/Main/Development/Viewer/viewerHelpers";
 
 
-/**
- * Компонент просмотра роли
- * @param {Object} props - параметры компонента
- * @constructor
- */
-export default function RoleViewer(props) {
+export default function RoleViewer() {
 
     const classes = ViewerCSS();
 
-    const {id} = useParams()
+    const {id, folderId} = useParams()
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -49,8 +44,6 @@ export default function RoleViewer(props) {
     const [permittedFolders, setPermittedFolders] = useState({loadedData: {}, namesList: []});
     const [selectedPermittedFolder, setSelectedPermittedFolder] = useState('');
 
-    let loadFunc = dataHub.roleController.get;
-    let loadParams = [id];
 
     function handleDataLoaded(loadedData) {
         setData(loadedData);
@@ -134,7 +127,7 @@ export default function RoleViewer(props) {
                 <Paper elevation={3} className={classes.userListPaper}>
                     <DataLoader
                         loadFunc={dataHub.roleController.getUsers}
-                        loadParams={loadParams}
+                        loadParams={[id]}
                         onDataLoaded={handleUsersDataLoaded}
                         onDataLoadFailed={handleDataLoadFailed}
                     >
@@ -158,7 +151,7 @@ export default function RoleViewer(props) {
                 <Paper elevation={3} className={classes.userListPaper}>
                     <DataLoader
                         loadFunc={dataHub.roleController.getDomainGroups}
-                        loadParams={loadParams}
+                        loadParams={[id]}
                         onDataLoaded={handleDomainGroupsDataLoaded}
                         onDataLoadFailed={handleDataLoadFailed}
                     >
@@ -174,7 +167,7 @@ export default function RoleViewer(props) {
         )
     };
 
-    const permittedFoldersTab = props.roleTypeId === 2 ? {
+    const permittedFoldersTab = Number(folderId) === 2 ? {
         tablabel:"Права",
         tabcontent:
             <div style={{display: 'flex', flex: 1, flexDirection: 'column'}}>
@@ -221,17 +214,18 @@ export default function RoleViewer(props) {
     // component
     return (
         <DataLoader
-            loadFunc={loadFunc}
-            loadParams={loadParams}
+            loadFunc={dataHub.roleController.get}
+            loadParams={[id]}
             onDataLoaded={handleDataLoaded}
             onDataLoadFailed={handleDataLoadFailed}
         >
             <ViewerPage
                 id={data.id}
                 name={data.name}
+                folderId = {folderId}
                 itemType={FolderItemTypes.roles}
                 disabledPadding={true}
-                onOkClick={() => location.state ? navigate(location.state) : navigate('/roles')}
+                onOkClick={() => location.state ? navigate(location.state) : navigate(`/roles/${folderId}`)}
                 readOnly={!hasRWRight}
             >
                 <PageTabs

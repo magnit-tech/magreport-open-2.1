@@ -1,6 +1,8 @@
 import React, {useState} from "react";
 import {useSnackbar} from "notistack";
 
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+
 import dataHub from "ajax/DataHub";
 import DataLoader from "main/DataLoader/DataLoader";
 
@@ -17,26 +19,17 @@ import UnboundedValueFields from './TypeSpecificFields/UnboundedValueFields';
 import TupleListFields from './TypeSpecificFields/TupleListFields';
 import {FolderItemTypes} from "../../../FolderContent/FolderItemTypes";
 
-/**
- * @callback onOkClick
- */
-/**
- * Компонент для просмотра экземпляра фильтра
- * @param props - свойства компонента
- * @param {Number} props.filterInstanceId - ID просматриваемого экземпляра фильтра
- * @param {onOkClick} props.onOkClick - callback, вызываемый при нажатии кнопки "ОК"
- * @return {JSX.Element}
- * @constructor
- */
-export default function FilterInstanceViewer(props) {
+
+export default function FilterInstanceViewer() {
+
+    const { id, folderId } = useParams()
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const {enqueueSnackbar} = useSnackbar();
 
     const [data, setData] = useState({});
 
-    let loadFunc = dataHub.filterInstanceController.get;
-    let loadFuncFilterTemplate = dataHub.filterTemplateController.get;
-    let loadParams = [props.filterInstanceId];
 
     function handleFilterInstanceDataLoaded(loadedData) {
         setData({
@@ -72,6 +65,7 @@ export default function FilterInstanceViewer(props) {
     children.push(
         data.filterTemplate ? (
             <ViewerChildCard
+                key={data.filterTemplate.id}
                 id={data.filterTemplate.id}
                 itemType={FolderItemTypes.filterTemplate}
                 name={data.filterTemplate.name}
@@ -84,43 +78,57 @@ export default function FilterInstanceViewer(props) {
 
     if(filterTemplateType === 'VALUE_LIST') {
 
-        fieldsComponent = <ValueListFieldsViewer
-            filterInstanceData={data}
-        />;
+        fieldsComponent = 
+            <ValueListFieldsViewer
+                key={Math.random()}
+                filterInstanceData={data}
+            />;
     } else if(filterTemplateType === 'HIERARCHY'
         || filterTemplateType === 'HIERARCHY_M2M') {
 
-        fieldsComponent = <HierTreeFieldsViewer
-            filterTemplateType={filterTemplateType}
-            filterInstanceData={data}
-        />
+        fieldsComponent = 
+            <HierTreeFieldsViewer
+                key={Math.random()}
+                filterTemplateType={filterTemplateType}
+                filterInstanceData={data}
+            />
     } else if(filterTemplateType === 'DATE_RANGE'
         || filterTemplateType === 'RANGE') {
 
-        fieldsComponent = <RangeFieldsViewer
-            filterTemplateType={filterTemplateType}
-            filterInstanceData={data}
-        />;
+        fieldsComponent = 
+            <RangeFieldsViewer
+                key={Math.random()}
+                filterTemplateType={filterTemplateType}
+                filterInstanceData={data}
+            />;
     } else if(filterTemplateType === 'DATE_VALUE') {
 
-        fieldsComponent = <DateValueFieldsViewer
-            filterInstanceData={data}
-        />;
+        fieldsComponent = 
+            <DateValueFieldsViewer
+                key={Math.random()}
+                filterInstanceData={data}
+            />;
     } else if( filterTemplateType === 'TOKEN_INPUT') {
 
-        fieldsComponent = <TokenInputFieldsViewer
-            filterInstanceData={data}
-        />;
+        fieldsComponent = 
+            <TokenInputFieldsViewer
+                key={Math.random()}
+                filterInstanceData={data}
+            />;
     } else if ( filterTemplateType === 'SINGLE_VALUE_UNBOUNDED'){
-        fieldsComponent = <UnboundedValueFields
-            readOnly = {true}
-            fields={data.fields}
-        />;
+        fieldsComponent = 
+            <UnboundedValueFields
+                key={Math.random()}    
+                readOnly = {true}
+                fields={data.fields}
+            />;
     } else if ( filterTemplateType === 'TUPLE_LIST'){
-        fieldsComponent = <TupleListFields
-            readOnly = {true}
-            fields={data.fields}
-        />;
+        fieldsComponent = 
+            <TupleListFields
+                key={Math.random()}    
+                readOnly = {true}
+                fields={data.fields}
+            />;
     }
     children.push(fieldsComponent);
 
@@ -135,13 +143,13 @@ export default function FilterInstanceViewer(props) {
 
     return (
         <DataLoader
-            loadFunc={loadFunc}
-            loadParams={loadParams}
+            loadFunc={dataHub.filterInstanceController.get}
+            loadParams={[id]}
             onDataLoaded={handleFilterInstanceDataLoaded}
             onDataLoadFailed={handleDataLoadFailed}
         >
             <DataLoader
-                loadFunc={loadFuncFilterTemplate}
+                loadFunc={dataHub.filterTemplateController.get}
                 loadParams={[data.templateId]}
                 onDataLoaded={handleFilterTemplateDataLoaded}
                 onDataLoadFailed={handleDataLoadFailed}
@@ -149,8 +157,9 @@ export default function FilterInstanceViewer(props) {
                 <ViewerPage
                     pageName={createViewerPageName(FolderItemTypes.filterInstance, data.name)}
                     id={data.id}
+                    folderId = {folderId}
                     itemType={FolderItemTypes.filterInstance}
-                    onOkClick={props.onOkClick}
+                    onOkClick={() => location.state ? navigate(location.state) : navigate(`/filterInstance/${folderId}`)}
                     readOnly={!hasRWRight}
                 >
                     {children}

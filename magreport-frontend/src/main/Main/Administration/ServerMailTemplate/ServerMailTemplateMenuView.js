@@ -35,8 +35,6 @@ function MailTemplatesMenuView(props){
 
     let state = props.state;
 
-    let loadFunc = dataHub.serverMailTemplateController.getMailTemplateType;
-
     let reload = {needReload : state.needReload};
     let folderItemsType = SidebarItems.admin.subItems.mailTexts.folderItemType;
     let sidebarItemType = SidebarItems.admin.subItems.mailTexts.key;
@@ -52,15 +50,11 @@ function MailTemplatesMenuView(props){
     }
     function handleItemClick(templateId) {
         props.actionItemClick(folderItemsType, templateId)
-        navigate(`/systemMailTemplates/view/${templateId}`, {state: location.pathname})
+        navigate(`/systemMailTemplates/${id}/view/${templateId}`, {state: location.pathname})
     }
     function handleEditItemClick(templateId) {
         props.actionEditItemClick(folderItemsType, templateId)
-        navigate(`/systemMailTemplates/edit/${templateId}`)
-    }
-    function handleAddItemClick(folderItemsType) {
-        props.actionAddItemClick(folderItemsType)
-        navigate(`/systemMailTemplates/add`)
+        navigate(`/systemMailTemplates/${id}/edit/${templateId}`, {state: location.pathname})
     }
 
     return(
@@ -68,8 +62,7 @@ function MailTemplatesMenuView(props){
             {
                 state.flowState === FLOW_STATE_BROWSE_FOLDER ?
                     <DataLoader
-                        loadFunc = {loadFunc}
-                        // loadParams = {[state.currentFolderId]}
+                        loadFunc = {dataHub.serverMailTemplateController.getMailTemplateType}
                         loadParams = {id ? [Number(id)] : [null]}
                         reload = {reload}
                         onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}}
@@ -90,9 +83,7 @@ function MailTemplatesMenuView(props){
                             onFolderClick = {handleFolderClick}
                             onItemClick={handleItemClick}
                             onEditItemClick={handleEditItemClick}
-                            onAddItemClick={handleAddItemClick}
 
-                            onAddFolder = {(name, description) => {props.actionAddFolder(folderItemsType, state.currentFolderData.id, name, description)}}
                             onDeleteFolderClick = {(folderId) => {props.actionDeleteFolderClick(folderItemsType, state.currentFolderData.id, folderId)}}
                             onDeleteItemClick = {(roleId) => {props.actionDeleteItemClick(folderItemsType, state.currentFolderId, roleId)}}
                             onEditFolder = {(folderId, name, description) => {props.actionEditFolder(sidebarItemType, folderItemsType, state.currentFolderData.id, folderId, name, description)}}
@@ -101,20 +92,20 @@ function MailTemplatesMenuView(props){
                             onSortClick ={sortParams => {props.actionSortClick(folderItemsType, state.currentFolderId, sortParams)}}
                         />
                     </DataLoader>
-                    : state.flowState === mailTemplateMenuViewFlowStates.mailTemplateViewer ?
-                    <ServerMailTemplateView
-                        serverMailTemplateId = {state.viewMailTemplateId}
-                        onOkClick = {handleExit}
-                        onEditClick={actionItemClick}
-                    />
-                    : state.flowState === mailTemplateMenuViewFlowStates.mailTemplateDesigner ?
-                        <ServerMailTemplateDesigner
-                            serverMailTemplateId = {state.viewMailTemplateId}
-                            onOkClick = {handleExit}
-                            onExitClick={handleExit}
-                            onEditClick={actionItemClick}
-                        />
-                        : <div>Неизвестное состояние</div>
+                    // : state.flowState === mailTemplateMenuViewFlowStates.mailTemplateViewer ?
+                    // <ServerMailTemplateView
+                    //     serverMailTemplateId = {state.viewMailTemplateId}
+                    //     onOkClick = {handleExit}
+                    //     onEditClick={actionItemClick}
+                    // />
+                    // : state.flowState === mailTemplateMenuViewFlowStates.mailTemplateDesigner ?
+                    //     <ServerMailTemplateDesigner
+                    //         serverMailTemplateId = {state.viewMailTemplateId}
+                    //         onOkClick = {handleExit}
+                    //         onExitClick={handleExit}
+                    //         onEditClick={actionItemClick}
+                    //     />
+                    : <div>Неизвестное состояние</div>
             }
         </div>
     )

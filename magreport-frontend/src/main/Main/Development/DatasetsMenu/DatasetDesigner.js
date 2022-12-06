@@ -1,6 +1,9 @@
 import React from 'react';
 import {useState} from 'react';
 import { useSnackbar } from 'notistack';
+
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+
 import Tooltip from '@material-ui/core/Tooltip';
 import UpdateIcon from '@material-ui/icons/Update';
 import IconButton from '@material-ui/core/IconButton';
@@ -28,14 +31,12 @@ import TableFooter from '@material-ui/core/TableFooter';
 // styles
 import { DatasetDesignerCSS } from '../Designer/DesignerCSS'
 
-/**
- * 
- * @param {*} props.mode : 'edit', 'create' - режим редактирования или создания нового объекта
- * @param {*} props.datasourceId : id объекта при редактировании (имеет значение только при mode == 'edit')
- * @param {*} props.folderId : id папки в которой размещается объект при создании (имеет значение только при mode == 'create')
- * @param {*} props.onExit : callback при выходе
- */
-export default function DatasetDesigner(props){
+
+export default function DatasetDesigner(){
+
+    const { id, folderId } = useParams()
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const { enqueueSnackbar } = useSnackbar();
     const classes = DatasetDesignerCSS();
@@ -63,7 +64,7 @@ export default function DatasetDesigner(props){
         datasetTypeId : "Тип объекта"        
     }
 
-    const [pageName, setPagename] = useState(props.mode === 'create' ? "Создание набора данных" : "Редактирование набора данных");
+    const [pageName, setPagename] = useState(id ? "Редактирование набора данных" : "Создание набора данных");
 
     const [uploading, setUploading] = useState(false);
     const [errorField, setErrorField] = useState({});
@@ -74,9 +75,9 @@ export default function DatasetDesigner(props){
     let loadParams = [];
     
 
-    if(props.mode === 'edit'){
+    if (id) {
         loadFunc = dataHub.datasetController.get;
-        loadParams = [props.datasetId];
+        loadParams = [id];
     }
 
     /*
@@ -107,8 +108,8 @@ export default function DatasetDesigner(props){
         
     }    
 
-    /*
-        Data editing
+    /* 
+        Data editing 
     */
 
     function handleChangeName(newName){
@@ -228,13 +229,13 @@ export default function DatasetDesigner(props){
                     errorExists = true;
                 } );
         
-        if(errorExists){
+        if (errorExists) {
             setErrorField(errors);
         }
-        else{
-            if(props.mode === 'create'){
+        else {
+            if (!id) {
                 dataHub.datasetController.add(
-                    props.folderId, 
+                    Number(folderId), 
                     data.datasetName.trim(), 
                     data.datasetDescription.trim(),
                     data.datasourceId,
@@ -244,10 +245,10 @@ export default function DatasetDesigner(props){
                     data.datasetTypeId,
                     handleAddEditAnswer);
             }
-            else{
+            else {
                 dataHub.datasetController.edit(
-                    props.folderId,
-                    props.datasetId,
+                    Number(folderId),
+                    Number(id),
                     data.datasetName.trim(), 
                     data.datasetDescription.trim(),
                     data.datasourceId,
@@ -262,20 +263,16 @@ export default function DatasetDesigner(props){
         }
     }
 
-    function handleCancel(){
-        props.onExit();
-    }
-
     function handleAddEditAnswer(magrepResponse){
         
         if(magrepResponse.ok){
-            props.onExit();
+            location.state ? navigate(location.state) : navigate(`/dataset/${folderId}`)
             enqueueSnackbar("Набор данных успешно сохранен", {variant : "success"});
         }
         else{
             setUploading(false);
 
-            let actionWord = props.mode === 'create' ? "создании" : "обновлении";
+            let actionWord = id ? "обновлении" : "создании";
             enqueueSnackbar("Ошибка при " + actionWord + " объекта: " + magrepResponse.data, {variant : "error"});
         }
     }
@@ -285,9 +282,9 @@ export default function DatasetDesigner(props){
     tabs.push({tablabel:"Настройки",
         tabcontent:
         <DesignerPage 
-        onSaveClick={handleSave}
-        onCancelClick={handleCancel}
-        //name = {pagename}
+            onSaveClick={handleSave}
+            onCancelClick={() => location.state ? navigate(location.state) : navigate(`/dataset/${folderId}`)}
+            //name = {pagename}
         >
             <DesignerTextField
                 minWidth = {StyleConsts.designerTextFieldMinWidth}
@@ -379,7 +376,7 @@ export default function DatasetDesigner(props){
             
             <DataLoader
                 loadFunc = {fldRefresh ? dataHub.datasetController.refresh : null}
-                loadParams = {fldRefresh ? [props.datasetId] : []}
+                loadParams = {fldRefresh ? [Number(id)] : []}
                 reload = {false}
                 onDataLoaded = {handleFldLoaded}
                 onDataLoadFailed = {null}

@@ -32,9 +32,6 @@ function SecurityFiltersMenuView(props){
     const navigateBack = useNavigateBack();
 
     const state = props.state;
-    let designerMode = props.state.editSecurityFilterId === null ? 'create' : 'edit';
-
-    // let loadFunc = dataHub.securityFilterController.getFolder;
 
     let reload = {needReload : state.needReload};
     let folderItemsType = SidebarItems.admin.subItems.securityFilters.folderItemType;
@@ -50,15 +47,15 @@ function SecurityFiltersMenuView(props){
     }
     function handleItemClick(securityFilterId) {
         props.actionItemClick(folderItemsType, securityFilterId)
-        navigate(`/securityFilters/view/${securityFilterId}`, {state: location.pathname})
+        navigate(`/securityFilters/${id}/view/${securityFilterId}`, {state: location.pathname})
     }
     function handleEditItemClick(securityFilterId) {
         props.actionEditItemClick(folderItemsType, securityFilterId)
-        navigate(`/securityFilters/edit/${securityFilterId}`)
+        navigate(`/securityFilters/${id}/edit/${securityFilterId}`, {state: location.pathname})
     }
     function handleAddItemClick(folderItemsType) {
         props.actionAddItemClick(folderItemsType)
-        navigate(`/securityFilters/add`)
+        navigate(`/securityFilters/${id}/add`, {state: location.pathname})
     }
 
     return(
@@ -68,7 +65,6 @@ function SecurityFiltersMenuView(props){
             (
             <DataLoader
                 loadFunc = {dataHub.securityFilterController.getFolder}
-                // loadParams = {[state.currentFolderId]}
                 loadParams = {id ? [Number(id)] : [null]}
                 reload = {reload}
                 onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}}

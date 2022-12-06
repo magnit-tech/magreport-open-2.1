@@ -59,6 +59,9 @@ function ViewerChildCard(props) {
 
     function onViewItemClick() {
         if (props.name) {
+            console.log(props.name);
+            console.log(props.itemType);
+            console.log(props.id);
             props.actionViewerViewItem(props.itemType, props.id, props.name);
         } else {
             props.actionViewerViewItem(props.itemType, props.id);

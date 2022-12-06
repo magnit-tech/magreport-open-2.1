@@ -30,18 +30,15 @@ function RolesMenuView(props){
     const navigate = useNavigate()
     const location = useLocation()
     
-
     const navigateBack = useNavigateBack();
 
     let state = props.state;
-    let designerMode = props.state.editRoleId === null ? 'create' : 'edit';
-    
-    let loadFunc = dataHub.roleController.getType;
 
     let reload = {needReload : state.needReload};
     let folderItemsType = SidebarItems.admin.subItems.roles.folderItemType;
     let sidebarItemType = SidebarItems.admin.subItems.roles.key;
     let isSortingAvailable = true;
+
 
     function handleExit() {
         if (state.fromUsers) {
@@ -54,30 +51,34 @@ function RolesMenuView(props){
             navigateBack();
         }
     }
+
     function handleFolderClick(folderId) {
         props.actionFolderClick(folderItemsType, folderId)
         navigate(`/roles/${folderId}`)
     }
+
     function handleItemClick(roleId) {
         props.actionItemClick(folderItemsType, roleId)
-        navigate(`/roles/view/${roleId}`, {state: location.pathname})
-    }
-    function handleEditItemClick(roleId) {
-        props.actionEditItemClick(folderItemsType, roleId)
-        navigate(`/roles/edit/${roleId}`)
-    }
-    function handleAddItemClick(folderItemsType) {
-        props.actionAddItemClick(folderItemsType)
-        navigate(`/roles/add`)
+        navigate(`/roles/${id}/view/${roleId}`, {state: location.pathname})
     }
 
+    function handleEditItemClick(roleId) {
+        props.actionEditItemClick(folderItemsType, roleId)
+        navigate(`/roles/${id}/edit/${roleId}`, {state: location.pathname})
+    }
+
+    function handleAddItemClick(folderItemsType) {
+        props.actionAddItemClick(folderItemsType)
+        navigate(`/roles/${id}/add`, {state: location.pathname})
+    }
+
+    
     return(
         <div  style={{display: 'flex', flex: 1}}>
             {
                 state.flowState === FLOW_STATE_BROWSE_FOLDER ?
                     <DataLoader
-                        loadFunc = {loadFunc}
-                        // loadParams = {[state.currentFolderId]}
+                        loadFunc = {dataHub.roleController.getType}
                         loadParams = {id ? [Number(id)] : [null]}
                         reload = {reload}
                         onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}}
@@ -110,21 +111,21 @@ function RolesMenuView(props){
                             contextAllowed
                         />
                     </DataLoader>
-                : state.flowState === rolesMenuViewFlowStates.roleViewer ?
-                    <RoleViewer
-                        roleId = {state.viewRoleId}
-                        roleTypeId = {state.currentFolderId}
-                        onOkClick = {handleExit}
-                    />
-                : state.flowState === rolesMenuViewFlowStates.roleDesigner ?
-                    <RoleDesigner
-                        mode = {designerMode}
-                        roleId = {state.editRoleId}
-                        roleTypeId = {state.currentFolderId}
-                        onExit = {handleExit}
-                        sortParams = {state.sortParams || {}}
-                        folderName = {state.currentFolderData?.name}
-                    />
+                // : state.flowState === rolesMenuViewFlowStates.roleViewer ?
+                //     <RoleViewer
+                //         roleId = {state.viewRoleId}
+                //         roleTypeId = {state.currentFolderId}
+                //         onOkClick = {handleExit}
+                //     />
+                // : state.flowState === rolesMenuViewFlowStates.roleDesigner ?
+                //     <RoleDesigner
+                //         mode = {designerMode}
+                //         roleId = {state.editRoleId}
+                //         roleTypeId = {state.currentFolderId}
+                //         onExit = {handleExit}
+                //         sortParams = {state.sortParams || {}}
+                //         folderName = {state.currentFolderData?.name}
+                //     />
 
                 : <div>Неизвестное состояние</div>
             }

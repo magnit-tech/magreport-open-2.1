@@ -26,11 +26,11 @@ import EmailController from "./controllers/EmailController";
 import ThemeController from "./controllers/ThemeController";
 import UserServiceController from "./controllers/UserServiceController";
 
-const userData = JSON.parse(localStorage.getItem('userData'))
+const USER_DATA = JSON.parse(localStorage.getItem('userData'))
 
 function DataHub(){
     
-    this.authorization = userData ? userData.authtoken : '';
+    this.authorization = USER_DATA ? `Bearer ${USER_DATA.authtoken}` : '';
     this.localCache = new LocalCache();
 
     this.getLocalCache = () => {return this.localCache};
