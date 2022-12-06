@@ -6,7 +6,7 @@ import {folderInitialState} from './folderInitialState';
 import {folderStateReducer} from './folderStateReducer';
 import SidebarItems from 'main/Main/Sidebar/SidebarItems';
 
-import {REPORT_START, FOLDER_CONTENT_ITEM_CLICK, JOBS_FILTER, JOB_CANCEL, JOB_CANCELED, JOB_CANCEL_FAILED} from 'redux/reduxTypes';
+import {REPORT_START, FOLDER_CONTENT_ITEM_CLICK, JOBS_FILTER} from 'redux/reduxTypes';
 
 const initialState = {
     ...folderInitialState,
@@ -87,80 +87,6 @@ export function usersJobsMenuViewReducer(state = initialState, action){
                 return newState
             }
             else{
-                return state;
-            }
-        
-        case JOB_CANCEL:
-            //debugger
-            if(action.itemsType === FolderItemTypes.userJobs){
-                let newState = {...state}
-                const fullArr = [...state.currentFolderData.jobs]
-                let newJob = {...fullArr[action.jobIndex], waitCancelResponse: true}
-                if (state.filters){
-                    const filteredArr = [...state.filteredJobs.jobs]
-                    newJob = {...filteredArr[action.jobIndex], waitCancelResponse: true}                    
-                    let indexFullArr = fullArr.findIndex(item => item.id === action.jobId)
-                    filteredArr.splice(action.jobIndex, 1, newJob)
-                    fullArr.splice(indexFullArr, 1, newJob)
-                    newState.filteredJobs.jobs = filteredArr
-                }
-                else {
-                    fullArr.splice(action.jobIndex, 1, newJob)
-                }
-                newState.currentFolderData.jobs = fullArr
-                return newState
-            }
-            else {
-                return state;
-            }
-        
-        case JOB_CANCELED:
-            if(action.itemsType === FolderItemTypes.userJobs){
-                let newState = {...state}
-                const fullArr = [...state.currentFolderData.jobs]
-                let newJob = {...fullArr[action.jobIndex], status: 'CANCELED'}
-                delete newJob.waitCancelResponse
-                if (state.filters){
-                    const filteredArr = [...state.filteredJobs.jobs]
-                    newJob = {...filteredArr[action.jobIndex], status: 'CANCELED'}
-                    delete newJob.waitCancelResponse
-                    let indexFullArr = fullArr.findIndex(item => item.id === action.jobId)
-                    filteredArr.splice(action.jobIndex, 1, newJob)
-                    fullArr.splice(indexFullArr, 1, newJob)
-                    newState.filteredJobs.jobs = filteredArr
-                }
-                else {
-                    fullArr.splice(action.jobIndex, 1, newJob)
-                }
-                newState.currentFolderData.jobs = fullArr
-                return newState
-            }
-            else {
-                return state;
-            }
-
-        case JOB_CANCEL_FAILED:
-            if(action.itemsType === FolderItemTypes.userJobs){
-                let newState = {...state}
-                const fullArr = [...state.currentFolderData.jobs]
-                let newJob = {...fullArr[action.jobIndex], status: 'RUNNING'}
-                delete newJob.waitCancelResponse
-                if (state.filters){
-                    const filteredArr = [...state.filteredJobs.jobs]
-                    newJob = {...filteredArr[action.jobIndex], status: 'RUNNING'} 
-                    delete newJob.waitCancelResponse                  
-                    let indexFullArr = fullArr.findIndex(item => item.id === action.jobId)
-                    filteredArr.splice(action.jobIndex, 1, newJob)
-                    fullArr.splice(indexFullArr, 1, newJob)
-                    newState.filteredJobs.jobs = filteredArr
-                }
-                else {
-                    fullArr.splice(action.jobIndex, 1, newJob)
-                }
-                newState.currentFolderData.jobs = fullArr
-                return newState
-            }
-            else {
                 return state;
             }
 
