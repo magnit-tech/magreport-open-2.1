@@ -9,7 +9,7 @@ import ru.magnit.magreportbackend.mapper.Mapper;
 
 @Service
 @RequiredArgsConstructor
-public class DataSetFieldUpMapper implements Mapper<DataSetField, DatasetFieldBackupTuple> {
+public class DataSetFieldRestoreMapper implements Mapper<DataSetField, DatasetFieldBackupTuple> {
     @Override
     public DataSetField from(DatasetFieldBackupTuple source) {
         return new DataSetField()

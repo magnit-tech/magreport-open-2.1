@@ -11,7 +11,7 @@ import ru.magnit.magreportbackend.mapper.Mapper;
 
 @Service
 @RequiredArgsConstructor
-public class DataSetUpMapper implements Mapper<DataSet, DatasetBackupTuple> {
+public class DataSetRestoreMapper implements Mapper<DataSet, DatasetBackupTuple> {
     @Override
     public DataSet from(DatasetBackupTuple source) {
         return new DataSet()

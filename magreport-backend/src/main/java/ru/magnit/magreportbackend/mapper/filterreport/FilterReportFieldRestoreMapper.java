@@ -11,7 +11,7 @@ import ru.magnit.magreportbackend.mapper.Mapper;
 
 @Service
 @RequiredArgsConstructor
-public class FilterReportFieldUpMapper implements Mapper<FilterReportField, FilterReportFieldBackupTuple> {
+public class FilterReportFieldRestoreMapper implements Mapper<FilterReportField, FilterReportFieldBackupTuple> {
     @Override
     public FilterReportField from(FilterReportFieldBackupTuple source) {
         return new FilterReportField()
