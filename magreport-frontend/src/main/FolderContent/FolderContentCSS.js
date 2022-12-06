@@ -168,6 +168,23 @@ export const ItemCardCSS = makeStyles(theme => ({
     },
     btn: {
         margin: '4px 0px 4px 8px'
+    },
+    commentBtn: {
+        margin: '-4px 0px 0px 8px'
+    },
+    flx: {
+        display: 'flex',
+        justifyContent: 'space-between'
+    },
+    comment: {
+        padding: '0px 4px',
+        "&:focus-within": {
+            boxShadow: '0px 0px 2px 2px',
+            borderRadius: '4px',
+            color: theme.palette.primary.light
+          //  border: "1px solid",
+           // borderColor: "blue"
+        }
     }
 }));
 
