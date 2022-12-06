@@ -30,7 +30,6 @@ public class ScheduleTaskBackupMapper implements Mapper<ScheduleTaskBackupTuple,
                 source.getErrorBodyMail(),
                 source.getErrorTitleMail(),
                 source.getSendEmptyReport(),
-                source.getSendEmptyReport(),
                 source.getExpirationDate(),
                 source.getCreatedDateTime(),
                 source.getModifiedDateTime()

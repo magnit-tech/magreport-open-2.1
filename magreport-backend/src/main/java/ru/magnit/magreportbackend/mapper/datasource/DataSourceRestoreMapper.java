@@ -10,7 +10,7 @@ import ru.magnit.magreportbackend.mapper.Mapper;
 
 @Service
 @RequiredArgsConstructor
-public class DataSourceUpMapper implements Mapper<DataSource, DataSourceBackupTuple> {
+public class DataSourceRestoreMapper implements Mapper<DataSource, DataSourceBackupTuple> {
     @Override
     public DataSource from(DataSourceBackupTuple source) {
         return new DataSource()

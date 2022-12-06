@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.magnit.magreportbackend.dto.backup.BackupRequest;
+import ru.magnit.magreportbackend.dto.backup.BackupRestoreRequest;
 import ru.magnit.magreportbackend.service.AdminService;
 import ru.magnit.magreportbackend.util.LogHelper;
 
@@ -80,7 +81,7 @@ public class AdminController {
             @RequestParam("file")
             MultipartFile uploadedFile)  {
         LogHelper.logInfoUserMethodStart();
-        adminService.loadBackup(uploadedFile);
+        adminService.loadBackup(new BackupRestoreRequest(), uploadedFile);
         LogHelper.logInfoUserMethodEnd();
 
     }

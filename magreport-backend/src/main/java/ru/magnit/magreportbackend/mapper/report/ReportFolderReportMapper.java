@@ -8,7 +8,7 @@ import ru.magnit.magreportbackend.mapper.Mapper;
 
 @Service
 @RequiredArgsConstructor
-public class ReportFolderUpMapper implements Mapper<ReportFolder, ReportFolderBackupTuple> {
+public class ReportFolderReportMapper implements Mapper<ReportFolder, ReportFolderBackupTuple> {
     @Override
     public ReportFolder from(ReportFolderBackupTuple source) {
         return new ReportFolder()

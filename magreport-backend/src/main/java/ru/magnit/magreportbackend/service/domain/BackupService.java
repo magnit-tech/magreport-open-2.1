@@ -16,13 +16,19 @@ import ru.magnit.magreportbackend.domain.filterinstance.FilterInstance;
 import ru.magnit.magreportbackend.domain.filterinstance.FilterInstanceField;
 import ru.magnit.magreportbackend.domain.filterinstance.FilterInstanceFolder;
 import ru.magnit.magreportbackend.domain.filterreport.FilterReport;
-import ru.magnit.magreportbackend.domain.filterreport.FilterReportField;
 import ru.magnit.magreportbackend.domain.filterreport.FilterReportGroup;
 import ru.magnit.magreportbackend.domain.report.Report;
 import ru.magnit.magreportbackend.domain.report.ReportField;
 import ru.magnit.magreportbackend.domain.report.ReportFolder;
+import ru.magnit.magreportbackend.domain.schedule.Schedule;
+import ru.magnit.magreportbackend.domain.schedule.ScheduleTask;
+import ru.magnit.magreportbackend.domain.securityfilter.SecurityFilter;
+import ru.magnit.magreportbackend.domain.securityfilter.SecurityFilterFolder;
 import ru.magnit.magreportbackend.domain.user.User;
+import ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum;
 import ru.magnit.magreportbackend.dto.backup.BackupRequest;
+import ru.magnit.magreportbackend.dto.backup.BackupRestoreRequest;
+import ru.magnit.magreportbackend.dto.backup.RestoreMappingObject;
 import ru.magnit.magreportbackend.dto.backup.dataset.DatasetBackupTuple;
 import ru.magnit.magreportbackend.dto.backup.dataset.DatasetFieldBackupTuple;
 import ru.magnit.magreportbackend.dto.backup.dataset.DatasetFolderBackupTuple;
@@ -37,7 +43,18 @@ import ru.magnit.magreportbackend.dto.backup.filterreport.FilterReportGroupBacku
 import ru.magnit.magreportbackend.dto.backup.report.ReportBackupTuple;
 import ru.magnit.magreportbackend.dto.backup.report.ReportFieldBackupTuple;
 import ru.magnit.magreportbackend.dto.backup.report.ReportFolderBackupTuple;
+import ru.magnit.magreportbackend.dto.backup.schedule.DestinationEmailBackupTuple;
+import ru.magnit.magreportbackend.dto.backup.schedule.DestinationRoleBackupTuple;
+import ru.magnit.magreportbackend.dto.backup.schedule.DestinationUserBackupTuple;
+import ru.magnit.magreportbackend.dto.backup.schedule.ScheduleBackupTuple;
+import ru.magnit.magreportbackend.dto.backup.schedule.ScheduleTaskBackupTuple;
+import ru.magnit.magreportbackend.dto.backup.securityfilter.SecurityFilterBackupTuple;
+import ru.magnit.magreportbackend.dto.backup.securityfilter.SecurityFilterDatasetBackupTuple;
+import ru.magnit.magreportbackend.dto.backup.securityfilter.SecurityFilterDatasetFieldBackupTuple;
+import ru.magnit.magreportbackend.dto.backup.securityfilter.SecurityFilterFolderBackupTuple;
+import ru.magnit.magreportbackend.dto.backup.serversettings.ThemeBackupTuple;
 import ru.magnit.magreportbackend.exception.FileSystemException;
+import ru.magnit.magreportbackend.exception.InvalidParametersException;
 import ru.magnit.magreportbackend.exception.JsonParseException;
 import ru.magnit.magreportbackend.mapper.asm.ExternalAuthBackupMapper;
 import ru.magnit.magreportbackend.mapper.asm.ExternalAuthSecurityFilterBackupMapper;
@@ -52,36 +69,36 @@ import ru.magnit.magreportbackend.mapper.auth.UserRoleBackupMapper;
 import ru.magnit.magreportbackend.mapper.auth.UsersBackupMapper;
 import ru.magnit.magreportbackend.mapper.dataset.DataSetBackupMapper;
 import ru.magnit.magreportbackend.mapper.dataset.DataSetFieldBackupMapper;
-import ru.magnit.magreportbackend.mapper.dataset.DataSetFieldUpMapper;
+import ru.magnit.magreportbackend.mapper.dataset.DataSetFieldRestoreMapper;
 import ru.magnit.magreportbackend.mapper.dataset.DataSetFolderBackupMapper;
+import ru.magnit.magreportbackend.mapper.dataset.DataSetFolderRestoreMapper;
 import ru.magnit.magreportbackend.mapper.dataset.DataSetFolderRoleBackupMapper;
 import ru.magnit.magreportbackend.mapper.dataset.DataSetFolderRolePermissionBackupMapper;
-import ru.magnit.magreportbackend.mapper.dataset.DataSetFolderUpMapper;
-import ru.magnit.magreportbackend.mapper.dataset.DataSetUpMapper;
+import ru.magnit.magreportbackend.mapper.dataset.DataSetRestoreMapper;
 import ru.magnit.magreportbackend.mapper.datasource.DataSourceBackupMapper;
 import ru.magnit.magreportbackend.mapper.datasource.DataSourceFolderBackupMapper;
+import ru.magnit.magreportbackend.mapper.datasource.DataSourceFolderRestoreMapper;
 import ru.magnit.magreportbackend.mapper.datasource.DataSourceFolderRoleBackupMapper;
 import ru.magnit.magreportbackend.mapper.datasource.DataSourceFolderRolePermissionBackupMapper;
-import ru.magnit.magreportbackend.mapper.datasource.DataSourceFolderUpMapper;
-import ru.magnit.magreportbackend.mapper.datasource.DataSourceUpMapper;
+import ru.magnit.magreportbackend.mapper.datasource.DataSourceRestoreMapper;
 import ru.magnit.magreportbackend.mapper.exceltemplate.ExcelTemplateBackupMapper;
 import ru.magnit.magreportbackend.mapper.exceltemplate.ExcelTemplateFolderBackupMapper;
 import ru.magnit.magreportbackend.mapper.exceltemplate.ExcelTemplateFolderRoleBackupMapper;
 import ru.magnit.magreportbackend.mapper.exceltemplate.ExcelTemplateFolderRolePermissionBackupMapper;
 import ru.magnit.magreportbackend.mapper.filterinstance.FilterInstanceBackupMapper;
 import ru.magnit.magreportbackend.mapper.filterinstance.FilterInstanceFieldBackupMapper;
-import ru.magnit.magreportbackend.mapper.filterinstance.FilterInstanceFieldUpMapper;
+import ru.magnit.magreportbackend.mapper.filterinstance.FilterInstanceFieldRestoreMapper;
 import ru.magnit.magreportbackend.mapper.filterinstance.FilterInstanceFolderBackupMapper;
+import ru.magnit.magreportbackend.mapper.filterinstance.FilterInstanceFolderRestoreMapper;
 import ru.magnit.magreportbackend.mapper.filterinstance.FilterInstanceFolderRoleBackupMapper;
 import ru.magnit.magreportbackend.mapper.filterinstance.FilterInstanceFolderRolePermissionBackupMapper;
-import ru.magnit.magreportbackend.mapper.filterinstance.FilterInstanceFolderUpMapper;
-import ru.magnit.magreportbackend.mapper.filterinstance.FilterInstanceUpMapper;
+import ru.magnit.magreportbackend.mapper.filterinstance.FilterInstanceRestoreMapper;
 import ru.magnit.magreportbackend.mapper.filterreport.FilterReportBackupMapper;
 import ru.magnit.magreportbackend.mapper.filterreport.FilterReportFieldBackupMapper;
-import ru.magnit.magreportbackend.mapper.filterreport.FilterReportFieldUpMapper;
+import ru.magnit.magreportbackend.mapper.filterreport.FilterReportFieldRestoreMapper;
 import ru.magnit.magreportbackend.mapper.filterreport.FilterReportGroupBackupMapper;
-import ru.magnit.magreportbackend.mapper.filterreport.FilterReportGroupUpMapper;
-import ru.magnit.magreportbackend.mapper.filterreport.FilterReportUpMapper;
+import ru.magnit.magreportbackend.mapper.filterreport.FilterReportGroupRestoreMapper;
+import ru.magnit.magreportbackend.mapper.filterreport.FilterReportRestoreMapper;
 import ru.magnit.magreportbackend.mapper.filtertemplate.FilterTemplateBackupMapper;
 import ru.magnit.magreportbackend.mapper.filtertemplate.FilterTemplateFieldBackupMapper;
 import ru.magnit.magreportbackend.mapper.filtertemplate.FilterTemplateFolderBackupMapper;
@@ -98,12 +115,12 @@ import ru.magnit.magreportbackend.mapper.report.FavReportBackupMapper;
 import ru.magnit.magreportbackend.mapper.report.ReportBackupMapper;
 import ru.magnit.magreportbackend.mapper.report.ReportExcelTemplateBackupMapper;
 import ru.magnit.magreportbackend.mapper.report.ReportFieldBackupMapper;
-import ru.magnit.magreportbackend.mapper.report.ReportFieldUpMapper;
+import ru.magnit.magreportbackend.mapper.report.ReportFieldRestoreMapper;
 import ru.magnit.magreportbackend.mapper.report.ReportFolderBackupMapper;
+import ru.magnit.magreportbackend.mapper.report.ReportFolderReportMapper;
 import ru.magnit.magreportbackend.mapper.report.ReportFolderRoleBackupMapper;
 import ru.magnit.magreportbackend.mapper.report.ReportFolderRolePermissionBackupMapper;
-import ru.magnit.magreportbackend.mapper.report.ReportFolderUpMapper;
-import ru.magnit.magreportbackend.mapper.report.ReportUpMapper;
+import ru.magnit.magreportbackend.mapper.report.ReportRestoreMapper;
 import ru.magnit.magreportbackend.mapper.reportjob.ReportJobBackupMapper;
 import ru.magnit.magreportbackend.mapper.reportjob.ReportJobFilterBackupMapper;
 import ru.magnit.magreportbackend.mapper.reportjob.ReportJobStatisticsBackupMapper;
@@ -113,17 +130,26 @@ import ru.magnit.magreportbackend.mapper.reportjob.ReportJobUserBackupMapper;
 import ru.magnit.magreportbackend.mapper.role.RoleBackupMapper;
 import ru.magnit.magreportbackend.mapper.role.RoleDomainGroupBackupMapper;
 import ru.magnit.magreportbackend.mapper.schedule.DestinationEmailBackupMapper;
+import ru.magnit.magreportbackend.mapper.schedule.DestinationEmailRestoreMapping;
 import ru.magnit.magreportbackend.mapper.schedule.DestinationRoleBackupMapper;
+import ru.magnit.magreportbackend.mapper.schedule.DestinationRoleRestoreMapping;
 import ru.magnit.magreportbackend.mapper.schedule.DestinationTypeBackupMapper;
 import ru.magnit.magreportbackend.mapper.schedule.DestinationUserBackupMapper;
+import ru.magnit.magreportbackend.mapper.schedule.DestinationUserRestoreMapping;
 import ru.magnit.magreportbackend.mapper.schedule.ScheduleBackupMapper;
+import ru.magnit.magreportbackend.mapper.schedule.ScheduleRestoreMapper;
 import ru.magnit.magreportbackend.mapper.schedule.ScheduleTaskBackupMapper;
+import ru.magnit.magreportbackend.mapper.schedule.ScheduleTaskRestoreMapping;
 import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterBackupMapper;
+import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterDataSetFieldRestoreMapper;
+import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterDataSetRestoreMapper;
 import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterDatasetBackupMapper;
 import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterDatasetFieldBackupMapper;
 import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterFolderBackupMapper;
+import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterFolderRestoreMapper;
 import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterFolderRoleBackupMapper;
 import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterFolderRolePermissionBackupMapper;
+import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterRestoreMapper;
 import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterRoleBackupMapper;
 import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterTupleBackupMapper;
 import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterTupleValueBackupMapper;
@@ -132,6 +158,7 @@ import ru.magnit.magreportbackend.mapper.serversettings.ServerMailTemplateBackup
 import ru.magnit.magreportbackend.mapper.serversettings.ServerSettingsBackupMapper;
 import ru.magnit.magreportbackend.mapper.serversettings.ServerSettingsJournalBackupMapper;
 import ru.magnit.magreportbackend.mapper.theme.ThemeBackupMapper;
+import ru.magnit.magreportbackend.mapper.theme.ThemeRestoreMapping;
 import ru.magnit.magreportbackend.repository.DataSetFieldRepository;
 import ru.magnit.magreportbackend.repository.DataSetFolderRepository;
 import ru.magnit.magreportbackend.repository.DataSetFolderRolePermissionRepository;
@@ -225,10 +252,35 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.DATASET;
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.DATASET_FIELD;
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.DATASET_FOLDER;
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.DATASOURCE;
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.DATASOURCE_FOLDER;
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.FILTER_INSTANCE;
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.FILTER_INSTANCE_FIELD;
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.FILTER_INSTANCE_FOLDER;
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.FILTER_REPORT;
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.FILTER_REPORT_FIELD;
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.FILTER_REPORT_GROUP;
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.REPORT;
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.REPORT_FIELD;
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.REPORT_FOLDER;
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.ROLE;
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.SCHEDULE;
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.SCHEDULE_TASK;
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.SECURITY_FILTER;
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.SECURITY_FILTER_DATASET;
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.SECURITY_FILTER_DATASET_FIELD;
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.SECURITY_FILTER_FOLDER;
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.THEME;
 
 @Slf4j
 @Service
@@ -399,20 +451,30 @@ public class BackupService {
     private final UserRoleBackupMapper userRoleBackupMapper;
 
 
-    private final DataSourceFolderUpMapper dataSourceFolderUpMapper;
-    private final DataSourceUpMapper dataSourceUpMapper;
-    private final DataSetUpMapper dataSetUpMapper;
-    private final DataSetFolderUpMapper dataSetFolderUpMapper;
-    private final DataSetFieldUpMapper dataSetFieldUpMapper;
-    private final ReportUpMapper reportUpMapper;
-    private final ReportFolderUpMapper reportFolderUpMapper;
-    private final ReportFieldUpMapper reportFieldUpMapper;
-    private final FilterReportGroupUpMapper filterReportGroupUpMapper;
-    private final FilterReportUpMapper filterReportUpMapper;
-    private final FilterInstanceFolderUpMapper filterInstanceFolderUpMapper;
-    private final FilterInstanceUpMapper filterInstanceUpMapper;
-    private final FilterInstanceFieldUpMapper filterInstanceFieldUpMapper;
-    private final FilterReportFieldUpMapper filterReportFieldUpMapper;
+    private final DataSourceFolderRestoreMapper dataSourceFolderRestoreMapper;
+    private final DataSourceRestoreMapper dataSourceRestoreMapper;
+    private final DataSetRestoreMapper dataSetRestoreMapper;
+    private final DataSetFolderRestoreMapper dataSetFolderRestoreMapper;
+    private final DataSetFieldRestoreMapper dataSetFieldRestoreMapper;
+    private final ReportRestoreMapper reportRestoreMapper;
+    private final ReportFolderReportMapper reportFolderReportMapper;
+    private final ReportFieldRestoreMapper reportFieldRestoreMapper;
+    private final FilterReportGroupRestoreMapper filterReportGroupRestoreMapper;
+    private final FilterReportRestoreMapper filterReportRestoreMapper;
+    private final FilterInstanceFolderRestoreMapper filterInstanceFolderRestoreMapper;
+    private final FilterInstanceRestoreMapper filterInstanceRestoreMapper;
+    private final FilterInstanceFieldRestoreMapper filterInstanceFieldRestoreMapper;
+    private final FilterReportFieldRestoreMapper filterReportFieldRestoreMapper;
+    private final SecurityFilterRestoreMapper securityFilterRestoreMapper;
+    private final SecurityFilterFolderRestoreMapper securityFilterFolderRestoreMapper;
+    private final SecurityFilterDataSetRestoreMapper securityFilterDataSetRestoreMapper;
+    private final SecurityFilterDataSetFieldRestoreMapper securityFilterDataSetFieldRestoreMapper;
+    private final ScheduleRestoreMapper scheduleRestoreMapper;
+    private final ScheduleTaskRestoreMapping scheduleTaskRestoreMapping;
+    private final DestinationRoleRestoreMapping destinationRoleRestoreMapping;
+    private final DestinationUserRestoreMapping destinationUserRestoreMapping;
+    private final DestinationEmailRestoreMapping destinationEmailRestoreMapping;
+    private final ThemeRestoreMapping themeRestoreMapping;
 
     @Transactional
     public byte[] createBackup(BackupRequest request) {
@@ -532,13 +594,13 @@ public class BackupService {
             writeRow("ServerMailTemplate", JsonUtils.getJsonFromObjects(new ArrayList<>(serverMailTemplateBackupMapper.from(serverMailTemplateRepository.findAll()))), output, false);
             writeRow("ServerSettings", JsonUtils.getJsonFromObjects(new ArrayList<>(serverSettingsBackupMapper.from(serverSettingsRepository.findAll()))), output, false);
             writeRow("ServerSettingsJournal", JsonUtils.getJsonFromObjects(new ArrayList<>(serverSettingsJournalBackupMapper.from(serverSettingsJournalRepository.findAll()))), output, false);
-            writeRow("ThemeBackupMapper", JsonUtils.getJsonFromObjects(new ArrayList<>(themeBackupMapper.from(themeRepository.findAll()))), output, false);
+            writeRow("Theme", JsonUtils.getJsonFromObjects(new ArrayList<>(themeBackupMapper.from(themeRepository.findAll()))), output, false);
 
             //User
             writeRow("DomainGroup", JsonUtils.getJsonFromObjects(new ArrayList<>(domainGroupBackupMapper.from(domainGroupRepository.findAll()))), output, false);
-            writeRow("UsersBackupMapper", JsonUtils.getJsonFromObjects(new ArrayList<>(usersBackupMapper.from(userRepository.findAll()))), output, false);
-            writeRow("UserReportExcelTemplateBackupMapper", JsonUtils.getJsonFromObjects(new ArrayList<>(userReportExcelTemplateBackupMapper.from(userReportExcelTemplateRepository.findAll()))), output, false);
-            writeRow("UserRoleBackupMapper", JsonUtils.getJsonFromObjects(new ArrayList<>(userRoleBackupMapper.from(userRoleRepository.findAll()))), output, true);
+            writeRow("Users", JsonUtils.getJsonFromObjects(new ArrayList<>(usersBackupMapper.from(userRepository.findAll()))), output, false);
+            writeRow("UserReportExcelTemplate", JsonUtils.getJsonFromObjects(new ArrayList<>(userReportExcelTemplateBackupMapper.from(userReportExcelTemplateRepository.findAll()))), output, false);
+            writeRow("UserRole", JsonUtils.getJsonFromObjects(new ArrayList<>(userRoleBackupMapper.from(userRoleRepository.findAll()))), output, true);
 
             output.write("}");
             output.flush();
@@ -557,20 +619,24 @@ public class BackupService {
 
 
     @Transactional
-    public void loadBackup(MultipartFile backup) {
-        Map<Class<?>, Map<Long, Long>> resultMap = initResultMap();
+    public void restoreBackup(BackupRestoreRequest request, MultipartFile backup) {
+
+        Map<BackupObjectTypeEnum, Map<Long, Long>> mapping = initResultMap(request.getMapping());
 
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(backup.getInputStream()));
             var lines = reader.lines()
-                    .filter(s -> s.length() > 1 && !s.contains("[]"))
+                    .filter(s -> s.length() > 1)
                     .collect(Collectors.toMap(s -> s.substring(0, s.indexOf(":")).replaceAll("\"", ""), s -> s.substring(s.indexOf("["))));
 
-            //loadDataSource(Collections.singletonList(15L), lines, resultMap);
-            //loadDataSet(Collections.singletonList(243L), lines, resultMap);
-            //loadFilterInstance(Collections.singletonList(108L), lines, resultMap);
-            loadReport(Collections.singletonList(48L), lines, resultMap);
-
+            restoreDataSource(request.getDataSources(), lines, mapping);
+            restoreDataSet(request.getDataSets(), lines, mapping);
+            restoreFilterInstance(request.getFilterInstances(), lines, mapping);
+            restoreReport(request.getReports(), lines, mapping);
+            restoreSecurityFilter(request.getSecurityFilters(), lines, mapping);
+            restoreSchedules(request.getSchedules(), lines, mapping);
+            restoreScheduleTasks(request.getScheduleTasks(), lines, mapping);
+            restoreTheme(request.getThemes(), lines, mapping);
 
 
         } catch (IOException ex) {
@@ -579,43 +645,50 @@ public class BackupService {
 
     }
 
-    private void loadDataSource(List<Long> listDataSourceId, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap) throws JsonProcessingException {
-        var userId = userDomainService.getCurrentUser().getId();
-        var resultFolders = resultMap.get(DataSourceFolder.class);
-        var resultDataSources = resultMap.get(DataSource.class);
-
-        var dataSources = Arrays.stream(objectMapper.readValue(linesBackup.get("DataSource"), DataSourceBackupTuple[].class))
-                .collect(Collectors.toMap(DataSourceBackupTuple::dataSourceId, o -> o));
-
-        listDataSourceId
-                .stream()
-                .filter(id -> !resultDataSources.containsKey(id))
-                .map(dataSources::get)
-                .map(dataSourceUpMapper::from)
-                .forEach(dataSource -> {
-                    var oldId = dataSource.getId();
-
-                    if (!resultFolders.containsKey(dataSource.getFolder().getId()))
-                        loadDataSourceFolder(dataSource.getFolder().getId(), linesBackup, resultMap);
-
-                    dataSource.setId(null);
-                    dataSource.setFolder(new DataSourceFolder(resultFolders.get(dataSource.getFolder().getId())));
-                    dataSource.setUser(new User(userId));
-
-                    resultDataSources.put(oldId, dataSourceRepository.save(dataSource).getId());
-                });
-    }
-
-    private void loadDataSet(List<Long> listDataSet, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap) {
+    private void restoreDataSource(List<Long> listDataSourceId, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
         try {
 
             var userId = userDomainService.getCurrentUser().getId();
-            var resultFolders = resultMap.get(DataSetFolder.class);
-            var resultDataSets = resultMap.get(DataSet.class);
-            var resultDataSources = resultMap.get(DataSource.class);
-            var resultDataSetFields = resultMap.get(DataSetField.class);
+            var mappingFolders = mapping.get(DATASOURCE_FOLDER);
+            var mappingDataSources = mapping.get(DATASOURCE);
 
-            listDataSet = listDataSet.stream().filter(id -> !resultDataSets.containsKey(id)).collect(Collectors.toList());
+            var dataSources = Arrays.stream(objectMapper.readValue(linesBackup.get("DataSource"), DataSourceBackupTuple[].class))
+                    .collect(Collectors.toMap(DataSourceBackupTuple::dataSourceId, o -> o));
+
+            listDataSourceId
+                    .stream()
+                    .filter(id -> !mappingDataSources.containsKey(id))
+                    .map(dataSources::get)
+                    .map(dataSourceRestoreMapper::from)
+                    .forEach(dataSource -> {
+                        var oldId = dataSource.getId();
+
+                        if (!mappingFolders.containsKey(dataSource.getFolder().getId()))
+                            restoreDataSourceFolder(dataSource.getFolder().getId(), linesBackup, mapping);
+
+
+                        dataSource.setId(null);
+                        dataSource.setFolder(new DataSourceFolder(mappingFolders.get(dataSource.getFolder().getId())));
+                        dataSource.setUser(new User(userId));
+
+                        mappingDataSources.put(oldId, dataSourceRepository.save(dataSource).getId());
+                    });
+
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage(), e.getCause());
+        }
+    }
+
+    private void restoreDataSet(List<Long> listDataSet, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
+        try {
+
+            var userId = userDomainService.getCurrentUser().getId();
+            var mappingFolders = mapping.get(DATASET_FOLDER);
+            var mappingDataSets = mapping.get(DATASET);
+            var mappingDataSources = mapping.get(DATASOURCE);
+            var mappingDataSetFields = mapping.get(DATASET_FIELD);
+
+            listDataSet = listDataSet.stream().filter(id -> !mappingDataSets.containsKey(id)).collect(Collectors.toList());
 
 
             var dataSets = Arrays.stream(objectMapper.readValue(linesBackup.get("DataSet"), DatasetBackupTuple[].class))
@@ -626,38 +699,34 @@ public class BackupService {
             listDataSet
                     .stream()
                     .map(dataSets::get)
-                    .map(dataSetUpMapper::from)
+                    .map(dataSetRestoreMapper::from)
                     .forEach(dataSet -> {
                         var oldId = dataSet.getId();
 
-                        if (!resultFolders.containsKey(dataSet.getFolder().getId()))
-                            loadDataSetFolder(dataSet.getFolder().getId(), linesBackup, resultMap);
+                        if (!mappingFolders.containsKey(dataSet.getFolder().getId()))
+                            restoreDataSetFolder(dataSet.getFolder().getId(), linesBackup, mapping);
 
-                        if (!resultDataSources.containsKey(dataSet.getDataSource().getId())) {
-                            try {
-                                loadDataSource(Collections.singletonList(dataSet.getDataSource().getId()), linesBackup, resultMap);
-                            } catch (JsonProcessingException e) {
-                                throw new JsonParseException(e.getMessage(), e.getCause());
-                            }
+                        if (!mappingDataSources.containsKey(dataSet.getDataSource().getId())) {
+                            restoreDataSource(Collections.singletonList(dataSet.getDataSource().getId()), linesBackup, mapping);
                         }
 
                         dataSet.setId(null);
-                        dataSet.setFolder(new DataSetFolder(resultFolders.get(dataSet.getFolder().getId())));
+                        dataSet.setFolder(new DataSetFolder(mappingFolders.get(dataSet.getFolder().getId())));
                         dataSet.setUser(new User(userId));
-                        dataSet.setDataSource(new DataSource(resultDataSources.get(dataSet.getDataSource().getId())));
-                        resultDataSets.put(oldId, dataSetRepository.save(dataSet).getId());
+                        dataSet.setDataSource(new DataSource(mappingDataSources.get(dataSet.getDataSource().getId())));
+                        mappingDataSets.put(oldId, dataSetRepository.save(dataSet).getId());
 
 
                         dataSetFields
                                 .stream()
                                 .filter(df -> df.datasetId().equals(oldId))
-                                .map(dataSetFieldUpMapper::from)
+                                .map(dataSetFieldRestoreMapper::from)
                                 .forEach(dsf -> {
                                     var old = dsf.getId();
                                     dsf.setId(null);
-                                    dsf.setDataSet(new DataSet(resultDataSets.get(oldId)));
+                                    dsf.setDataSet(new DataSet(mappingDataSets.get(oldId)));
 
-                                    resultDataSetFields.put(old, dataSetFieldRepository.save(dsf).getId());
+                                    mappingDataSetFields.put(old, dataSetFieldRepository.save(dsf).getId());
                                 });
                     });
         } catch (JsonProcessingException e) {
@@ -665,11 +734,11 @@ public class BackupService {
         }
     }
 
-    private void loadDataSourceFolder(Long dataSourceFolderId, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap){
+    private void restoreDataSourceFolder(Long dataSourceFolderId, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
 
         try {
 
-            var resultFolders = resultMap.get(DataSetFolder.class);
+            var mappingFolders = mapping.get(DATASOURCE_FOLDER);
 
             var folders = Arrays.stream(objectMapper.readValue(linesBackup.get("DataSourceFolder"), DataSourceFolderBackupTuple[].class))
                     .collect(Collectors.toMap(DataSourceFolderBackupTuple::dataSourceFolderId, o -> o));
@@ -687,15 +756,15 @@ public class BackupService {
             listDataSourceFolderId
                     .stream()
                     .map(folders::get)
-                    .filter(folder -> !resultFolders.containsKey(folder.dataSourceFolderId()))
-                    .map(dataSourceFolderUpMapper::from)
+                    .filter(folder -> !mappingFolders.containsKey(folder.dataSourceFolderId()))
+                    .map(dataSourceFolderRestoreMapper::from)
                     .forEach(folder -> {
                         var oldId = folder.getId();
                         var oldParentId = folder.getParentFolder().getId();
                         folder.setId(null);
-                        folder.setParentFolder(resultFolders.containsKey(oldParentId) ? new DataSourceFolder(resultFolders.get(oldParentId)) : null);
+                        folder.setParentFolder(mappingFolders.containsKey(oldParentId) ? new DataSourceFolder(mappingFolders.get(oldParentId)) : null);
 
-                        resultFolders.put(oldId, dataSourceFolderRepository.save(folder).getId());
+                        mappingFolders.put(oldId, dataSourceFolderRepository.save(folder).getId());
                     });
 
 
@@ -705,10 +774,10 @@ public class BackupService {
 
     }
 
-    private void loadDataSetFolder(Long datasetFolderId, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap) {
+    private void restoreDataSetFolder(Long datasetFolderId, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
         try {
 
-            var resultFolders = resultMap.get(DataSetFolder.class);
+            var mappingFolders = mapping.get(DATASET_FOLDER);
 
             var datasetFolders = Arrays.stream(objectMapper.readValue(linesBackup.get("DataSetFolder"), DatasetFolderBackupTuple[].class))
                     .collect(Collectors.toMap(DatasetFolderBackupTuple::datasetFolderId, o -> o));
@@ -726,15 +795,15 @@ public class BackupService {
             listDatasetFolderId
                     .stream()
                     .map(datasetFolders::get)
-                    .filter(datasetFolder -> !resultFolders.containsKey(datasetFolder.datasetFolderId()))
-                    .map(dataSetFolderUpMapper::from)
+                    .filter(datasetFolder -> !mappingFolders.containsKey(datasetFolder.datasetFolderId()))
+                    .map(dataSetFolderRestoreMapper::from)
                     .forEach(dataSetFolder -> {
                         var oldId = dataSetFolder.getId();
                         var oldParentId = dataSetFolder.getParentFolder().getId();
                         dataSetFolder.setId(null);
-                        dataSetFolder.setParentFolder(resultFolders.containsKey(oldParentId) ? new DataSetFolder(resultFolders.get(oldParentId)) : null);
+                        dataSetFolder.setParentFolder(mappingFolders.containsKey(oldParentId) ? new DataSetFolder(mappingFolders.get(oldParentId)) : null);
 
-                        resultFolders.put(oldId, dataSetFolderRepository.save(dataSetFolder).getId());
+                        mappingFolders.put(oldId, dataSetFolderRepository.save(dataSetFolder).getId());
                     });
 
 
@@ -743,50 +812,56 @@ public class BackupService {
         }
     }
 
-    private void loadReport(List<Long> listReport, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap) throws JsonProcessingException {
-
-        var userId = userDomainService.getCurrentUser().getId();
-
-        var resultReports = resultMap.get(Report.class);
-        var resultReportFolders = resultMap.get(ReportFolder.class);
-        var resultDataSets = resultMap.get(DataSet.class);
-
-        listReport = listReport.stream().filter(id -> !resultReports.containsKey(id)).collect(Collectors.toList());
-
-        var reports = Arrays.stream(objectMapper.readValue(linesBackup.get("Report"), ReportBackupTuple[].class))
-                .collect(Collectors.toMap(ReportBackupTuple::reportId, o -> o));
-
-        listReport
-                .stream()
-                .map(reports::get)
-                .map(reportUpMapper::from)
-                .forEach(report -> {
-                    var oldId = report.getId();
-
-                    if(!resultReportFolders.containsKey(report.getFolder().getId()))
-                        loadReportFolder(report.getFolder().getId(), linesBackup, resultMap);
-
-                    if (!resultDataSets.containsKey(report.getDataSet().getId()))
-                        loadDataSet(Collections.singletonList(report.getDataSet().getId()), linesBackup, resultMap);
-
-                    report.setId(null);
-                    report.setFolder(new ReportFolder(resultReportFolders.get(report.getFolder().getId())));
-                    report.setUser(new User(userId));
-                    report.setDataSet(new DataSet(resultDataSets.get(report.getDataSet().getId())));
-
-                    resultReports.put(oldId, reportRepository.save(report).getId());
-
-                    loadReportField(oldId, linesBackup, resultMap);
-                    loadFilterReportGroup(oldId, linesBackup, resultMap);
-
-                });
-    }
-
-    private void loadFilterReportGroup(Long reportId, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap) {
+    private void restoreReport(List<Long> listReport, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
 
         try {
-            var resultReport = resultMap.get(Report.class);
-            var resultFRG = resultMap.get(FilterReportGroup.class);
+
+            var userId = userDomainService.getCurrentUser().getId();
+
+            var mappingReports = mapping.get(REPORT);
+            var mappingReportFolders = mapping.get(REPORT_FOLDER);
+            var mappingDataSets = mapping.get(DATASET);
+
+            listReport = listReport.stream().filter(id -> !mappingReports.containsKey(id)).collect(Collectors.toList());
+
+            var reports = Arrays.stream(objectMapper.readValue(linesBackup.get("Report"), ReportBackupTuple[].class))
+                    .collect(Collectors.toMap(ReportBackupTuple::reportId, o -> o));
+
+            listReport
+                    .stream()
+                    .map(reports::get)
+                    .map(reportRestoreMapper::from)
+                    .forEach(report -> {
+                        var oldId = report.getId();
+
+                        if (!mappingReportFolders.containsKey(report.getFolder().getId()))
+                            restoreReportFolder(report.getFolder().getId(), linesBackup, mapping);
+
+                        if (!mappingDataSets.containsKey(report.getDataSet().getId()))
+                            restoreDataSet(Collections.singletonList(report.getDataSet().getId()), linesBackup, mapping);
+
+                        report.setId(null);
+                        report.setFolder(new ReportFolder(mappingReportFolders.get(report.getFolder().getId())));
+                        report.setUser(new User(userId));
+                        report.setDataSet(new DataSet(mappingDataSets.get(report.getDataSet().getId())));
+
+                        mappingReports.put(oldId, reportRepository.save(report).getId());
+
+                        restoreReportField(oldId, linesBackup, mapping);
+                        restoreFilterReportGroup(oldId, linesBackup, mapping);
+
+                    });
+
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage(), e.getCause());
+        }
+    }
+
+    private void restoreFilterReportGroup(Long reportId, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
+
+        try {
+            var mappingReport = mapping.get(REPORT);
+            var mappingFRG = mapping.get(FILTER_REPORT_GROUP);
 
             var filterReportGroupIds = new ArrayList<Long>();
             var filterReportGroups = Arrays.stream(objectMapper.readValue(linesBackup.get("FilterReportGroup"), FilterReportGroupBackupTuple[].class))
@@ -794,104 +869,104 @@ public class BackupService {
                     .collect(Collectors.toList());
 
             filterReportGroups.stream()
-                    .filter(f -> !resultFRG.containsKey(f.filterReportGroupId()))
+                    .filter(f -> !mappingFRG.containsKey(f.filterReportGroupId()))
                     .filter(f -> f.parentId() == null)
-                    .map(filterReportGroupUpMapper::from)
+                    .map(filterReportGroupRestoreMapper::from)
                     .forEach(f -> {
                         var oldId = f.getId();
                         f.setId(null);
-                        f.setReport(new Report(resultReport.get(reportId)));
-                        resultFRG.put(oldId, filterReportGroupRepository.save(f).getId());
+                        f.setReport(new Report(mappingReport.get(reportId)));
+                        mappingFRG.put(oldId, filterReportGroupRepository.save(f).getId());
                         filterReportGroupIds.add(oldId);
                     });
 
-            filterReportGroups = filterReportGroups.stream().filter(f -> !resultFRG.containsKey(f.filterReportGroupId())).collect(Collectors.toList());
+            filterReportGroups = filterReportGroups.stream().filter(f -> !mappingFRG.containsKey(f.filterReportGroupId())).collect(Collectors.toList());
 
             while (!filterReportGroups.isEmpty()) {
                 var itr = filterReportGroups.iterator();
                 while (itr.hasNext()) {
                     var filterGroupBackup = itr.next();
-                    if (resultFRG.containsKey(filterGroupBackup.parentId())) {
-                        var f = filterReportGroupUpMapper.from(filterGroupBackup);
+                    if (mappingFRG.containsKey(filterGroupBackup.parentId())) {
+                        var f = filterReportGroupRestoreMapper.from(filterGroupBackup);
                         var oldId = f.getId();
                         f.setId(null);
-                        f.setParentGroup(new FilterReportGroup(resultFRG.get(f.getParentGroup().getId())));
-                        f.setReport(new Report(resultReport.get(reportId)));
+                        f.setParentGroup(new FilterReportGroup(mappingFRG.get(f.getParentGroup().getId())));
+                        f.setReport(new Report(mappingReport.get(reportId)));
                         filterReportGroupIds.add(oldId);
-                        resultFRG.put(oldId, filterReportGroupRepository.save(f).getId());
+                        mappingFRG.put(oldId, filterReportGroupRepository.save(f).getId());
                         itr.remove();
                     }
                 }
             }
 
-            filterReportGroupIds.forEach(id -> loadFilterReport(id, linesBackup, resultMap));
+            filterReportGroupIds.forEach(id -> restoreFilterReport(id, linesBackup, mapping));
 
         } catch (JsonProcessingException e) {
             throw new JsonParseException(e.getMessage(), e.getCause());
         }
     }
 
-    private void loadFilterReport(Long filterReportGroupId, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap) {
+    private void restoreFilterReport(Long filterReportGroupId, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
 
         try {
             var userId = userDomainService.getCurrentUser().getId();
-            var resultFRG = resultMap.get(FilterReportGroup.class);
-            var resultFI = resultMap.get(FilterInstance.class);
-            var resultFR = resultMap.get(FilterReport.class);
+            var mappingFRG = mapping.get(FILTER_REPORT_GROUP);
+            var mappingFI = mapping.get(FILTER_INSTANCE);
+            var mappingFR = mapping.get(FILTER_REPORT);
 
             var frIds = new ArrayList<Long>();
 
             Arrays.stream(objectMapper.readValue(linesBackup.get("FilterReport"), FilterReportBackupTuple[].class))
                     .filter(f -> f.filterReportGroupId().equals(filterReportGroupId))
-                    .map(filterReportUpMapper::from)
+                    .map(filterReportRestoreMapper::from)
                     .forEach(fr -> {
                         var oldId = fr.getId();
                         fr.setId(null);
-                        if (!resultFI.containsKey(fr.getFilterInstance().getId())) {
-                            loadFilterInstance(Collections.singletonList(fr.getFilterInstance().getId()), linesBackup, resultMap);
+                        if (!mappingFI.containsKey(fr.getFilterInstance().getId())) {
+                            restoreFilterInstance(Collections.singletonList(fr.getFilterInstance().getId()), linesBackup, mapping);
                         }
-                        fr.setFilterInstance(new FilterInstance(resultFI.get(fr.getFilterInstance().getId())));
-                        fr.setGroup(new FilterReportGroup(resultFRG.get(fr.getGroup().getId())));
+                        fr.setFilterInstance(new FilterInstance(mappingFI.get(fr.getFilterInstance().getId())));
+                        fr.setGroup(new FilterReportGroup(mappingFRG.get(fr.getGroup().getId())));
                         fr.setUser(new User(userId));
 
-                        resultFR.put(oldId, filterReportRepository.save(fr).getId());
+                        mappingFR.put(oldId, filterReportRepository.save(fr).getId());
                         frIds.add(oldId);
                     });
 
-            frIds.forEach(id -> loadFilterReportField(id, linesBackup, resultMap));
+            frIds.forEach(id -> restoreFilterReportField(id, linesBackup, mapping));
 
         } catch (JsonProcessingException e) {
             throw new JsonParseException(e.getMessage(), e.getCause());
         }
     }
 
-    private void loadFilterInstance(List<Long> filterInstanceIds, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap) {
+    private void restoreFilterInstance(List<Long> filterInstanceIds, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
         try {
             var userId = userDomainService.getCurrentUser().getId();
-            var resultFI = resultMap.get(FilterInstance.class);
-            var resultFIFolder = resultMap.get(FilterInstanceFolder.class);
-            var resultDataSets = resultMap.get(DataSet.class);
+            var mappingFI = mapping.get(FILTER_INSTANCE);
+            var mappingFIFolder = mapping.get(FILTER_INSTANCE_FOLDER);
+            var mappingDataSets = mapping.get(DATASET);
 
             Arrays.stream(objectMapper.readValue(linesBackup.get("FilterInstance"), FilterInstanceBackupTuple[].class))
-                    .filter(fi -> !resultFI.containsKey(fi.filterInstanceId()))
+                    .filter(fi -> !mappingFI.containsKey(fi.filterInstanceId()))
                     .filter(fi -> filterInstanceIds.contains(fi.filterInstanceId()))
-                    .map(filterInstanceUpMapper::from)
+                    .map(filterInstanceRestoreMapper::from)
                     .forEach(fi -> {
-                        if (!resultFIFolder.containsKey(fi.getFolder().getId()))
-                            loadFilterInstanceFolder(fi.getFolder().getId(), linesBackup, resultMap);
+                        if (!mappingFIFolder.containsKey(fi.getFolder().getId()))
+                            restoreFilterInstanceFolder(fi.getFolder().getId(), linesBackup, mapping);
 
-                        if (fi.getDataSet() != null && !resultDataSets.containsKey(fi.getDataSet().getId()))
-                            loadDataSet(Collections.singletonList(fi.getDataSet().getId()), linesBackup, resultMap);
+                        if (fi.getDataSet() != null && !mappingDataSets.containsKey(fi.getDataSet().getId()))
+                            restoreDataSet(Collections.singletonList(fi.getDataSet().getId()), linesBackup, mapping);
 
                         var oldId = fi.getId();
                         fi.setId(null);
-                        fi.setFolder(new FilterInstanceFolder(resultFIFolder.get(fi.getFolder().getId())));
-                        fi.setDataSet(fi.getDataSet() == null ? null : new DataSet(resultDataSets.get(fi.getDataSet().getId())));
+                        fi.setFolder(new FilterInstanceFolder(mappingFIFolder.get(fi.getFolder().getId())));
+                        fi.setDataSet(fi.getDataSet() == null ? null : new DataSet(mappingDataSets.get(fi.getDataSet().getId())));
                         fi.setUser(new User(userId));
 
-                        resultFI.put(oldId, filterInstanceRepository.save(fi).getId());
+                        mappingFI.put(oldId, filterInstanceRepository.save(fi).getId());
 
-                        loadFilterInstanceField(oldId, linesBackup, resultMap);
+                        restoreFilterInstanceField(oldId, linesBackup, mapping);
                     });
 
 
@@ -901,25 +976,25 @@ public class BackupService {
 
     }
 
-    private void loadFilterReportField(Long filterReportId, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap) {
+    private void restoreFilterReportField(Long filterReportId, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
         try {
-            var resultFR = resultMap.get(FilterReport.class);
-            var resultFRF = resultMap.get(FilterReportField.class);
-            var resultFIF = resultMap.get(FilterInstanceField.class);
-            var resultRF = resultMap.get(ReportField.class);
+            var mappingFR = mapping.get(FILTER_REPORT);
+            var mappingFRF = mapping.get(FILTER_REPORT_FIELD);
+            var mappingFIF = mapping.get(FILTER_INSTANCE_FIELD);
+            var mappingRF = mapping.get(REPORT_FIELD);
 
             Arrays.stream(objectMapper.readValue(linesBackup.get("FilterReportField"), FilterReportFieldBackupTuple[].class))
                     .filter(frf -> frf.filterReportId().equals(filterReportId))
-                    .map(filterReportFieldUpMapper::from)
+                    .map(filterReportFieldRestoreMapper::from)
                     .forEach(frf -> {
 
                         var oldId = frf.getId();
                         frf.setId(null);
-                        frf.setReportField(!resultRF.containsKey(frf.getReportField().getId()) ? null : new ReportField(resultRF.get(frf.getReportField().getId())));
-                        frf.setFilterInstanceField(new FilterInstanceField(resultFIF.get(frf.getFilterInstanceField().getId())));
-                        frf.setFilterReport(new FilterReport(resultFR.get(frf.getFilterReport().getId())));
+                        frf.setReportField(!mappingRF.containsKey(frf.getReportField().getId()) ? null : new ReportField(mappingRF.get(frf.getReportField().getId())));
+                        frf.setFilterInstanceField(new FilterInstanceField(mappingFIF.get(frf.getFilterInstanceField().getId())));
+                        frf.setFilterReport(new FilterReport(mappingFR.get(frf.getFilterReport().getId())));
 
-                        resultFRF.put(oldId, filterReportFieldRepository.save(frf).getId());
+                        mappingFRF.put(oldId, filterReportFieldRepository.save(frf).getId());
                     });
 
         } catch (JsonProcessingException e) {
@@ -928,46 +1003,46 @@ public class BackupService {
 
     }
 
-    private void loadReportField(Long reportId,  Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap){
+    private void restoreReportField(Long reportId, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
         try {
-            var resultReports = resultMap.get(Report.class);
-            var resultReportFields = resultMap.get(ReportField.class);
-            var resultDataSetFields = resultMap.get(DataSetField.class);
+            var mappingReports = mapping.get(REPORT);
+            var mappingReportFields = mapping.get(REPORT_FIELD);
+            var mappingDataSetFields = mapping.get(DATASET_FIELD);
 
-        Arrays.stream(objectMapper.readValue(linesBackup.get("ReportField"), ReportFieldBackupTuple[].class))
-                .filter(rf -> rf.reportId().equals(reportId))
-                .map(reportFieldUpMapper::from)
-                .forEach(rf -> {
-                    var old = rf.getId();
-                    rf.setId(null);
-                    rf.setReport(new Report(resultReports.get(reportId)));
-                    rf.setDataSetField(new DataSetField(resultDataSetFields.get(rf.getDataSetField().getId())));
+            Arrays.stream(objectMapper.readValue(linesBackup.get("ReportField"), ReportFieldBackupTuple[].class))
+                    .filter(rf -> rf.reportId().equals(reportId))
+                    .map(reportFieldRestoreMapper::from)
+                    .forEach(rf -> {
+                        var old = rf.getId();
+                        rf.setId(null);
+                        rf.setReport(new Report(mappingReports.get(reportId)));
+                        rf.setDataSetField(new DataSetField(mappingDataSetFields.get(rf.getDataSetField().getId())));
 
-                    resultReportFields.put(old, reportFieldRepository.save(rf).getId());
-                });
+                        mappingReportFields.put(old, reportFieldRepository.save(rf).getId());
+                    });
 
         } catch (JsonProcessingException e) {
             throw new JsonParseException(e.getMessage(), e.getCause());
         }
     }
 
-    private void loadFilterInstanceField(Long filterInstanceId, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap) {
+    private void restoreFilterInstanceField(Long filterInstanceId, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
 
         try {
-            var resultFI = resultMap.get(FilterInstance.class);
-            var resultFIF = resultMap.get(FilterInstanceField.class);
-            var resultDataSetFields = resultMap.get(DataSetField.class);
+            var mappingFI = mapping.get(FILTER_INSTANCE);
+            var mappingFIF = mapping.get(FILTER_INSTANCE_FIELD);
+            var mappingDataSetFields = mapping.get(DATASET_FIELD);
 
             Arrays.stream(objectMapper.readValue(linesBackup.get("FilterInstanceField"), FilterInstanceFieldBackupTuple[].class))
                     .filter(fif -> fif.filterInstanceId().equals(filterInstanceId))
-                    .map(filterInstanceFieldUpMapper::from)
+                    .map(filterInstanceFieldRestoreMapper::from)
                     .forEach(fif -> {
                         var oldId = fif.getId();
                         fif.setId(null);
-                        fif.setDataSetField(fif.getDataSetField().getId() == null ?  null : new DataSetField(resultDataSetFields.get(fif.getDataSetField().getId())));
-                        fif.setInstance(new FilterInstance(resultFI.get(fif.getInstance().getId())));
+                        fif.setDataSetField(fif.getDataSetField().getId() == null ? null : new DataSetField(mappingDataSetFields.get(fif.getDataSetField().getId())));
+                        fif.setInstance(new FilterInstance(mappingFI.get(fif.getInstance().getId())));
 
-                        resultFIF.put(oldId, filterInstanceFieldRepository.save(fif).getId());
+                        mappingFIF.put(oldId, filterInstanceFieldRepository.save(fif).getId());
                     });
 
         } catch (JsonProcessingException e) {
@@ -976,10 +1051,10 @@ public class BackupService {
 
     }
 
-    private void loadFilterInstanceFolder(Long filterInstanceFolderId, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap) {
+    private void restoreFilterInstanceFolder(Long filterInstanceFolderId, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
 
         try {
-            var resultFIFolder = resultMap.get(FilterInstanceFolder.class);
+            var mappingFIFolder = mapping.get(FILTER_INSTANCE_FOLDER);
 
             var filterInstanceFolders = Arrays.stream(objectMapper.readValue(linesBackup.get("FilterInstanceFolder"), FilterInstanceFolderBackupTuple[].class))
                     .collect(Collectors.toMap(FilterInstanceFolderBackupTuple::filterInstanceFolderId, o -> o));
@@ -997,15 +1072,15 @@ public class BackupService {
             listFilterInstanceFolderId
                     .stream()
                     .map(filterInstanceFolders::get)
-                    .filter(filterInstanceFolder -> !resultFIFolder.containsKey(filterInstanceFolder.filterInstanceFolderId()))
-                    .map(filterInstanceFolderUpMapper::from)
+                    .filter(filterInstanceFolder -> !mappingFIFolder.containsKey(filterInstanceFolder.filterInstanceFolderId()))
+                    .map(filterInstanceFolderRestoreMapper::from)
                     .forEach(filterInstanceFolder -> {
                         var oldId = filterInstanceFolder.getId();
                         var oldParentId = filterInstanceFolder.getParentFolder().getId();
                         filterInstanceFolder.setId(null);
-                        filterInstanceFolder.setParentFolder(resultFIFolder.containsKey(oldParentId) ? new FilterInstanceFolder(resultFIFolder.get(oldParentId)) : null);
+                        filterInstanceFolder.setParentFolder(mappingFIFolder.containsKey(oldParentId) ? new FilterInstanceFolder(mappingFIFolder.get(oldParentId)) : null);
 
-                        resultFIFolder.put(oldId, filterInstanceFolderRepository.save(filterInstanceFolder).getId());
+                        mappingFIFolder.put(oldId, filterInstanceFolderRepository.save(filterInstanceFolder).getId());
                     });
         } catch (JsonProcessingException e) {
             throw new JsonParseException(e.getMessage(), e.getCause());
@@ -1013,9 +1088,9 @@ public class BackupService {
 
     }
 
-    private void loadReportFolder(Long reportFolderId, Map<String, String> linesBackup, Map<Class<?>, Map<Long, Long>> resultMap){
+    private void restoreReportFolder(Long reportFolderId, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
         try {
-            var resultFolder = resultMap.get(ReportFolder.class);
+            var mappingFolder = mapping.get(REPORT_FOLDER);
 
             var filterInstanceFolders = Arrays.stream(objectMapper.readValue(linesBackup.get("ReportFolder"), ReportFolderBackupTuple[].class))
                     .collect(Collectors.toMap(ReportFolderBackupTuple::reportFolderId, o -> o));
@@ -1033,16 +1108,309 @@ public class BackupService {
             listReportFolderId
                     .stream()
                     .map(filterInstanceFolders::get)
-                    .filter(reportFolder -> !resultFolder.containsKey(reportFolder.reportFolderId()))
-                    .map(reportFolderUpMapper::from)
+                    .filter(reportFolder -> !mappingFolder.containsKey(reportFolder.reportFolderId()))
+                    .map(reportFolderReportMapper::from)
                     .forEach(reportFolder -> {
                         var oldId = reportFolder.getId();
                         var oldParentId = reportFolder.getParentFolder().getId();
                         reportFolder.setId(null);
-                        reportFolder.setParentFolder(resultFolder.containsKey(oldParentId) ? new ReportFolder(resultFolder.get(oldParentId)) : null);
+                        reportFolder.setParentFolder(mappingFolder.containsKey(oldParentId) ? new ReportFolder(mappingFolder.get(oldParentId)) : null);
 
-                        resultFolder.put(oldId, reportFolderRepository.save(reportFolder).getId());
+                        mappingFolder.put(oldId, reportFolderRepository.save(reportFolder).getId());
                     });
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage(), e.getCause());
+        }
+    }
+
+    private void restoreSecurityFilter(List<Long> ids, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
+        try {
+            var userId = userDomainService.getCurrentUser().getId();
+            var mappingSecurityFilter = mapping.get(SECURITY_FILTER);
+            var mappingSecurityFilterFolder = mapping.get(SECURITY_FILTER_FOLDER);
+            var mappingFilterInstance = mapping.get(FILTER_INSTANCE);
+
+            Arrays.stream(objectMapper.readValue(linesBackup.get("SecurityFilter"), SecurityFilterBackupTuple[].class))
+                    .filter(sf -> ids.contains(sf.securityFilterId()))
+                    .map(securityFilterRestoreMapper::from)
+                    .forEach(sf -> {
+
+                        var oldId = sf.getId();
+
+                        if (!mappingSecurityFilterFolder.containsKey(sf.getFolder().getId()))
+                            restoreSecurityFilterFolder(sf.getFolder().getId(), linesBackup, mapping);
+
+                        if (!mappingFilterInstance.containsKey(sf.getFilterInstance().getId()))
+                            restoreFilterInstance(Collections.singletonList(sf.getFilterInstance().getId()), linesBackup, mapping);
+
+                        sf.setId(null);
+                        sf.setFolder(new SecurityFilterFolder(mappingSecurityFilterFolder.get(sf.getFolder().getId())));
+                        sf.setFilterInstance(new FilterInstance(mappingFilterInstance.get(sf.getFilterInstance().getId())));
+                        sf.setUser(new User(userId));
+
+                        mappingSecurityFilter.put(oldId, securityFilterRepository.save(sf).getId());
+
+                        restoreSecurityFilterDatasets(oldId, linesBackup, mapping);
+                    });
+
+
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage(), e.getCause());
+        }
+
+    }
+
+    private void restoreSecurityFilterFolder(Long folderId, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
+
+        try {
+
+            var mappingFolders = mapping.get(SECURITY_FILTER_FOLDER);
+
+            var folders = Arrays.stream(objectMapper.readValue(linesBackup.get("SecurityFilterFolder"), SecurityFilterFolderBackupTuple[].class))
+                    .collect(Collectors.toMap(SecurityFilterFolderBackupTuple::securityFilterFolderId, o -> o));
+
+            var listFolderId = new ArrayList<Long>();
+
+            Long currentIdFolder = folderId;
+            while (currentIdFolder != null) {
+                listFolderId.add(currentIdFolder);
+                var folder = folders.get(currentIdFolder);
+                currentIdFolder = folder.parentId();
+            }
+            Collections.reverse(listFolderId);
+
+            listFolderId
+                    .stream()
+                    .map(folders::get)
+                    .filter(folder -> !mappingFolders.containsKey(folder.securityFilterFolderId()))
+                    .map(securityFilterFolderRestoreMapper::from)
+                    .forEach(folder -> {
+                        var oldId = folder.getId();
+                        var oldParentId = folder.getParentFolder().getId();
+                        folder.setId(null);
+                        folder.setParentFolder(mappingFolders.containsKey(oldParentId) ? new SecurityFilterFolder(mappingFolders.get(oldParentId)) : null);
+
+                        mappingFolders.put(oldId, securityFilterFolderRepository.save(folder).getId());
+                    });
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage(), e.getCause());
+        }
+
+    }
+
+    private void restoreSecurityFilterDatasets(Long securityFilterId, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
+
+        try {
+
+            var mappingSecurityFilter = mapping.get(SECURITY_FILTER_FOLDER);
+            var mappingSecurityFilterDataset = mapping.get(SECURITY_FILTER_DATASET);
+            var mappingDataset = mapping.get(DATASET);
+
+
+            Arrays.stream(objectMapper.readValue(linesBackup.get("SecurityFilterDataset"), SecurityFilterDatasetBackupTuple[].class))
+                    .filter(sfd -> sfd.securityFilterId().equals(securityFilterId))
+                    .map(securityFilterDataSetRestoreMapper::from)
+                    .forEach(sfd -> {
+                        var oldId = sfd.getId();
+
+                        if (!mappingDataset.containsKey(sfd.getDataSet().getId()))
+                            restoreDataSet(Collections.singletonList(sfd.getDataSet().getId()), linesBackup, mapping);
+
+                        sfd.setId(null);
+                        sfd.setDataSet(new DataSet(mappingDataset.get(sfd.getDataSet().getId())));
+                        sfd.setSecurityFilter(new SecurityFilter(mappingSecurityFilter.get(sfd.getSecurityFilter().getId())));
+
+                        mappingSecurityFilterDataset.put(oldId, securityFilterDataSetRepository.save(sfd).getId());
+
+                        restoreSecurityFilterDatasetFields(securityFilterId, linesBackup, mapping);
+                    });
+
+
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage(), e.getCause());
+        }
+    }
+
+    private void restoreSecurityFilterDatasetFields(Long securityFilterId, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
+
+        try {
+
+            var mappingSecurityFilter = mapping.get(SECURITY_FILTER);
+            var mappingSecurityFilterDatasetField = mapping.get(SECURITY_FILTER_DATASET_FIELD);
+            var mappingFilterInstanceField = mapping.get(FILTER_INSTANCE_FIELD);
+            var mappingDataSetField = mapping.get(DATASET_FIELD);
+
+
+            Arrays.stream(objectMapper.readValue(linesBackup.get("SecurityFilterDatasetField"), SecurityFilterDatasetFieldBackupTuple[].class))
+                    .filter(sfdf -> sfdf.securityFilterId().equals(securityFilterId))
+                    .map(securityFilterDataSetFieldRestoreMapper::from)
+                    .forEach(sfdf -> {
+                        var oldId = sfdf.getId();
+
+                        if (!mappingDataSetField.containsKey(sfdf.getDataSetField().getId())) {
+                            restoreDataSetField(sfdf.getDataSetField().getId(), linesBackup, mapping);
+                        }
+
+                        sfdf.setId(null);
+                        sfdf.setDataSetField(new DataSetField(mappingDataSetField.get(sfdf.getDataSetField().getId())));
+                        sfdf.setSecurityFilter(new SecurityFilter(mappingSecurityFilter.get(sfdf.getSecurityFilter().getId())));
+                        sfdf.setFilterInstanceField(new FilterInstanceField(mappingFilterInstanceField.get(sfdf.getFilterInstanceField().getId())));
+
+                        mappingSecurityFilterDatasetField.put(oldId, securityFilterDataSetFieldRepository.save(sfdf).getId());
+
+                    });
+
+
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage(), e.getCause());
+        }
+
+
+    }
+
+    private void restoreDataSetField(Long dataSetFieldId, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
+        try {
+            restoreDataSet(
+                    Arrays.stream(objectMapper.readValue(linesBackup.get("DataSetField"), DatasetFieldBackupTuple[].class))
+                            .filter(dsf -> dsf.datasetFieldId().equals(dataSetFieldId))
+                            .map(DatasetFieldBackupTuple::datasetId)
+                            .toList(),
+                    linesBackup,
+                    mapping);
+
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage(), e.getCause());
+        }
+    }
+
+    private void restoreSchedules(List<Long> scheduleIds, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
+
+        try {
+            var userId = userDomainService.getCurrentUser().getId();
+            var mappingSchedules = mapping.get(SCHEDULE);
+
+            Arrays.stream(objectMapper.readValue(linesBackup.get("Schedule"), ScheduleBackupTuple[].class))
+                    .filter(s -> !mappingSchedules.containsKey(s.scheduleId()))
+                    .filter(s -> scheduleIds.contains(s.scheduleId()))
+                    .map(scheduleRestoreMapper::from)
+                    .forEach(s -> {
+
+                        var oldId = s.getId();
+
+                        s.setId(null);
+                        s.setUser(new User(userId));
+
+                        mappingSchedules.put(oldId, scheduleRepository.save(s).getId());
+                    });
+
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage(), e.getCause());
+        }
+    }
+
+    private void restoreScheduleTasks(List<Long> scheduleTaskIds, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
+        try {
+            var userId = userDomainService.getCurrentUser().getId();
+            var mappingScheduleTasks = mapping.get(SCHEDULE_TASK);
+            var mappingReports = mapping.get(REPORT);
+
+            Arrays.stream(objectMapper.readValue(linesBackup.get("ScheduleTask"), ScheduleTaskBackupTuple[].class))
+                    .filter(s -> !mappingScheduleTasks.containsKey(s.scheduleTaskId()))
+                    .filter(s -> scheduleTaskIds.contains(s.scheduleTaskId()))
+                    .map(scheduleTaskRestoreMapping::from)
+                    .forEach(s -> {
+                        var oldId = s.getId();
+
+                        if (!mappingReports.containsKey(s.getReport().getId()))
+                            restoreReport(Collections.singletonList(s.getReport().getId()), linesBackup, mapping);
+
+                        s.setId(null);
+                        s.setUser(new User(userId));
+                        s.setScheduleList(restoreScheduleScheduleTask(oldId, linesBackup, mapping));
+
+                        mappingScheduleTasks.put(oldId, scheduleTaskRepository.save(s).getId());
+                        restoreDestinations(oldId, linesBackup, mapping);
+
+                    });
+
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage(), e.getCause());
+        }
+    }
+
+    private void restoreDestinations(Long scheduleTaskId, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
+
+        try {
+            var mappingScheduleTasks = mapping.get(SCHEDULE_TASK);
+            var mappingRoles = mapping.get(ROLE);
+
+            Arrays.stream(objectMapper.readValue(linesBackup.get("DestinationEmail"), DestinationEmailBackupTuple[].class))
+                    .filter(d -> scheduleTaskId.equals(d.scheduleTaskId()))
+                    .map(destinationEmailRestoreMapping::from)
+                    .forEach(d -> {
+                        d.setScheduleTask(new ScheduleTask(mappingScheduleTasks.get(scheduleTaskId)));
+                        destinationEmailRepository.save(d);
+                    });
+
+            Arrays.stream(objectMapper.readValue(linesBackup.get("DestinationUser"), DestinationUserBackupTuple[].class))
+                    .filter(d -> scheduleTaskId.equals(d.scheduleTaskId()))
+                    .map(destinationUserRestoreMapping::from)
+                    .forEach(d -> {
+                        d.setScheduleTask(new ScheduleTask(mappingScheduleTasks.get(scheduleTaskId)));
+                        destinationUserRepository.save(d);
+                    });
+
+            Arrays.stream(objectMapper.readValue(linesBackup.get("DestinationRole"), DestinationRoleBackupTuple[].class))
+                    .filter(d -> scheduleTaskId.equals(d.scheduleTaskId()))
+                    .filter(d -> mappingRoles.containsKey(d.val()))
+                    .map(destinationRoleRestoreMapping::from)
+                    .forEach(d -> {
+                        d.setScheduleTask(new ScheduleTask(mappingScheduleTasks.get(scheduleTaskId)));
+                        destinationRoleRepository.save(d);
+                    });
+
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage(), e.getCause());
+        }
+    }
+
+    private List<Schedule> restoreScheduleScheduleTask(Long scheduleTaskId, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
+        try {
+            var schedulesIds = Arrays.stream(objectMapper.readValue(linesBackup.get("ScheduleScheduleTask"), Integer[][].class))
+                    .filter(s -> Objects.equals(s[0].longValue(), scheduleTaskId))
+                    .map(s -> s[1].longValue())
+                    .toList();
+
+            restoreSchedules(schedulesIds, linesBackup, mapping);
+
+            return schedulesIds.stream().map(Schedule::new).toList();
+
+
+        } catch (JsonProcessingException e) {
+            throw new JsonParseException(e.getMessage(), e.getCause());
+        }
+    }
+
+    private void restoreTheme(List<Long> themeIds, Map<String, String> linesBackup, Map<BackupObjectTypeEnum, Map<Long, Long>> mapping) {
+
+        try {
+            var userId = userDomainService.getCurrentUser().getId();
+            var mappingThemes = mapping.get(THEME);
+
+            Arrays.stream(objectMapper.readValue(linesBackup.get("Theme"), ThemeBackupTuple[].class))
+                    .filter(t -> themeIds.contains(t.themeId()))
+                    .filter(t -> !mappingThemes.containsKey(t.themeId()))
+                    .map(themeRestoreMapping::from)
+                    .forEach(t -> {
+
+                        var oldId = t.getId();
+
+                        t.setId(null);
+                        t.setUser(new User(userId));
+
+                        mappingThemes.put(oldId, themeRepository.save(t).getId());
+                    });
+
         } catch (JsonProcessingException e) {
             throw new JsonParseException(e.getMessage(), e.getCause());
         }
@@ -1053,27 +1421,18 @@ public class BackupService {
         writer.newLine();
     }
 
-    private Map<Class<?>, Map<Long, Long>> initResultMap() {
+    private Map<BackupObjectTypeEnum, Map<Long, Long>> initResultMap(List<RestoreMappingObject> mappingObjects) {
 
-        Map<Class<?>, Map<Long, Long>> resultMap = new HashMap<>();
+        Map<BackupObjectTypeEnum, Map<Long, Long>> mapping = new EnumMap<>(BackupObjectTypeEnum.class);
+        Arrays.stream(BackupObjectTypeEnum.values()).forEach(e -> mapping.put(e, new HashMap<>()));
 
-        resultMap.put(DataSource.class, new HashMap<>());
-        resultMap.put(DataSourceFolder.class, new HashMap<>());
-        resultMap.put(DataSet.class, new HashMap<>());
-        resultMap.put(DataSetFolder.class, new HashMap<>());
-        resultMap.put(DataSetField.class, new HashMap<>());
-        resultMap.put(Report.class, new HashMap<>());
-        resultMap.put(ReportFolder.class, new HashMap<>());
-        resultMap.put(ReportField.class, new HashMap<>());
-        resultMap.put(FilterReportGroup.class, new HashMap<>());
-        resultMap.put(FilterReport.class, new HashMap<>());
-        resultMap.put(FilterInstance.class, new HashMap<>());
-        resultMap.put(FilterInstanceFolder.class, new HashMap<>());
-        resultMap.put(FilterInstanceField.class, new HashMap<>());
-        resultMap.put(FilterReportField.class, new HashMap<>());
+        mappingObjects.forEach(m -> {
+            if (mapping.containsKey(m.getType())) {
+                mapping.get(m.getType()).put(m.getId(), m.getNewId());
+            } else throw new InvalidParametersException("Unknown type object: " + m.getType());
+        });
 
-
-        return resultMap;
+        return mapping;
     }
 
 }

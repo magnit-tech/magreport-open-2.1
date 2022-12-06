@@ -10,7 +10,7 @@ import ru.magnit.magreportbackend.mapper.Mapper;
 
 @Service
 @RequiredArgsConstructor
-public class FilterReportUpMapper implements Mapper<FilterReport, FilterReportBackupTuple> {
+public class FilterReportRestoreMapper implements Mapper<FilterReport, FilterReportBackupTuple> {
     @Override
     public FilterReport from(FilterReportBackupTuple source) {
         return new FilterReport()

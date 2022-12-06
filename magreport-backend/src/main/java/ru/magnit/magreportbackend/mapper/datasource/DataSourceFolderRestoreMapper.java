@@ -7,7 +7,7 @@ import ru.magnit.magreportbackend.dto.backup.datasource.DataSourceFolderBackupTu
 import ru.magnit.magreportbackend.mapper.Mapper;
 @Service
 @RequiredArgsConstructor
-public class DataSourceFolderUpMapper implements Mapper<DataSourceFolder, DataSourceFolderBackupTuple> {
+public class DataSourceFolderRestoreMapper implements Mapper<DataSourceFolder, DataSourceFolderBackupTuple> {
     @Override
     public DataSourceFolder from(DataSourceFolderBackupTuple source) {
         return new DataSourceFolder()
