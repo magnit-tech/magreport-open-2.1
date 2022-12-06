@@ -1,7 +1,7 @@
 default:
   tags: 
     - bi
-  image: itm-orkhd-team-docker-images.repo.corp.tander.ru/bigdata/magreportjava16
+  image: itm-orkhd-team-docker-images.repo.corp.tander.ru/bigdata/tanderjava16
 
 variables:
   CI_DEBUG_TRACE: $TRACE
@@ -21,7 +21,7 @@ workflow:
 package:
   stage: package
   script:
-    - mvn clean package -X
+    - mvn clean package $EXTRA_LOGGING
   artifacts:
     paths:
       - ./target/*.jar
