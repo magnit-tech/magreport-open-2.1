@@ -9,6 +9,7 @@ import ru.magnit.magreportbackend.domain.reportjob.ReportJob;
 
 import javax.persistence.Tuple;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -18,6 +19,8 @@ public interface ReportJobRepository extends JpaRepository<ReportJob, Long> {
     List<ReportJob> getAllByUserId(Long userId);
 
     List<ReportJob> getAllByIdIn(List<Long> idList);
+
+    List<ReportJob> getAllByReportIdAndUserIdAndStatusIdIn(Long reportId, Long userId, Collection<Long> statuses);
 
     ReportJob getFirstByUserIdAndReportIdOrderByIdDesc(Long userId, Long reportId);
 
@@ -41,7 +44,7 @@ public interface ReportJobRepository extends JpaRepository<ReportJob, Long> {
             "       ET.NAME," +
             "       ET.DESCRIPTION," +
             "       RET.IS_DEFAULT, " +
-            "       RJ.COMMENT, " +
+            "       RJ.COMMENT " +
             "FROM REPOSITORY.REPORT_JOB RJ" +
             "         JOIN REPOSITORY.REPORT R ON R.REPORT_ID = RJ.REPORT_ID" +
             "         JOIN REPOSITORY.USERS U ON U.USER_ID = RJ.USER_ID" +
