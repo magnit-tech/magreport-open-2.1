@@ -16,6 +16,7 @@ import ru.magnit.magreportbackend.domain.folderreport.FolderAuthorityEnum;
 import ru.magnit.magreportbackend.domain.reportjob.ReportJobStateEnum;
 import ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum;
 import ru.magnit.magreportbackend.dto.inner.RoleView;
+import ru.magnit.magreportbackend.dto.inner.UserView;
 import ru.magnit.magreportbackend.dto.inner.datasource.DataSourceData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportFilterGroupData;
@@ -157,6 +158,7 @@ class ReportJobServiceTest {
         final var permissionsResponse = new FolderRoleResponse(1L, FolderAuthorityEnum.WRITE);
 
         when(reportResponse.getAllFilters()).thenReturn(Collections.emptyList());
+        when(userDomainService.getCurrentUser()).thenReturn(new UserView().setId(1L));
         when(reportDomainService.getReport(anyLong())).thenReturn(reportResponse);
         when(jobDomainService.addJob(any())).thenReturn(ID);
         when(jobDomainService.getJob(anyLong())).thenReturn(getReportJobResponse());
