@@ -6,14 +6,14 @@ import ru.magnit.magreportbackend.domain.dataset.DataSet;
 import ru.magnit.magreportbackend.domain.dataset.DataSetFolder;
 import ru.magnit.magreportbackend.domain.dataset.DataSetType;
 import ru.magnit.magreportbackend.domain.datasource.DataSource;
-import ru.magnit.magreportbackend.dto.backup.dataset.DatasetBackupTuple;
+import ru.magnit.magreportbackend.dto.backup.dataset.DataSetBackupTuple;
 import ru.magnit.magreportbackend.mapper.Mapper;
 
 @Service
 @RequiredArgsConstructor
-public class DataSetRestoreMapper implements Mapper<DataSet, DatasetBackupTuple> {
+public class DataSetRestoreMapper implements Mapper<DataSet, DataSetBackupTuple> {
     @Override
-    public DataSet from(DatasetBackupTuple source) {
+    public DataSet from(DataSetBackupTuple source) {
         return new DataSet()
                 .setId(source.datasetId())
                 .setFolder(new DataSetFolder(source.datasetFolderId()))

@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 public record DomainGroupBackupTuple(
 
         Long domainGroupId,
+        Long domainId,
         String name,
         String description,
         LocalDateTime created,
