@@ -9,7 +9,7 @@ import dataHub from 'ajax/DataHub';
 // redux
 import {FLOW_STATE_BROWSE_FOLDER, jobsMenuViewFlowStates} from 'redux/reducers/menuViews/flowStates';
 import {actionFolderLoaded, actionFolderLoadFailed, actionItemClick} from 'redux/actions/menuViews/folderActions';
-import {actionFilterJobs, actionJobCancel, showSqlDialog, actionShowStatusHistory} from 'redux/actions/jobs/actionJobs';
+import {actionFilterJobs, actionJobCancel, showSqlDialog, actionShowStatusHistory, actionJobAddComment} from 'redux/actions/jobs/actionJobs';
 import actionSetSidebarItem from 'redux/actions/sidebar/actionSetSidebarItem';
 import {startReport} from 'redux/actions/menuViews/reportActions';
 
@@ -80,11 +80,16 @@ function JobsMenuView(props){
                     onItemClick = {handleItemClick}
                     onReportRunClick = {handleReportRunClick}
 
+                    currentUser = {props.currentUser}
+                    // onItemClick = {jobId => {props.actionItemClick(folderItemsType, jobId)}}
+                    // onReportRunClick = {(reportId, jobId) => {props.startReport(reportId, jobId, SidebarItems.jobs.key, SidebarItems.jobs.folderItemType)}}
+
                     onFilterClick = {filters => {props.actionFilterJobs(folderItemsType, filters)}}
                     onJobCancelClick = {(jobIndex, jobId) => {props.actionJobCancel(folderItemsType, jobIndex, jobId)}}
                     onRefreshClick = {handleRefreshFolder}
                     onShowSqlDialogClick = {props.showSqlDialog}
                     onShowHistoryStatusClick = {props.actionShowStatusHistory}
+                    onJobAddComment = {(jobId, jobIndex, comment) => actionJobAddComment(folderItemsType, jobId, jobIndex, comment)}
                 />
 
             </DataLoader>
@@ -116,7 +121,8 @@ const mapStateToProps = state => {
         state : state.jobsMenuView,
         currentFolderData : state.jobsMenuView.currentFolderData,
         filteredJobs : state.jobsMenuView.filteredJobs,
-        filters : state.jobsMenuView.filters
+        filters : state.jobsMenuView.filters,
+        currentUser: state.login.userName
     }
 }
 
@@ -129,7 +135,8 @@ const mapDispatchToProps = {
     actionJobCancel,
     startReport,
     showSqlDialog,
-    actionShowStatusHistory
+    actionShowStatusHistory,
+    actionJobAddComment
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(JobsMenuView);

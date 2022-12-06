@@ -80,7 +80,6 @@ public class OlapService {
     private final UserDomainService userDomainService;
     private final DerivedFieldService derivedFieldService;
     private final ObjectMapper objectMapper;
-
     private final TokenService tokenService;
 
     public OlapCubeResponse getCube(OlapCubeRequest request) {
@@ -167,9 +166,9 @@ public class OlapService {
                 "Превышен допустимый объем обрабатываемых данных:" +
                     "\nМаксимальный объем - " + maxDataVolume +
                     "\nЗапрашиваемый объем - " + numColumns * numRows * numMetrics +
-                    "\nКолво стобцов - " + numColumns +
-                    "\nКолво строк - " + numRows +
-                    "\nКолво метрик - " + numMetrics
+                    "\nКол-во столбцов - " + numColumns +
+                    "\nКол-во строк - " + numRows +
+                    "\nКол-во метрик - " + numMetrics
             );
         }
     }

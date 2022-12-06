@@ -6,7 +6,7 @@ import {FolderItemTypes} from  '../FolderItemTypes';
 
 
 
-import {hideSqlDialog} from 'redux/actions/jobs/actionJobs';
+import {hideJobDialog} from 'redux/actions/jobs/actionJobs';
 
 // components
 import Button from '@material-ui/core/Button';
@@ -22,7 +22,7 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 
-import {SqlViewerCSS} from './ModalWindowsCSS';
+import {ItemCardDialogViewerCSS} from './ModalWindowsCSS';
 /**
  * 
  * @param {*} props.id - id задания
@@ -30,14 +30,14 @@ import {SqlViewerCSS} from './ModalWindowsCSS';
  * @param {*} props.sqlQuery - Текст запроса
  * @param {*} props.onCLose - функция при закрытии окна
  */
-function SqlViewer(props){
+function ItemCardDialogViewer(props){
 
-    const classes = SqlViewerCSS();
+    const classes = ItemCardDialogViewerCSS();
     const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'};
 
     const handleClose = event => {
         event.stopPropagation()
-        props.hideSqlDialog(props.itemsType)
+        props.hideJobDialog(props.itemsType)
     }
 
     return (
@@ -101,16 +101,16 @@ function SqlViewer(props){
 
 const mapStateToProps = state => {
     return {
-        open : state.jobSql.open,
-        itemsType: state.jobSql.itemsType,
-        data: state.jobSql.data,
-        titleName: state.jobSql.titleName
+        open : state.jobDialog.open,
+        itemsType: state.jobDialog.itemsType,
+        data: state.jobDialog.data,
+        titleName: state.jobDialog.titleName
         
     }
 }
 
 const mapDispatchToProps = {
-    hideSqlDialog
+    hideJobDialog
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(SqlViewer);
+export default connect(mapStateToProps, mapDispatchToProps)(ItemCardDialogViewer);

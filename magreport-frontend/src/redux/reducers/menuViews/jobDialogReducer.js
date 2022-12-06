@@ -1,5 +1,5 @@
-import { JOB_SQL_CLICK,  JOB_SQL_CLOSE, JOB_SQL_LOADED, JOB_SQL_LOAD_FAILED,
-    JOB_STATUS_HISTORY_CLICK,  JOB_STATUS_HISTORY_CLOSE, JOB_STATUS_HISTORY_LOADED, JOB_STATUS_HISTORY_LOAD_FAILED } from   '../../reduxTypes';
+import { JOB_SQL_CLICK,  JOB_DIALOG_CLOSE, JOB_SQL_LOADED, JOB_SQL_LOAD_FAILED,
+    JOB_STATUS_HISTORY_CLICK, JOB_STATUS_HISTORY_LOADED, JOB_STATUS_HISTORY_LOAD_FAILED } from   '../../reduxTypes';
 
 const initialState = {
         open: false,
@@ -8,7 +8,7 @@ const initialState = {
         data: {}
 }
 
-export const jobSqlReducer = (state = initialState, action) => {
+export const jobDialogReducer = (state = initialState, action) => {
     switch (action.type){
         case JOB_SQL_CLICK:
             return {
@@ -26,7 +26,7 @@ export const jobSqlReducer = (state = initialState, action) => {
                 state
             }
 
-        case JOB_SQL_CLOSE:
+        case JOB_DIALOG_CLOSE:
             return {
                 ...state, open: false
             }
@@ -45,12 +45,6 @@ export const jobSqlReducer = (state = initialState, action) => {
             return {
                 state
             }
-
-        case JOB_STATUS_HISTORY_CLOSE:
-            return {
-                ...state, open: false
-            }
-
             
         default:
             return state

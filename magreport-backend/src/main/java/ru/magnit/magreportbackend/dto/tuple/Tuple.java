@@ -17,6 +17,20 @@ import java.util.List;
 @AllArgsConstructor
 @Accessors(chain = true)
 public class Tuple {
-
     private List<TupleValue> values = new LinkedList<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Tuple tuple = (Tuple) o;
+
+        return getValues().equals(tuple.getValues());
+    }
+
+    @Override
+    public int hashCode() {
+        return getValues().hashCode();
+    }
 }
