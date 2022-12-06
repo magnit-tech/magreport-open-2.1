@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import clsx from 'clsx';
 // material-ui
 import {Table, TableBody, TableRow, TableCell } from '@material-ui/core';
 import Card from '@material-ui/core/Card';
@@ -62,6 +63,7 @@ function ItemCard(props){
 
     const classes = ItemCardCSS();
     const [comment, setComment] = useState(props.data.comment||'');
+    const [isEditedComment, setIsEditedComment] = useState(false);
 
     let isInvalid = (props.data.isValid !==undefined && !props.data.isValid) ||
     (props.itemType === FolderItemTypes.scheduleTasks && 
@@ -230,13 +232,22 @@ function ItemCard(props){
     }
     
     function handleSaveComment(event){
-        let resp = props.onJobAddComment(props.itemType, props.data.id, event.target.value);
+        props.onJobAddComment(event.target.value);
+        setIsEditedComment(false);
     }
+
+    React.useEffect(() => {
+        if (isEditedComment) {
+            const commentElement = document.getElementById(props.data.id.toString());
+            commentElement.focus();
+        }
+        }, [isEditedComment] // eslint-disable-line
+    );
+
 
     function handleEditCommentClick(event){
         event.stopPropagation();
-        const commentElement = document.getElementById(props.data.id)
-        commentElement.focus();
+        setIsEditedComment(true);
     }
 
     let actionBtns =[];
@@ -466,30 +477,40 @@ function ItemCard(props){
             <CardContent>
                 <Table>
                     <TableBody>
-                        {(props.itemType === FolderItemTypes.job)/* && props.data.comment */ &&
-                        <TableRow>
-                            <TableCell colSpan = {2} align="left"  padding="none">
-                                <InputBase
-                                    id = {props.data.id}
-                                    size = "small"
-                                    value = {comment}
-                                    multiline
-                                    onBlur = {handleSaveComment}
-                                    onChange = {handleChangeComment}
-                                    onClick = {(e)=>e.stopPropagation()}
-                                />
-                                <Tooltip key={9} title="Редактировать комментарий">
-                                    <IconButton
-                                        className = {classes.btn} 
+                        {(props.itemType === FolderItemTypes.job) &&
+                            <TableRow>
+                                <TableCell colSpan = {2} align="justify"  padding="none">
+                                    <div className={clsx(classes.flx, {[classes.comment]: isEditedComment})}>
+                                    <InputBase
+                                        style={{display: isEditedComment ? 'flex' : 'none' }}
+                                        id = {props.data.id.toString()}
                                         size = "small"
-                                        aria-label = "comment edit"
-                                        onClick = {(e)=>handleEditCommentClick(e)} 
-                                    >  
-                                        <Icon path={mdiCommentEditOutline} size={0.9} className = {invalidSuccessDefault}/>  
-                                    </IconButton>
-                                </Tooltip>
-                            </TableCell>
-                        </TableRow>
+                                        value = {comment}
+                                        placeholder = "Комментарий"
+                                        fullWidth
+                                        multiline
+                                        autoFocus
+                                        onBlur = {handleSaveComment}
+                                        onChange = {handleChangeComment}
+                                        onClick = {(e)=>e.stopPropagation()}
+                                    />
+                                    <Typography variant="caption" style={{display: !isEditedComment ? 'flex' : 'none' }}>{comment}</Typography>
+                                    <div>
+                                    <Tooltip key={9} title="Редактировать комментарий">
+                                        <IconButton
+                                            style={{display: !isEditedComment ? 'flex' : 'none' }}
+                                            className = {classes.commentBtn} 
+                                            size = "small"
+                                            aria-label = "comment edit"
+                                            onClick = {(e)=>handleEditCommentClick(e)} 
+                                        >  
+                                            <Icon path={mdiCommentEditOutline} size={0.8} className = {invalidSuccessDefault}/>  
+                                        </IconButton>
+                                    </Tooltip>
+                                    </div>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
                         }
                         {(props.itemType === FolderItemTypes.scheduleTasks) &&
                             <>

@@ -18,8 +18,7 @@ import { SIDEBAR_ITEM_CHANGED,
     FAVORITES_ADD_START, 
     FAVORITES_ADDED, 
     FAVORITES_DELETE_START, 
-    FAVORITES_DELETED,
-    JOB_ADD_COMMENT_SUCCESS
+    FAVORITES_DELETED
 } from 'redux/reduxTypes';
 import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
 import {FLOW_STATE_BROWSE_FOLDER} from './flowStates';    
@@ -57,8 +56,7 @@ export function folderStateReducer(state, action, sidebarItem, folderItemsType){
             }
             else{
                 return state;
-            }     
-        case JOB_ADD_COMMENT_SUCCESS:            
+            }           
         case FOLDER_CONTENT_LOADED:
             if(action.itemsType === folderItemsType){
                 delete state.searchParams;

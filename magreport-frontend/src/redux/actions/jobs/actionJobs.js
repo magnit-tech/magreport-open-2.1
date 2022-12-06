@@ -102,23 +102,26 @@ export const actionStatusHistoryLoadFailed = error =>{
 
 
 
-function handleJobAddComment(magrepResponse){
+function handleJobAddComment(itemsType, jobId, jobIndex, comment, magrepResponse){
     let type = magrepResponse.ok ? JOB_ADD_COMMENT_SUCCESS : JOB_ADD_COMMENT_FAILED;
-    let data = magrepResponse.data;
 
     store.dispatch({
-        type: type,
-        data
+        type,
+        itemsType,
+        jobId,
+        jobIndex,
+        comment
     });
 }
 
-export function actionJobAddComment(itemsType, jobId, comment){
+export function actionJobAddComment(itemsType, jobId, jobIndex, comment){
 
-    dataHub.reportJobController.addComment(jobId, comment, handleJobAddComment)
-    return {
+    dataHub.reportJobController.addComment(jobId, comment, m => handleJobAddComment(itemsType, jobId, jobIndex, comment, m))
+    return({
         type: JOB_ADD_COMMENT,
         itemsType,
+        jobIndex,
         jobId,
         comment
-    }
+    })
 }

@@ -63,7 +63,7 @@ function JobsMenuView(props){
                     onRefreshClick = {handleRefreshFolder}
                     onShowSqlDialogClick = {props.showSqlDialog}
                     onShowHistoryStatusClick = {props.actionShowStatusHistory}
-                    onJobAddComment = {(folderItemsType, jobId, comment) => actionJobAddComment(folderItemsType, jobId, comment)}
+                    onJobAddComment = {(jobId, jobIndex, comment) => actionJobAddComment(folderItemsType, jobId, jobIndex, comment)}
                 />
 
             </DataLoader>
