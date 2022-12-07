@@ -28,6 +28,11 @@ function JobsMenuView(props){
 
     let state = props.state;
 
+    let params = [props.filters?.periodStart ?? null, 
+        props.filters?.periodEnd ?? null, 
+        props.filters?.selectedStatuses ?? null
+    ];
+    
     const [reload, setReload] = useState({needReload : false})
 
     let folderItemsType = SidebarItems.jobs.folderItemType;
@@ -54,20 +59,25 @@ function JobsMenuView(props){
         navigate(`/report/starter/${reportId}?jobId=${jobId}`, {state: location.pathname})
     }
 
+    function handleCancelClick(folderItemsType, jobIndex, jobId){
+        props.actionJobCancel(folderItemsType, jobIndex, jobId);
+        setReload({needReload : true})
+    }
+
     return(
         <div  style={{display: 'flex', flex: 1}}>
         {
             state.flowState === FLOW_STATE_BROWSE_FOLDER ?
             <DataLoader
                 loadFunc = {dataHub.reportJobController.getMyJobs}
-                loadParams = {[]}
+                loadParams = {params}
                 reload = {reload}
                 onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data)}}
                 onDataLoadFailed = {(message) => {props.actionFolderLoadFailed(folderItemsType, message)}}
             >
                 <FolderContent
                     itemsType = {folderItemsType}
-                    data = {props.filteredJobs ? props.filteredJobs : props.currentFolderData}
+                    data = {props.currentFolderData}
                     filters = {props.filters}
                     showAddFolder = {false}
                     showAddItem = {false}
@@ -85,7 +95,7 @@ function JobsMenuView(props){
                     // onReportRunClick = {(reportId, jobId) => {props.startReport(reportId, jobId, SidebarItems.jobs.key, SidebarItems.jobs.folderItemType)}}
 
                     onFilterClick = {filters => {props.actionFilterJobs(folderItemsType, filters)}}
-                    onJobCancelClick = {(jobIndex, jobId) => {props.actionJobCancel(folderItemsType, jobIndex, jobId)}}
+                    onJobCancelClick = {(jobIndex, jobId) => handleCancelClick(folderItemsType, jobIndex, jobId)}
                     onRefreshClick = {handleRefreshFolder}
                     onShowSqlDialogClick = {props.showSqlDialog}
                     onShowHistoryStatusClick = {props.actionShowStatusHistory}
@@ -120,7 +130,6 @@ const mapStateToProps = state => {
     return {
         state : state.jobsMenuView,
         currentFolderData : state.jobsMenuView.currentFolderData,
-        filteredJobs : state.jobsMenuView.filteredJobs,
         filters : state.jobsMenuView.filters,
         currentUser: state.login.userName
     }
