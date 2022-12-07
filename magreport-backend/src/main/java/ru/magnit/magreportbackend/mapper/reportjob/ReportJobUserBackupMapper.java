@@ -15,7 +15,9 @@ public class ReportJobUserBackupMapper implements Mapper<ReportJobUserBackupTupl
                 source.getReportJob().getId(),
                 source.getUser().getId(),
                 source.getId(),
-                source.getType().getId()
+                source.getType().getId(),
+                source.getCreatedDateTime(),
+                source.getModifiedDateTime()
         );
     }
 }
