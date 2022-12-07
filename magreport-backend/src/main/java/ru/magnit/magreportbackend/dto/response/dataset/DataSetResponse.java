@@ -23,6 +23,7 @@ public class DataSetResponse {
 
     private Long id;
     private Long typeId;
+    private Long folderId;
     private String name;
     private String description;
     private String catalogName;
