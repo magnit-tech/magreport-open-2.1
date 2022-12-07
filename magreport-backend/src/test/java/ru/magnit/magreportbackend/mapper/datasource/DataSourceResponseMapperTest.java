@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.magnit.magreportbackend.domain.datasource.DataSource;
+import ru.magnit.magreportbackend.domain.datasource.DataSourceFolder;
 import ru.magnit.magreportbackend.domain.datasource.DataSourceType;
 import ru.magnit.magreportbackend.domain.user.User;
 import ru.magnit.magreportbackend.dto.response.datasource.DataSourceResponse;
@@ -70,6 +71,7 @@ class DataSourceResponseMapperTest {
     private DataSource getDataSource() {
         DataSource dataSource = new DataSource();
         dataSource.setId(ID);
+        dataSource.setFolder(new DataSourceFolder(ID));
         dataSource.setName(NAME);
         dataSource.setDescription(DESCRIPTION);
         dataSource.setCreatedDateTime(CREATED_TIME);
