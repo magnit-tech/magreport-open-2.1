@@ -26,6 +26,7 @@ import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobMetadataRespon
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportPageResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportSqlQueryResponse;
+import ru.magnit.magreportbackend.dto.response.reportjob.ScheduledReportResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.TokenResponse;
 import ru.magnit.magreportbackend.dto.response.user.UserResponse;
 import ru.magnit.magreportbackend.exception.InvalidParametersException;
@@ -380,5 +381,9 @@ public class ReportJobService {
     public ReportJobHistoryResponse getHistory(ReportJobRequest request) {
         final var history = jobDomainService.getJobStatHistory(request.getJobId());
         return new ReportJobHistoryResponse(request.getJobId(), history);
+    }
+
+    public List<ScheduledReportResponse> getAllScheduledReports() {
+        return jobDomainService.getAllScheduledReports();
     }
 }
