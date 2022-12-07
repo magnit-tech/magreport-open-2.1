@@ -60,4 +60,10 @@ public class Theme extends EntityWithName {
         return this;
     }
 
+    @Override
+    public Theme setId(Long id){
+        this.id = id;
+        return this;
+    }
+
 }
