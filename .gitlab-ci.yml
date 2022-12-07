@@ -22,16 +22,6 @@ package:
   stage: package
   script:
     - mvn clean package $EXTRA_LOGGING
-  artifacts:
-    paths:
-      - ./target/*.jar
-    expire_in: 1 day
-  cache:
-    policy: pull
-    paths:
-      - ./target
-      - ./.m2
-      - node_modules
 
 copy_files:
   stage: copy_files
