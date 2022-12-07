@@ -13,7 +13,6 @@ import ru.magnit.magreportbackend.mapper.auth.RoleResponseMapper;
 @Service
 @RequiredArgsConstructor
 public class RolePermissionResponseMapperReportFolder implements Mapper<RolePermissionResponse, ReportFolderRole> {
-
     private final RoleResponseMapper roleResponseMapper;
 
     @Override
