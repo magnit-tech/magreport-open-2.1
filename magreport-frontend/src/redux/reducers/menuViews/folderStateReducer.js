@@ -45,18 +45,18 @@ const getItemName = itemsType => {
 
 export function folderStateReducer(state, action, sidebarItem, folderItemsType){
     switch(action.type){
-        case SIDEBAR_ITEM_CHANGED:
-            if(action.newSidebarItem.key === sidebarItem.key){
-                return {
-                    ...state,
-                    flowState : FLOW_STATE_BROWSE_FOLDER,
-                    currentFolderId : null,
-                    needReload : true
-                }
-            }
-            else{
-                return state;
-            }           
+        // case SIDEBAR_ITEM_CHANGED:
+        //     if(action.newSidebarItem.key === sidebarItem.key){
+        //         return {
+        //             ...state,
+        //             flowState : FLOW_STATE_BROWSE_FOLDER,
+        //             currentFolderId : null,
+        //             needReload : true
+        //         }
+        //     }
+        //     else{
+        //         return state;
+        //     }           
         case FOLDER_CONTENT_LOADED:
             if(action.itemsType === folderItemsType){
                 delete state.searchParams;

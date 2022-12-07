@@ -39,7 +39,6 @@ function SidebarTopLevelMenu(props){
 
     const [menuExpanded, setMenuExpanded] = useState(false);
 
-
     useEffect(() => {
         const arr = props.sidebarItem.subItems ? Object.values(props.sidebarItem.subItems) : []
 

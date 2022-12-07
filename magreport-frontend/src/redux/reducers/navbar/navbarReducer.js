@@ -38,14 +38,16 @@ function buildNavigationPathToFolder(itemsType, folderId, isLastPosition){
     let id = folderId;
     let localCache = dataHub.getLocalCache();
     let isLast = isLastPosition;
+
     while((id !== null)&&(id !== undefined)){
         if (itemsType !== FolderItemTypes.userJobs && itemsType !== FolderItemTypes.job){
-            
             let data = localCache.getFolderData(itemsType, id);
             path.push({
                 text : data.name,
                 callbackFunc: actionFolderClick(itemsType, id),
-                isLast
+                isLast,
+                itemsType,
+                id
             });
             isLast = false;
             id = data.parentId;
@@ -56,6 +58,7 @@ function buildNavigationPathToFolder(itemsType, folderId, isLastPosition){
                 text : data.name,
                 callbackFunc: actionFolderClick(itemsType, id),
                 isLast,
+                id
             })
             break
         }
@@ -83,6 +86,8 @@ function buildNavigationPathToFolder(itemsType, folderId, isLastPosition){
         text : sidebarItem.text,
         icon : sidebarItem.icon,
         callbackFunc : actionSetSidebarItem(sidebarItem),
+        itemsType,
+        id: null,
         isLast
     });
 
@@ -240,18 +245,18 @@ export const navbarReducer = (state = initialState, action) => {
             return {
                 items: buildNavigationPathToNewItem(state.items, action.itemsType, action.folderId)
             };
-        case SIDEBAR_ITEM_CHANGED: 
+        // case SIDEBAR_ITEM_CHANGED: 
 
-            const item = {
-                text: action.newSidebarItem.text,
-                icon: action.newSidebarItem.icon,
-                isLast: true,
-                callbackFunc: actionSetSidebarItem(action.newSidebarItem),
-            }
+        //     const item = {
+        //         text: action.newSidebarItem.text,
+        //         icon: action.newSidebarItem.icon,
+        //         isLast: true,
+        //         callbackFunc: actionSetSidebarItem(action.newSidebarItem),
+        //     }
 
-            return {
-                items: [item]
-            }
+        //     return {
+        //         items: [item]
+        //     }
         case FOLDER_CONTENT_FOLDER_CLICK:
             if(action.isFolderItemPicker) {
                 return state;

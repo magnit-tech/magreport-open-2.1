@@ -7,8 +7,8 @@ const initialState = initialSidebarItem.key;
 
 export const currentSideBarItemKeyReducer = (state = initialState, action) => {
     switch (action.type){
-        case SIDEBAR_ITEM_CHANGED:
-            return  action.newSidebarItem.key;
+        // case SIDEBAR_ITEM_CHANGED:
+        //     return  action.newSidebarItem.key;
         case VIEWER_VIEW_ITEM:
         case VIEWER_EDIT_ITEM:
         case FOLDER_CONTENT_EDIT_ROLE_USER_CLICK:
