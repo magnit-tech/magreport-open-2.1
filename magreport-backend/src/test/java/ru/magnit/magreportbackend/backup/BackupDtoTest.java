@@ -558,9 +558,6 @@ class BackupDtoTest {
     }
 
     private  void checkNumberOfFields(Class<?> parentClass, Class<?> dtoClass)  {
-        var x = getAllClassFields(parentClass);
-        var y = getAllClassFields(dtoClass);
-
         assertEquals(getAllClassFields(parentClass).size(), getAllClassFields(dtoClass).size(), "Number of fields in class " + parentClass.getSimpleName() + " changed.");
     }
 
