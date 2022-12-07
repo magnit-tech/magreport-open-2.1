@@ -1,6 +1,6 @@
 default:
   tags: 
-    - bi
+    - heavy-runner
   image: itm-orkhd-team-docker-images.repo.corp.tander.ru/bigdata/magreportjava16
 
 variables:
