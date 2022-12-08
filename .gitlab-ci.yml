@@ -10,7 +10,6 @@ variables:
     
 stages:
   - package
-  - npm_log
 
 workflow:
   rules:
@@ -22,10 +21,5 @@ package:
   stage: package
   script:
     - mvn clean package $EXTRA_LOGGING
-  allow_failure: true
-
-npm_log:
-  stage: npm_log
-  script:
     - cat /root/.npm/_logs/*debug.log
   allow_failure: true
