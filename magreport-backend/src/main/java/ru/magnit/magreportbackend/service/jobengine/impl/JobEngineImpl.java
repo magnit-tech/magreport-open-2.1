@@ -253,9 +253,9 @@ public class JobEngineImpl implements JobEngine, InitializingBean {
         finish.forEach((key, value) -> {
             var job = jobDomainService.getJob(key);
             if (value.isCompletedExceptionally())
-                jobDomainService.setJobStatus(key, ReportJobStatusEnum.FAILED, job.getRowCount());
+                jobDomainService.setJobStatus(key, ReportJobStatusEnum.FAILED, Long.max(0, job.getRowCount()));
             else
-                jobDomainService.setJobStatus(key, ReportJobStatusEnum.COMPLETE, job.getRowCount());
+                jobDomainService.setJobStatus(key, ReportJobStatusEnum.COMPLETE, Long.max(0, job.getRowCount()));
             exportReportRunners.remove(key);
 
             sendMessageToUser(key);
