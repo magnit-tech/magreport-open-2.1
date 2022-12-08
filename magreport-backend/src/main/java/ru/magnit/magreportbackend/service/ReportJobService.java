@@ -374,7 +374,10 @@ public class ReportJobService {
         var result = filter.getFrom() == null || (filter.getFrom().isBefore(source.getCreated()) || filter.getFrom().isEqual(source.getCreated()));
         if (filter.getTo() != null && !(filter.getTo().isAfter(source.getCreated()) || filter.getTo().isEqual(source.getCreated()))) result = false;
         if (filter.getStatuses() != null && !filter.getStatuses().isEmpty() && !filter.getStatuses().contains(source.getStatus())) result = false;
-        if (filter.getUsers() != null && !filter.getUsers().isEmpty() && !filter.getUsers().contains(source.getUser().name())) result = false;
+        if (filter.getUsers() != null && !filter.getUsers().isEmpty() &&
+                filter.getUsers().stream().noneMatch( u -> u.getUserName().equalsIgnoreCase(source.getUser().name()) && u.getDomain().equalsIgnoreCase(source.getUser().domain()))){
+            result = false;
+        }
         return result;
     }
 
