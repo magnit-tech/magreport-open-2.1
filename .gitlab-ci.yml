@@ -20,6 +20,5 @@ workflow:
 package:
   stage: package
   script:
-    - mvn clean package $EXTRA_LOGGING
-    - cat /root/.npm/_logs/*debug.log
+    - mvn clean package $EXTRA_LOGGING || cat /root/.npm/_logs/*debug.log
   allow_failure: true
