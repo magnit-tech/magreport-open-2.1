@@ -20,5 +20,5 @@ workflow:
 package:
   stage: package
   script:
-    - mvn clean package -Djavax.net.ssl.trustStore=/etc/gitlab-runner/security/cacerts $EXTRA_LOGGING || cat /root/.npm/_logs/*debug.log
+    - mvn clean package $EXTRA_LOGGING || cat /root/.npm/_logs/*debug.log
   allow_failure: true
