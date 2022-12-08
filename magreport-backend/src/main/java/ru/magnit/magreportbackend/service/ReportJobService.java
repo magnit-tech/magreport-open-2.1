@@ -289,7 +289,6 @@ public class ReportJobService {
     }
 
     public List<ReportJobResponse> getMyJobs(ReportJobHistoryRequestFilter filter) {
-
         var responses = jobDomainService.getMyJobs();
         responses.forEach(response -> response.setCanExecute(checkReportPermission(response.getReport().id())));
         return applyFilter(responses, filter);
@@ -369,6 +368,7 @@ public class ReportJobService {
         return source.stream().filter(entry -> isConformToFilter(entry, filter)).toList();
     }
 
+    @SuppressWarnings("java:S3776")
     private boolean isConformToFilter(ReportJobResponse source, ReportJobHistoryRequestFilter filter) {
         if (filter.getFrom() == null && filter.getTo() == null && (filter.getStatuses() == null || filter.getStatuses().isEmpty()) && (filter.getUsers() == null || filter.getUsers().isEmpty())) return true;
         var result = filter.getFrom() == null || (filter.getFrom().isBefore(source.getCreated()) || filter.getFrom().isEqual(source.getCreated()));
@@ -378,6 +378,7 @@ public class ReportJobService {
                 filter.getUsers().stream().noneMatch( u -> u.getUserName().equalsIgnoreCase(source.getUser().name()) && u.getDomain().equalsIgnoreCase(source.getUser().domain()))){
             result = false;
         }
+        if (filter.getReportIds() != null && !filter.getReportIds().isEmpty() && !filter.getReportIds().contains(source.getReport().id())) result = false;
         return result;
     }
 
