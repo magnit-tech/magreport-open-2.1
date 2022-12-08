@@ -1,6 +1,6 @@
 default:
   tags: 
-    - heavy-runner
+    - bi
   image: dockerhub.repo.corp.tander.ru/maven:3.8.1-openjdk-16
 
 variables:
