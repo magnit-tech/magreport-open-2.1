@@ -265,7 +265,7 @@ public class DataSetDomainService {
         final var newFields = objectFields.stream().map(ObjectFieldResponse::getFieldName).map(String::toUpperCase).collect(Collectors.toSet());
         final var insertedFNames = newFields.stream().filter(fn -> !currentFieldNames.contains(fn)).map(String::toUpperCase).collect(Collectors.toSet());
         final var newFieldTypes = objectFields.stream().collect(Collectors.toMap(o -> o.getFieldName().toUpperCase(), o -> DataTypeEnum.valueOf(JDBCType.valueOf(o.getDataType())).name()));
-        final var newRemarks = objectFields.stream().collect(Collectors.toMap(o -> o.getFieldName().toUpperCase(), ObjectFieldResponse::getRemarks));
+        final var newRemarks = objectFields.stream().collect(Collectors.toMap(o -> o.getFieldName().toUpperCase(), o -> o.getRemarks() == null ? "" : o.getRemarks() ));
 
         for (var field :currentFields) {
             if (newFields.contains(field.getName().toUpperCase())) {
