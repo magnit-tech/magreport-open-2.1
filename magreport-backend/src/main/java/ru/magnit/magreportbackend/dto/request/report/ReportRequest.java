@@ -12,7 +12,6 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @Accessors(chain = true)
 public class ReportRequest {
-
     private Long id;
     private Long jobId;
 }
