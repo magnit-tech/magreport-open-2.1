@@ -30,6 +30,8 @@ function JobsMenuView(props){
 
     let params = [props.filters?.periodStart ?? null, 
         props.filters?.periodEnd ?? null, 
+        props.filters?.users ?? null, 
+        props.filters?.reportIds ?? null, 
         props.filters?.selectedStatuses ?? null
     ];
     
