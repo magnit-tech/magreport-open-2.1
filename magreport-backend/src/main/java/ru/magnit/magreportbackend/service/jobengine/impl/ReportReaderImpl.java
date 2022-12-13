@@ -116,12 +116,11 @@ public class ReportReaderImpl implements ReportReader {
 
     private List<CacheEntry> getListCacheEntryForProcedure(ResultSet resultSet, List<ReportFieldData> reportFields) {
         final var result = new ArrayList<CacheEntry>(reportFields.size());
-        var fieldCounter = 0;
 
         for (int i = 0; i < readerData.report().reportData().fields().size(); i++) {
             final var currentField = readerData.report().reportData().fields().get(i);
             if (currentField.visible()) {
-                result.add(getCacheEntryFromResultSet(resultSet, currentField, ++fieldCounter));
+                result.add(getCacheEntryFromResultSet(resultSet, currentField, currentField.ordinal()));
             }
         }
 
