@@ -111,6 +111,8 @@ public class ExcelReportDomainService {
 
         try {
             Files.deleteIfExists(rmsOutPath);
+            Files.deleteIfExists(rmsInPath);
+            Files.deleteIfExists(reportPath);
         } catch (IOException e) {
              throw new ReportExportException("Error deleting old excel pivot table file", e);
         }
