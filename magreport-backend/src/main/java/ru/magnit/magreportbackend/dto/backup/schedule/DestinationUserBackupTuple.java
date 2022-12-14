@@ -8,6 +8,7 @@ public record DestinationUserBackupTuple(
         Long scheduleTaskId,
         Long destinationTypeId,
         String val,
+        String domain,
         LocalDateTime created,
         LocalDateTime modified
 

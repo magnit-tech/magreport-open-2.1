@@ -119,6 +119,7 @@ public class ReportDomainService {
         } else {
             var folder = folderRepository.getReferenceById(id);
             result = reportFolderResponseMapper.from(folder);
+            result.setPath(getPathToFolder(id));
         }
 
         result.getReports().forEach(report -> report.setFavorite(favReportRepository.existsByUserIdAndReportId(userId, report.getId())));

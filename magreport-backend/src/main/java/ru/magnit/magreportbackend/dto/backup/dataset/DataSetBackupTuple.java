@@ -3,7 +3,7 @@ package ru.magnit.magreportbackend.dto.backup.dataset;
 import java.time.LocalDateTime;
 
 
-public record DatasetBackupTuple(
+public record DataSetBackupTuple(
         Long datasetId,
         Long datasourceId,
         Long datasetTypeId,
@@ -13,6 +13,7 @@ public record DatasetBackupTuple(
         String objectName,
         String name,
         String description,
+        String domainName,
         Long userId,
         LocalDateTime created,
         LocalDateTime modified

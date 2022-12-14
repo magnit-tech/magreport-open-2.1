@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 
 // material-ui
 import FilterListIcon from '@material-ui/icons/FilterList';
-//import Typography from '@material-ui/core/Typography';
 import { MuiPickersUtilsProvider, KeyboardDateTimePicker } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import ruLocale from "date-fns/locale/ru";
@@ -10,8 +9,6 @@ import format from "date-fns/format";
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import Badge from '@material-ui/core/Badge';
-//import DoneOutlineIcon from '@material-ui/icons/DoneOutline';
-//import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import CloseIcon from '@material-ui/icons/Close';
 import DoneIcon from '@material-ui/icons/Done';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
@@ -24,7 +21,8 @@ import JobStatusSelect from './JobFilters/JobStatusSelect'
 import JobUsernameSelect from './JobFilters/JobUsernameSelect'
 import {FolderItemTypes} from './FolderItemTypes';
 import Slide from '@material-ui/core/Slide';
-import DesignerTextField from '../Main/Development/Designer/DesignerTextField';
+// dataHub
+import dataHub from 'ajax/DataHub';
 // styles
 import { TimeSlider, FolderContentCSS } from './FolderContentCSS';
 
@@ -127,6 +125,10 @@ export default function FilterPanel(props){
             return acc
         }, 0)
     };
+
+    function handleSelectChange(type, selectArray){
+        props.onFilterChange(type, selectArray)
+    }
     
     return (
         <div >
@@ -204,22 +206,21 @@ export default function FilterPanel(props){
 						{ props.itemsType === FolderItemTypes.userJobs &&
 							<Grid item>
 								<JobUsernameSelect 
-									user={props.filters.user}
-									onChange={user => props.onFilterChange('user', user)}
+                                    user={props.filters.user}
+                                    label={"Пользователи"}
+                                    onDataLoad={dataHub.userController.users}
+									onChange={users => handleSelectChange('user', users)}
 								/>
 							</Grid>
 						}
-                        <Grid item className = {classes.itemStatusFilter}>
-                            <DesignerTextField
-                                margin = {'4px'}
-                                size = "small"
-                                label = "Название отчёта"
-                                value = {props.filters.name}
-                                fullWidth
-                                variant="filled"
-                                onChange={e => props.onFilterChange('name', e)}
-                            />
-                        </Grid>
+                        <Grid item>
+                            <JobUsernameSelect 
+                                label={"Отчёты"}
+                                user={props.filters.reportIds}
+                                onDataLoad={dataHub.reportJobController.getAllReports}
+								onChange={reports => handleSelectChange('reportIds', reports)}
+							/>
+						</Grid>
 						<Grid item className = {classes.itemStatusFilter}>
 							<JobStatusSelect 
 								selectedStatuses={props.filters.selectedStatuses}

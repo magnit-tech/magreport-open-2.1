@@ -27,7 +27,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-
         <!--  Component versions  -->
         <java-jwt.version>3.19.2</java-jwt.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
@@ -38,21 +37,20 @@
         <mockito-core.version>4.6.1</mockito-core.version>
         <snappy-java.version>1.1.8.4</snappy-java.version>
         <poi-ooxml.version>5.2.2</poi-ooxml.version>
-        <preliquibase-spring-boot-starter.version>1.1.1</preliquibase-spring-boot-starter.version>
-        <spring-boot-starter-websocket.version>2.7.0</spring-boot-starter-websocket.version>
+        <preliquibase-spring-boot-starter.version>1.3.0</preliquibase-spring-boot-starter.version>
+        <spring-boot-starter-websocket.version>2.7.6</spring-boot-starter-websocket.version>
         <guava.version>31.1-jre</guava.version>
         <httpclient.version>4.5.13</httpclient.version>
         <logback-core.version>1.2.11</logback-core.version>
         <slf4j.version>1.7.36</slf4j.version>
-        <liquibase-core.version>4.11.0</liquibase-core.version>
+        <liquibase-core.version>4.17.2</liquibase-core.version>
         <h2.version>2.1.214</h2.version>
-        <springdoc-openapi-ui.version>1.6.9</springdoc-openapi-ui.version>
+        <springdoc-openapi-ui.version>1.6.13</springdoc-openapi-ui.version>
         <org.json.version>20220320</org.json.version>
-        <spring-boot-admin-client.version>2.7.5</spring-boot-admin-client.version>
+        <spring-boot-admin-client.version>2.7.6</spring-boot-admin-client.version>
     </properties>
 
     <dependencies>
-
         <!--  Core  -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -91,12 +89,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
@@ -108,8 +104,6 @@
             <artifactId>json</artifactId>
             <version>${org.json.version}</version>
         </dependency>
-
-
 
         <!-- Logger -->
         <dependency>
@@ -123,7 +117,6 @@
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
         </dependency>
-
 
         <!--  Security  -->
         <dependency>
@@ -243,8 +236,6 @@
             <version>${spring-boot-starter-websocket.version}</version>
 
         </dependency>
-
-
     </dependencies>
 
     <build>
@@ -268,9 +259,20 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <release>16</release>
                     <source>16</source>
                     <target>16</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-configuration-processor</artifactId>
+                            <version>2.7.6</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.24</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
             <plugin>
@@ -288,6 +290,7 @@
                 <configuration>
                     <filesets>
                         <fileset>
+                            <!--suppress UnresolvedMavenProperty -->
                             <directory>${MAGREPORT_HOME}</directory>
                             <includes>
                                 <include>**/*</include>
@@ -314,23 +317,32 @@
                         <phase>initialize</phase>
                         <configuration>
                             <target>
+                                <!--suppress UnresolvedMavenProperty -->
                                 <mkdir dir="${MAGREPORT_HOME}/reports"/>
+                                <!--suppress UnresolvedMavenProperty -->
                                 <mkdir dir="${MAGREPORT_HOME}/log"/>
+                                <!--suppress UnresolvedMavenProperty -->
                                 <mkdir dir="${MAGREPORT_HOME}/excel-export"/>
+                                <!--suppress UnresolvedMavenProperty -->
                                 <mkdir dir="${MAGREPORT_HOME}/excel-templates"/>
+                                <!--suppress UnresolvedMavenProperty -->
                                 <mkdir dir="${MAGREPORT_HOME}/jdbc"/>
+                                <!--suppress UnresolvedMavenProperty -->
                                 <mkdir dir="${MAGREPORT_HOME}/magreport-admin"/>
                                 
+                                <!--suppress UnresolvedMavenProperty -->
                                 <copy todir="${MAGREPORT_HOME}/excel-templates">
                                     <fileset dir="src/main/resources/templates">
                                         <include name="**/*"/>
                                     </fileset>
                                 </copy>
+                                <!--suppress UnresolvedMavenProperty -->
                                 <copy todir="${MAGREPORT_HOME}/jdbc">
                                     <fileset dir="jdbc">
                                         <include name="**/*"/>
                                     </fileset>
                                 </copy>
+                                <!--suppress UnresolvedMavenProperty -->
                                 <copy todir="${MAGREPORT_HOME}">
                                     <fileset dir="profiles">
                                         <include name="**/*"/>

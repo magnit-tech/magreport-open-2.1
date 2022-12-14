@@ -29,6 +29,7 @@ import ru.magnit.magreportbackend.mapper.datasource.DataSourceMerger;
 import ru.magnit.magreportbackend.mapper.datasource.DataSourceResponseMapper;
 import ru.magnit.magreportbackend.mapper.datasource.DataSourceTypeResponseMapper;
 import ru.magnit.magreportbackend.mapper.datasource.DataSourceViewMapper;
+import ru.magnit.magreportbackend.mapper.datasource.FolderNodeResponseDataSourceFolderMapper;
 import ru.magnit.magreportbackend.repository.DataSourceFolderRepository;
 import ru.magnit.magreportbackend.repository.DataSourceRepository;
 import ru.magnit.magreportbackend.repository.DataSourceTypeRepository;
@@ -43,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -100,6 +102,9 @@ class DataSourceDomainServiceTest {
     @Mock
     private DataSourceDependenciesResponseMapper dataSourceDependenciesResponseMapper;
 
+    @Mock
+    private FolderNodeResponseDataSourceFolderMapper folderNodeResponseDataSourceFolderMapper;
+
     @Test
     void getFolder() {
         when(folderRepository.existsById(anyLong())).thenReturn(true);
@@ -118,8 +123,8 @@ class DataSourceDomainServiceTest {
 
 
         verify(dataSourceFolderResponseMapper).from(any(DataSourceFolder.class));
-        verify(folderRepository).getReferenceById(anyLong());
-        verify(folderRepository).existsById(anyLong());
+        verify(folderRepository, times(2)).getReferenceById(anyLong());
+        verify(folderRepository, times(2)).existsById(anyLong());
         verifyNoMoreInteractions(folderRepository, dataSourceFolderResponseMapper);
 
         Mockito.reset(folderRepository, dataSourceFolderResponseMapper);
@@ -476,6 +481,7 @@ class DataSourceDomainServiceTest {
     private DataSourceResponse getDataSourceResponse() {
 
         return new DataSourceResponse(
+                ID,
                 ID,
                 NAME,
                 DESCRIPTION,

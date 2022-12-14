@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import ru.magnit.magreportbackend.domain.folderreport.FolderAuthorityEnum;
+import ru.magnit.magreportbackend.dto.response.folder.FolderNodeResponse;
 import ru.magnit.magreportbackend.dto.response.report.ReportResponse;
 
 import java.time.LocalDateTime;
@@ -43,6 +44,9 @@ public class FolderResponse {
 
     @Schema(name = "Уровень доступа текущего пользователя")
     private FolderAuthorityEnum authority;
+
+    @Schema(name = "Путь к папке")
+    private List<FolderNodeResponse> path = Collections.emptyList();
 
     @JsonFormat(pattern = ISO_DATE_TIME_PATTERN)
     @Schema(name = "Дата и время создания каталога")

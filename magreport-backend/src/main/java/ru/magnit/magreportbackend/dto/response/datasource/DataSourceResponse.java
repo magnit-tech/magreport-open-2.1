@@ -12,6 +12,9 @@ public record DataSourceResponse(
         @JsonFormat(shape = JsonFormat.Shape.NUMBER_INT)
         Long id,
 
+        @JsonFormat(shape = JsonFormat.Shape.NUMBER_INT)
+        Long folderId,
+
         @JsonFormat(shape = JsonFormat.Shape.STRING)
         String name,
 
@@ -41,6 +44,6 @@ public record DataSourceResponse(
 ) {
     // For satisfying tests (default constructor with meaningless parameters)
     public DataSourceResponse() {
-        this(null, null, null, null, null, null, null, null, null, null);
+        this(null, null, null, null,  null, null, null, null, null, null, null);
     }
 }

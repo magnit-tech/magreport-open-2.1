@@ -3,18 +3,16 @@ package ru.magnit.magreportbackend.mapper.dataset;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.magnit.magreportbackend.domain.dataset.DataSet;
-import ru.magnit.magreportbackend.dto.backup.dataset.DatasetBackupTuple;
+import ru.magnit.magreportbackend.dto.backup.dataset.DataSetBackupTuple;
 import ru.magnit.magreportbackend.mapper.Mapper;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class DataSetBackupMapper implements Mapper<DatasetBackupTuple, DataSet> {
+public class DataSetBackupMapper implements Mapper<DataSetBackupTuple, DataSet> {
 
     @Override
-    public DatasetBackupTuple from(DataSet source) {
-        return new DatasetBackupTuple(
+    public DataSetBackupTuple from(DataSet source) {
+        return new DataSetBackupTuple(
                 source.getId(),
                 source.getDataSource().getId(),
                 source.getType().getId(),
@@ -24,6 +22,7 @@ public class DataSetBackupMapper implements Mapper<DatasetBackupTuple, DataSet> 
                 source.getObjectName(),
                 source.getName(),
                 source.getDescription(),
+                source.getDomainName(),
                 source.getUser().getId(),
                 source.getCreatedDateTime(),
                 source.getModifiedDateTime()

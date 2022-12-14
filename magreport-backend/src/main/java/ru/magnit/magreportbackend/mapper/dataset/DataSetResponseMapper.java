@@ -23,6 +23,7 @@ public class DataSetResponseMapper implements Mapper<DataSetResponse, DataSet> {
     private DataSetResponse mapBaseProperties(DataSet source) {
         final var dataSetResponse = new DataSetResponse()
                 .setId(source.getId())
+                .setFolderId(source.getFolder().getId())
                 .setName(source.getName())
                 .setDescription(source.getDescription())
                 .setCatalogName(source.getCatalogName())

@@ -1,6 +1,5 @@
 package ru.magnit.magreportbackend.service;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -8,7 +7,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.magnit.magreportbackend.dto.request.folder.FolderSearchRequest;
-import ru.magnit.magreportbackend.dto.request.user.DomainGroupADRequest;
 import ru.magnit.magreportbackend.dto.request.user.DomainGroupRequest;
 import ru.magnit.magreportbackend.dto.request.user.RoleAddRequest;
 import ru.magnit.magreportbackend.dto.request.user.RoleDomainGroupSetRequest;
@@ -16,21 +14,16 @@ import ru.magnit.magreportbackend.dto.request.user.RoleRequest;
 import ru.magnit.magreportbackend.dto.request.user.RoleTypeRequest;
 import ru.magnit.magreportbackend.dto.request.user.RoleUsersSetRequest;
 import ru.magnit.magreportbackend.dto.response.folder.FolderSearchResponse;
-import ru.magnit.magreportbackend.dto.response.role.RoleFolderPermissionResponse;
 import ru.magnit.magreportbackend.dto.response.user.DomainGroupResponse;
 import ru.magnit.magreportbackend.dto.response.user.RoleDomainGroupResponse;
 import ru.magnit.magreportbackend.dto.response.user.RoleResponse;
 import ru.magnit.magreportbackend.dto.response.user.RoleTypeResponse;
 import ru.magnit.magreportbackend.dto.response.user.RoleUsersResponse;
 import ru.magnit.magreportbackend.dto.response.user.UserResponse;
-import ru.magnit.magreportbackend.service.domain.DomainService;
 import ru.magnit.magreportbackend.service.domain.LdapService;
 import ru.magnit.magreportbackend.service.domain.RoleDomainService;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -51,8 +44,6 @@ class RoleServiceTest {
     private static final String NAME = "Name";
     private static final String DESCRIPTION = "Description";
     private static final Long TYPE_ID = 5L;
-    private static final String NAME_PART = "NamePart";
-    private static final Long MAX_RESULTS = 10L;
 
     @Mock
     private RoleDomainService roleDomainService;
@@ -60,12 +51,8 @@ class RoleServiceTest {
     @Mock
     private LdapService ldapService;
 
-    @Mock
-    private DomainService domainService;
-
     @InjectMocks
     private RoleService service;
-
 
     @Test
     void addRole() {
@@ -122,20 +109,6 @@ class RoleServiceTest {
 
         verify(roleDomainService).getRole(anyLong());
         verify(request).getId();
-
-        verifyNoMoreInteractions(request, roleDomainService, ldapService);
-    }
-
-    @Disabled("Need to repair")
-    @Test
-    void deleteRole() {
-        when(service.getPermittedFolders(any())).thenReturn(new RoleFolderPermissionResponse());
-        RoleRequest request = spy(getRoleRequest());
-
-        service.deleteRole(request);
-
-        verify(request).getId();
-        verify(roleDomainService).deleteRole(anyLong());
 
         verifyNoMoreInteractions(request, roleDomainService, ldapService);
     }
@@ -331,22 +304,6 @@ class RoleServiceTest {
     }
 
     @Test
-    void getADDomainGroups() {
-        DomainGroupADRequest request = spy(getDomainGroupADRequest());
-
-        when(ldapService.getGroupsByNamePart(any(), any())).thenReturn(Collections.singletonList("Group"));
-
-        var result = service.getADDomainGroups(request);
-
-        assertEquals(1, result.size());
-        verify(ldapService).getGroupsByNamePart(any(), any());
-        verify(request).getNamePart();
-        verify(request).getDomainNames();
-
-        verifyNoMoreInteractions(request, roleDomainService, ldapService);
-    }
-
-    @Test
     void deleteRoleByName() {
 
         String roleName = "Name";
@@ -426,18 +383,5 @@ class RoleServiceTest {
         return new RoleUsersSetRequest()
                 .setId(ID)
                 .setUsers(Collections.singletonList(1L));
-    }
-
-    private DomainGroupADRequest getDomainGroupADRequest() {
-        return new DomainGroupADRequest()
-                .setNamePart(NAME_PART)
-                .setMaxResults(MAX_RESULTS)
-                .setDomainNames(Collections.emptyList());
-    }
-
-    private Map <String, Long> getDomains() {
-        var res = new HashMap<String, Long>();
-        res.put("DOMAIN",1L);
-        return res;
     }
 }
