@@ -120,7 +120,9 @@ public class DataSetDomainService {
         } else {
             var folder = folderRepository.getReferenceById(id);
 
-            return dataSetFolderResponseMapper.from(folder);
+            var response =  dataSetFolderResponseMapper.from(folder);
+            response.setPath(getPathToFolder(id));
+            return response;
         }
     }
 

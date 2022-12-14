@@ -129,8 +129,10 @@ public class FilterInstanceDomainService {
                     .setModified(LocalDateTime.now());
         } else {
             var folder = folderRepository.getReferenceById(id);
+            var response = filterInstanceFolderResponseMapper.from(folder);
+            response.setPath(getPathToFolder(id));
 
-            return filterInstanceFolderResponseMapper.from(folder);
+            return response;
         }
     }
 
