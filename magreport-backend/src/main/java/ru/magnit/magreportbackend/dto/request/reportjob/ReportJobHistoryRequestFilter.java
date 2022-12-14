@@ -6,7 +6,6 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum;
-import ru.magnit.magreportbackend.dto.request.user.UserRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,6 +19,6 @@ public class ReportJobHistoryRequestFilter {
     private LocalDateTime from;
     private LocalDateTime to;
     private List<ReportJobStatusEnum> statuses;
-    private List<UserRequest> users;
+    private List<Long> users;
     private List<Long> reportIds;
 }
