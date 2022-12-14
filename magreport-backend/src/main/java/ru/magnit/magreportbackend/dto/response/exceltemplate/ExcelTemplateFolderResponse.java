@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import ru.magnit.magreportbackend.domain.folderreport.FolderAuthorityEnum;
+import ru.magnit.magreportbackend.dto.response.folder.FolderNodeResponse;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -28,6 +29,7 @@ public class ExcelTemplateFolderResponse {
     private List<ExcelTemplateFolderResponse> childFolders = Collections.emptyList();
     private List<ExcelTemplateResponse> excelTemplates = Collections.emptyList();
     private FolderAuthorityEnum authority;
+    private List<FolderNodeResponse> path = Collections.emptyList();
 
     @JsonFormat(pattern = ISO_DATE_TIME_PATTERN)
     private LocalDateTime created;

@@ -183,12 +183,16 @@ public class SecurityFilterDomainService {
                 securityFilterFolderResponseMapper.shallowMap(folderRepository.getAllByParentFolderIsNull()),
                 Collections.emptyList(),
                 FolderAuthorityEnum.NONE,
+                Collections.emptyList(),
                 LocalDateTime.now(),
                 LocalDateTime.now());
         } else {
             var folder = folderRepository.getReferenceById(folderId);
 
-            return securityFilterFolderResponseMapper.from(folder);
+            var response = securityFilterFolderResponseMapper.from(folder);
+            response.setPath(getPathToFolder(folderId));
+
+            return response;
         }
     }
 
