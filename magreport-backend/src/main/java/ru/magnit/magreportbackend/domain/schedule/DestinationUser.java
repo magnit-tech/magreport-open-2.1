@@ -57,7 +57,8 @@ public class DestinationUser extends BaseEntity {
     }
 
 
-    public DestinationUser(String value){
+    public DestinationUser(String value, String domainName){
         this.value = value;
+        this.domainName = domainName;
     }
 }

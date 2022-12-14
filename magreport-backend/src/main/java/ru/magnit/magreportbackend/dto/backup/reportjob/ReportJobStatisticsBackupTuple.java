@@ -12,7 +12,10 @@ public record ReportJobStatisticsBackupTuple(
         Long reportJobStateId,
         Long rowCount,
         LocalDateTime created,
-        LocalDateTime modified
+        LocalDateTime modified,
+        Long exportExcelCount,
+        Long olapRequestCount,
+        Boolean isShare
 
 ) {
 }

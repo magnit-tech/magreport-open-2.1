@@ -22,6 +22,7 @@ public class DataSourceResponseMapper implements Mapper<DataSourceResponse, Data
     private DataSourceResponse mapBaseProperties(DataSource source) {
         return new DataSourceResponse(
             source.getId(),
+            source.getFolder().getId(),
             source.getName(),
             source.getDescription(),
             source.getUrl(),

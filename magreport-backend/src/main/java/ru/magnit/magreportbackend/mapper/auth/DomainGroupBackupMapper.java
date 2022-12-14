@@ -13,6 +13,7 @@ public class DomainGroupBackupMapper implements Mapper<DomainGroupBackupTuple, D
     public DomainGroupBackupTuple from(DomainGroup source) {
         return new DomainGroupBackupTuple(
                 source.getId(),
+                source.getDomain().getId(),
                 source.getName(),
                 source.getDescription(),
                 source.getCreatedDateTime(),
