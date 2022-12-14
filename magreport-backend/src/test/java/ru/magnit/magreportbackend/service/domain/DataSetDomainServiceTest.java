@@ -59,6 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -154,8 +155,8 @@ class DataSetDomainServiceTest {
 
         verify(dataSetFolderResponseMapper).from((DataSetFolder) any());
         verifyNoMoreInteractions(dataSetFolderResponseMapper);
-        verify(folderRepository).getReferenceById(anyLong());
-        verify(folderRepository).existsById(anyLong());
+        verify(folderRepository, times(2)).getReferenceById(anyLong());
+        verify(folderRepository, times(2)).existsById(anyLong());
         verifyNoMoreInteractions(folderRepository);
 
         when(folderRepository.getAllByParentFolderIsNull()).thenReturn(Collections.emptyList());
