@@ -40,7 +40,6 @@ import ru.magnit.magreportbackend.repository.ExcelTemplateFolderRepository;
 import ru.magnit.magreportbackend.repository.ExcelTemplateFolderRoleRepository;
 import ru.magnit.magreportbackend.repository.ExcelTemplateRepository;
 import ru.magnit.magreportbackend.repository.ReportExcelTemplateRepository;
-import ru.magnit.magreportbackend.util.JsonUtils;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -95,7 +94,10 @@ public class ExcelTemplateDomainService {
         } else {
             var folder = folderRepository.getReferenceById(folderId);
 
-            return excelTemplateFolderResponseMapper.from(folder);
+            var response =  excelTemplateFolderResponseMapper.from(folder);
+            response.setPath(getPathToFolder(folderId));
+
+            return response;
         }
     }
 
