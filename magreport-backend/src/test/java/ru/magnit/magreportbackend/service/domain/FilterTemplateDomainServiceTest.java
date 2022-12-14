@@ -20,6 +20,7 @@ import ru.magnit.magreportbackend.mapper.filtertemplate.FilterTemplateFolderMapp
 import ru.magnit.magreportbackend.mapper.filtertemplate.FilterTemplateFolderResponseMapper;
 import ru.magnit.magreportbackend.mapper.filtertemplate.FilterTemplateResponseMapper;
 import ru.magnit.magreportbackend.mapper.filtertemplate.FilterTypeResponseMapper;
+import ru.magnit.magreportbackend.mapper.filtertemplate.FolderNodeResponseFilterTemplateFolderMapper;
 import ru.magnit.magreportbackend.repository.FilterFieldTypeRepository;
 import ru.magnit.magreportbackend.repository.FilterOperationTypeRepository;
 import ru.magnit.magreportbackend.repository.FilterTemplateFolderRepository;
@@ -36,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -85,6 +87,9 @@ class FilterTemplateDomainServiceTest {
     @Mock
     private FilterTemplateResponseMapper filterTemplateResponseMapper;
 
+    @Mock
+    private FolderNodeResponseFilterTemplateFolderMapper folderNodeResponseFilterTemplateFolderMapper;
+
     @Test
     void getFolder() {
         when(folderRepository.existsById(anyLong())).thenReturn(true);
@@ -101,8 +106,8 @@ class FilterTemplateDomainServiceTest {
         assertEquals(CREATED_TIME, response.getCreated());
         assertEquals(MODIFIED_TIME, response.getModified());
 
-        verify(folderRepository).existsById(anyLong());
-        verify(folderRepository).getReferenceById(anyLong());
+        verify(folderRepository, times(2)).existsById(anyLong());
+        verify(folderRepository, times(2)).getReferenceById(anyLong());
         verify(filterTemplateFolderResponseMapper).from((FilterTemplateFolder) any());
         verifyNoMoreInteractions(folderRepository, filterTemplateFolderResponseMapper);
 

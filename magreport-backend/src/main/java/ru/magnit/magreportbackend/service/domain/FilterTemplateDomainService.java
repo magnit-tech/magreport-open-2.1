@@ -77,7 +77,9 @@ public class FilterTemplateDomainService {
                     .setModified(LocalDateTime.now());
         } else {
             var folder = folderRepository.getReferenceById(id);
-            return filterTemplateFolderResponseMapper.from(folder);
+            var response = filterTemplateFolderResponseMapper.from(folder);
+            response.setPath(getPathToFolder(id));
+            return response;
         }
     }
 
