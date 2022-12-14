@@ -25,6 +25,7 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 
 import { setLightTheme, setDarkTheme } from '../../redux/actions/admin/actionThemeDesign';
+import NewYearPanel from './newyearpanel';
 
 function PaperComponent(props) {
     return (
@@ -74,6 +75,7 @@ function Header(props){
     }
     return(
         <AppBar position="static" className={classes.appBar}>
+            <NewYearPanel/>
             <Menu
                 id="simple-menu"
                 anchorEl={anchorEl}
