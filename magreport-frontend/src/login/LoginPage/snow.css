@@ -1,0 +1,39 @@
+.sneg {
+    position: absolute;
+    inset: 0;
+    background-image: url('../../images/snow.png'), 
+    url('../../images/snow3.png'), 
+    url('../../images/snow2.png');
+    
+    -webkit-animation: snow 10s linear infinite;
+    -moz-animation: snow 10s linear infinite;
+    -ms-animation: snow 10s linear infinite;
+    animation: snow 10s linear infinite;
+    }
+    @keyframes snow {
+        0% {background-position: 0px 0px, 0px 0px, 0px 0px;}
+        30% {background-position: 150px 200px, 100px 100px, 100px 100px;}
+        60% {background-position: 350px 600px, 250px 250px, 200px 200px;}    
+        100% {background-position: 500px 1000px, 400px 400px, 300px 300px;}
+        }
+        
+        @-moz-keyframes snow {
+        0% {background-position: 0px 0px, 0px 0px, 0px 0px;}
+        30% {background-position: 150px 200px, 100px 100px, 100px 100px;}
+        60% {background-position: 350px 600px, 250px 250px, 200px 200px;}    
+        100% {background-position: 500px 1000px, 400px 400px, 300px 300px;}
+        }
+        
+        @-webkit-keyframes snow {
+        0% {background-position: 0px 0px, 0px 0px, 0px 0px;}
+        30% {background-position: 150px 200px, 100px 100px, 100px 100px;}
+        60% {background-position: 350px 600px, 250px 250px, 200px 200px;}    
+        100% {background-position: 500px 1000px, 400px 400px, 300px 300px;}
+        }
+        
+        @-ms-keyframes snow {
+        0% {background-position: 0px 0px, 0px 0px, 0px 0px;}
+        30% {background-position: 150px 200px, 100px 100px, 100px 100px;}
+        60% {background-position: 350px 600px, 250px 250px, 200px 200px;}    
+        100% {background-position: 500px 1000px, 400px 400px, 300px 300px;}
+        }
