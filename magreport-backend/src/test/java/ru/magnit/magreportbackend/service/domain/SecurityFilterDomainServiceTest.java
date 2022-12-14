@@ -174,8 +174,8 @@ class SecurityFilterDomainServiceTest {
 
         assertNotNull(domainService.getFolder(ID));
 
-        verify(folderRepository).existsById(any());
-        verify(folderRepository).getReferenceById(any());
+        verify(folderRepository, times(2)).existsById(any());
+        verify(folderRepository, times(2)).getReferenceById(any());
 
         verifyNoMoreInteractions(folderRepository);
 

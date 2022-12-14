@@ -40,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -134,8 +135,8 @@ class FolderDomainServiceTest {
         assertEquals(CREATED_TIME, response.getCreated());
         assertEquals(MODIFIED_TIME, response.getModified());
 
-        verify(folderRepository).existsById(anyLong());
-        verify(folderRepository).getReferenceById(anyLong());
+        verify(folderRepository, times(2)).existsById(anyLong());
+        verify(folderRepository, times(2)).getReferenceById(anyLong());
         verify(folderResponseMapper).from((Folder) any());
         verifyNoMoreInteractions(folderRepository, folderResponseMapper);
 

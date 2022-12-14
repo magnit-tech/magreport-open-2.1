@@ -147,8 +147,8 @@ class FilterInstanceDomainServiceTest {
         assertEquals(CREATED_TIME, response.getCreated());
         assertEquals(MODIFIED_TIME, response.getModified());
 
-        verify(folderRepository).existsById(anyLong());
-        verify(folderRepository).getReferenceById(anyLong());
+        verify(folderRepository, times(2)).existsById(anyLong());
+        verify(folderRepository, times(2)).getReferenceById(anyLong());
         verifyNoMoreInteractions(folderRepository);
         verify(filterInstanceFolderResponseMapper).from((FilterInstanceFolder) any());
         verifyNoMoreInteractions(filterInstanceFolderResponseMapper);
