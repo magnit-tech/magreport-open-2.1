@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.magnit.magreportbackend.domain.dataset.DataSet;
 import ru.magnit.magreportbackend.domain.dataset.DataSetField;
+import ru.magnit.magreportbackend.domain.dataset.DataSetFolder;
 import ru.magnit.magreportbackend.domain.dataset.DataSetType;
 import ru.magnit.magreportbackend.domain.datasource.DataSource;
 import ru.magnit.magreportbackend.domain.user.User;
@@ -78,6 +79,7 @@ class DataSetResponseMapperTest {
     private DataSet getDataSet() {
         return new DataSet()
                 .setId(ID)
+                .setFolder(new DataSetFolder(ID))
                 .setName(NAME)
                 .setDescription(DESCRIPTION)
                 .setCatalogName(CATALOG_NAME)

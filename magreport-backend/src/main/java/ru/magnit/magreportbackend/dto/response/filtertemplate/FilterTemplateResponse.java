@@ -22,6 +22,7 @@ import static ru.magnit.magreportbackend.util.Constant.ISO_DATE_TIME_PATTERN;
 public class FilterTemplateResponse {
 
     private Long id;
+    private Long folderId;
     private String name;
     private String description;
     private FilterTypeResponse type;

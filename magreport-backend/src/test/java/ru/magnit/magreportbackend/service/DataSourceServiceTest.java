@@ -507,6 +507,7 @@ class DataSourceServiceTest {
 
         return new DataSourceResponse(
                 ID,
+                ID,
                 NAME,
                 DESCRIPTION,
                 URL,
@@ -546,6 +547,7 @@ class DataSourceServiceTest {
     private DataSourceResponse getRenameDataSourceResponse() {
 
         return new DataSourceResponse(
+                ID,
                 ID,
                 RENAME,
                 DESCRIPTION,
