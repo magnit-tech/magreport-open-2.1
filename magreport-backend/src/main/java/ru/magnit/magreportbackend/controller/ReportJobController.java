@@ -25,6 +25,7 @@ import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobMetadataRespon
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportPageResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportSqlQueryResponse;
+import ru.magnit.magreportbackend.dto.response.reportjob.ScheduledReportResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.TokenResponse;
 import ru.magnit.magreportbackend.dto.response.user.UserResponse;
 import ru.magnit.magreportbackend.service.ReportJobService;
@@ -61,8 +62,7 @@ public class ReportJobController {
     public static final String REPORT_JOB_GET_USERS_JOB = "/api/v1/report-job/get-users-job";
     public static final String REPORT_JOB_COMMENT = "/api/v1/report-job/add-comment";
     public static final String REPORT_JOB_GET_HISTORY = "/api/v1/report-job/get-history";
-
-
+    public static final String REPORT_JOB_GET_ALL_REPORTS = "/api/v1/report-job/get-all-reports";
 
     @Operation(summary = "Получение страницы отчета")
     @ResponseStatus(HttpStatus.OK)
@@ -220,6 +220,23 @@ public class ReportJobController {
                 .message("")
                 .data(service.getMyJobs(filter))
                 .build();
+
+        LogHelper.logInfoUserMethodEnd();
+        return response;
+    }
+
+    @Operation(summary = "Получение информации об отчетах в заданиях пользователей")
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping(value = REPORT_JOB_GET_ALL_REPORTS,
+        produces = APPLICATION_JSON_VALUE)
+    public ResponseList<ScheduledReportResponse> getAllScheduledReports() {
+        LogHelper.logInfoUserMethodStart();
+
+        var response = ResponseList.<ScheduledReportResponse>builder()
+            .success(true)
+            .message("")
+            .data(service.getAllScheduledReports())
+            .build();
 
         LogHelper.logInfoUserMethodEnd();
         return response;

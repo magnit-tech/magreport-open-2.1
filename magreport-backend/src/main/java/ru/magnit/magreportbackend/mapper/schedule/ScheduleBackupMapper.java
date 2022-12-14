@@ -31,7 +31,9 @@ public class ScheduleBackupMapper implements Mapper<ScheduleBackupTuple, Schedul
                 source.getPlanStartDate(),
                 source.getLastStartDate(),
                 source.getCreatedDateTime(),
-                source.getModifiedDateTime()
+                source.getModifiedDateTime(),
+                source.getIntervalMinutes(),
+                source.getFinishTime()
         );
     }
 }

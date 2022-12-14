@@ -580,7 +580,7 @@ class DataSetServiceTest {
                 .setCatalogName(CATALOG_NAME)
                 .setObjectName(OBJECT_NAME)
                 .setSchemaName(SCHEMA_NAME)
-                .setDataSource(new DataSourceResponse(ID, null, null, null, null, null, null, null, null, null))
+                .setDataSource(new DataSourceResponse(ID, null, null,null, null, null, null, null, null, null, null))
                 .setFields(Collections.singletonList(new DataSetFieldResponse()));
     }
 

@@ -7,6 +7,8 @@ public record ReportBackupTuple(
         Long reportId,
         Long reportFolderId,
         Long datasetId,
+
+        Long userId,
         String requirementsURL,
         String name,
         String description,

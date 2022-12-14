@@ -25,8 +25,10 @@ import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobStatisticsResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobUserResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportSqlQueryResponse;
+import ru.magnit.magreportbackend.dto.response.reportjob.ScheduledReportResponse;
 import ru.magnit.magreportbackend.exception.FileSystemException;
 import ru.magnit.magreportbackend.exception.InvalidParametersException;
+import ru.magnit.magreportbackend.mapper.report.ScheduledReportResponseMapper;
 import ru.magnit.magreportbackend.mapper.reportjob.ReportJobBaseStatsTupleMapper;
 import ru.magnit.magreportbackend.mapper.reportjob.ReportJobDataMapper;
 import ru.magnit.magreportbackend.mapper.reportjob.ReportJobFilterResponseMapper;
@@ -40,6 +42,7 @@ import ru.magnit.magreportbackend.repository.ReportJobFilterRepository;
 import ru.magnit.magreportbackend.repository.ReportJobRepository;
 import ru.magnit.magreportbackend.repository.ReportJobStatisticsRepository;
 import ru.magnit.magreportbackend.repository.ReportJobUserRepository;
+import ru.magnit.magreportbackend.repository.ReportRepository;
 import ru.magnit.magreportbackend.service.ExcelTemplateService;
 import ru.magnit.magreportbackend.util.FileUtils;
 
@@ -71,7 +74,7 @@ public class JobDomainService {
     private final ReportJobRepository repository;
     private final UserDomainService userDomainService;
     private final ReportJobStatisticsRepository statisticsRepository;
-
+    private final ReportRepository reportRepository;
     private final ReportJobBaseStatsTupleMapper baseStatsTupleMapper;
     private final ReportJobFilterRepository reportJobFilterRepository;
     private final ReportJobUserRepository reportJobUserRepository;
@@ -84,7 +87,7 @@ public class JobDomainService {
     private final ReportJobMetadataResponseMapper reportJobMetadataResponseMapper;
     private final ReportJobUserResponseMapper reportJobUserResponseMapper;
     private final ReportJobStatisticsResponseMapper statisticsResponseMapper;
-
+    private final ScheduledReportResponseMapper scheduledReportResponseMapper;
     @Value("${magreport.jobengine.job-retention-time}")
     private Long jobRetentionTime;
 
@@ -130,7 +133,7 @@ public class JobDomainService {
         final var job = repository.getReferenceById(id);
         final var jobStatus =  ReportJobStatusEnum.getById(job.getStatus().getId());
 
-        if ((jobStatus.equals(SCHEDULED) || jobStatus.equals(PENDING_DB_CONNECTION)) && status.equals(CANCELING))
+        if ((jobStatus.equals(SCHEDULED) || jobStatus.equals(PENDING_DB_CONNECTION)) && status.equals(CANCELING) || jobStatus.equals(CANCELING))
             status = CANCELED;
 
         if (checkFinalStatus(job.getStatus().getId())) {
@@ -393,6 +396,10 @@ public class JobDomainService {
     @Transactional
     public List<ReportJobResponse> getActiveJobs(Long reportId, Long userId, Collection<Long> statuses) {
         return reportJobResponseMapper.from(repository.getAllByReportIdAndUserIdAndStatusIdIn(reportId, userId, statuses));
+    }
+
+    public List<ScheduledReportResponse> getAllScheduledReports() {
+        return scheduledReportResponseMapper.from(reportRepository.findAllScheduledReports());
     }
 
     private boolean checkFinalStatus(Long status) {

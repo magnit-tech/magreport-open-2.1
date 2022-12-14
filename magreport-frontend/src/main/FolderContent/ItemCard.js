@@ -477,12 +477,19 @@ function ItemCard(props){
             <CardContent>
                 <Table>
                     <TableBody>
+                        {(props.itemType === FolderItemTypes.userJobs) &&
+                            <TableRow>
+                                <TableCell colSpan = {2} align="justify"  padding="none">
+                                    <Typography variant="caption">{comment}</Typography>
+                                </TableCell>
+                            </TableRow>
+                        }
                         {(props.itemType === FolderItemTypes.job) &&
                             <TableRow>
                                 <TableCell colSpan = {2} align="justify"  padding="none">
                                     <div className={clsx(classes.flx, {[classes.comment]: isEditedComment})}>
                                     <InputBase
-                                        style={{display: isEditedComment ? 'flex' : 'none' }}
+                                        style={{display: isEditedComment && username === props.currentUser ? 'flex' : 'none' }}
                                         id = {props.data.id.toString()}
                                         size = "small"
                                         value = {comment}
@@ -494,11 +501,11 @@ function ItemCard(props){
                                         onChange = {handleChangeComment}
                                         onClick = {(e)=>e.stopPropagation()}
                                     />
-                                    <Typography variant="caption" style={{display: !isEditedComment ? 'flex' : 'none' }}>{comment}</Typography>
+                                    <Typography variant="caption" style={{display: !isEditedComment || username !== props.currentUser ? 'flex' : 'none' }}>{comment}</Typography>
                                     <div>
                                     <Tooltip key={9} title="Редактировать комментарий">
                                         <IconButton
-                                            style={{display: !isEditedComment ? 'flex' : 'none' }}
+                                            style={{display: !isEditedComment || username !== props.currentUser ? 'flex' : 'none' }}
                                             className = {classes.commentBtn} 
                                             size = "small"
                                             aria-label = "comment edit"
