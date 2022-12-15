@@ -1,6 +1,13 @@
 import React from 'react';
+import isHollyday from  '../../HollydayFunctions';
+
 export default function NewYearPanel(props){
-return (
+    const value = isHollyday();
+    switch (value){
+        case 0:
+        case 1:
+        case 2:
+        return (
     <div className="b-page_newyear">
       <div className="b-page__content">
       <i className="b-head-decor">
@@ -140,4 +147,7 @@ return (
        
     </div>
     </div>
-)};
+    )
+        default: return (<div/>)
+    }
+};
