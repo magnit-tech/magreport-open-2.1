@@ -18,6 +18,7 @@ public class ExternalAuthSourceBackupMapper implements Mapper<ExternalAuthSource
                 source.getType().getId(),
                 source.getPreSql(),
                 source.getPostSql(),
+                source.getRoleDescription(),
                 source.getName(),
                 source.getDescription(),
                 source.getCreatedDateTime(),

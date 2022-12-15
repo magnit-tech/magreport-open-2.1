@@ -26,6 +26,7 @@ public class AsmSecuritySourceAddRequest {
     private ExternalAuthSourceTypeEnum sourceType;
     private String preSql;
     private String postSql;
+    private String roleDescription;
     private List<AsmSecuritySecurityFilterAddRequest> securityFilters = Collections.emptyList();
     private List<AsmSecurityDataSetFieldMapRequest> fields = Collections.emptyList();
 }
