@@ -55,104 +55,54 @@ function ReportsMenuView(props){
         props.actionItemClick(folderItemsType, reportId)
         navigate(`/report/starter/${reportId}`, {state: location.pathname})
     }
+    function handleAddItemClick(folderItemsType) {
+        props.actionAddItemClick(folderItemsType)
+        navigate(`/reports/${id}/add`)
+    }
 
     return(
         <div style={{display: 'flex', flex: 1}}>
-        {/* {
-            state.flowState === FLOW_STATE_BROWSE_FOLDER ?
-                <DataLoader
-                    loadFunc = {loadFunc}
-                    loadParams = {id ? [Number(id)] : [null]}
-                    reload = {reload}
-                    onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}}
-                    onDataLoadFailed = {(message) => {props.actionFolderLoadFailed(folderItemsType, message)}}
-                >
-                    <FolderContent
-                        itemsType = {folderItemsType}
-                        showAddFolder = {true}
-                        showAddItem = {true}
-                        data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
-                        searchParams = {state.searchParams || {}}
-                        sortParams = {state.sortParams || {}}
-                        
-                        onFolderClick = {handleFolderClick}
-                        onItemClick = {handleItemClick}
+            <DataLoader
+                loadFunc = {loadFunc}
+                loadParams = {id ? [Number(id)] : [null]}
+                reload = {reload}
+                onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}}
+                onDataLoadFailed = {(message) => {props.actionFolderLoadFailed(folderItemsType, message)}}
+            >
+                <FolderContent
+                    itemsType = {folderItemsType}
+                    showAddFolder = {true}
+                    showAddItem = {true}
+                    data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
+                    searchParams = {state.searchParams || {}}
+                    sortParams = {state.sortParams || {}}
+                    
+                    onFolderClick = {handleFolderClick}
+                    onItemClick = {handleItemClick}
+                    onAddItemClick={handleAddItemClick}
 
-                        onAddFolder = {(name, description) => {props.actionAddFolder(folderItemsType, state.currentFolderData.id, name, description)}}
-                        onAddItemClick = {() => {props.actionAddItemClick(folderItemsType)}}
-                        onEditFolderClick = {(folderId, name, description) => {props.actionEditFolder(folderItemsType, state.currentFolderData.id, folderId, name, description)}}
-                        onEditItemClick = {(reportId) => {props.actionEditItemClick(folderItemsType, reportId)}}
-                        onDeleteFolderClick = {(folderId) => {props.actionDeleteFolderClick(folderItemsType, state.currentFolderData.id, folderId)}}
-                        onDeleteItemClick = {(reportId) => {props.actionDeleteItemClick(folderItemsType, state.currentFolderId, reportId)}}
-                        onSearchClick ={searchParams => {props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)}}
-                        onAddDeleteFavorites = {(index, folderId, reportId, isFavorite) => props.actionAddDeleteFavorites(folderItemsType, index, folderId, reportId, isFavorite, enqueueSnackbar)}
-                        onSortClick ={sortParams => {props.actionSortClick(folderItemsType, state.currentFolderId, sortParams)}}
-                        contextAllowed
-                        copyAndMoveAllowed
-                        copyAndMoveAllowedForReport
-                        onChangeParentFolder={(itemsType, folderId, parentFolderId) => props.actionChangeParentFolder(itemsType, folderId, parentFolderId)}
-                        onCopyFolder = {(itemsType, destFolderId, folderIds) => props.actionCopyFolder(itemsType, destFolderId, folderIds)}
-                    />
-                </DataLoader>
-
-                
-
-            // : state.flowState === reportsMenuViewFlowStates.pudlishReportDesigner ?
-            //     <PublishReportDesigner
-            //         folderId = {state.currentFolderId}
-            //         onExit = {handleDesignerExit}
-            //     />
-
-            // : state.flowState === reportsMenuViewFlowStates.startReport ?
-            //     <ReportStarter
-            //         reportId = {state.reportId}
-            //         onCancel = {handleReportCancel}
-            //         onDataLoadFunction={dataHub.reportController.get}
-            //     />
-
-            : <div>Неизвестное состояние</div>            
-        } */}
-                        <DataLoader
-                    loadFunc = {loadFunc}
-                    loadParams = {id ? [Number(id)] : [null]}
-                    reload = {reload}
-                    onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}}
-                    onDataLoadFailed = {(message) => {props.actionFolderLoadFailed(folderItemsType, message)}}
-                >
-                    <FolderContent
-                        itemsType = {folderItemsType}
-                        showAddFolder = {true}
-                        showAddItem = {true}
-                        data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
-                        searchParams = {state.searchParams || {}}
-                        sortParams = {state.sortParams || {}}
-                        
-                        onFolderClick = {handleFolderClick}
-                        onItemClick = {handleItemClick}
-
-                        onAddFolder = {(name, description) => {props.actionAddFolder(folderItemsType, state.currentFolderData.id, name, description)}}
-                        onAddItemClick = {() => {props.actionAddItemClick(folderItemsType)}}
-                        onEditFolderClick = {(folderId, name, description) => {props.actionEditFolder(folderItemsType, state.currentFolderData.id, folderId, name, description)}}
-                        onEditItemClick = {(reportId) => {props.actionEditItemClick(folderItemsType, reportId)}}
-                        onDeleteFolderClick = {(folderId) => {props.actionDeleteFolderClick(folderItemsType, state.currentFolderData.id, folderId)}}
-                        onDeleteItemClick = {(reportId) => {props.actionDeleteItemClick(folderItemsType, state.currentFolderId, reportId)}}
-                        onSearchClick ={searchParams => {props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)}}
-                        onAddDeleteFavorites = {(index, folderId, reportId, isFavorite) => props.actionAddDeleteFavorites(folderItemsType, index, folderId, reportId, isFavorite, enqueueSnackbar)}
-                        onSortClick ={sortParams => {props.actionSortClick(folderItemsType, state.currentFolderId, sortParams)}}
-                        contextAllowed
-                        copyAndMoveAllowed
-                        copyAndMoveAllowedForReport
-                        onChangeParentFolder={(itemsType, folderId, parentFolderId) => props.actionChangeParentFolder(itemsType, folderId, parentFolderId)}
-                        onCopyFolder = {(itemsType, destFolderId, folderIds) => props.actionCopyFolder(itemsType, destFolderId, folderIds)}
-                    />
-                </DataLoader>
+                    onAddFolder = {(name, description) => {props.actionAddFolder(folderItemsType, state.currentFolderData.id, name, description)}}
+                    onEditFolderClick = {(folderId, name, description) => {props.actionEditFolder(folderItemsType, state.currentFolderData.id, folderId, name, description)}}
+                    onEditItemClick = {(reportId) => {props.actionEditItemClick(folderItemsType, reportId)}}
+                    onDeleteFolderClick = {(folderId) => {props.actionDeleteFolderClick(folderItemsType, state.currentFolderData.id, folderId)}}
+                    onDeleteItemClick = {(reportId) => {props.actionDeleteItemClick(folderItemsType, state.currentFolderId, reportId)}}
+                    onSearchClick ={searchParams => {props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)}}
+                    onAddDeleteFavorites = {(index, folderId, reportId, isFavorite) => props.actionAddDeleteFavorites(folderItemsType, index, folderId, reportId, isFavorite, enqueueSnackbar)}
+                    onSortClick ={sortParams => {props.actionSortClick(folderItemsType, state.currentFolderId, sortParams)}}
+                    contextAllowed
+                    copyAndMoveAllowed
+                    copyAndMoveAllowedForReport
+                    onChangeParentFolder={(itemsType, folderId, parentFolderId) => props.actionChangeParentFolder(itemsType, folderId, parentFolderId)}
+                    onCopyFolder = {(itemsType, destFolderId, folderIds) => props.actionCopyFolder(itemsType, destFolderId, folderIds)}
+                />
+            </DataLoader>
         </div>
     )
 }
 
 const mapStateToProps = state => {
     return {
-        state : state.reportsMenuView
+        state : state.folderData
     }
 }
 

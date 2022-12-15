@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
 // components
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -12,7 +14,7 @@ import Link from '@material-ui/core/Link';
 
 import {FolderItemTypes} from 'main//FolderContent/FolderItemTypes';
 import DesignerPage from "main/Main/Development/Designer/DesignerPage";
-import PageTabs from 'main/PageTabs/PageTabs';
+import PageTabs from 'components/PageTabs/PageTabs';
 import Typography from '@material-ui/core/Typography';
 
 // styles
@@ -20,12 +22,14 @@ import {DatasetMenuCSS} from './DatasetsMenu/DatasetMenuCSS'
 
 export default function DependencyViewer(props){
 
+    const navigate = useNavigate()
+
     const classes = DatasetMenuCSS();
 
-    const pagename = (props.itemsType === FolderItemTypes.dataset) ? 'Зависимости от набора данных: ' + props.data.name 
-                   : (props.itemsType === FolderItemTypes.reportsDev) ? 'Зависимости от отчёта: ' +  props.data.name
-                   : (props.itemsType === FolderItemTypes.datasource) ? 'Зависимости от источника данных: ' +  props.data.name 
-                   : (props.itemsType === FolderItemTypes.filterInstance) ? 'Зависимости от источника данных: ' +  props.data.name : null ;
+    const pagename = (props.itemsType === FolderItemTypes.dataset) ? 'Зависимости от набора данных: ' + props.data?.name 
+                   : (props.itemsType === FolderItemTypes.reportsDev) ? 'Зависимости от отчёта: ' +  props.data?.name
+                   : (props.itemsType === FolderItemTypes.datasource) ? 'Зависимости от источника данных: ' +  props.data?.name 
+                   : (props.itemsType === FolderItemTypes.filterInstance) ? 'Зависимости от источника данных: ' +  props.data?.name : null ;
 
     const folders = {
         folders: {name: 'Отчёты', itemsType: 'folders' },
@@ -36,15 +40,15 @@ export default function DependencyViewer(props){
         dataSets: {name: 'Наборы данных', itemsType: FolderItemTypes.dataset}
     } ;
 
-    function handleLinkPathClick(itemType, pathArr, event){
+    function handleLinkPathClick(value, pathArr, event){
         event.preventDefault()
-        props.onLinkPathClick(itemType, pathArr[pathArr.length-1].id)
+        navigate(`/${value}/${pathArr[pathArr.length - 1].id}`)
     }
 
     let tabs = [];
 
     for (const [key, value] of Object.entries(folders)) {
-        if (props.data[key]?.length > 0 ){
+        if (props.data && props.data[key]?.length > 0 ){
             tabs.push({
                 tablabel: value.name,
                 tabcontent: 
@@ -71,10 +75,10 @@ export default function DependencyViewer(props){
                                         <TableCell align="left">{row.description ? row.description: props.data.description}</TableCell>
                                         <TableCell align="left">
                                             {row.path && row.path.length > 0
-                                                ?   
-                                                <Link href="#" onClick={event => handleLinkPathClick(value.itemsType === 'folders' ? 'report' : value.itemsType, row.path, event)} color="inherit">
-                                                    {`/ ${row.path.map(p => p.name).join(' / ')}`}
-                                                </Link>                                                                
+                                                ? 
+                                                    <Link href="#" onClick={event => handleLinkPathClick(value.itemsType, row.path, event)} color="inherit">
+                                                        {`/ ${row.path.map(p => p.name).join(' / ')}`}
+                                                    </Link>                      
                                                 : 
                                                ''
                                             }

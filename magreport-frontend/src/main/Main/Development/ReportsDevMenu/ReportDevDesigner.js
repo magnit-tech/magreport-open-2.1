@@ -14,7 +14,7 @@ import DesignerTextField from '../Designer/DesignerTextField';
 import DesignerFolderItemPicker from '../Designer/DesignerFolderItemPicker'
 import ReportFields from './ReportFields'
 import ReportFiltersTab from './ReportFilters/ReportFiltersTab'
-import PageTabs from 'main/PageTabs/PageTabs';
+import PageTabs from 'components/PageTabs/PageTabs';
 import ReportTemplates from './ReportTemplates'
 import DataLoader from 'main/DataLoader/DataLoader';
 import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';

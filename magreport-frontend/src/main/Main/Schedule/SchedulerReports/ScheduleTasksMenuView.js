@@ -140,7 +140,7 @@ function ScheduleTasksMenuView(props){
 
 const mapStateToProps = state => {
     return {
-        state : state.scheduleTasksMenuView
+        state : state.folderData
     }
 }
 

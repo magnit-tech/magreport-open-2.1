@@ -24,14 +24,14 @@ import { showAlertDialog, hideAlertDialog } from 'redux/actions/actionsAlertDial
 // styles 
 import { UsersCSS } from "./UsersCSS";
 
-
 function UserDesigner(props){
 
-    const { enqueueSnackbar } = useSnackbar();
-    const [selectedUser, setSelectedUser] = useState(props.items?.selectedUser?.id||-1);
-    const [selectedRoleToAdd, setSelectedRoleToAdd] = useState("");
     const classes = UsersCSS();
 
+    const { enqueueSnackbar } = useSnackbar();
+    
+    const [selectedUser, setSelectedUser] = useState(props.items?.selectedUser?.id||-1);
+    const [selectedRoleToAdd, setSelectedRoleToAdd] = useState("");
 
 
     function handleSelectUser (id) {

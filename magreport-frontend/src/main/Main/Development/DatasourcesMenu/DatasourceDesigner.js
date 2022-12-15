@@ -19,7 +19,7 @@ import DataLoader from 'main/DataLoader/DataLoader';
 import { CircularProgress } from '@material-ui/core';
 
 import Button from '@material-ui/core/Button';
-import Alerts from "main/Alerts/Alerts";
+import Alerts from "components/Alerts/Alerts";
 
 import Icon from '@mdi/react'  
 import { mdiCheckDecagram } from '@mdi/js';

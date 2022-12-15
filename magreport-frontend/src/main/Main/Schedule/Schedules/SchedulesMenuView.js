@@ -177,7 +177,7 @@ function SchedulesMenuView(props) {
 
 const mapStateToProps = state => {
     return {
-        state: state.schedulesMenuView
+        state: state.folderData
     };
 }
 

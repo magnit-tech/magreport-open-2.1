@@ -10,7 +10,7 @@ import dataHub from 'ajax/DataHub';
 // actions
 import {actionFolderLoaded, actionFolderLoadFailed, actionFolderClick, 
     actionItemClick, actionEditItemClick, actionDeleteItemClick, actionAddFolder, actionAddItemClick,
-    actionEditFolder, actionDeleteFolderClick, actionGetDependencies, actionSearchClick, actionChangeParentFolder, actionCopyFolder, actionMoveFolderItem, actionCopyFolderItem, actionSortClick} from 'redux/actions/menuViews/folderActions';
+    actionEditFolder, actionDeleteFolderClick, actionSearchClick, actionChangeParentFolder, actionCopyFolder, actionMoveFolderItem, actionCopyFolderItem, actionSortClick} from 'redux/actions/menuViews/folderActions';
 import actionSetSidebarItem from 'redux/actions/sidebar/actionSetSidebarItem';
 
 // flowstates
@@ -63,7 +63,6 @@ function FilterInstancesMenuView(props){
         navigate(`/filterInstance/${id}/edit/${filterInstanceId}`, {state: location.pathname})
     }
     function handleDependenciesClick(filterInstanceId) {
-        props.actionGetDependencies(folderItemsType, filterInstanceId)
         // navigate(`/filterInstance/dependencies/${filterInstanceId}`)
     }
     function handleAddItemClick(folderItemsType) {
@@ -145,7 +144,7 @@ function FilterInstancesMenuView(props){
 
 const mapStateToProps = state => {
     return {
-        state : state.filterInstancesMenuView
+        state : state.folderData
     }
 }
 
@@ -160,7 +159,6 @@ const mapDispatchToProps = {
     actionDeleteFolderClick,
     actionEditItemClick,
     actionDeleteItemClick,
-    actionGetDependencies,
     actionSearchClick,
     actionSetSidebarItem,
     actionChangeParentFolder,

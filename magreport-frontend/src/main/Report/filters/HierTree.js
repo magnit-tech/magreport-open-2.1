@@ -772,7 +772,7 @@ function HierTree(props){
 
 const mapStateToProps = state => {
     return {
-        currentSidebarItemKey: state.currentSidebarItemKey
+        currentSidebarItemKey: state.sidebar.currentSidebarItemKey
     }
 }
 

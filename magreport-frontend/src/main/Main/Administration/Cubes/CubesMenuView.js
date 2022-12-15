@@ -180,8 +180,8 @@ function CubesMenuView(props){
 
 const mapStateToProps = state => {
     return {
-        state : state.cubesMenuView,
-        currentFolderData : state.cubesMenuView.currentFolderData?.cubes.map(item => ({
+        state : state.folderData,
+        currentFolderData : state.folderData.currentFolderData?.cubes.map(item => ({
             id: item.reportJobId,
             created: item.created,
             modified: item.modified,
@@ -193,8 +193,8 @@ const mapStateToProps = state => {
             reportId: item.reportId,
             reportJobOwner: item.reportJobOwner
         })),
-        filteredCubes : state.cubesMenuView.filteredCubes,
-        filters : state.cubesMenuView.filters
+        filteredCubes : state.folderData.filteredCubes,
+        filters : state.folderData.filters
     }
 }
 

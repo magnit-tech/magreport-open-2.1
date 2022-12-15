@@ -9,6 +9,8 @@ import LoginPage from '../login/LoginPage/LoginPage';
 import Main from '../main/Main/Main';
 
 import ReportsMenuView from '../main/Main/Reports/ReportsMenuView';
+import PublishReportDesigner from '../main/Main/Reports/PublishReportDesigner';
+
 import FavoritesMenuView from '../main/Main/Favorites/FavoritesMenuView';
 import JobsMenuView from '../main/Main/Jobs/JobsMenuView';
 
@@ -16,7 +18,7 @@ import JobsMenuView from '../main/Main/Jobs/JobsMenuView';
 import RolesMenuView from '../main/Main/Administration/Roles/RolesMenuView';
 import RoleViewer from '../main/Main/Administration/Roles/RoleViewer';
 import RoleDesigner from '../main/Main/Administration/Roles/RoleDesigner';
-import UsersMenuView from '../main/Main/Administration/Users/UsersMenuView';
+import UserDesigner from '../main/Main/Administration/Users/UserDesigner';
 import SecurityFiltersMenuView from '../main/Main/Administration/SecurityFilters/SecurityFiltersMenuView';
 import SecurityFilterViewer from '../main/Main/Administration/SecurityFilters/SecurityFilterViewer';
 import SecurityFilterDesigner from '../main/Main/Administration/SecurityFilters/SecurityFilterDesigner';
@@ -41,7 +43,6 @@ import ThemesMenuView from '../main/Main/Administration/Theme/ThemesMenuView';
 import DatasourcesMenuView from '../main/Main/Development/DatasourcesMenu/DatasourcesMenuView';
 import DatasourceViewer from '../main/Main/Development/DatasourcesMenu/DatasourceViewer';
 import DatasourceDesigner from '../main/Main/Development/DatasourcesMenu/DatasourceDesigner';
-import DependencyViewer from '../main/Main/Development/DependencyViewer';
 
 import DatasetsMenuView from '../main/Main/Development/DatasetsMenu/DatasetsMenuView';
 import DatasetViewer from '../main/Main/Development/DatasetsMenu/DatasetViewer';
@@ -89,6 +90,7 @@ export default function AppRoutes(props) {
 			
 					<Route path="/reports" element={<ReportsMenuView/>} />
 					<Route path="/reports/:id" element={<ReportsMenuView/>} />
+					<Route path="/reports/:folderId/add" element={<PublishReportDesigner/>} />
 					<Route path="/favorites" element={<FavoritesMenuView/>} />
 					<Route path="/job" element={<JobsMenuView/>} />
 
@@ -99,7 +101,7 @@ export default function AppRoutes(props) {
 					<Route path="/roles/:folderId/edit/:id" element={<RoleDesigner/>} />
 					<Route path="/roles/:folderId/add" element={<RoleDesigner/>} />
 
-					<Route path="/users" element={<UsersMenuView/>} />
+					<Route path="/users" element={<UserDesigner/>} />
 
 					<Route path="/securityFilters" element={<SecurityFiltersMenuView/>} />
 					<Route path="/securityFilters/:id" element={<SecurityFiltersMenuView/>} />
@@ -115,7 +117,7 @@ export default function AppRoutes(props) {
 					<Route path="/asm/add" element={<ASMDesigner/>} />
 
 					<Route path="/logs" element={<LogsMenuView/>} />
-					<Route path="/settings" element={<SettingsMenuView/>} />
+					<Route path="/settings" element={<SettingsMenuView/>} /> {/* !!!!!!!! */}
 
 					<Route path="/systemMailTemplates" element={<ServerMailTemplateMenuView/>} />
 					<Route path="/systemMailTemplates/:id" element={<ServerMailTemplateMenuView/>} />
@@ -124,14 +126,13 @@ export default function AppRoutes(props) {
 
 					<Route path="/mailSender" element={<EmailMenuView/>} />
 					<Route path="/cubes" element={<CubesMenuView/>} />
-					<Route path="/theme" element={<ThemesMenuView/>} /> 
+					<Route path="/theme" element={<ThemesMenuView/>} />  {/* !!!!!!!! */}
 
 					{/********** Разработка **********/}
 					<Route path="/datasource" element={<DatasourcesMenuView />} />
 					<Route path="/datasource/:id" element={<DatasourcesMenuView/>} />
 					<Route path="/datasource/:folderId/view/:id" element={<DatasourceViewer/>} />
 					<Route path="/datasource/:folderId/edit/:id" element={<DatasourceDesigner/>} />
-					{/* <Route path="/datasource/dependencies/:id" element={<DependencyViewer/>} /> */}
 					<Route path="/datasource/:folderId/add" element={<DatasourceDesigner/>} />
 
 					<Route path="/dataset" element={<DatasetsMenuView/>} />

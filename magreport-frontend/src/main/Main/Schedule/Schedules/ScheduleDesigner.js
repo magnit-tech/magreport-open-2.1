@@ -11,7 +11,7 @@ import {CircularProgress} from "@material-ui/core";
 
 // local components
 import DataLoader from "main/DataLoader/DataLoader";
-import PageTabs from "main/PageTabs/PageTabs";
+import PageTabs from "components/PageTabs/PageTabs";
 import DesignerPage from "main/Main/Development/Designer/DesignerPage";
 import DesignerTextField from "main/Main/Development/Designer/DesignerTextField";
 import ScheduleParameters from "./ScheduleParameters";

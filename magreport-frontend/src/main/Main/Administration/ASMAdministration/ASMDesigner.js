@@ -7,7 +7,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 
 // components
 import DesignerPage from "main/Main/Development/Designer/DesignerPage";
-import PageTabs from 'main/PageTabs/PageTabs';
+import PageTabs from 'components/PageTabs/PageTabs';
 import DesignerTextField from "main/Main/Development/Designer/DesignerTextField";
 import ExternalSecuritySource from "./ASMSecuritySourceCard";
 import CircularProgress from '@material-ui/core/CircularProgress';

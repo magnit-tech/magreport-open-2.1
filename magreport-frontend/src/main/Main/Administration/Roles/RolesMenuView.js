@@ -111,21 +111,6 @@ function RolesMenuView(props){
                             contextAllowed
                         />
                     </DataLoader>
-                // : state.flowState === rolesMenuViewFlowStates.roleViewer ?
-                //     <RoleViewer
-                //         roleId = {state.viewRoleId}
-                //         roleTypeId = {state.currentFolderId}
-                //         onOkClick = {handleExit}
-                //     />
-                // : state.flowState === rolesMenuViewFlowStates.roleDesigner ?
-                //     <RoleDesigner
-                //         mode = {designerMode}
-                //         roleId = {state.editRoleId}
-                //         roleTypeId = {state.currentFolderId}
-                //         onExit = {handleExit}
-                //         sortParams = {state.sortParams || {}}
-                //         folderName = {state.currentFolderData?.name}
-                //     />
 
                 : <div>Неизвестное состояние</div>
             }
@@ -135,7 +120,7 @@ function RolesMenuView(props){
 
 const mapStateToProps = state => { 
     return {
-        state : state.rolesMenuView
+        state : state.folderData
     }
 }
 

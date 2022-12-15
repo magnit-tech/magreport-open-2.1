@@ -30,7 +30,7 @@ import {MuiPickersUtilsProvider, KeyboardDatePicker,} from '@material-ui/pickers
 // local components
 import {randomWordCode} from 'utils/randomWordCode';
 import DataLoader from "main/DataLoader/DataLoader";
-import PageTabs from "main/PageTabs/PageTabs";
+import PageTabs from "components/PageTabs/PageTabs";
 import DesignerPage from "main/Main/Development/Designer/DesignerPage";
 import DesignerTextField from "main/Main/Development/Designer/DesignerTextField";
 import DesignerMultipleSelectField from "main/Main/Development/Designer/DesignerMultipleSelectField";

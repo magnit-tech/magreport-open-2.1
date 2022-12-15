@@ -1,10 +1,10 @@
-import { ROOTMENUCHANGE } from '../../reduxTypes'
+// import { ROOTMENUCHANGE } from '../../reduxTypes'
 
-export const rootMenuChange = (menuItemType, key, val) =>{
-    return {
-        type: ROOTMENUCHANGE,
-        menuItemType,
-        key,
-        val,
-    }
-}
+// export const rootMenuChange = (menuItemType, key, val) =>{
+//     return {
+//         type: ROOTMENUCHANGE,
+//         menuItemType,
+//         key,
+//         val,
+//     }
+// }

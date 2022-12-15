@@ -13,52 +13,38 @@ import DataLoader from "../../../DataLoader/DataLoader";
 import ExternalSecurityDesigner from "./ASMDesigner";
 import ExternalSecurityViewer from "./ASMViewer";
 import ExternalSecurityList from "./ASMList";
+import { useState } from 'react';
 
 
 function ASMAdministrationMenuView(props){
 
     const navigate = useNavigate()
 
-    const state = props.state;
-    const needReload = state.needReload;
+    // const state = props.state;
+    // const needReload = state.needReload;
     // const designerMode = state.designerMode;
 
-    const loadFunc = dataHub.asmController.getAll;
-
     function handleAddItemClick() {
-        props.actionAsmAddItemClick();
+        // props.actionAsmAddItemClick();
         navigate(`/asm/add`)
     }
 
+    const [data, setData] = useState()
+
     return (
         <div  style={{display: 'flex', flex: 1}}>
-            {
-                state.flowState === asmAdministrationMenuViewFlowStates.externalSecurityList ?
-                    <DataLoader
-                        loadFunc={loadFunc}
-                        loadParams={[]}
-                        reload={{needReload}}
-                        onDataLoaded={(data) => props.actionAsmListLoaded(data)}
-                        onDataLoadFailed={(error) => props.actionAsmListLoadFailed(error)}
-                    >
-                        <ExternalSecurityList
-                            data={state.data}
-                            onAddAsmClick={handleAddItemClick}
-                        />
-
-                    </DataLoader>
-
-                    // : state.flowState === asmAdministrationMenuViewFlowStates.externalSecurityViewer ?
-                    // <ExternalSecurityViewer
-                    //     asmId={state.viewASMId}
-                    // />
-                    // : state.flowState === asmAdministrationMenuViewFlowStates.externalSecurityDesigner ?
-                    // <ExternalSecurityDesigner
-                    //     designerMode={designerMode}
-                    //     asmId={state.editASMId}
-                    // />
-                    : <div>Неизвестное состояние</div>
-            }
+            <DataLoader
+                loadFunc={dataHub.asmController.getAll}
+                loadParams={[]}
+                reload={false}
+                onDataLoaded={(data) => setData(data)}
+                onDataLoadFailed={(error) => setData(error)}
+            >
+                <ExternalSecurityList
+                    data={data}
+                    onAddAsmClick={handleAddItemClick}
+                />
+            </DataLoader>
         </div>
     );
 }

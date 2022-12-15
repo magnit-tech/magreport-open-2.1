@@ -16,7 +16,7 @@ import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 // local
 import DesignerPage from '../../Development/Designer/DesignerPage';
-import PageTabs from 'main/PageTabs/PageTabs';
+import PageTabs from 'components/PageTabs/PageTabs';
 import DesignerTextField from '../../Development/Designer/DesignerTextField';
 import UserList from '../Users/UserList';
 import DomainGroupList from '../DomainGroups/DomainGroupList';

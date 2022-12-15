@@ -75,10 +75,6 @@ function MailTemplatesMenuView(props){
                             searchParams = {state.searchParams || {}}
                             sortParams = {state.sortParams || {}}
                             data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
-                            // onFolderClick = {(folderId) => {props.actionFolderClick(folderItemsType, folderId)}}
-                            // onItemClick = {(templateId) => {props.actionItemClick(folderItemsType, templateId)}}
-                            // onEditItemClick = {(templateId) => {props.actionEditItemClick(folderItemsType, templateId)}}
-                            // onAddItemClick = {() => {props.actionAddItemClick(folderItemsType)}}
                             
                             onFolderClick = {handleFolderClick}
                             onItemClick={handleItemClick}
@@ -92,19 +88,7 @@ function MailTemplatesMenuView(props){
                             onSortClick ={sortParams => {props.actionSortClick(folderItemsType, state.currentFolderId, sortParams)}}
                         />
                     </DataLoader>
-                    // : state.flowState === mailTemplateMenuViewFlowStates.mailTemplateViewer ?
-                    // <ServerMailTemplateView
-                    //     serverMailTemplateId = {state.viewMailTemplateId}
-                    //     onOkClick = {handleExit}
-                    //     onEditClick={actionItemClick}
-                    // />
-                    // : state.flowState === mailTemplateMenuViewFlowStates.mailTemplateDesigner ?
-                    //     <ServerMailTemplateDesigner
-                    //         serverMailTemplateId = {state.viewMailTemplateId}
-                    //         onOkClick = {handleExit}
-                    //         onExitClick={handleExit}
-                    //         onEditClick={actionItemClick}
-                    //     />
+
                     : <div>Неизвестное состояние</div>
             }
         </div>
@@ -113,7 +97,7 @@ function MailTemplatesMenuView(props){
 
 const mapStateToProps = state => {
     return {
-        state : state.mailTemplateMenuView
+        state : state.folderData
     }
 }
 
