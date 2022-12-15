@@ -1,14 +1,16 @@
 import { makeStyles } from '@material-ui/core/styles';
-import StyleConsts from '../../../StyleConsts'; 
-import CatFingerPng from '../../../images/catFinger.png'
+//import StyleConsts from '../../StyleConsts'; 
+import CatFingerPng from '../../images/catFinger.png'
 
 export const HeaderCSS = makeStyles(theme => ({
     appBar: {
         backgroundColor: theme.palette.primary.dark,
-        height: StyleConsts.headerHeight,
+        height: '120px', //StyleConsts.headerHeight,
         overflowX: 'hidden',
         transform: 'translateZ(0)',
-        whiteSpace: 'nowrap'
+        whiteSpace: 'nowrap',
+        justifyContent: 'end'
+
     },
     iconIndent: {
         paddingLeft: '12px'
@@ -22,7 +24,8 @@ export const HeaderCSS = makeStyles(theme => ({
         margin: '10px'
     },
     iconButton: {
-        color: theme.palette.primary.contrastText
+        color: theme.palette.primary.contrastText,
+        zIndex: 1110
     },
     userNameClass: {
         margin: theme.spacing(0,1)
