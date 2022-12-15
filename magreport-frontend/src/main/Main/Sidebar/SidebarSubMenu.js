@@ -18,6 +18,7 @@ import { SidebarCSS } from './SidebarCSS';
  * 
  * @param {*} props.sidebarItem - объект пункта меню верхнего уровня в SidebarItems
  */
+
 function SidebarSubMenu(props){
     
     const classes = SidebarCSS();

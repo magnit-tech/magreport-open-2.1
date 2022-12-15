@@ -77,14 +77,12 @@ function SecurityFiltersMenuView(props){
                     data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
                     searchParams = {state.searchParams || {}}
                     sortParams = {state.sortParams || {}}
-                    // onFolderClick = {(folderId) => {props.actionFolderClick(folderItemsType, folderId)}}
-                    // onItemClick = {(securityFilterId) => {props.actionItemClick(folderItemsType, securityFilterId)}}
-                    // onEditItemClick = {(securityFilterId) => {props.actionEditItemClick(folderItemsType, securityFilterId)}}
-                    // onAddItemClick = {() => {props.actionAddItemClick(folderItemsType)}}
+
                     onFolderClick = {handleFolderClick}
                     onItemClick={handleItemClick}
                     onEditItemClick={handleEditItemClick}
                     onAddItemClick={handleAddItemClick}
+
                     // onAddFolder = {(name, description) => {props.actionAddFolder(folderItemsType, state.currentFolderData.id, name, description)}}
 
                     onEditFolderClick = {(folderId, name, description) => {props.actionEditFolder(folderItemsType, state.currentFolderData.id, folderId, name, description)}}
@@ -101,19 +99,7 @@ function SecurityFiltersMenuView(props){
             </DataLoader>
             )
 
-        // : state.flowState === securityFiltersMenuViewFlowStates.securityFiltersDesigner ?
-        // <SecurityFilterDesigner
-        //     mode = {designerMode}
-        //     securityFilterId = {state.editSecurityFilterId}
-        //     folderId = {state.currentFolderId}
-        //     onExit = {handleDesignerExit}
-        // />
-        // : state.flowState === securityFiltersMenuViewFlowStates.securityFiltersViewer ?
-        // <SecurityFilterViewer
-        //     securityFilterId = {state.viewSecurityFilterId}
-        //     onOkClick = {handleDesignerExit}
-        // />
-        : <div>Неизвестное состояние</div>
+            : <div>Неизвестное состояние</div>
         }
         </div>
     )
@@ -121,7 +107,7 @@ function SecurityFiltersMenuView(props){
 
 const mapStateToProps = state => {
     return {
-        state : state.securityFiltersMenuView
+        state : state.folderData
     }
 }
 

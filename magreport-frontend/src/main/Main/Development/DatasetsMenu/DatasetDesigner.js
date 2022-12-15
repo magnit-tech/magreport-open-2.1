@@ -9,7 +9,7 @@ import UpdateIcon from '@material-ui/icons/Update';
 import IconButton from '@material-ui/core/IconButton';
 // local
 import DesignerPage from '../Designer/DesignerPage';
-import PageTabs from 'main/PageTabs/PageTabs';
+import PageTabs from 'components/PageTabs/PageTabs';
 import DesignerTextField from '../Designer/DesignerTextField';
 import DesignerSelectField from '../Designer/DesignerSelectField';
 import DesignerFolderItemPicker from '../Designer/DesignerFolderItemPicker';

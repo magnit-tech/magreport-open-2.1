@@ -8,7 +8,7 @@ import dataHub from "ajax/DataHub";
 import DataLoader from "main/DataLoader/DataLoader";
 
 import Paper from "@material-ui/core/Paper";
-import PageTabs from "main/PageTabs/PageTabs";
+import PageTabs from "components/PageTabs/PageTabs";
 
 import {FolderItemTypes} from "main/FolderContent/FolderItemTypes";
 import ViewerPage from "main/Main/Development/Viewer/ViewerPage";

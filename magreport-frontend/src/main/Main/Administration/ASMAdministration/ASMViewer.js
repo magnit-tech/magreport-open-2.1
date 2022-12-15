@@ -10,7 +10,7 @@ import DataLoader from "main/DataLoader/DataLoader";
 import dataHub from "ajax/DataHub";
 
 // local
-import PageTabs from 'main/PageTabs/PageTabs';
+import PageTabs from 'components/PageTabs/PageTabs';
 import ViewerPage from "main/Main/Development/Viewer/ViewerPage";
 import ViewerTextField from "main/Main/Development/Viewer/ViewerTextField";
 import ViewerChildCard from "main/Main/Development/Viewer/ViewerChildCard";

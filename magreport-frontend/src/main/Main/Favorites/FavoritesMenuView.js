@@ -70,7 +70,6 @@ function FavoritesMenuView(props){
                     pagination = {false}
                     onFolderClick = {handleFolderClick}
                     
-                    // onItemClick = {reportId => props.actionItemClick(folderItemsType, reportId)}
                     onItemClick = {handleItemClick}
 
                     onJobCancelClick = {(jobIndex, jobId) => props.actionJobCancel(folderItemsType, jobIndex, jobId)}
@@ -81,13 +80,6 @@ function FavoritesMenuView(props){
                 />
             </DataLoader>
 
-            // : state.flowState === favoritesMenuViewFlowStates.startReport ?
-            // <ReportStarter
-            //     reportId = {state.reportId}
-            //     onCancel = {handleReportCancel}
-            //     onDataLoadFunction={dataHub.reportController.get}
-            // />
-
             : <p>Неизвестное состояние</p>
         }
         </div>
@@ -96,8 +88,10 @@ function FavoritesMenuView(props){
 
 const mapStateToProps = state => {
     return {
-        state : state.favoritesMenuView,
-        currentFolderData : state.favoritesMenuView.currentFolderData,
+        // state : state.favoritesMenuView,
+        // currentFolderData : state.favoritesMenuView.currentFolderData,
+        state : state.folderData,
+        currentFolderData : state.folderData.currentFolderData,
     }
 }
 

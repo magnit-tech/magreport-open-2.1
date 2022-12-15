@@ -11,7 +11,7 @@ import ViewerChildCard from "main/Main/Development/Viewer/ViewerChildCard";
 import ReportFieldsViewer from './ReportFieldsViewer';
 import ReportTemplatesViewer from './ReportTemplatesViewer'
 import ReportFiltersViewerTab from './ReportFilters/ReportFiltersViewerTab'
-import PageTabs from 'main/PageTabs/PageTabs';
+import PageTabs from 'components/PageTabs/PageTabs';
 import DataLoader from 'main/DataLoader/DataLoader';
 import {ViewerCSS} from "main/Main/Development/Viewer/ViewerCSS";
 import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';

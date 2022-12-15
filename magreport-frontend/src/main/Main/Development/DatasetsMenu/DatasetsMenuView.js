@@ -10,7 +10,7 @@ import dataHub from 'ajax/DataHub';
 // actions
 import {actionFolderLoaded, actionFolderLoadFailed, actionFolderClick, actionItemClick, actionAddFolder, 
     actionAddItemClick, actionEditItemClick, actionDeleteItemClick, actionEditFolder, actionDeleteFolderClick, 
-    actionGetDependencies, actionSearchClick, actionChangeParentFolder, actionCopyFolder, actionMoveFolderItem, actionCopyFolderItem, actionSortClick
+    actionSearchClick, actionChangeParentFolder, actionCopyFolder, actionMoveFolderItem, actionCopyFolderItem, actionSortClick
 } from 'redux/actions/menuViews/folderActions';
 import actionSetSidebarItem from 'redux/actions/sidebar/actionSetSidebarItem';
 
@@ -65,7 +65,6 @@ function DatasetsMenuView(props){
         navigate(`/dataset/${id}/edit/${datasetId}`, {state: location.pathname})
     }
     function handleDependenciesClick(datasetId) {
-        props.actionGetDependencies(folderItemsType, datasetId)
         // navigate(`/dataset/dependencies/${datasetId}`)
     }
     function handleAddItemClick(folderItemsType) {
@@ -97,12 +96,6 @@ function DatasetsMenuView(props){
                     onEditItemClick={handleEditItemClick}
                     onDependenciesClick = {handleDependenciesClick}
                     onAddItemClick={handleAddItemClick}
-
-                    // onFolderClick = {(folderId) => {props.actionFolderClick(folderItemsType, folderId)}}
-                    // onItemClick = {(datasetId) => {props.actionItemClick(folderItemsType, datasetId)}}
-                    // onEditItemClick = {(datasetId) => {props.actionEditItemClick(folderItemsType, datasetId)}}
-                    // onDependenciesClick = {datasetId => props.actionGetDependencies(folderItemsType, datasetId)}
-                    // onAddItemClick = {() => {props.actionAddItemClick(folderItemsType)}}
 
 
                     onAddFolder = {(name, description) => {props.actionAddFolder(folderItemsType, state.currentFolderData.id, name, description)}}
@@ -147,7 +140,7 @@ function DatasetsMenuView(props){
 
 const mapStateToProps = state => {
     return {
-        state : state.datasetsMenuView
+        state : state.folderData
     }
 }
 
@@ -162,7 +155,6 @@ const mapDispatchToProps = {
     actionDeleteItemClick,
     actionEditFolder,
     actionDeleteFolderClick,
-    actionGetDependencies,
     actionSetSidebarItem,
     actionSearchClick,
     actionChangeParentFolder,

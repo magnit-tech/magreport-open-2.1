@@ -22,8 +22,11 @@ import dataHub from 'ajax/DataHub';
 import Divider from "@material-ui/core/Divider";
 
 function LogsMenuView() {
+
     const classes = LogsCSS()
+
     const {enqueueSnackbar} = useSnackbar();
+    
     const [downloading, setDownloading] = useState(false)
 
     function handleDownLoadClick(type) {

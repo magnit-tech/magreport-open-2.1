@@ -130,9 +130,9 @@ function JobsMenuView(props){
 
 const mapStateToProps = state => {
     return {
-        state : state.jobsMenuView,
-        currentFolderData : state.jobsMenuView.currentFolderData,
-        filters : state.jobsMenuView.filters,
+        state : state.folderData,
+        currentFolderData : state.folderData.currentFolderData,
+        filters : state.folderData.filters,
         currentUser: state.login.userName
     }
 }

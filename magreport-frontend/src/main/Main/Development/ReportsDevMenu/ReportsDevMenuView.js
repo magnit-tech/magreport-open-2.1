@@ -10,7 +10,7 @@ import dataHub from 'ajax/DataHub';
 // actions
 import {actionFolderLoaded, actionFolderLoadFailed, actionFolderClick,
         actionItemClick, actionEditItemClick, actionDeleteItemClick, actionAddFolder, actionAddItemClick,
-        actionEditFolder, actionDeleteFolderClick, actionGetDependencies, actionSearchClick, actionSortClick, actionChangeParentFolder, actionCopyFolder, actionMoveFolderItem, actionCopyFolderItem} from 'redux/actions/menuViews/folderActions';
+        actionEditFolder, actionDeleteFolderClick, actionSearchClick, actionSortClick, actionChangeParentFolder, actionCopyFolder, actionMoveFolderItem, actionCopyFolderItem} from 'redux/actions/menuViews/folderActions';
 import actionSetSidebarItem from 'redux/actions/sidebar/actionSetSidebarItem';
 import {actionViewerViewItem} from "redux/actions/actionViewer";
 
@@ -76,7 +76,6 @@ function ReportsDevMenuView(props){
         navigate(`/reportsDev/${id}/edit/${reportId}`, {state: location.pathname})
     }
     function handleDependenciesClick(reportId) {
-        props.actionGetDependencies(folderItemsType, reportId)
         // navigate(`/reportsDev/dependencies/${reportId}`)
     }
     function handleAddItemClick(folderItemsType) {
@@ -114,7 +113,6 @@ function ReportsDevMenuView(props){
                     // onFolderClick = {(folderId) => {props.actionFolderClick(folderItemsType, folderId)}}
                     // onItemClick = {(reportId) => {props.actionItemClick(folderItemsType, reportId)}}
                     // onEditItemClick = {(reportId) => {props.actionEditItemClick(folderItemsType, reportId)}}
-                    // onDependenciesClick = {reportId => props.actionGetDependencies(folderItemsType, reportId)}
                     // onAddItemClick = {() => {props.actionAddItemClick(folderItemsType)}}
                     // onViewItemClick = {(reportId) => props.actionViewerViewItem(folderItemsType, reportId)}
 
@@ -171,7 +169,7 @@ function ReportsDevMenuView(props){
 
 const mapStateToProps = state => {
     return {
-        state : state.reportsDevMenuView
+        state : state.folderData
     }
 }
 
@@ -187,7 +185,6 @@ const mapDispatchToProps = {
     actionViewerViewItem,
     actionEditFolder,
     actionDeleteFolderClick,
-    actionGetDependencies,
     actionSearchClick,
     actionSortClick,
     actionSetSidebarItem,

@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import LoginForm from '../LoginForm/LoginForm.js';
 import LoginCat from './LoginCat.js';
-import Alerts from '../../main/Alerts/Alerts'
+import Alerts from '../../components/Alerts/Alerts'
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Paper from '@material-ui/core/Paper';
 import Hidden from '@material-ui/core/Hidden';

@@ -43,15 +43,15 @@ function FolderTree(props){
     const ROOT_FOLDER_ID = null;
 
     useEffect(() => {
+        if (foldersTreeEntity.status === 'init' && props.menuExpanded){
+            props.foldersLoading(ROOT_FOLDER_ID, entity.key, []);
+        }
         // вызывается при размонтировании компонента, нужно чтобы если в дереве нет данных при следующем развороте заново началась загрузка данных с бэка
         return () => {
             props.foldersSetInit(entity.key)
         }
     }, []) // eslint-disable-line
 
-    if (foldersTreeEntity.status === 'init' && props.menuExpanded){
-        props.foldersLoading(ROOT_FOLDER_ID, entity.key, []);
-    }
 
     function handleFolderIconClick(folderId, foldersPath, expanded) {
         if (expanded !== undefined){
@@ -204,7 +204,7 @@ function FolderTree(props){
 const mapStateToProps = state => {
     return {
         foldersTreeEntity: state.folderTree,
-        drawerOpen: state.drawer.open
+        drawerOpen: state.sidebar.drawerOpen
     }
 }
 

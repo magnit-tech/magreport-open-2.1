@@ -30,7 +30,6 @@ export default function FilterInstanceViewer() {
 
     const [data, setData] = useState({});
 
-
     function handleFilterInstanceDataLoaded(loadedData) {
         setData({
             ...data,
@@ -67,6 +66,7 @@ export default function FilterInstanceViewer() {
             <ViewerChildCard
                 key={data.filterTemplate.id}
                 id={data.filterTemplate.id}
+                folderId={data.filterTemplate.folderId}
                 itemType={FolderItemTypes.filterTemplate}
                 name={data.filterTemplate.name}
             />

@@ -30,7 +30,7 @@ import { useRef } from 'react';
  * @param {*} props.sidebarItem - объект пункта меню верхнего уровня в SidebarItems
  */
 function SidebarTopLevelMenu(props){
-
+console.log(props.state);
     const classes = SidebarCSS();
 
     const location = useLocation()
@@ -61,13 +61,13 @@ function SidebarTopLevelMenu(props){
 
     function handleClick(){
         if(!props.sidebarItem.subItems && locationName.current !== props.sidebarItem.folderItemType){
-            props.actionSetSidebarItem(props.sidebarItem);
+            // props.actionSetSidebarItem(props.sidebarItem);
             navigate(props.sidebarItem.folderItemType)
         }
     }
 
     function handleSubitemClick(item){
-        props.actionSetSidebarItem(item);
+        // props.actionSetSidebarItem(item);
     }
 
     function handleExpand(){
@@ -122,8 +122,9 @@ function SidebarTopLevelMenu(props){
 
 const mapStateToProps = state => (
     {
-        drawerOpen : state.drawer.open,
-        currentSidebarItemKey : state.currentSidebarItemKey
+        drawerOpen : state.sidebar.drawerOpen,
+        currentSidebarItemKey : state.sidebar.currentSidebarItemKey,
+        state: state
     }
 )
 

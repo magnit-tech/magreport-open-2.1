@@ -14,7 +14,7 @@ import Box from '@material-ui/core/Box';
 import DesignerPage from '../../Development/Designer/DesignerPage';
 import DesignerTextField from '../../Development/Designer/DesignerTextField';
 import DesignerFolderItemPicker from '../../Development/Designer/DesignerFolderItemPicker';
-import PageTabs from 'main/PageTabs/PageTabs';
+import PageTabs from 'components/PageTabs/PageTabs';
 import DataLoader from 'main/DataLoader/DataLoader';
 import DatasetItem from './DatasetItem'
 import SecurityFilterRoles from "./SecurityFilterRoles";

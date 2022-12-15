@@ -17,7 +17,7 @@ import {ViewerCSS} from "main/Main/Development/Viewer/ViewerCSS";
 import {createViewerTextFields} from "main/Main/Development/Viewer/viewerHelpers";
 
 import Button from '@material-ui/core/Button';
-import Alerts from "main/Alerts/Alerts";
+import Alerts from "components/Alerts/Alerts";
 
 import Icon from '@mdi/react'  
 import { mdiCheckDecagram } from '@mdi/js';

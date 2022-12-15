@@ -101,7 +101,6 @@ function FilterTemplatesMenuView(props){
     //     navigate(`/filterTemplate/${id}/edit/${filterTemplateId}`, {state: location.pathname})
     // }
     // function handleDependenciesClick(filterTemplateId) {
-    //     props.actionGetDependencies(folderItemsType, filterTemplateId)
     //     // navigate(`/filterTemplate/dependencies/${datasetId}`)
     // }
     // function handleAddItemClick(folderItemsType) {
@@ -152,7 +151,7 @@ function FilterTemplatesMenuView(props){
 
 const mapStateToProps = state => {
     return {
-        state : state.filtersMenuView
+        state : state.folderData
     }
 }
 

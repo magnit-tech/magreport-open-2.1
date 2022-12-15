@@ -434,31 +434,31 @@ function handleParentFolderTreeChanged(itemsType, folderId, parentFolderId, magr
     });
 }
 
-export function actionGetDependencies(itemsType, itemId){
+// export function actionGetDependencies(itemsType, itemId){
 
 
-    const serviceCallFunction = dataHubItemController(itemsType).getDependencies;
+//     const serviceCallFunction = dataHubItemController(itemsType).getDependencies;
     
-    serviceCallFunction(itemId, magrepResponse => handleGetDependencies(itemsType, itemId, magrepResponse));
+//     serviceCallFunction(itemId, magrepResponse => handleGetDependencies(itemsType, itemId, magrepResponse));
     
-    return {
-        type: FOLDER_CONTENT_GET_DEPENDENCIES_START,
-        itemsType,
-        itemId,
-    }
-}
+//     return {
+//         type: FOLDER_CONTENT_GET_DEPENDENCIES_START,
+//         itemsType,
+//         itemId,
+//     }
+// }
 
-function handleGetDependencies(itemsType, itemId, magrepResponse){
-    const type = magrepResponse.ok ? FOLDER_CONTENT_GET_DEPENDENCIES_LOADED : FOLDER_CONTENT_GET_DEPENDENCIES_FAILED
+// function handleGetDependencies(itemsType, itemId, magrepResponse){
+//     const type = magrepResponse.ok ? FOLDER_CONTENT_GET_DEPENDENCIES_LOADED : FOLDER_CONTENT_GET_DEPENDENCIES_FAILED
 
-    store.dispatch({
-        type,
-        itemsType,
-        itemId,
-        dependenciesData: magrepResponse.data,
-        errorMessage: magrepResponse.ok === false && magrepResponse.data 
-    });
-}
+//     store.dispatch({
+//         type,
+//         itemsType,
+//         itemId,
+//         dependenciesData: magrepResponse.data,
+//         errorMessage: magrepResponse.ok === false && magrepResponse.data 
+//     });
+// }
 
 export function actionMoveFolderItem(itemsType, destFolderId, objIds, textForSnackbar){
 

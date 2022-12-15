@@ -6,7 +6,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import dataHub from "ajax/DataHub";
 import DataLoader from "main/DataLoader/DataLoader";
 
-import PageTabs from "main/PageTabs/PageTabs";
+import PageTabs from "components/PageTabs/PageTabs";
 
 import {FolderItemTypes} from "main/FolderContent/FolderItemTypes";
 

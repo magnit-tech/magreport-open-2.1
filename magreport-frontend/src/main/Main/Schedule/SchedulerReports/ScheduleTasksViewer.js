@@ -22,7 +22,7 @@ import DesignerTextField from "main/Main/Development/Designer/DesignerTextField"
 
 // local components
 import DataLoader from "main/DataLoader/DataLoader";
-import PageTabs from "main/PageTabs/PageTabs";
+import PageTabs from "components/PageTabs/PageTabs";
 import ViewerTextField from "main/Main/Development/Viewer/ViewerTextField";
 import ViewerChildCard from "main/Main/Development/Viewer/ViewerChildCard";
 import ViewerPage from "main/Main/Development/Viewer/ViewerPage";

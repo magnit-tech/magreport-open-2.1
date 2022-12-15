@@ -30,7 +30,8 @@ function Sidebar(){
     const classes = SidebarCSS();
 
     const dispatch = useDispatch();
-    const drawerOpen = useSelector(state => state.drawer.open);
+    // const drawerOpen = useSelector(state => state.drawer.open);
+    const { drawerOpen } = useSelector(state => state.sidebar);
     const currentUser = dataHub.localCache.getUserInfo();
 
     const defaultDraggerColor = "#f4f7f9";
