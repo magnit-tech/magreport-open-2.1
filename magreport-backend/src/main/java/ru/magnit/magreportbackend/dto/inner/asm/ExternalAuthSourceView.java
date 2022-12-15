@@ -33,6 +33,7 @@ public class ExternalAuthSourceView {
     private DataSetView dataSet;
     private String preSql;
     private String postSql;
+    private String roleDescription;
     private Map<ExternalAuthSourceFieldTypeEnum, List<ExternalAuthSourceFieldView>> fields;
     private List<ExternalAuthSecurityFilterView> filters;
 
