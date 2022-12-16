@@ -19,5 +19,6 @@ public class ReportJobHistoryRequestFilter {
     private LocalDateTime from;
     private LocalDateTime to;
     private List<ReportJobStatusEnum> statuses;
-    private List<String> users;
+    private List<Long> users;
+    private List<Long> reportIds;
 }

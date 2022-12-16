@@ -87,7 +87,7 @@ public class PivotTableWriter implements Writer {
                 telemetryService.setState(telemetryId, ExcelExportTelemetry.HEADER_WRITING);
                 writeMeasuresColumnMetric(sheet);
 
-
+                telemetryService.setState(telemetryId, ExcelExportTelemetry.ROWS_WRITING);
                 writeDataColumnMetric(sheet);
             } else {
                 telemetryService.setState(telemetryId, ExcelExportTelemetry.HEADER_WRITING);
@@ -323,6 +323,8 @@ public class PivotTableWriter implements Writer {
     }
 
     private void writeCellValue(Cell cell, String value, DataTypeEnum type) {
+
+        value = value == null ? "" : value;
 
         if (!value.isEmpty()) {
             switch (type) {

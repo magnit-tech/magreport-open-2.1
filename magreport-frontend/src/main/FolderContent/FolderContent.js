@@ -102,9 +102,9 @@ export default function FolderContent(props){
     const [elementsOnPage, setElementsOnPage] = useState(10)
     const [countElement, setCountElement] = useState(100);
     const [filterValues, setFilterValues] = useState(props.filters || {
-        name: null,
+        reportIds: null,
         periodStart: null,
-        periodEnd: null, 
+        periodEnd: null,
         selectedStatuses: defaultStatuses
     })
     const [contextPosition, setContextPosition] = useState({
@@ -499,7 +499,7 @@ export default function FolderContent(props){
         let filters = filterValues
         if (isCleared){
             filters = {
-                name: null,
+                reportIds: null,
                 periodStart: null,
                 periodEnd: null,
                 selectedStatuses: defaultStatuses,

@@ -32,6 +32,8 @@ public record AsmSecuritySourceResponse(
         @JsonFormat(shape = JsonFormat.Shape.STRING)
         String postSql,
 
+        @JsonFormat(shape = JsonFormat.Shape.STRING)
+        String roleDescription,
         @JsonFormat(shape = JsonFormat.Shape.OBJECT)
         List<AsmSecuritySourceFieldResponse>fields,
 
