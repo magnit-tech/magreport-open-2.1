@@ -204,7 +204,7 @@ public class DataSetService {
 
         final var dataSet = domainService.getDataSet(request.getId());
 
-        final var dataSource = dataSourceService.getDataSourceView(dataSet.getDataSource().id());
+        final var dataSource = dataSourceService.getDataSourceView(dataSet.getDataSource().getId());
 
         List<ObjectFieldResponse> objectFields;
         if (PROCEDURE.equalsIsLong(dataSet.getTypeId())) {

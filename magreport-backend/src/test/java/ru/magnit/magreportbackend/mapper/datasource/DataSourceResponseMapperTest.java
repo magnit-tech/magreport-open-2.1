@@ -44,27 +44,27 @@ class DataSourceResponseMapperTest {
 
         DataSourceResponse response = mapper.from(getDataSource());
 
-        assertEquals(ID, response.id());
-        assertEquals(NAME, response.name());
-        assertEquals(DESCRIPTION, response.description());
-        assertEquals(CREATED_TIME, response.created());
-        assertEquals(MODIFIED_TIME, response.modified());
-        assertEquals(URL, response.url());
-        assertEquals(USER, response.userName());
-        assertNotNull(response.type());
+        assertEquals(ID, response.getId());
+        assertEquals(NAME, response.getName());
+        assertEquals(DESCRIPTION, response.getDescription());
+        assertEquals(CREATED_TIME, response.getCreated());
+        assertEquals(MODIFIED_TIME, response.getModified());
+        assertEquals(URL, response.getUrl());
+        assertEquals(USER, response.getUserName());
+        assertNotNull(response.getType());
 
         List<DataSourceResponse> responses = mapper.from(Collections.singletonList(getDataSource()));
 
         assertNotEquals(0, responses.size());
         response = responses.get(0);
 
-        assertEquals(ID, response.id());
-        assertEquals(NAME, response.name());
-        assertEquals(DESCRIPTION, response.description());
-        assertEquals(CREATED_TIME, response.created());
-        assertEquals(MODIFIED_TIME, response.modified());
-        assertEquals(URL, response.url());
-        assertEquals(USER, response.userName());
+        assertEquals(ID, response.getId());
+        assertEquals(NAME, response.getName());
+        assertEquals(DESCRIPTION, response.getDescription());
+        assertEquals(CREATED_TIME, response.getCreated());
+        assertEquals(MODIFIED_TIME, response.getModified());
+        assertEquals(URL, response.getUrl());
+        assertEquals(USER, response.getUserName());
     }
 
     private DataSource getDataSource() {
