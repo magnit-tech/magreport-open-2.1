@@ -221,8 +221,11 @@ public class DataSourceDomainService {
         checkDataSourceExists(id);
 
         var dataSource = dataSourceRepository.getReferenceById(id);
+        var result = dataSourceResponseMapper.from(dataSource);
 
-        return dataSourceResponseMapper.from(dataSource);
+        result.setPath(getPathToFolder(dataSource.getFolder().getId()));
+
+        return result;
     }
 
     @Transactional

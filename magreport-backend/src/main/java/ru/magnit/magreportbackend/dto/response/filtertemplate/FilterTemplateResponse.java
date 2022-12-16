@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import ru.magnit.magreportbackend.domain.filtertemplate.FilterOperationTypeEnum;
+import ru.magnit.magreportbackend.dto.response.folder.FolderNodeResponse;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -28,6 +29,7 @@ public class FilterTemplateResponse {
     private FilterTypeResponse type;
     private List<FilterTemplateFieldResponse> fields = Collections.emptyList();
     private List<FilterOperationTypeEnum> supportedOperations = Collections.emptyList();
+    private List<FolderNodeResponse> path = Collections.emptyList();
 
     private String userName;
 
