@@ -1,5 +1,4 @@
 import { makeStyles, alpha } from '@material-ui/core/styles';
-//import StyleConsts from 'StyleConsts';
 
 export const RoleWindowCSS = makeStyles(theme => ({
     root: {

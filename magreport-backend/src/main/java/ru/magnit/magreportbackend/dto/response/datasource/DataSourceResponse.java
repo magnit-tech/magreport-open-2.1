@@ -26,6 +26,9 @@ public class DataSourceResponse {
         @JsonFormat(shape = JsonFormat.Shape.NUMBER_INT)
         private Long id;
 
+        @JsonFormat(shape = JsonFormat.Shape.NUMBER_INT)
+        Long folderId,
+
         @JsonFormat(shape = JsonFormat.Shape.STRING)
         private String name;
 

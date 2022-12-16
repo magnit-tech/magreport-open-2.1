@@ -20,6 +20,7 @@ import ru.magnit.magreportbackend.dto.request.olap.MetricDefinitionNew;
 import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequestNew;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldTypes;
+import ru.magnit.magreportbackend.dto.request.report.ReportRequest;
 import ru.magnit.magreportbackend.dto.response.derivedfield.DerivedFieldResponse;
 import ru.magnit.magreportbackend.dto.response.derivedfield.ExpressionResponse;
 import ru.magnit.magreportbackend.exception.InvalidExpression;
@@ -264,5 +265,9 @@ public class DerivedFieldService {
         final var derivedFields = domainService.getDerivedFieldsForReport(reportId);
         return derivedFields.stream()
             .collect(Collectors.toMap(DerivedFieldResponse::getId, Function.identity()));
+    }
+
+    public List<DerivedFieldResponse> getDerivedFieldsByReport(ReportRequest request) {
+        return domainService.getDerivedFieldsForReport(request.getId());
     }
 }

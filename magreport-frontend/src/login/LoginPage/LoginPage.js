@@ -1,4 +1,5 @@
 import React from 'react';
+import clsx from 'clsx';
 import { connect } from 'react-redux';
 import LoginForm from '../LoginForm/LoginForm.js';
 import LoginCat from './LoginCat.js';
@@ -12,6 +13,7 @@ import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import { LoginPageCSS } from './LoginPageCSS';
 import ErrorIcon from '@material-ui/icons/Error';
+import './snow.css'
 
 
 function LoginPage(props){
@@ -19,7 +21,7 @@ function LoginPage(props){
     const classes = LoginPageCSS();
 
     return (
-        <div>
+        <div className={clsx('sneg', {[classes.snow]: true})}>
             <Header version={props.version}/>
             <Grid container component="main" className={classes.main} >
                 <CssBaseline/>
