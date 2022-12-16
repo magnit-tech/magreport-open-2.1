@@ -133,7 +133,7 @@ public class JobDomainService {
         final var job = repository.getReferenceById(id);
         final var jobStatus =  ReportJobStatusEnum.getById(job.getStatus().getId());
 
-        if ((jobStatus.equals(SCHEDULED) || jobStatus.equals(PENDING_DB_CONNECTION)) && status.equals(CANCELING))
+        if ((jobStatus.equals(SCHEDULED) || jobStatus.equals(PENDING_DB_CONNECTION)) && status.equals(CANCELING) || jobStatus.equals(CANCELING))
             status = CANCELED;
 
         if (checkFinalStatus(job.getStatus().getId())) {

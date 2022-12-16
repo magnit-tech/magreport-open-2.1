@@ -20,7 +20,7 @@ class ExternalAuthSourceTest extends BaseEntityTest {
 
     @BeforeAll
     public void init() throws ClassNotFoundException {
-        checkNumberOfFields(12);
+        checkNumberOfFields(13);
     }
 
     @Test
