@@ -93,8 +93,6 @@ export const DomainGroupCSS = makeStyles(theme => ({
         },
     },
     domainGroupList: {
-      //margin: theme.spacing(1),
-      //height: `calc(100vh - ${StyleConsts.headerHeight} - 30px - 174px - ${StyleConsts.breadHeight})`,
       minWidth: StyleConsts.paperRoleUserWidth,
       padding: 0,
       display: 'flex',
@@ -103,8 +101,6 @@ export const DomainGroupCSS = makeStyles(theme => ({
       minHeight: '48px'
     },
     domainGroupListBox: {
-      //overflow: 'auto',
-      //height: `calc(100vh - ${StyleConsts.headerHeight} * 3 - 32px - 124px - ${StyleConsts.breadHeight})`
       top: 0,
       left: 0,
       right: 0,

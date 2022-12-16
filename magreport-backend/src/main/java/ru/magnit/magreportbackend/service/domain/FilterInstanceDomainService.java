@@ -248,7 +248,11 @@ public class FilterInstanceDomainService {
 
     @Transactional
     public FilterInstanceResponse getFilterInstance(Long id) {
-        return filterInstanceResponseMapper.from(filterRepository.getReferenceById(id));
+        var filterInstance = filterRepository.getReferenceById(id);
+        var response =  filterInstanceResponseMapper.from(filterInstance);
+        response.setPath(getPathToFolder(filterInstance.getFolder().getId()));
+
+        return response;
     }
 
     @Transactional
