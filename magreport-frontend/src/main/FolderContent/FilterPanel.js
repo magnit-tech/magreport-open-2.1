@@ -21,7 +21,8 @@ import JobStatusSelect from './JobFilters/JobStatusSelect'
 import JobUsernameSelect from './JobFilters/JobUsernameSelect'
 import {FolderItemTypes} from './FolderItemTypes';
 import Slide from '@material-ui/core/Slide';
-//import DesignerTextField from '../Main/Development/Designer/DesignerTextField';
+// dataHub
+import dataHub from 'ajax/DataHub';
 // styles
 import { TimeSlider, FolderContentCSS } from './FolderContentCSS';
 
@@ -124,6 +125,10 @@ export default function FilterPanel(props){
             return acc
         }, 0)
     };
+
+    function handleSelectChange(type, selectArray){
+        props.onFilterChange(type, selectArray)
+    }
     
     return (
         <div >
@@ -201,23 +206,21 @@ export default function FilterPanel(props){
 						{ props.itemsType === FolderItemTypes.userJobs &&
 							<Grid item>
 								<JobUsernameSelect 
-									user={props.filters.user}
-									onChange={user => props.onFilterChange('user', user)}
+                                    user={props.filters.user}
+                                    label={"Пользователи"}
+                                    onDataLoad={dataHub.userController.users}
+									onChange={users => handleSelectChange('user', users)}
 								/>
 							</Grid>
 						}
-                      {/*  <Grid item className = {classes.itemStatusFilter}>
-                            <DesignerTextField
-                                margin = {'4px'}
-                                size = "small"
-                                label = "Название отчёта"
-                                value = {props.filters.name}
-                                fullWidth
-                                variant="filled"
-                                onChange={e => props.onFilterChange('name', e)}
-                            />
-                        </Grid>
-                        */}
+                        <Grid item>
+                            <JobUsernameSelect 
+                                label={"Отчёты"}
+                                user={props.filters.reportIds}
+                                onDataLoad={dataHub.reportJobController.getAllReports}
+								onChange={reports => handleSelectChange('reportIds', reports)}
+							/>
+						</Grid>
 						<Grid item className = {classes.itemStatusFilter}>
 							<JobStatusSelect 
 								selectedStatuses={props.filters.selectedStatuses}

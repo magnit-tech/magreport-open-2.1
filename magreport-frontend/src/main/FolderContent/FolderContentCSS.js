@@ -99,7 +99,7 @@ export const FolderContentCSS = makeStyles(theme => ({
         padding: '3px',
         position: 'fixed',
         right: '30px',
-        top: StyleConsts.headerHeight ,
+        top: '120px', //StyleConsts.headerHeight ,
         zIndex: 100
   },
   
