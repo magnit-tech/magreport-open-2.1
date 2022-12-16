@@ -10,6 +10,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import ru.magnit.magreportbackend.domain.datasource.DataSource;
 import ru.magnit.magreportbackend.domain.datasource.DataSourceFolder;
 import ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum;
+import ru.magnit.magreportbackend.domain.filterinstance.FilterInstanceFolder;
 import ru.magnit.magreportbackend.dto.inner.UserView;
 import ru.magnit.magreportbackend.dto.inner.datasource.DataSourceData;
 import ru.magnit.magreportbackend.dto.request.datasource.DataSourceAddRequest;
@@ -242,13 +243,13 @@ class DataSourceDomainServiceTest {
 
         DataSourceResponse response = domainService.editDataSource(getDataSourceAddRequest());
 
-        assertEquals(ID, response.id());
-        assertEquals(NAME, response.name());
-        assertEquals(DESCRIPTION, response.description());
-        assertEquals(URL, response.url());
-        assertEquals(USER_NAME, response.userName());
-        assertEquals(CREATED_TIME, response.created());
-        assertEquals(MODIFIED_TIME, response.modified());
+        assertEquals(ID, response.getId());
+        assertEquals(NAME, response.getName());
+        assertEquals(DESCRIPTION, response.getDescription());
+        assertEquals(CREATED_TIME, response.getCreated());
+        assertEquals(MODIFIED_TIME, response.getModified());
+        assertEquals(URL, response.getUrl());
+        assertEquals(USER_NAME, response.getUserName());
 
         verify(dataSourceRepository).existsById(anyLong());
         verify(dataSourceRepository).getReferenceById(any());
@@ -263,18 +264,20 @@ class DataSourceDomainServiceTest {
     @Test
     void getDataSource() {
         when(dataSourceRepository.existsById(anyLong())).thenReturn(true);
-        when(dataSourceRepository.getReferenceById(anyLong())).thenReturn(new DataSource());
+        when(dataSourceRepository.getReferenceById(anyLong())).thenReturn(getDataSourceObject());
         when(dataSourceResponseMapper.from((DataSource) any())).thenReturn(getDataSourceResponse());
+        when(folderRepository.existsById(anyLong())).thenReturn(true);
+        when(folderRepository.getReferenceById(anyLong())).thenReturn(new DataSourceFolder());
 
         DataSourceResponse response = domainService.getDataSource(ID);
 
-        assertEquals(ID, response.id());
-        assertEquals(NAME, response.name());
-        assertEquals(DESCRIPTION, response.description());
-        assertEquals(URL, response.url());
-        assertEquals(USER_NAME, response.userName());
-        assertEquals(CREATED_TIME, response.created());
-        assertEquals(MODIFIED_TIME, response.modified());
+        assertEquals(ID, response.getId());
+        assertEquals(NAME, response.getName());
+        assertEquals(DESCRIPTION, response.getDescription());
+        assertEquals(CREATED_TIME, response.getCreated());
+        assertEquals(MODIFIED_TIME, response.getModified());
+        assertEquals(URL, response.getUrl());
+        assertEquals(USER_NAME, response.getUserName());
 
         verify(dataSourceRepository).existsById(anyLong());
         verify(dataSourceRepository).getReferenceById(any());
@@ -430,6 +433,11 @@ class DataSourceDomainServiceTest {
                 POOL_SIZE);
     }
 
+    private DataSource getDataSourceObject(){
+        return new DataSource()
+                .setFolder(new DataSourceFolder().setId(ID));
+    }
+
     private DataSourceFolderResponse getFolderResponse() {
         return new DataSourceFolderResponse()
                 .setId(ID)
@@ -490,6 +498,7 @@ class DataSourceDomainServiceTest {
                 new DataSourceTypeResponse(ID, NAME, DESCRIPTION, CREATED_TIME, MODIFIED_TIME),
                 POOL_SIZE,
                 "Creator",
+                Collections.emptyList(),
                 CREATED_TIME,
                 MODIFIED_TIME
         );
