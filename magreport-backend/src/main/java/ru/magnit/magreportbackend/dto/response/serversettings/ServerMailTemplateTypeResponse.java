@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import ru.magnit.magreportbackend.dto.response.folder.FolderNodeResponse;
 import ru.magnit.magreportbackend.dto.response.user.UserResponse;
 
 import java.time.LocalDateTime;
@@ -44,6 +45,9 @@ public class ServerMailTemplateTypeResponse {
 
     @Schema(description ="Дочерние шаблоны")
     private List<ServerMailTemplateResponse> systemMailTemplates = Collections.emptyList();
+
+    @Schema(description ="Путь к типу")
+    private List<FolderNodeResponse> path = Collections.emptyList();
 
     @JsonFormat(pattern = ISO_DATE_TIME_PATTERN)
     @Schema(description ="Дата и время создания типа")

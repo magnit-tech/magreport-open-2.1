@@ -246,7 +246,8 @@ class DataSetDomainServiceTest {
     @Test
     void getDataSet() {
         when(dataSetRepository.existsById(anyLong())).thenReturn(true);
-        when(dataSetRepository.getReferenceById(anyLong())).thenReturn(new DataSet());
+        when(folderRepository.existsById(anyLong())).thenReturn(true);
+        when(dataSetRepository.getReferenceById(anyLong())).thenReturn(getDataset(TYPE_ID));
         when(dataSetResponseMapper.from((DataSet) any())).thenReturn(getDataSetResponse());
 
         DataSetResponse response = service.getDataSet(ID);
@@ -622,7 +623,7 @@ class DataSetDomainServiceTest {
         return new DataSet()
                 .setId(ID)
                 .setType(new DataSetType().setId(idType))
-                .setFolder(new DataSetFolder());
+                .setFolder(new DataSetFolder().setId(ID));
     }
 
     private DataSetField getDataSetField(){

@@ -220,8 +220,10 @@ public class DataSetDomainService {
     @Transactional
     public DataSetResponse getDataSet(Long id) {
         checkDataSetExists(id);
-
-        return dataSetResponseMapper.from(dataSetRepository.getReferenceById(id));
+        var dataset = dataSetRepository.getReferenceById(id);
+        var response =  dataSetResponseMapper.from(dataset);
+        response.setPath(getPathToFolder(dataset.getFolder().getId()));
+        return response;
     }
 
     @Transactional
