@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import ru.magnit.magreportbackend.domain.datasource.DataSourceFolder;
 import ru.magnit.magreportbackend.domain.filtertemplate.FilterTemplate;
 import ru.magnit.magreportbackend.domain.filtertemplate.FilterTemplateFolder;
 import ru.magnit.magreportbackend.dto.request.folder.FolderAddRequest;
@@ -259,8 +260,10 @@ class FilterTemplateDomainServiceTest {
     @Test
     void getFilterTemplate() {
 
-        when(filterTemplateRepository.getReferenceById(anyLong())).thenReturn(new FilterTemplate());
+        when(filterTemplateRepository.getReferenceById(anyLong())).thenReturn(getFilterTemplateObject());
         when(filterTemplateResponseMapper.from(any(FilterTemplate.class))).thenReturn(new FilterTemplateResponse());
+        when(folderRepository.existsById(anyLong())).thenReturn(true);
+        when(folderRepository.getReferenceById(anyLong())).thenReturn(new FilterTemplateFolder());
 
         assertNotNull(domainService.getFilterTemplate(anyLong()));
 
@@ -317,6 +320,12 @@ class FilterTemplateDomainServiceTest {
                 .setId(ID)
                 .setName(NAME)
                 .setDescription(DESCRIPTION);
+    }
+
+    private FilterTemplate getFilterTemplateObject(){
+        return new FilterTemplate()
+                .setId(ID)
+                .setFolder(new FilterTemplateFolder(ID));
     }
 
 

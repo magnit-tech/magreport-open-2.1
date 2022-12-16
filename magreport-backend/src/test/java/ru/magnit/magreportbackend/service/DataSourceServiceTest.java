@@ -236,13 +236,13 @@ class DataSourceServiceTest {
 
         DataSourceResponse response = service.addDataSource(getDataSourceAddRequest());
 
-        assertEquals(ID, response.id());
-        assertEquals(NAME, response.name());
-        assertEquals(DESCRIPTION, response.description());
-        assertEquals(URL, response.url());
-        assertEquals(USER_NAME, response.userName());
-        assertEquals(CREATED_TIME, response.created());
-        assertEquals(MODIFIED_TIME, response.modified());
+        assertEquals(ID, response.getId());
+        assertEquals(NAME, response.getName());
+        assertEquals(DESCRIPTION, response.getDescription());
+        assertEquals(CREATED_TIME, response.getCreated());
+        assertEquals(MODIFIED_TIME, response.getModified());
+        assertEquals(URL, response.getUrl());
+        assertEquals(USER_NAME, response.getUserName());
 
         verify(dataSourceDomainService).addDataSource(any(), any());
         verifyNoMoreInteractions(dataSourceDomainService);
@@ -255,13 +255,13 @@ class DataSourceServiceTest {
 
         DataSourceResponse response = service.editDataSource(getRenameDataSourceAddRequest());
 
-        assertEquals(ID, response.id());
-        assertEquals(RENAME, response.name());
-        assertEquals(DESCRIPTION, response.description());
-        assertEquals(URL, response.url());
-        assertEquals(USER_NAME, response.userName());
-        assertEquals(CREATED_TIME, response.created());
-        assertEquals(MODIFIED_TIME, response.modified());
+        assertEquals(ID, response.getId());
+        assertEquals(RENAME, response.getName());
+        assertEquals(DESCRIPTION, response.getDescription());
+        assertEquals(CREATED_TIME, response.getCreated());
+        assertEquals(MODIFIED_TIME, response.getModified());
+        assertEquals(URL, response.getUrl());
+        assertEquals(USER_NAME, response.getUserName());
 
         verify(dataSourceDomainService).editDataSource(any());
         verify(dataSourceDomainService).getDataSourceView(any());
@@ -274,13 +274,13 @@ class DataSourceServiceTest {
 
         DataSourceResponse response = service.getDataSource(getDataSourceRequest());
 
-        assertEquals(ID, response.id());
-        assertEquals(NAME, response.name());
-        assertEquals(DESCRIPTION, response.description());
-        assertEquals(URL, response.url());
-        assertEquals(USER_NAME, response.userName());
-        assertEquals(CREATED_TIME, response.created());
-        assertEquals(MODIFIED_TIME, response.modified());
+        assertEquals(ID, response.getId());
+        assertEquals(NAME, response.getName());
+        assertEquals(DESCRIPTION, response.getDescription());
+        assertEquals(CREATED_TIME, response.getCreated());
+        assertEquals(MODIFIED_TIME, response.getModified());
+        assertEquals(URL, response.getUrl());
+        assertEquals(USER_NAME, response.getUserName());
 
         verify(dataSourceDomainService).getDataSource(any());
         verifyNoMoreInteractions(dataSourceDomainService);
@@ -515,6 +515,7 @@ class DataSourceServiceTest {
                 new DataSourceTypeResponse(ID, NAME, DESCRIPTION, CREATED_TIME, MODIFIED_TIME),
                 POOL_SIZE,
                 "Creator",
+                Collections.emptyList(),
                 CREATED_TIME,
                 MODIFIED_TIME
         );
@@ -556,6 +557,7 @@ class DataSourceServiceTest {
                 new DataSourceTypeResponse(ID, NAME, DESCRIPTION, CREATED_TIME, MODIFIED_TIME),
                 POOL_SIZE,
                 "Creator",
+                Collections.emptyList(),
                 CREATED_TIME,
                 MODIFIED_TIME
         );
