@@ -182,7 +182,9 @@ public class FilterTemplateDomainService {
     @Transactional
     public FilterTemplateResponse getFilterTemplate(Long id) {
         var filterTemplate = filterTemplateRepository.getReferenceById(id);
-        return filterTemplateResponseMapper.from(filterTemplate);
+        var response =  filterTemplateResponseMapper.from(filterTemplate);
+        response.setPath(getPathToFolder(filterTemplate.getFolder().getId()));
+        return response;
     }
 
     @Transactional
