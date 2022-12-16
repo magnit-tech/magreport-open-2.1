@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import ru.magnit.magreportbackend.dto.response.folder.FolderNodeResponse;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -40,6 +41,9 @@ public class RoleTypeResponse {
 
     @Schema(description ="Дочерние роли")
     private List<RoleResponse> roles = Collections.emptyList();
+
+    @Schema(description ="Путь к типу")
+    private List<FolderNodeResponse> path = Collections.emptyList();
 
     @JsonFormat(pattern = ISO_DATE_TIME_PATTERN)
     @Schema(description ="Дата и время создания типа")
