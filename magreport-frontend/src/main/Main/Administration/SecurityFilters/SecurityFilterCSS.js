@@ -1,5 +1,5 @@
 import { makeStyles } from '@material-ui/core/styles';
-import StyleConsts from '../../../../StyleConsts.js';
+import StyleConsts from 'StyleConsts.js';
 
 export const GridCSS = makeStyles((theme) => ({
     root: {
@@ -34,7 +34,6 @@ export const GridCSS = makeStyles((theme) => ({
 
     },
     filterList: {
-        //height: `calc(100vh - ${StyleConsts.headerHeight} * 3 - 32px - ${StyleConsts.breadHeight} - 104px)`,
         display: 'flex',
         flex: 1,
         flexDirection: 'column',

@@ -10,6 +10,8 @@ public record ExternalAuthSourceBackupTuple(
         Long externalAuthSourceTypeId,
         String preSql,
         String postSql,
+
+        String roleDescription,
         String name,
         String description,
         LocalDateTime created,

@@ -112,7 +112,11 @@ public class SecurityFilterDomainService {
 
     @Transactional
     public SecurityFilterResponse getSecurityFilter(Long securityFilterId) {
-        return securityFilterResponseMapper.from(repository.getReferenceById(securityFilterId));
+
+        var securityFilter = repository.getReferenceById(securityFilterId);
+        var response = securityFilterResponseMapper.from(securityFilter);
+        response.setPath(getPathToFolder(securityFilter.getFolder().getId()));
+        return response;
     }
 
     @Transactional

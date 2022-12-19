@@ -259,11 +259,11 @@ class RoleDomainServiceTest {
     @Test
     void addDomainGroups() {
         when(domainGroupRepository.getByDomainIdAndName(any(), any())).thenReturn(getDomainGroup());
-        when(domainGroupRepository.existsByDomainIdAndName(any(),any())).thenReturn(true);
+        when(domainGroupRepository.existsByDomainIdAndName(any(), any())).thenReturn(true);
 
         domainService.addDomainGroups(Collections.singletonList(new DomainGroupRequest(1L, "Group 1")));
 
-        verify(domainGroupRepository).existsByDomainIdAndName(any(),any());
+        verify(domainGroupRepository).existsByDomainIdAndName(any(), any());
         verify(domainGroupRepository).getByDomainIdAndName(any(), any());
         verify(domainGroupRepository).saveAll(any());
 
@@ -346,8 +346,8 @@ class RoleDomainServiceTest {
     void searchRole() {
 
         when(roleTypeRepository.getReferenceById(any())).thenReturn(new RoleType()
-            .setName(NAME)
-            .setRoles(Collections.singletonList(get_role())));
+                .setName(NAME)
+                .setRoles(Collections.singletonList(get_role())));
 
 
         assertNotNull(domainService.searchRole(getFolderSearchRequest()));
@@ -364,70 +364,71 @@ class RoleDomainServiceTest {
 
     private RoleAddRequest getRoleAddRequest() {
         return new RoleAddRequest()
-            .setId(ID)
-            .setName(NAME)
-            .setDescription(DESCRIPTION)
-            .setTypeId(ID);
+                .setId(ID)
+                .setName(NAME)
+                .setDescription(DESCRIPTION)
+                .setTypeId(ID);
     }
 
     private Role get_role() {
         return new Role()
-            .setId(ID)
-            .setName(NAME)
-            .setDescription(DESCRIPTION)
-            .setCreatedDateTime(NOW)
-            .setModifiedDateTime(NOW)
-            .setUserRoles(Collections.singletonList(
-                new UserRole()
-                    .setId(ID)
-                    .setUser(new User().setId(ID))))
-            .setRoleDomainGroups(new ArrayList<>(Collections.singletonList(
-                new RoleDomainGroup()
-                    .setDomainGroup(new DomainGroup().setName("group1").setDomain(new Domain().setId(ID)))
-            )));
+                .setId(ID)
+                .setName(NAME)
+                .setDescription(DESCRIPTION)
+                .setCreatedDateTime(NOW)
+                .setModifiedDateTime(NOW)
+                .setRoleType(new RoleType(ID))
+                .setUserRoles(Collections.singletonList(
+                        new UserRole()
+                                .setId(ID)
+                                .setUser(new User().setId(ID))))
+                .setRoleDomainGroups(new ArrayList<>(Collections.singletonList(
+                        new RoleDomainGroup()
+                                .setDomainGroup(new DomainGroup().setName("group1").setDomain(new Domain().setId(ID)))
+                )));
     }
 
     private RoleResponse getRoleResponse() {
         return new RoleResponse()
-            .setId(ID)
-            .setName(NAME)
-            .setDescription(DESCRIPTION)
-            .setCreated(NOW)
-            .setModified(NOW)
-            .setTypeId(ID);
+                .setId(ID)
+                .setName(NAME)
+                .setDescription(DESCRIPTION)
+                .setCreated(NOW)
+                .setModified(NOW)
+                .setTypeId(ID);
     }
 
     private RoleUsersSetRequest getRoleUsersSetRequest() {
         return new RoleUsersSetRequest()
-            .setId(ID)
-            .setUsers(Collections.singletonList(ID));
+                .setId(ID)
+                .setUsers(Collections.singletonList(ID));
 
     }
 
     private DomainGroup getDomainGroup() {
         return new DomainGroup()
-            .setDomain(new Domain().setId(1L).setName("Domain 1"))
-            .setId(ID)
-            .setName(NAME)
-            .setCreatedDateTime(NOW)
-            .setModifiedDateTime(NOW);
+                .setDomain(new Domain().setId(1L).setName("Domain 1"))
+                .setId(ID)
+                .setName(NAME)
+                .setCreatedDateTime(NOW)
+                .setModifiedDateTime(NOW);
     }
 
     private RoleDomainGroupSetRequest getRoleDomainGroupSetRequest() {
         return new RoleDomainGroupSetRequest()
-            .setId(ID)
-            .setDomainGroups(
-                Arrays.asList(
-                    new DomainGroupRequest(1L, "Group 1")
-                ));
+                .setId(ID)
+                .setDomainGroups(
+                        Arrays.asList(
+                                new DomainGroupRequest(1L, "Group 1")
+                        ));
     }
 
     private FolderSearchRequest getFolderSearchRequest() {
         return new FolderSearchRequest()
-            .setRootFolderId(0L)
-            .setSearchString("")
-            .setRecursive(true)
-            .setLikenessType(LikenessType.CONTAINS);
+                .setRootFolderId(0L)
+                .setSearchString("")
+                .setRecursive(true)
+                .setLikenessType(LikenessType.CONTAINS);
     }
 
 }
