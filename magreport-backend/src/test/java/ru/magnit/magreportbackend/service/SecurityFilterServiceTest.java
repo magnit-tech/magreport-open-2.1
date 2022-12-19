@@ -368,6 +368,7 @@ class SecurityFilterServiceTest {
 
     private SecurityFilterResponse getSecurityFilterResponse() {
         return new SecurityFilterResponse(ID,
+                FOLDER_ID,
                 new FilterInstanceResponse(),
                 OPERATION_TYPE,
                 NAME,
