@@ -198,7 +198,7 @@ public class FilterInstanceService {
         var response = domainService.getFilterInstanceDependants(request.getId());
 
         response.getReports().forEach(reportResponse -> reportResponse.setPath(reportDomainService.getPathReport(reportResponse.getId())));
-        response.getSecurityFilters().forEach(securityFilterResponse -> securityFilterResponse.path().addAll(securityFilterDomainService.getPathSecurityFilter(securityFilterResponse.id())));
+        response.getSecurityFilters().forEach(securityFilterResponse -> securityFilterResponse.getPath().addAll(securityFilterDomainService.getPathSecurityFilter(securityFilterResponse.getId())));
         response.setPath(domainService.getPathFilter(response.getId()));
         return response;
     }
