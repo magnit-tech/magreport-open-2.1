@@ -30,9 +30,10 @@ import ru.magnit.magreportbackend.service.telemetry.state.ExcelExportTelemetry;
 import ru.magnit.magreportbackend.util.Pair;
 
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -75,7 +76,8 @@ public class PivotTableWriter implements Writer {
         telemetryService.setState(telemetryId, ExcelExportTelemetry.INITIALIZING);
 
         try (
-                final var workbook = new SXSSFWorkbook(new XSSFWorkbook(new File(templatePath)), SXSSFWorkbook.DEFAULT_WINDOW_SIZE);
+                final var inputStream = Files.newInputStream(Paths.get(templatePath));
+                final var workbook = new SXSSFWorkbook(new XSSFWorkbook(inputStream), SXSSFWorkbook.DEFAULT_WINDOW_SIZE);
                 final var outputStream = new BufferedOutputStream(new FileOutputStream(exportPath.toFile()))
         ) {
             initConfig(workbook);
@@ -333,6 +335,7 @@ public class PivotTableWriter implements Writer {
                 case DOUBLE -> cell.setCellValue(Double.parseDouble(value));
                 case DATE -> cell.setCellValue(LocalDate.parse(value));
                 case TIMESTAMP -> cell.setCellValue(LocalDateTime.parse(value.replace(" ", "T")));
+                case BOOLEAN -> cell.setCellValue(Boolean.parseBoolean(value));
             }
         } else {
             cell.setCellValue(value);
