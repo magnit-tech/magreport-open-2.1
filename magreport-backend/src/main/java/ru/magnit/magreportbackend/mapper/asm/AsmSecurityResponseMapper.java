@@ -7,6 +7,7 @@ import ru.magnit.magreportbackend.dto.response.asm.AsmSecurityResponse;
 import ru.magnit.magreportbackend.mapper.Mapper;
 import ru.magnit.magreportbackend.mapper.auth.RoleTypeResponseMapper;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,7 +30,8 @@ public class AsmSecurityResponseMapper implements Mapper<AsmSecurityResponse, Ex
                 roleTypeResponseMapper.shallowMap(source.getRoleType()),
                 source.getIsDefaultDomain(),
                 source.getCreatedDateTime(),
-                source.getModifiedDateTime());
+                source.getModifiedDateTime(),
+                Collections.emptyList());
     }
 
     @Override
