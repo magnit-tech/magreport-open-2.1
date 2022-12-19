@@ -500,7 +500,7 @@ class FilterInstanceServiceTest {
                 .setValid(true)
                 .setPath(Collections.singletonList(new FolderNodeResponse(null,null,null,null, null, null)))
                 .setReports(Collections.singletonList(new ReportResponse()))
-                .setSecurityFilters(Collections.singletonList(new SecurityFilterResponse(null,null,null,null,null,null,null,null,null,null,new ArrayList<>())));
+                .setSecurityFilters(Collections.singletonList(new SecurityFilterResponse(null,null,null,null,null,null,null,null,null,null,null,new ArrayList<>())));
 
     }
 

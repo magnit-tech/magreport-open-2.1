@@ -51,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -132,6 +133,8 @@ class SecurityFilterDomainServiceTest {
     void getSecurityFilter() {
         when(securityFilterResponseMapper.from(any(SecurityFilter.class))).thenReturn(getSecurityFilterResponse());
         when(repository.getReferenceById(any())).thenReturn(getFilter());
+        when(folderRepository.existsById(anyLong())).thenReturn(true);
+        when(folderRepository.getReferenceById(any())).thenReturn(new SecurityFilterFolder());
 
         assertNotNull(domainService.getSecurityFilter(ID));
 
@@ -363,7 +366,7 @@ class SecurityFilterDomainServiceTest {
                 .setDescription(DESCRIPTION)
                 .setCreatedDateTime(NOW)
                 .setModifiedDateTime(NOW)
-                .setFolder(new SecurityFilterFolder().setParentFolder(new SecurityFilterFolder()))
+                .setFolder(new SecurityFilterFolder().setId(ID).setParentFolder(new SecurityFilterFolder()))
                 .setFilterInstance(new FilterInstance()
                         .setId(ID));
 
@@ -379,6 +382,7 @@ class SecurityFilterDomainServiceTest {
 
     private SecurityFilterResponse getSecurityFilterResponse() {
         return new SecurityFilterResponse(
+                ID,
                 ID,
                 null,
                 FilterOperationTypeEnum.IS_BETWEEN,

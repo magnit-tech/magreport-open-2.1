@@ -1,6 +1,7 @@
 package ru.magnit.magreportbackend.dto.response.asm;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import ru.magnit.magreportbackend.dto.response.folder.FolderNodeResponse;
 import ru.magnit.magreportbackend.dto.response.user.RoleTypeResponse;
 
 import java.time.LocalDateTime;
@@ -35,6 +36,9 @@ public record AsmSecurityResponse(
         LocalDateTime created,
 
         @JsonFormat(pattern = ISO_DATE_TIME_PATTERN)
-        LocalDateTime modified
+        LocalDateTime modified,
+
+        @JsonFormat(shape = JsonFormat.Shape.OBJECT)
+        List<FolderNodeResponse> path
 ) {
 }
