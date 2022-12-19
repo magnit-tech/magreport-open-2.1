@@ -25,6 +25,7 @@ public class ExternalAuthSourceMapper implements Mapper<ExternalAuthSource, AsmS
                 .setDescription(source.getDescription())
                 .setPreSql(source.getPreSql())
                 .setPostSql(source.getPostSql())
+                .setRoleDescription(source.getRoleDescription())
                 .setDataSet(new DataSet(source.getDataSetId()))
                 .setSecurityFilters(securityFilterMapper.from(source.getSecurityFilters()))
                 .setFields(fieldMapper.from(source.getFields()));

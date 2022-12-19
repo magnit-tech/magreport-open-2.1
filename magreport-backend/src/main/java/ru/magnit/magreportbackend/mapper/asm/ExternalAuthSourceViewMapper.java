@@ -44,7 +44,8 @@ public class ExternalAuthSourceViewMapper implements Mapper<ExternalAuthSourceVi
                 .setFields(fieldViewMapper.mapFrom(source.getFields()))
                 .setFilters(amsFilterViewMapper.from(source.getSecurityFilters()))
                 .setPreSql(source.getPreSql())
-                .setPostSql(source.getPostSql());
+                .setPostSql(source.getPostSql())
+                .setRoleDescription(source.getRoleDescription());
     }
 
 }

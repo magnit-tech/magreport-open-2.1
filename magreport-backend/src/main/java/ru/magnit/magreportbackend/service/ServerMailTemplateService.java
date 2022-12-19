@@ -11,6 +11,7 @@ import ru.magnit.magreportbackend.service.domain.ServerMailTemplateDomainService
 import ru.magnit.magreportbackend.service.domain.ServerMailTemplateTypeDomainService;
 import ru.magnit.magreportbackend.service.domain.UserDomainService;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
@@ -35,8 +36,11 @@ public class ServerMailTemplateService {
         serverMailTemplateDomainService.editServerMailTemplate(request, currentUser.getId());
     }
 
+    @Transactional
     public ServerMailTemplateResponse getServerMailTemplate(ServerMailTemplateRequest request) {
-        return serverMailTemplateDomainService.getServerMailTemplate(request.getId());
+        var response  =  serverMailTemplateDomainService.getServerMailTemplate(request.getId());
+        response.setPath(serverMailTemplateTypeDomainService.getPathById(response.getType().getId()));
+        return response;
     }
 
     public List<ServerMailTemplateResponse> getServerMailTemplateByType(ServerMailTemplateTypeRequest request) {
