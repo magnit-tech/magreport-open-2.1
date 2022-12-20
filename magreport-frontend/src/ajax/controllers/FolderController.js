@@ -52,7 +52,7 @@ export default function FolderController(dataHub){
         const body = {
             id,
         };
-        return dataHub.requestService(FOLDER_GET_URL, METHOD, body, callback, (data) => {dataHub.localCache.setFolderData(FolderItemTypes.report, data)});
+        return dataHub.requestService(FOLDER_GET_URL, METHOD, body, callback, (data) => {dataHub.localCache.setFolderData(FolderItemTypes.reports, data)});
     }
 
     this.renameFolder = function (description, id, name, callback){
@@ -94,7 +94,7 @@ export default function FolderController(dataHub){
             rootFolderId, 
             searchString
         };
-        return dataHub.requestService(FOLDER_SEARCH_URL, METHOD, body, callback, data => dataHub.localCache.setSearchFolderData(FolderItemTypes.report, data));
+        return dataHub.requestService(FOLDER_SEARCH_URL, METHOD, body, callback, data => dataHub.localCache.setSearchFolderData(FolderItemTypes.reports, data));
     }
 
     this.changeParentFolder = function (id, parentId, callback){

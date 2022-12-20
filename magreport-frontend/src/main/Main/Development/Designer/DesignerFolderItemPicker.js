@@ -20,10 +20,10 @@ import dataHub from 'ajax/DataHub';
 // local
 import DataLoader from 'main/DataLoader/DataLoader';
 import FolderContent from 'main/FolderContent/FolderContent';
-import {folderItemTypeName, dataHubItemController, FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
+import { folderItemTypeName, dataHubItemController } from 'main/FolderContent/FolderItemTypes';
 
 // actions 
-import {actionFolderLoaded, actionFolderLoadFailed, actionFolderClick, actionSearchClick} from 'redux/actions/menuViews/folderActions';
+import {actionFolderLoaded, actionFolderLoadFailed, actionSearchClick} from 'redux/actions/menuViews/folderActions';
 
 
 // styles
@@ -34,13 +34,6 @@ import {DesignerCSS} from './DesignerCSS';
  * @param {number} itemId
  * @param {Object} item
  * @param {number} folderId
- */
-
-/**
- * @callback actionFolderClick
- * @param {string} itemType
- * @param {number} folderId
- * @param {boolean} [isFolderItemPicker=false]
  */
 
 /**
@@ -74,13 +67,12 @@ import {DesignerCSS} from './DesignerCSS';
  * @param {boolean} [props.error=false] - признак ошибки задания поля
  * @param {boolean} [props.disabled=false] - признак недоступности поля
  * @param {itemPickerOnChange} props.onChange - function(itemId, item, folderId)
- * @param {actionFolderClick} props.actionFolderClick - callback, вызываемый при нажатии на карточку папки
  * @param {actionFolderLoaded} props.actionFolderLoaded - callback, вызываемый при успешной загрузке содержимого папки
  * @param {actionFolderLoadFailed} props.actionFolderLoadFailed - callback, вызываемый при ошибке загрузки содержимого папки
  * @param {actionSearchClick} props.actionSearchClick - callback, вызываемый при нажатии на кнопку поиска
  */
 function DesignerFolderItemPicker(props){
-
+    
     const classes = DesignerCSS();
 
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -104,7 +96,6 @@ function DesignerFolderItemPicker(props){
 
     function handleFolderClick(folderId, folderName){
         folderPath.current.push({id: folderId, name: folderName});
-        props.actionFolderClick(props.itemType, folderId, true);
         setLoadParams(folderId)
     }
 
@@ -245,25 +236,27 @@ function DesignerFolderItemPicker(props){
 }
 
 const mapStateToProps = (state, props) => {
-    const {itemType} = props
-    let s = null
-    if (itemType === FolderItemTypes.filterTemplate) s = state.filtersMenuView
-    if (itemType === FolderItemTypes.filterInstance) s = state.filterInstancesMenuView
-    if (itemType === FolderItemTypes.report) s = state.reportsMenuView
-    if (itemType === FolderItemTypes.reportsDev) s = state.reportsDevMenuView
-    if (itemType === FolderItemTypes.dataset) s = state.datasetsMenuView
-    if (itemType === FolderItemTypes.datasource) s = state.datasourcesMenuView
-    if (itemType === FolderItemTypes.roles) s = state.rolesMenuView
-    if (itemType === FolderItemTypes.securityFilters) s = state.securityFiltersMenuView
+    // const {itemType} = props
+    // let s = null
+    // if (itemType === FolderItemTypes.filterTemplate) s = state.filtersMenuView
+    // if (itemType === FolderItemTypes.filterInstance) s = state.filterInstancesMenuView
+    // if (itemType === FolderItemTypes.reports) s = state.reportsMenuView
+    // if (itemType === FolderItemTypes.reportsDev) s = state.reportsDevMenuView
+    // if (itemType === FolderItemTypes.dataset) s = state.datasetsMenuView
+    // if (itemType === FolderItemTypes.datasource) s = state.datasourcesMenuView
+    // if (itemType === FolderItemTypes.roles) s = state.rolesMenuView
+    // if (itemType === FolderItemTypes.securityFilters) s = state.securityFiltersMenuView
+    // return {
+    //     state: s
+    // }
     return {
-        state: s
+        state : state.folderData
     }
 }
 
 const mapDispatchToProps = {
     actionFolderLoaded,
     actionFolderLoadFailed,
-    actionFolderClick,
     actionSearchClick,
 }
 

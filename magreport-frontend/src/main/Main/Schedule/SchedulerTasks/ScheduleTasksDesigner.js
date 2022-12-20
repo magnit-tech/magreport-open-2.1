@@ -1,6 +1,11 @@
-import React, {useState} from "react";
+import React, { useState, useEffect } from "react";
 import {useSnackbar} from "notistack";
 import {CopyToClipboard} from 'react-copy-to-clipboard';
+
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+
+import { useDispatch } from "react-redux";
+import { editItemNavbar, addItemNavbar } from "redux/actions/navbar/actionNavbar";
 
 // dataHub
 import dataHub from "ajax/DataHub";
@@ -28,7 +33,7 @@ import {MuiPickersUtilsProvider, KeyboardDatePicker,} from '@material-ui/pickers
 // local components
 import {randomWordCode} from 'utils/randomWordCode';
 import DataLoader from "main/DataLoader/DataLoader";
-import PageTabs from "main/PageTabs/PageTabs";
+import PageTabs from "components/PageTabs/PageTabs";
 import DesignerPage from "main/Main/Development/Designer/DesignerPage";
 import DesignerTextField from "main/Main/Development/Designer/DesignerTextField";
 import DesignerMultipleSelectField from "main/Main/Development/Designer/DesignerMultipleSelectField";
@@ -37,25 +42,33 @@ import {FolderItemTypes} from "main/FolderContent/FolderItemTypes";
 import ReportStarter from '../../../Report/ReportStarter';
 import {ScheduleTaskTypeMap, ScheduleStatusMap} from '../../../FolderContent/JobFilters/JobStatuses';
 import DesignerTextFieldWithSeparator from 'main/Main/Development/Designer/DesignerTextFieldWithSeparator';
+
 //styles
 import {DesignerCSS} from '../../Development/Designer/DesignerCSS';
-/**
- * @callback onExit
- */
 
 /**
  * Компонент создания и редактирования отчетов на расписании
  * @param {Object} props - параметры компонента
- * @param {String} props.mode - "create" - создание; "edit" - редактирование
  * @param {String} props.status - статус задания. Если CHANGED, то переход на вкладку "Фильтры обязателен"
- * @param {Number} props.reportId - идентификатор отчета на расписании
- * @param {onExit} props.onExit - callback, вызываемый при закрытии формы
  * @return {JSX.Element}
  * @constructor
  */
+
 export default function ScheduleTasksDesigner(props) {
     const classes = DesignerCSS();
- 
+    
+    const {id} = useParams()
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        if(!id) {
+            dispatch(addItemNavbar('scheduleTasks', null, null))
+        }
+    }, []) // eslint-disable-line
+
     const {enqueueSnackbar} = useSnackbar();
 
     const [uploading, setUploading] = useState(false);
@@ -115,7 +128,6 @@ export default function ScheduleTasksDesigner(props) {
         ["maxFailedStarts " , "Количество падений"]
     ]); 
 
-    const [id, setId] = useState(props.scheduleId);
     const [scheduledReport, setScheduledReport] = useState([]);
     const [schedulesList, setSchedulesList] = useState([]);
     const [usersList, setUsersList] = useState([]);
@@ -127,7 +139,7 @@ export default function ScheduleTasksDesigner(props) {
     const [emailErrorStatus, setEmailErrorStatus] = useState('success');
     const [disableSave, setDisableSave] = useState(true);
     const [hideFilterTab, setHideFilterTab] = useState(false);
-    const pageName = props.mode === "create" ? "Добавление отчёта на расписание" : "Редактирование отчёта на расписании";
+    const pageName = id ? "Редактирование отчёта на расписании" : "Добавление отчёта на расписание";
     
     function handleSchedulesLoaded(data){
         setSchedulesList(data.map((v) => ({id: v.id, name: v.name, type: v.type})));
@@ -152,7 +164,7 @@ export default function ScheduleTasksDesigner(props) {
     let loadFuncRoles = dataHub.roleController.getAll;
     let loadFuncRunLink = dataHub.scheduleController.taskGetManualLink;
 
-    if (props.mode === "edit") {
+    if (id) {
         loadFunc = dataHub.scheduleController.taskGet;
         loadParams = [id];
     }
@@ -262,7 +274,6 @@ export default function ScheduleTasksDesigner(props) {
         setErrorField({...errorField, 'taskTypeId': false});
     }
 
-    
     function mandatoryFilters(data){
         let mg = mandatoryGroups(data)
         
@@ -366,7 +377,7 @@ export default function ScheduleTasksDesigner(props) {
 
         if(hasErrors()) {
             //enqueueSnackbar(`Форма содержит ошибки`, {variant: "error"});
-        } else if (props.mode === "create") {
+        } else if (!id) {
             dataHub.scheduleController.taskAdd(
                 dataToSave,
                 magResponse => handleAddedEdited(magResponse)
@@ -374,7 +385,7 @@ export default function ScheduleTasksDesigner(props) {
             setUploading(true);
         } else {
             dataHub.scheduleController.taskEdit(
-                {id: props.scheduleId, ...dataToSave },
+                {id: id, ...dataToSave },
                 magRepResponse => handleAddedEdited(magRepResponse)
             );
             setUploading(true);
@@ -383,18 +394,14 @@ export default function ScheduleTasksDesigner(props) {
 
     function handleAddedEdited(magRepResponse) {
         if (magRepResponse.ok) {
-            props.onExit();
+            location.state ? navigate(location.state) : navigate(`/scheduleTasks`)
             enqueueSnackbar("Отчет на расписании успешно сохранен", {variant : "success"});
         } else {
             setUploading(false);
-            const actionWord = props.mode === "create" ? "создании" : "обновлении";
+            const actionWord = id ? "обновлении" : "создании";
             enqueueSnackbar(`При ${actionWord} возникла ошибка: ${magRepResponse.data}`,
                 {variant: "error"});
         }
-    }
-
-    function handleCancel() {
-        props.onExit();
     }
 
     function handleDataLoaded(loadedData) {
@@ -404,7 +411,7 @@ export default function ScheduleTasksDesigner(props) {
         let childGroups = loadedData.report.filterGroup.childGroups === null ? [] : loadedData.report.filterGroup.childGroups;
         let filters     = loadedData.report.filterGroup.filters     === null ? [] : loadedData.report.filterGroup.filters;
 
-        setId(loadedData.id);
+        // setId(loadedData.id);
         setScheduledReport({id: loadedData.report.id, name: loadedData.report.name});
         setTaskTypeId(tTask);
         setIsManual(loadedData.code ? true : false);
@@ -434,6 +441,9 @@ export default function ScheduleTasksDesigner(props) {
             maxFailedStarts: loadedData.maxFailedStarts ,
             failedStart: loadedData.failedStart
         });
+        if (id) {
+            dispatch(editItemNavbar('scheduleTasks', loadedData.name, id, null, null))
+        }
         if  (childGroups.length === 0  && filters.length === 0) {
             setDisableSave(false);
             setHideFilterTab(true);
@@ -457,7 +467,7 @@ export default function ScheduleTasksDesigner(props) {
             <DesignerPage
                 disableSave = {disableSave}
                 onSaveClick={handleSave}
-                onCancelClick={handleCancel}
+                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/scheduleTasks`)}
             >
                 <DesignerFolderItemPicker
                 //minWidth = {StyleConsts.designerTextFieldMinWidth}
@@ -500,7 +510,6 @@ export default function ScheduleTasksDesigner(props) {
             
             </DesignerPage>
     })
-
     tabs.push({
         tablabel: "Расписания",
         tabdisabled: !(data.reportId && data.name && data.description) ,
@@ -508,7 +517,7 @@ export default function ScheduleTasksDesigner(props) {
             <DesignerPage
                 disableSave = {disableSave}
                 onSaveClick={handleSave}
-                onCancelClick={handleCancel}
+                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/scheduleTasks`)}
             >
                 <DesignerMultipleSelectField
                    // minWidth = {StyleConsts.designerTextFieldMinWidth}
@@ -579,182 +588,182 @@ export default function ScheduleTasksDesigner(props) {
                 
             </DesignerPage>
     })
-
     tabs.push({
-        tablabel: "Рассылка",
+    tablabel: "Рассылка",
+    tabdisabled: !(data.reportId && data.name && data.description) ,
+    tabcontent: uploading ? <CircularProgress/> :
+        <DesignerPage
+            disableSave = {disableSave}
+            onSaveClick={handleSave}
+            onCancelClick={() => location.state ? navigate(location.state) : navigate(`/scheduleTasks`)}
+        >
+            <FormControl component="fieldset" style={{margin: '8px 0px'}}>
+                <FormLabel component="legend">Тип рассылки:</FormLabel>
+                    <RadioGroup row aria-label="taskType" name="taskType" 
+                        value={taskTypeId} 
+                        defaultValue = {taskTypeId}
+                        onChange={(event) => handleChangeTaskTypeId( event.target.value)}
+                    >
+                        <FormControlLabel value= '0' control={<Radio />} label="E-mail" />
+                        <FormControlLabel value= '1' control={<Radio />} label="Задания" />
+                    </RadioGroup>
+            </FormControl>
+            
+            {taskTypeId === '0' &&
+                <DesignerTextFieldWithSeparator
+                    label = "Адреса"
+                    source = "destinationEmails"
+                    value = {data.destinationEmails}
+                    onChange = {handleChangeEmails}
+                    mandatory = {taskTypeId === '0'}
+                    displayblock 
+                    fullWidth
+                    multiline
+                    error = {errorField.destinationEmails}
+                />
+            }
+
+            <DesignerMultipleSelectField
+                    // minWidth = {StyleConsts.designerTextFieldMinWidth}
+                    label = "Пользователи"
+                    value = {usersList.filter(item => data.destinationUsers.indexOf(item.id)>=0 )}
+                    data = {usersList}
+                    //needName = {true}
+                    onChange = {data => {handleChange('destinationUsers', data)}}
+                    displayBlock
+                    fullWidth
+                    error = {errorField.destinationUsers}
+                />
+            <DesignerMultipleSelectField
+                    // minWidth = {StyleConsts.designerTextFieldMinWidth}
+                    label = "Роли"
+                    value = {rolesList.filter(item => data.destinationRoles.map(item => item.id).indexOf(item.id)>=0 )}
+                    data = {rolesList}
+                    needIdName = {true}
+                    onChange = {data => {handleChange('destinationRoles', data )}}
+                    displayBlock
+                    fullWidth
+                    error = {errorField.destinationRoles}
+            />
+            {taskTypeId === '0' &&
+                <DesignerTextField
+                    label="Тема письма"
+                    value={data.reportTitleMail}
+                    onChange={data => {handleChange('reportTitleMail', data)}}
+                    multiline
+                    displayBlock
+                    fullWidth
+                    error = {errorField.reportTitleMail}
+                />
+            } 
+            {taskTypeId === '0' &&
+                <DesignerTextField
+                    label="Тело письма"
+                    value={data.reportBodyMail}
+                    onChange={data => {handleChange('reportBodyMail', data)}}
+                    multiline
+                    displayBlock
+                    fullWidth
+                    error = {errorField.reportBodyMail}
+                />
+            }
+            {taskTypeId === '0' &&
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={data.sendEmptyReport}
+                            onChange={event => {handleChange('sendEmptyReport', event.target.checked)}}
+                            name="sendEmptyReport"
+                            color="primary"
+                        />
+                    }
+                    label="Отправлять пустой отчёт?"
+                />
+            }
+        </DesignerPage>
+    })
+    tabs.push({
+        tablabel: "Падение рассылки",
         tabdisabled: !(data.reportId && data.name && data.description) ,
         tabcontent: uploading ? <CircularProgress/> :
             <DesignerPage
                 disableSave = {disableSave}
                 onSaveClick={handleSave}
-                onCancelClick={handleCancel}
+                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/scheduleTasks`)}
             >
-                <FormControl component="fieldset" style={{margin: '8px 0px'}}>
-                    <FormLabel component="legend">Тип рассылки:</FormLabel>
-                        <RadioGroup row aria-label="taskType" name="taskType" 
-                            value={taskTypeId} 
-                            defaultValue = {taskTypeId}
-                            onChange={(event) => handleChangeTaskTypeId( event.target.value)}
-                        >
-                            <FormControlLabel value= '0' control={<Radio />} label="E-mail" />
-                            <FormControlLabel value= '1' control={<Radio />} label="Задания" />
-                        </RadioGroup>
-                </FormControl>
-                
-                {taskTypeId === '0' &&
-                    <DesignerTextFieldWithSeparator
+                <DesignerTextFieldWithSeparator
                         label = "Адреса"
-                        source = "destinationEmails"
-                        value = {data.destinationEmails}
+                        source = "errEmails"
+                        value = {data.errEmails}
                         onChange = {handleChangeEmails}
-                        mandatory = {taskTypeId === '0'}
                         displayblock 
                         fullWidth
                         multiline
-                        error = {errorField.destinationEmails}
-                    />
-                }
-
+                        error = {errorField.errEmails}
+                />  
                 <DesignerMultipleSelectField
-                        // minWidth = {StyleConsts.designerTextFieldMinWidth}
-                        label = "Пользователи"
-                        value = {usersList.filter(item => data.destinationUsers.indexOf(item.id)>=0 )}
-                        data = {usersList}
-                        //needName = {true}
-                        onChange = {data => {handleChange('destinationUsers', data)}}
-                        displayBlock
-                        fullWidth
-                        error = {errorField.destinationUsers}
-                    />
-                <DesignerMultipleSelectField
-                        // minWidth = {StyleConsts.designerTextFieldMinWidth}
-                        label = "Роли"
-                        value = {rolesList.filter(item => data.destinationRoles.map(item => item.id).indexOf(item.id)>=0 )}
-                        data = {rolesList}
-                        needIdName = {true}
-                        onChange = {data => {handleChange('destinationRoles', data )}}
-                        displayBlock
-                        fullWidth
-                        error = {errorField.destinationRoles}
+                    label = "Пользователи"
+                    value = {usersList.filter(item => data.errUsers.indexOf(item.id)>=0 )}
+                    data = {usersList}
+                    //needName = {true}
+                    onChange = {data => {handleChange('errUsers', data)}}
+                    displayBlock
+                    fullWidth
+                    error = {errorField.errUsers}
                 />
-                {taskTypeId === '0' &&
-                    <DesignerTextField
+                <DesignerMultipleSelectField
+                    label = "Роли"
+                    value = {rolesList.filter(item => data.errRoles.map(item => item.id).indexOf(item.id)>=0 )}
+                    data = {rolesList}
+                    needIdName = {true}
+                    onChange = {data => {handleChange('errRoles', data )}}
+                    displayBlock
+                    fullWidth
+                    error = {errorField.errRoles}
+            />
+                <DesignerTextField
                         label="Тема письма"
-                        value={data.reportTitleMail}
-                        onChange={data => {handleChange('reportTitleMail', data)}}
+                        value={data.errorTitleMail}
+                        onChange={data => {handleChange('errorTitleMail', data)}}
                         multiline
                         displayBlock
                         fullWidth
-                        error = {errorField.reportTitleMail}
-                    />
-                } 
-                {taskTypeId === '0' &&
-                    <DesignerTextField
-                        label="Тело письма"
-                        value={data.reportBodyMail}
-                        onChange={data => {handleChange('reportBodyMail', data)}}
-                        multiline
-                        displayBlock
-                        fullWidth
-                        error = {errorField.reportBodyMail}
-                    />
-                }
-                {taskTypeId === '0' &&
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={data.sendEmptyReport}
-                                onChange={event => {handleChange('sendEmptyReport', event.target.checked)}}
-                                name="sendEmptyReport"
-                                color="primary"
-                            />
-                        }
-                        label="Отправлять пустой отчёт?"
-                    />
-                }
-            </DesignerPage>
-        })
-        tabs.push({
-            tablabel: "Падение рассылки",
-            tabdisabled: !(data.reportId && data.name && data.description) ,
-            tabcontent: uploading ? <CircularProgress/> :
-                <DesignerPage
-                    disableSave = {disableSave}
-                    onSaveClick={handleSave}
-                    onCancelClick={handleCancel}
-                >
-                    <DesignerTextFieldWithSeparator
-                            label = "Адреса"
-                            source = "errEmails"
-                            value = {data.errEmails}
-                            onChange = {handleChangeEmails}
-                            displayblock 
-                            fullWidth
-                            multiline
-                            error = {errorField.errEmails}
-                    />  
-                    <DesignerMultipleSelectField
-                        label = "Пользователи"
-                        value = {usersList.filter(item => data.errUsers.indexOf(item.id)>=0 )}
-                        data = {usersList}
-                        //needName = {true}
-                        onChange = {data => {handleChange('errUsers', data)}}
-                        displayBlock
-                        fullWidth
-                        error = {errorField.errUsers}
-                    />
-                    <DesignerMultipleSelectField
-                        label = "Роли"
-                        value = {rolesList.filter(item => data.errRoles.map(item => item.id).indexOf(item.id)>=0 )}
-                        data = {rolesList}
-                        needIdName = {true}
-                        onChange = {data => {handleChange('errRoles', data )}}
-                        displayBlock
-                        fullWidth
-                        error = {errorField.errRoles}
+                        error = {errorField.errorTitleMail}
                 />
-                  <DesignerTextField
-                            label="Тема письма"
-                            value={data.errorTitleMail}
-                            onChange={data => {handleChange('errorTitleMail', data)}}
-                            multiline
-                            displayBlock
-                            fullWidth
-                            error = {errorField.errorTitleMail}
-                    />
+                <DesignerTextField
+                        label="Тело письма"
+                        value={data.errorBodyMail}
+                        onChange={data => {handleChange('errorBodyMail', data)}}
+                        multiline
+                        displayBlock
+                        fullWidth
+                        error = {errorField.errorBodyMail}
+                />
+                <div style={{display: 'flex'}}> 
                     <DesignerTextField
-                            label="Тело письма"
-                            value={data.errorBodyMail}
-                            onChange={data => {handleChange('errorBodyMail', data)}}
-                            multiline
-                            displayBlock
-                            fullWidth
-                            error = {errorField.errorBodyMail}
+                        label="Количество падений"
+                        helperText = {`после которых задание изменит статус на ${ScheduleStatusMap.get('FAILED')}`}
+                        value={data.maxFailedStarts}
+                        minWidth = {`calc(50% - 16px)`}
+                        onChange={data => {handleChange('maxFailedStarts', data)}}
+                        type='number'
+                        error = {errorField.maxFailedStarts}
+                    /> 
+                    <DesignerTextField
+                        margin ={'8px 0px 0px 16px'}
+                        minWidth = {'50%'}
+                        label="Количество фактических падений"
+                        value={data.failedStart}
+                        onChange={data => {handleChange('failedStart', data)}}
+                        disabled
+                        type='number'
+                        error = {errorField.failedStart}
                     />
-                    <div style={{display: 'flex'}}> 
-                        <DesignerTextField
-                            label="Количество падений"
-                            helperText = {`после которых задание изменит статус на ${ScheduleStatusMap.get('FAILED')}`}
-                            value={data.maxFailedStarts}
-                            minWidth = {`calc(50% - 16px)`}
-                            onChange={data => {handleChange('maxFailedStarts', data)}}
-                            type='number'
-                            error = {errorField.maxFailedStarts}
-                        /> 
-                        <DesignerTextField
-                            margin ={'8px 0px 0px 16px'}
-                            minWidth = {'50%'}
-                            label="Количество фактических падений"
-                            value={data.failedStart}
-                            onChange={data => {handleChange('failedStart', data)}}
-                            disabled
-                            type='number'
-                            error = {errorField.failedStart}
-                        />
-                    </div>
-    
-                </DesignerPage>
-            })
+                </div>
+
+            </DesignerPage>
+    })
+
     if (!hideFilterTab){
         tabs.push({
             tablabel: "Фильтры",
@@ -770,7 +779,7 @@ export default function ScheduleTasksDesigner(props) {
                         onDataLoadFunction={dataHub.reportController.getScheduleReport}
                         scheduleTaskId={id}
                         parameters = {data.reportJobFilter}
-                        onCancel = {handleCancel}
+                        onCancel = {() => location.state ? navigate(location.state) : navigate(`/scheduleTasks`)}
                         onSave = {handleSave}
                         onSaveScheduleTaskFilterData = {onSaveScheduleTaskFilterData}
                         checkFilters = {handleCheckFilters}

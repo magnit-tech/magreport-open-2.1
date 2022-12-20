@@ -1,18 +1,19 @@
-import React, {useState} from "react";
+import React, { useState, useEffect } from "react";
 import {connect} from "react-redux";
 import {useSnackbar} from "notistack";
-import {useNavigateBack} from "main/Main/Navbar/navbarHooks";
+
+import { useParams, useNavigate } from 'react-router-dom'
 
 // components
 import DesignerPage from "main/Main/Development/Designer/DesignerPage";
-import PageTabs from 'main/PageTabs/PageTabs';
+import PageTabs from 'components/PageTabs/PageTabs';
 import DesignerTextField from "main/Main/Development/Designer/DesignerTextField";
 import ExternalSecuritySource from "./ASMSecuritySourceCard";
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 // local
 import dataHub from "ajax/DataHub";
-import {hideAlertDialog, showAlertDialog} from "redux/actions/actionsAlertDialog";
+import {hideAlertDialog, showAlertDialog} from "redux/actions/UI/actionsAlertDialog";
 import {
     actionAsmDesignerChangeRootData,
     actionAsmDesignerDataTypesLoadFailed,
@@ -20,6 +21,8 @@ import {
 } from "redux/actions/admin/actionAsmDesigner";
 import {actionAsmAdded, actionAsmEdited, actionAsmListShow,
     actionAsmDataLoaded, actionAsmDataLoadFailed} from "redux/actions/admin/actionAsm";
+import { addItemNavbar } from "redux/actions/navbar/actionNavbar";
+
 import {
     selectData,
     selectHasErrors,
@@ -32,12 +35,12 @@ import {
     ROLE_TYPE_ID,
     SECURITY_SOURCES,
     IS_DEFAULT_DOMAIN,
-    ASM_DESIGNER_CREATE_MODE,
-    ASM_DESIGNER_EDIT_MODE
 } from "utils/asmConstants";
 import DataLoader from "main/DataLoader/DataLoader";
 import DesignerSelectField from "main/Main/Development/Designer/DesignerSelectField";
+
 import { ASMCSS as useStyles} from "./ASMCSS";
+
 
 /**
  * @callback actionAsmDesignerChangeRootData
@@ -90,8 +93,6 @@ import { ASMCSS as useStyles} from "./ASMCSS";
 /**
  * Дизайнер объекта ASM для создания нового/редактирования старого
  * @param {Object} props - component properties
- * @param {Number} props.asmId - ID редактируемого объекта ASM
- * @param {String} props.designerMode - режим дизайнера - значение константы из utils/asmConstants
  * @param {Object} props.state - asmDesigner State
  * @param {actionAsmDesignerChangeRootData} props.actionAsmDesignerChangeRootData - меняет значение полей редактируемого ExternalSecurity
  * @param {actionAsmListShow} props.actionAsmListShow - возврат в список всех ASM
@@ -108,9 +109,14 @@ import { ASMCSS as useStyles} from "./ASMCSS";
  */
 function ASMDesigner(props) {
 
-    const navigateBack = useNavigateBack();
+    const {id} = useParams()
+    const navigate = useNavigate();
 
-    const designerMode = props.designerMode;
+    useEffect(() => {
+        if(!id) {
+            props.addItemNavbar('asm', null, null)
+        }
+    }, []) // eslint-disable-line
 
     const {enqueueSnackbar} = useSnackbar();
     const classes = useStyles();
@@ -131,9 +137,10 @@ function ASMDesigner(props) {
 
     let loadFunc;
     let loadParams = [];
-    if(props.designerMode === ASM_DESIGNER_EDIT_MODE) {
+
+    if (id) {
         loadFunc = dataHub.asmController.get;
-        loadParams = [props.asmId];
+        loadParams = [id];
     }
 
     const sourceItems = [];
@@ -158,7 +165,7 @@ function ASMDesigner(props) {
             return;
         }
 
-        if (designerMode === ASM_DESIGNER_CREATE_MODE) {
+        if (!id) {
             dataHub.asmController.add(
                 roleTypeId,
                 name,
@@ -168,7 +175,7 @@ function ASMDesigner(props) {
                 magrepResponse => handleAddEditAnswer(needExit, magrepResponse)
             );
             setUploading(true);
-        } else if (designerMode === ASM_DESIGNER_EDIT_MODE) {
+        } else if (id) {
             dataHub.asmController.edit(
                 data.id,
                 roleTypeId,
@@ -180,7 +187,7 @@ function ASMDesigner(props) {
             );
             setUploading(true);
         } else {
-            enqueueSnackbar(`Неизвестный режим запуска дизайнера: ${designerMode}`, {variant: "error"});
+            enqueueSnackbar(`Неизвестный режим запуска дизайнера`, {variant: "error"});
         }
     }
 
@@ -189,21 +196,18 @@ function ASMDesigner(props) {
         
         if(magrepResponse.ok){
             if (needExit){
-                let actionWord = designerMode === ASM_DESIGNER_CREATE_MODE ? "создан" : "обновлён";
+                let actionWord = id ? "обновлён" : "создан";
                 enqueueSnackbar(`ASM ${name} ${actionWord} успешно`, {variant: "success"});
-                if(designerMode === ASM_DESIGNER_CREATE_MODE) {
+                if (!id) {
                     props.actionAsmListShow();
+                    navigate('/asm')
                 } else {
-                    navigateBack();
+                    navigate(`/asm/view/${id}`)
                 }
             }
-            /*  else {
-                setASMId(magrepResponse.data.id)
-            }
-            */ 
         }
         else{
-            let actionWord = designerMode === ASM_DESIGNER_CREATE_MODE ? "создании" : "обновлении";
+            let actionWord = id ? "обновлении" : "создании";
             enqueueSnackbar("Ошибка при " + actionWord + " объекта: " + magrepResponse.data, {variant : "error"});
         }
     }
@@ -211,10 +215,11 @@ function ASMDesigner(props) {
     function handleCancelButtonClick(e) {
         const handleAlertDialogAction = (isOk) => {
             if (isOk) {
-                if(designerMode === ASM_DESIGNER_CREATE_MODE) {
+                if (!id) {
                     props.actionAsmListShow();
+                    navigate('/asm')
                 } else {
-                    navigateBack();
+                    navigate(`/asm/view/${id}`)
                 }
             }
             props.hideAlertDialog();
@@ -266,7 +271,6 @@ function ASMDesigner(props) {
         </DesignerPage>
     })
 
-
     securitySources.forEach((securitySource, index) => {
         tabs.push({
             tablabel: "Настройка " + securitySource.sourceType,
@@ -286,7 +290,7 @@ function ASMDesigner(props) {
         <DataLoader
             loadFunc={loadFunc}
             loadParams={loadParams}
-            onDataLoaded={(data) => props.actionAsmDataLoaded(data)}
+            onDataLoaded={(data) => props.actionAsmDataLoaded(data, id ? 'edit' : 'add')}
             onDataLoadFailed={(error) => props.actionAsmDataLoadFailed(error)}
         >
             <DataLoader
@@ -304,7 +308,7 @@ function ASMDesigner(props) {
                     <PageTabs
                         tabsdata={tabs}
                         onTabChange={handleTabChange}
-                        pageName={designerMode === ASM_DESIGNER_CREATE_MODE ? "Создание объекта ASM" : "Редактирование объекта ASM: " + name}
+                        pageName={id ? "Редактирование объекта ASM: " + name : "Создание объекта ASM"}
                     />
                 </DataLoader>
             </DataLoader>
@@ -328,7 +332,8 @@ const mapDispatchToProps = {
     actionAsmDataLoaded,
     actionAsmDataLoadFailed,
     actionAsmDesignerDataTypesLoaded,
-    actionAsmDesignerDataTypesLoadFailed
+    actionAsmDesignerDataTypesLoadFailed,
+    addItemNavbar
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(ASMDesigner);
