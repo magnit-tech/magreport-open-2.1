@@ -136,7 +136,7 @@ export default function FilterPanel(props){
             !panelOpen 
             ?
             <div className={classes.filterButton}>
-                <Badge color="secondary" overlap="circular" badgeContent={countFilters}>
+                <Badge classes={{badge: classes.badge}} color="secondary" overlap="circular" badgeContent={countFilters}>
                     <Tooltip title = "Фильтры" placement="top"> 
                         <Paper elevation={3} className={classes.openSearchBtn}>
                             <IconButton
