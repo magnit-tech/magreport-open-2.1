@@ -1,6 +1,4 @@
-import { 
-    ROLE_LIST_LOADED, ROLE_LIST_LOAD_FAILED, ROLE_CHANGE_WRITE_RIGHTS, ROLE_ADD, ROLE_DELETE, ROLE_FILTER, ROLE_SELECTED, FOLDER_CONTENT_FOLDER_CLICK, ROLE_SELECTED_FOLDER_TYPE 
-} from 'redux/reduxTypes'
+import { ROLE_LIST_LOADED, ROLE_LIST_LOAD_FAILED, ROLE_CHANGE_WRITE_RIGHTS, ROLE_ADD, ROLE_DELETE, ROLE_FILTER, ROLE_SELECTED, ROLE_SELECTED_FOLDER_TYPE } from 'redux/reduxTypes'
 
 const initialState = {
     selectedRole: null,
@@ -103,8 +101,6 @@ export const rolesReducer = (state = initialState, action) => {
         case ROLE_SELECTED:
             return {...state, selectedRole: action.roleId}
 
-        case FOLDER_CONTENT_FOLDER_CLICK:
-            return {...state, selectedRole: null}
         case ROLE_SELECTED_FOLDER_TYPE:
             return {...state, selectedFolderType: action.folderType}
         default:

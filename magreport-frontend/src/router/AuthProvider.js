@@ -5,9 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import dataHub from 'ajax/DataHub'
 
 import { useDispatch } from 'react-redux';
-import { hideLoader } from '../redux/actions/actionLoader'
-import { showAlert, hideAlert } from '../redux/actions/actionsAlert'
-// import { APP_LOGGED_IN } from '../redux/reduxTypes'
+import { hideLoader } from '../redux/actions/UI/actionLoader'
+import { showAlert, hideAlert } from '../redux/actions/UI/actionsAlert'
 
 
 export const AuthContext = createContext(null)
@@ -62,7 +61,6 @@ export const AuthProvider = ({children}) => {
                 const callback = () => {dispatch(hideAlert())}
                 const buttons = [{'text':'OK','onClick': callback}]
                 dispatch(showAlert("Ошибка", errorText, buttons, callback))
-                // props.appLoginFail()
             }
         }
         catch (e) {

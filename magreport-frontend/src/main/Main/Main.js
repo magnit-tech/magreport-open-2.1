@@ -11,11 +11,6 @@ import Navbar from '../../components/Navbar/Navbar'
 import SnackbarInfo from '../../components/SnackbarInfo/SnackbarInfo';
 import AlertDialog from '../../components/AlertDialog/AlertDialog';
 
-// import { connect } from 'react-redux';
-// import { showSnackbar } from '../../redux/actions/actionSnackbar';
-// import { showAlertDialog, hideAlertDialog } from '../../redux/actions/actionsAlertDialog';
-
-
 
 export default function Main(props){
 
@@ -36,17 +31,3 @@ export default function Main(props){
         </main>
     );
 }
-
-// const mapStateToProps = state => {
-//     return {
-//         currentSidebarItemKey: state.currentSidebarItemKey
-//     }
-// }
-
-// const mapDispatchToProps = {
-//     showAlertDialog,
-//     hideAlertDialog,
-//     showSnackbar,
-// }
-
-// export default connect(null, null)(Main);

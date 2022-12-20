@@ -19,7 +19,7 @@ import AsyncAutocomplete from '../../../../main/AsyncAutocomplete/AsyncAutocompl
 
 // actions
 import { actionUsersLoaded, actionUsersLoadFailed, actionManageUsers, actionAllUserChecked, actionUserAdd, actionUserRoleDelete, actionUserSelect } from 'redux/actions/admin/actionUsers'
-import { showAlertDialog, hideAlertDialog } from 'redux/actions/actionsAlertDialog'
+import { showAlertDialog, hideAlertDialog } from 'redux/actions/UI/actionsAlertDialog'
 
 // styles 
 import { UsersCSS } from "./UsersCSS";

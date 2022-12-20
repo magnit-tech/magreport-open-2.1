@@ -4,11 +4,13 @@ import {CopyToClipboard} from 'react-copy-to-clipboard';
 
 import { useParams, useNavigate } from 'react-router-dom'
 
+import { useDispatch } from "react-redux";
+import { viewItemNavbar } from "redux/actions/navbar/actionNavbar";
+
 // dataHub
 import dataHub from "ajax/DataHub";
 
 // components
-
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -35,25 +37,15 @@ import {ViewerCSS} from "main/Main/Development/Viewer/ViewerCSS";
 // functions
 import {createViewerPageName} from "main/Main/Development/Viewer/viewerHelpers";
 
-/**
- * @callback onExit
- */
 
-/**
- * Компонент создания и редактирования отчетов на расписании
- * @param {Object} props - параметры компонента
- * @param {Number} props.reportId - идентификатор отчета на расписании
- * @param {onExit} props.onExit - callback, вызываемый при закрытии формы
- * @param {onOkClick} props.onOkClick - callback, вызываемый при нажатии кнопки ОК
- * @return {JSX.Element}
- * @constructor
- */
-export default function ScheduleTasksViewer(props) {
+export default function ScheduleTasksViewer() {
 
     const classes = ViewerCSS();
 
     const {id} = useParams()
     const navigate = useNavigate();
+
+    const dispatch = useDispatch()
 
     const {enqueueSnackbar} = useSnackbar();
 
@@ -61,8 +53,6 @@ export default function ScheduleTasksViewer(props) {
     const [runLink, setRunLink] = useState('');
 
     let loadFuncRunLink = dataHub.scheduleController.taskGetManualLink;
-    // let loadFunc = dataHub.scheduleController.taskGet;
-    // let loadParams = [props.scheduleId];
 
     function handleDataLoaded(loadedData) {
         let childGroups = loadedData.report.filterGroup.childGroups === null ? [] : loadedData.report.filterGroup.childGroups;
@@ -87,6 +77,7 @@ export default function ScheduleTasksViewer(props) {
             excelTemplateName: loadedData.excelTemplate.name,
             reportId: loadedData.report.id,
             reportName: loadedData.report.name,
+            parentFolderId: loadedData.report.path[0].id,
             reportJobFilter: loadedData.reportJobFilters,
             schedules:  loadedData.schedules.map(item=>({id: item.id, name: item.name})),
             taskTypeId: ScheduleTaskTypeMap.get(loadedData.typeTask),
@@ -95,6 +86,8 @@ export default function ScheduleTasksViewer(props) {
             maxFailedStarts: loadedData.maxFailedStarts ,
             failedStart: loadedData.failedStart                 
         })
+
+        dispatch(viewItemNavbar('scheduleTasks', loadedData.name, id, null, null))
     }
 
     function handleRunLinkoaded(loadedData) {
@@ -128,6 +121,7 @@ export default function ScheduleTasksViewer(props) {
                 />
                 <ViewerChildCard
                     id={data.reportId}
+                    parentFolderId={data.parentFolderId}
                     itemType={FolderItemTypes.reportsDev}
                     name={data.reportName}
                 />

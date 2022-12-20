@@ -1,7 +1,10 @@
-import React, {useState} from "react";
+import React, { useState, useEffect} from "react";
 import {useSnackbar} from "notistack";
 
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+
+import { useDispatch } from "react-redux";
+import { editItemNavbar, addItemNavbar } from "redux/actions/navbar/actionNavbar";
 
 // dataHub
 import dataHub from "ajax/DataHub";
@@ -16,15 +19,20 @@ import DesignerPage from "main/Main/Development/Designer/DesignerPage";
 import DesignerTextField from "main/Main/Development/Designer/DesignerTextField";
 import ScheduleParameters from "./ScheduleParameters";
 
-/**
- * Компонент создания и редактирования расписаний
- * @return {JSX.Element}
- * @constructor
- */
+
 export default function ScheduleDesigner() {
 
-    const {id} = useParams()
+    const { id } = useParams()
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        if(!id) {
+            dispatch(addItemNavbar('schedules', null, null))
+        }
+    }, []) // eslint-disable-line
 
     const {enqueueSnackbar} = useSnackbar();
 
@@ -78,6 +86,9 @@ export default function ScheduleDesigner() {
         handleChangeDescription(loadedData.description);
         //handleChangeTasks(loadedData.tasks);
         handleChangeParameters(loadedData);
+        if (id) {
+            dispatch(editItemNavbar('schedules', loadedData.name, id, null, null))
+        }
     }
 
     function handleDataLoadFailed(message) {
@@ -113,12 +124,7 @@ export default function ScheduleDesigner() {
     function handleAddedEdited(magRepResponse) {
         
         if (magRepResponse.ok) {
-            if (id) {
-                navigate(`/schedules/view/${id}`)
-            } else {
-                navigate(`/schedules`)
-            }
-                
+            location.state ? navigate(location.state) : navigate(`/schedules`)
             enqueueSnackbar("Расписание успешно сохранено", {variant : "success"});
         } else {
             setUploading(false);
@@ -137,7 +143,7 @@ export default function ScheduleDesigner() {
         tabcontent: uploading ? <CircularProgress/> :
             <DesignerPage
                 onSaveClick={handleSave}
-                onCancelClick={() => navigate(-1)}
+                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/schedules`)}
             >
                 <DesignerTextField
                     label="Название"

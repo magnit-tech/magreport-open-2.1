@@ -15,7 +15,6 @@ import Collapse from '@material-ui/core/Collapse';
 
 //actions
 import { foldersTreeToggle } from '../../../redux/actions/sidebar/actionFolderTree';
-import actionSetSidebarItem from "../../../redux/actions/sidebar/actionSetSidebarItem";
 
 // local
 import FolderTree from './FolderTree/FolderTree';
@@ -30,7 +29,7 @@ import { useRef } from 'react';
  * @param {*} props.sidebarItem - объект пункта меню верхнего уровня в SidebarItems
  */
 function SidebarTopLevelMenu(props){
-console.log(props.state);
+
     const classes = SidebarCSS();
 
     const location = useLocation()
@@ -56,17 +55,30 @@ console.log(props.state);
                 }
             })
         }
+        // if (props.sidebarItem.folderItemType === props.path) {
+        //     console.log(props.sidebarItem.folderItemType);
+        //     console.log(props.path);
+        //     return setMenuExpanded(true)
+        // } else {
+        //     arr.forEach(item => {
+        //         if (item.folderItemType === locationName.current) {
+        //             return setMenuExpanded(true)
+        //         }
+        //     })
+        // }
 
-    }, [props.sidebarItem, props.sidebarItem.subItems, location])
+        // return setMenuExpanded(false)
+
+    }, [props.sidebarItem, props.sidebarItem.subItems, location.pathname])
 
     function handleClick(){
         if(!props.sidebarItem.subItems && locationName.current !== props.sidebarItem.folderItemType){
-            // props.actionSetSidebarItem(props.sidebarItem);
             navigate(props.sidebarItem.folderItemType)
         }
     }
 
     function handleSubitemClick(item){
+        // console.log(item);
         // props.actionSetSidebarItem(item);
     }
 
@@ -80,7 +92,7 @@ console.log(props.state);
         
         handleClick();
     }
-    
+
     return (
         <React.Fragment>       
 			<List className={classes.listClassMain}>
@@ -88,6 +100,7 @@ console.log(props.state);
 					<ListItem 
 						// className={classes.listItem + ' ' + (location.pathname.indexOf(locationName.current) !== -1 ? classes.folderListItemActive : null)} 
 						className={classes.listItem + ' '} 
+                        // className={classes.listItem + ' ' + (menuExpanded ? classes.folderListItemActive : null)}
 						onClick={(props.drawerOpen ? handleExpand : handleClick)} button key={props.sidebarItem.key}
 					>
 						{props.sidebarItem.icon && <ListItemIcon className={classes.listIconClass} >{props.sidebarItem.icon}</ListItemIcon>}
@@ -124,13 +137,12 @@ const mapStateToProps = state => (
     {
         drawerOpen : state.sidebar.drawerOpen,
         currentSidebarItemKey : state.sidebar.currentSidebarItemKey,
-        state: state
+        state: state,
     }
 )
 
 const mapDispatchToProps = {
     foldersTreeToggle,
-    actionSetSidebarItem
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(SidebarTopLevelMenu);

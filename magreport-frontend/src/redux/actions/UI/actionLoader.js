@@ -1,4 +1,4 @@
-import { SHOWLOADER, HIDELOADER } from '../reduxTypes'
+import { SHOWLOADER, HIDELOADER } from '../../reduxTypes'
 
 export const showLoader = () =>{
     return {type: SHOWLOADER}

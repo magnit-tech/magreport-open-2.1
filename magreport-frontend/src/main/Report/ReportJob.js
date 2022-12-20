@@ -3,6 +3,9 @@ import { useSnackbar } from 'notistack';
 
 import { useParams } from 'react-router-dom'
 
+import { useDispatch } from 'react-redux';
+import { addReportNavbar } from "redux/actions/navbar/actionNavbar";
+
 // dataHub
 import dataHub from 'ajax/DataHub';
 
@@ -38,7 +41,9 @@ const REQUEST_TIMEOUT_INTERVAL_MS = 1000;
  * @param {*} props.onRestartReportClick - function(reportId) - callback перезапуска отчёта
  */
 export default function ReportJob(props){
-    const {id} = useParams()
+    const { id } = useParams()
+
+    const dispatch = useDispatch()
 
     const classes = ReportDataCSS();
 
@@ -76,6 +81,7 @@ export default function ReportJob(props){
             timer.current = window.setTimeout(setReload, REQUEST_TIMEOUT_INTERVAL_MS, {needReload: true});
         }
         setJobStatus(newStatus);
+        dispatch(addReportNavbar('report', data.report.name, id))
     }
 
     function handleCancelClick(){
@@ -109,68 +115,65 @@ export default function ReportJob(props){
     }
 
     return (
-        // !props.jobId || props.jobId === null ?
-            // <div></div>
-            // :
+        <div className={classes.flexDiv}>
+            <DataLoader
+                loadFunc = {dataHub.reportJobController.get}
+                // loadParams = {[props.jobId]}
+                loadParams = {props.jobId ? [props.jobId] : [Number(id)]}
+                reload = {reload}
+                onDataLoaded = {handleJobInfoLoaded}
+                onDataLoadFailed = {message => {console.log(message)}}
+                showSpinner = {false}
+                disabledScroll = {true}
+            >
             <div className={classes.flexDiv}>
-                <DataLoader
-                    loadFunc = {dataHub.reportJobController.get}
-                    // loadParams = {[props.jobId]}
-                    loadParams = {props.jobId ? [props.jobId] : [Number(id)]}
-                    reload = {reload}
-                    onDataLoaded = {handleJobInfoLoaded}
-                    onDataLoadFailed = {message => {console.log(message)}}
-                    showSpinner = {false}
-                    disabledScroll = {true}
-                >
-                <div className={classes.flexDiv}>
-                {
-                    jobStatus === JobStatus.UNDEFINED ?
-                        
-                            <CircularProgress/>
-
-                    :jobStatus === JobStatus.SCHEDULED || jobStatus === JobStatus.RUNNING || jobStatus === JobStatus.PENDING_DB_CONNECTION ?
-                        <div className={classes.repExec}>
-                            <Typography gutterBottom variant="h6">Отчет выполняется</Typography>
-                            <Button color="secondary" onClick={handleCancelClick}>Отменить</Button>
-                            <CircularProgress className = {classes.progress}/>
-                        </div>
-
-                    :jobStatus === JobStatus.COMPLETE || jobStatus === JobStatus.EXPORT ?
-                        <ReportJobData
-                            jobStatus = {jobStatus}
-                            canExecute = {jobData.current.canExecute}
-                            reportId = {reportId.current}
-                            folderId = {folderId.current}
-                            jobId = {Number(id)}
-                            jobOwnerName = {jobOwnerName.current}
-                            excelRowLimit = {excelRowLimit.current}
-                            excelTemplates = {jobData.current.excelTemplates}
-                            // onRestartReportClick = {handleRestartReportClick}
-                        />
-
-                    :jobStatus === JobStatus.CANCELING ?
-                        <div className={classes.repExec}>
-                            <Typography gutterBottom variant="h6">Отчет отменяется</Typography>
-                            <CircularProgress className = {classes.progress}/>
-                        </div>
-
-                    :jobStatus === JobStatus.CANCELED ?
-                        <div className={classes.repExec}>
-                            <Typography gutterBottom variant="h6">Отчет отменен</Typography>
-                        </div>            
+            {
+                jobStatus === JobStatus.UNDEFINED ?
                     
-                    :jobStatus === JobStatus.FAILED ?
-                        <div className={classes.repExecFailed}>
-                            <Typography gutterBottom variant="subtitle1" color = "error">Отчёт завершён с ошибкой:</Typography>
-                            {setCustomErrorMessage()}
-                        </div>
-                    :
-                    <div></div>
+                        <CircularProgress/>
 
-                }
-                </div>
-                </DataLoader>
+                :jobStatus === JobStatus.SCHEDULED || jobStatus === JobStatus.RUNNING || jobStatus === JobStatus.PENDING_DB_CONNECTION ?
+                    <div className={classes.repExec}>
+                        <Typography gutterBottom variant="h6">Отчет выполняется</Typography>
+                        <Button color="secondary" onClick={handleCancelClick}>Отменить</Button>
+                        <CircularProgress className = {classes.progress}/>
+                    </div>
+
+                :jobStatus === JobStatus.COMPLETE || jobStatus === JobStatus.EXPORT ?
+                    <ReportJobData
+                        jobStatus = {jobStatus}
+                        canExecute = {jobData.current.canExecute}
+                        reportId = {reportId.current}
+                        folderId = {folderId.current}
+                        jobId = {Number(id)}
+                        jobOwnerName = {jobOwnerName.current}
+                        excelRowLimit = {excelRowLimit.current}
+                        excelTemplates = {jobData.current.excelTemplates}
+                        // onRestartReportClick = {handleRestartReportClick}
+                    />
+
+                :jobStatus === JobStatus.CANCELING ?
+                    <div className={classes.repExec}>
+                        <Typography gutterBottom variant="h6">Отчет отменяется</Typography>
+                        <CircularProgress className = {classes.progress}/>
+                    </div>
+
+                :jobStatus === JobStatus.CANCELED ?
+                    <div className={classes.repExec}>
+                        <Typography gutterBottom variant="h6">Отчет отменен</Typography>
+                    </div>            
+                
+                :jobStatus === JobStatus.FAILED ?
+                    <div className={classes.repExecFailed}>
+                        <Typography gutterBottom variant="subtitle1" color = "error">Отчёт завершён с ошибкой:</Typography>
+                        {setCustomErrorMessage()}
+                    </div>
+                :
+                <div></div>
+
+            }
             </div>
+            </DataLoader>
+        </div>
     )
 }

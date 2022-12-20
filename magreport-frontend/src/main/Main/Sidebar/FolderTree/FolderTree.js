@@ -18,9 +18,8 @@ import ReportProblemIcon from '@material-ui/icons/ReportProblem';
 import DragAndDrop from "main/DragAndDrop/DragAndDrop";
 
 // actions
-import { actionFolderClick, actionChangeParentFolderTree } from 'redux/actions/menuViews/folderActions';    
+import { actionChangeParentFolderTree } from 'redux/actions/menuViews/folderActions';    
 import { foldersLoading, foldersTreeToggle, foldersSetInit } from 'redux/actions/sidebar/actionFolderTree';
-import actionSetSidebarItem from 'redux/actions/sidebar/actionSetSidebarItem';
 
 // styles
 import { FolderTreeCSS } from './FolderTreeCSS'
@@ -63,8 +62,6 @@ function FolderTree(props){
     }
 
     function handleFolderClick(folderId){
-        props.actionSetSidebarItem(entity)
-        props.actionFolderClick(props.folderItemType, folderId)
         navigate(`/${props.folderItemType}/${folderId}`)
 
     }
@@ -209,12 +206,10 @@ const mapStateToProps = state => {
 }
 
 const mapDispatchToProps = {
-    actionFolderClick, 
     actionChangeParentFolderTree,
     foldersLoading, 
     foldersTreeToggle, 
     foldersSetInit,
-    actionSetSidebarItem,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(FolderTree);

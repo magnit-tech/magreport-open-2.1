@@ -1,6 +1,13 @@
 import React, {useState} from 'react';
 
+import { LoginFormCSS } from './LoginFormCSS'
+
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from 'router/useAuth';
+
+import { connect } from 'react-redux';
+import { showLoader, hideLoader } from '../../redux/actions/UI/actionLoader'
+import { showAlert, hideAlert } from '../../redux/actions/UI/actionsAlert'
 
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
@@ -10,13 +17,6 @@ import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 
-import { connect } from 'react-redux';
-import { appLogin } from '../../redux/actions/actionsLogin';
-import { showLoader, hideLoader } from '../../redux/actions/actionLoader'
-import { showAlert, hideAlert } from '../../redux/actions/actionsAlert'
-
-
-import { LoginFormCSS } from './LoginFormCSS'
 import CircularProgress from '@material-ui/core/CircularProgress';
 import IconButton from '@material-ui/core/IconButton';
 import OutlinedInput from '@material-ui/core/OutlinedInput';
@@ -29,7 +29,6 @@ import VisibilityOff from '@material-ui/icons/VisibilityOff';
 //local
 import StyleConsts from 'StyleConsts.js';
 
-import { useLocation, useNavigate } from 'react-router-dom';
 
 function LoginForm(props){
     const classes = LoginFormCSS();
@@ -75,7 +74,6 @@ function LoginForm(props){
         if (!localStorage.getItem('drawerWidth')) {
             localStorage.setItem('drawerWidth', StyleConsts.drawerWidth);
         }
-        // props.appLogin(userName, domainName, form.password, dataHub);
         
         signin(userName, domainName, form.password, () => navigate(location.state?.from?.pathname || '/', {replace: true}))
     }
@@ -176,7 +174,6 @@ const mapStateToProps = state => {
 }
 
 const mapDispatchToProps = {
-    appLogin,
     showAlert,
     hideAlert,
     showLoader, 

@@ -1,4 +1,4 @@
-import { SHOWLOADER, HIDELOADER } from '../reduxTypes'
+import { SHOWLOADER, HIDELOADER } from '../../reduxTypes'
 
 const initialState = {
     loader: false

@@ -63,9 +63,9 @@ import ReportDevDesigner from '../main/Main/Development/ReportsDevMenu/ReportDev
 import SchedulesMenuView from "../main/Main/Schedule/Schedules/SchedulesMenuView";
 import ScheduleViewer from "../main/Main/Schedule/Schedules/ScheduleViewer";
 import ScheduleDesigner from "../main/Main/Schedule/Schedules/ScheduleDesigner";
-import ScheduleTasksMenuView from '../main/Main/Schedule/SchedulerReports/ScheduleTasksMenuView';
-import ScheduleTasksViewer from '../main/Main/Schedule/SchedulerReports/ScheduleTasksViewer';
-import ScheduleTasksDesigner from '../main/Main/Schedule/SchedulerReports/ScheduleTasksDesigner';
+import ScheduleTasksMenuView from '../main/Main/Schedule/SchedulerTasks/ScheduleTasksMenuView';
+import ScheduleTasksViewer from '../main/Main/Schedule/SchedulerTasks/ScheduleTasksViewer';
+import ScheduleTasksDesigner from '../main/Main/Schedule/SchedulerTasks/ScheduleTasksDesigner';
 
 import ReportJob from '../main/Report/ReportJob';
 import ReportStarter from '../main/Report/ReportStarter';
@@ -86,8 +86,11 @@ export default function AppRoutes(props) {
 					element={<Navigate to="/reports" replace />}
 				/>
 
-				<Route element={ <RequireAuth><Main version={props.version}/></RequireAuth> }>
-			
+				<Route element = { 
+					<RequireAuth>
+						<Main version={props.version}/>
+					</RequireAuth> 
+				}>
 					<Route path="/reports" element={<ReportsMenuView/>} />
 					<Route path="/reports/:id" element={<ReportsMenuView/>} />
 					<Route path="/reports/:folderId/add" element={<PublishReportDesigner/>} />

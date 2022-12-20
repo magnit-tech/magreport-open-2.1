@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useSnackbar } from 'notistack';
 
@@ -31,6 +31,7 @@ import {actionFiltersLoaded, actionFiltersAdd, actionFiltersGroupAdd, actionFilt
     actionFiltersGroupChange, actionFiltersChange, actionFiltersChangeOrdinal, actionMoveBefore, actionMoveInto
 } from 'redux/actions/developer/actionReportFilters'
 import {actionLoaded, actionLoadedFailed} from 'redux/actions/developer/actionReportTemplates'
+import { editItemNavbar, addItemNavbar } from "redux/actions/navbar/actionNavbar";
 
 // styles
 import {DesignerCSS} from '../../Development/Designer/DesignerCSS';
@@ -75,7 +76,14 @@ function ReportDevDesigner(props){
     const navigate = useNavigate();
     const location = useLocation();
 
+    useEffect(() => {
+        if(!id) {
+            dataHub.reportController.getFolder(folderId, handleFoldersLoaded)
+        }
+    }, []) // eslint-disable-line
+
     const { enqueueSnackbar } = useSnackbar();
+
     const classes = DesignerCSS();
 
     const [fieldValues, setFieldValues] = useState(null)
@@ -126,6 +134,12 @@ function ReportDevDesigner(props){
         Data loading
     */
 
+    function handleFoldersLoaded({ok, data}) {
+        if(ok) {
+            props.addItemNavbar('reportsDev', folderId, data.path)
+        }
+    }
+
     function handleDataLoaded(loadedData){
 
         setRandomCodeForEmptyCode(loadedData.filterGroup);
@@ -140,6 +154,10 @@ function ReportDevDesigner(props){
         setFieldValues(sortByOrdinal(loadedData.fields))
         props.actionFiltersLoaded(loadedData, id)
         setPagename("Редактирование отчета: " + loadedData.name);
+
+        if (id) {
+            props.editItemNavbar('reportsDev', loadedData.name, id, folderId, loadedData.path)
+        }
     }
 
     /*
@@ -453,6 +471,8 @@ const mapDispatchToProps = {
     actionMoveInto,
     actionLoaded, 
     actionLoadedFailed,
+    editItemNavbar,
+    addItemNavbar
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(ReportDevDesigner);

@@ -1,6 +1,5 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import {useNavigateBack} from "components/Navbar/navbarHooks";
 
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 
@@ -11,8 +10,6 @@ import dataHub from 'ajax/DataHub';
 import {
     actionFolderLoaded,
     actionFolderLoadFailed,
-    actionFolderClick,
-    actionItemClick,
     actionSearchClick
 } from 'redux/actions/menuViews/folderActions';
 
@@ -20,16 +17,6 @@ import {
 import DataLoader from '../../../DataLoader/DataLoader';
 import FolderContent from '../../../FolderContent/FolderContent';
 import SidebarItems from '../../Sidebar/SidebarItems'
-import FilterTemplatesViewer from "./FilterTemplatesViewer";
-
-// flowstates
-import {FLOW_STATE_BROWSE_FOLDER, filterTemplatesMenuViewFlowStates} from 'redux/reducers/menuViews/flowStates';
-
-/**
- * @callback actionFolderClick
- * @param {String} folderItemsType - тип объекта из FolderItemsType
- * @param {Number} folderId - идентификатор папки с объектами
- */
 
 /**
  * @callback actionFolderLoaded
@@ -44,12 +31,6 @@ import {FLOW_STATE_BROWSE_FOLDER, filterTemplatesMenuViewFlowStates} from 'redux
  */
 
 /**
- * @callback actionItemClick
- * @param {String} folderItemsType - тип объекта из FolderItemsType
- * @param {Number} scheduleId - идентификатор расписания
- */
-
-/**
  * @callback actionSearchClick
  * @param {String} folderItemsType - тип объекта из FolderItemsType
  * @param {Number} currentFolderId - идентификатор текущей папки
@@ -60,10 +41,8 @@ import {FLOW_STATE_BROWSE_FOLDER, filterTemplatesMenuViewFlowStates} from 'redux
  * Компонент просмотра шаблонов фильтров
  * @param {Object} props - свойства компонента
  * @param {Object} props.state - привязанное состояние со списком расписаний
- * @param {actionFolderClick} props.actionFolderClick - действие, вызываемое при нажатии на папку
  * @param {actionFolderLoaded} props.actionFolderLoaded - действие, вызываемое при успешной загрузке данных
  * @param {actionFolderLoadFailed} props.actionFolderLoadFailed - действие, вызываемое в случае ошибки при получении данных
- * @param {actionItemClick} props.actionItemClick - действие, вызываемое при нажатии на карточку объекта
  * @param {actionSearchClick} props.actionSearchClick - действие, вызываемое при нажатии на кнопку поиска
  * @return {JSX.Element}
  * @constructor
@@ -75,43 +54,22 @@ function FilterTemplatesMenuView(props){
     const navigate = useNavigate()
     const location = useLocation()
 
-    const navigateBack = useNavigateBack();
-
     let state = props.state;
-
-    // let loadFunc = dataHub.filterTemplateController.getFolder;
 
     let reload = {needReload : state.needReload};
     let folderItemsType = SidebarItems.development.subItems.filterTemplates.folderItemType;
 
-    function handleExit() {
-        navigateBack();
-    }
-
+    
     function handleFolderClick(folderId) {
-        props.actionFolderClick(folderItemsType, folderId)
         navigate(`/filterTemplate/${folderId}`)
     }
     function handleItemClick(filterTemplateId) {
-        props.actionItemClick(folderItemsType, filterTemplateId)
         navigate(`/filterTemplate/${id}/view/${filterTemplateId}`, {state: location.pathname})
     }
-    // function handleEditItemClick(filterTemplateId) {
-    //     props.actionEditItemClick(folderItemsType, filterTemplateId)
-    //     navigate(`/filterTemplate/${id}/edit/${filterTemplateId}`, {state: location.pathname})
-    // }
-    // function handleDependenciesClick(filterTemplateId) {
-    //     // navigate(`/filterTemplate/dependencies/${datasetId}`)
-    // }
-    // function handleAddItemClick(folderItemsType) {
-    //     props.actionAddItemClick(folderItemsType)
-    //     navigate(`/filterTemplate/${id}/add`, {state: location.pathname})
-    // }
+
 
     return(
         <div style={{display: 'flex', flex: 1}}>
-        {
-        state.flowState === FLOW_STATE_BROWSE_FOLDER ?
             <DataLoader
                 loadFunc = {dataHub.filterTemplateController.getFolder}
                 loadParams = {id ? [Number(id)] : [null]}
@@ -124,7 +82,7 @@ function FilterTemplatesMenuView(props){
                     showAddFolder = {false}
                     showAddItem = {false}
                     showItemControls={false}
-                    data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
+                    data = {state.currentFolderData}
                     searchParams = {state.searchParams || {}}
 
                     onFolderClick = {handleFolderClick}
@@ -133,18 +91,9 @@ function FilterTemplatesMenuView(props){
                     // onDependenciesClick = {handleDependenciesClick}
                     // onAddItemClick={handleAddItemClick}
 
-                    // onFolderClick = {(folderId) => {props.actionFolderClick(folderItemsType, folderId)}}
-                    // onItemClick = {(filterTemplateId) => {props.actionItemClick(folderItemsType, filterTemplateId)}}
                     onSearchClick ={searchParams => {props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)}}
                 />
             </DataLoader>
-        : state.flowState === filterTemplatesMenuViewFlowStates.filterTemplatesViewer ?
-            <FilterTemplatesViewer
-                filterTemplateId = {state.viewFilterTemplateId}
-                onOkClick={handleExit}
-            />
-        : <div>Неизвестное состояние</div>
-        }
         </div>
     )
 }
@@ -158,8 +107,6 @@ const mapStateToProps = state => {
 const mapDispatchToProps = {
     actionFolderLoaded,
     actionFolderLoadFailed,
-    actionFolderClick,
-    actionItemClick,
     actionSearchClick
 }
 

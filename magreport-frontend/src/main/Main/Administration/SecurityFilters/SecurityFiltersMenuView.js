@@ -1,6 +1,5 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import {useNavigateBack} from "components/Navbar/navbarHooks";
 
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 
@@ -8,20 +7,14 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import dataHub from 'ajax/DataHub';
 
 // actions
-import {actionFolderLoaded, actionFolderLoadFailed, actionFolderClick, 
-        actionItemClick, actionEditItemClick, actionDeleteItemClick, actionAddFolder, actionAddItemClick,
+import {actionFolderLoaded, actionFolderLoadFailed, actionDeleteItemClick, actionAddFolder,
         actionEditFolder, actionDeleteFolderClick, actionSearchClick, actionChangeParentFolder, actionCopyFolder, actionSortClick} from 'redux/actions/menuViews/folderActions';
-
-// const
-
-import {FLOW_STATE_BROWSE_FOLDER, securityFiltersMenuViewFlowStates} from 'redux/reducers/menuViews/flowStates';
 
 // components
 import DataLoader from '../../../DataLoader/DataLoader';
 import FolderContent from '../../../FolderContent/FolderContent';
 import SidebarItems from '../../Sidebar/SidebarItems'
-import SecurityFilterDesigner from './SecurityFilterDesigner'
-import SecurityFilterViewer from "./SecurityFilterViewer";
+
 
 function SecurityFiltersMenuView(props){
 
@@ -29,40 +22,28 @@ function SecurityFiltersMenuView(props){
     const navigate = useNavigate()
     const location = useLocation()
 
-    const navigateBack = useNavigateBack();
-
     const state = props.state;
 
     let reload = {needReload : state.needReload};
     let folderItemsType = SidebarItems.admin.subItems.securityFilters.folderItemType;
     let isSortingAvailable = true;
-    
-    function handleDesignerExit(){
-        navigateBack();
-    }
+
 
     function handleFolderClick(folderId) {
-        props.actionFolderClick(folderItemsType, folderId)
         navigate(`/securityFilters/${folderId}`)
     }
     function handleItemClick(securityFilterId) {
-        props.actionItemClick(folderItemsType, securityFilterId)
         navigate(`/securityFilters/${id}/view/${securityFilterId}`, {state: location.pathname})
     }
     function handleEditItemClick(securityFilterId) {
-        props.actionEditItemClick(folderItemsType, securityFilterId)
         navigate(`/securityFilters/${id}/edit/${securityFilterId}`, {state: location.pathname})
     }
     function handleAddItemClick(folderItemsType) {
-        props.actionAddItemClick(folderItemsType)
         navigate(`/securityFilters/${id}/add`, {state: location.pathname})
     }
 
     return(
         <div  style={{display: 'flex', flex: 1}}>
-        {
-        state.flowState === FLOW_STATE_BROWSE_FOLDER ?
-            (
             <DataLoader
                 loadFunc = {dataHub.securityFilterController.getFolder}
                 loadParams = {id ? [Number(id)] : [null]}
@@ -97,10 +78,6 @@ function SecurityFiltersMenuView(props){
                     onCopyFolder = {(itemsType, destFolderId, folderIds) => props.actionCopyFolder(itemsType, destFolderId, folderIds)}
                 />
             </DataLoader>
-            )
-
-            : <div>Неизвестное состояние</div>
-        }
         </div>
     )
 }
@@ -114,12 +91,8 @@ const mapStateToProps = state => {
 const mapDispatchToProps = {
     actionFolderLoaded,
     actionFolderLoadFailed,
-    actionFolderClick,
-    actionItemClick,
-    actionEditItemClick,
     actionDeleteItemClick,
     actionAddFolder,
-    actionAddItemClick,
     actionEditFolder,
     actionDeleteFolderClick,
     actionSearchClick,

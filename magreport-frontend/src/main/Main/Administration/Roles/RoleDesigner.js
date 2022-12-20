@@ -1,5 +1,4 @@
-import React from 'react';
-import {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useSnackbar } from 'notistack';
 
@@ -34,6 +33,7 @@ import { RolesCSS } from "./RolesCSS";
 // actions
 import { actionUsersLoaded, actionUsersLoadFailed } from 'redux/actions/admin/actionUsers';
 import { actionRoleSelectFolderType } from 'redux/actions/admin/actionRoles';
+import { editItemNavbar, addItemNavbar } from "redux/actions/navbar/actionNavbar";
 
 
 function RoleDesigner(props){
@@ -41,6 +41,12 @@ function RoleDesigner(props){
     const {id, folderId} = useParams()
     const navigate = useNavigate();
     const location = useLocation();
+
+    useEffect(() => {
+        if(!id) {
+            dataHub.roleController.getFolder(folderId, handleFoldersLoaded)
+        }
+    }, []) // eslint-disable-line
 
     const classes = RolesCSS();
     const { enqueueSnackbar } = useSnackbar();
@@ -56,7 +62,6 @@ function RoleDesigner(props){
         roleName : '',
         roleDescription : ''
     });
-
 
     const [domainGroupsData, setDomainGroupsData] = useState({
         domainGroups: []
@@ -84,6 +89,12 @@ function RoleDesigner(props){
         Data loading
     */
 
+    function handleFoldersLoaded({ok, data}) {
+        if(ok) {
+            props.addItemNavbar('roles', folderId, data.path)
+        }
+    }
+
     function enableRoleReload(){
         setReload({needReload: true})
     }    
@@ -94,8 +105,10 @@ function RoleDesigner(props){
             roleName : loadedData.name,
             roleDescription : loadedData.description,
         });
-
         setPagename("Редактирование роли: " + loadedData.name);
+        if (id) {
+            props.editItemNavbar('roles', loadedData.name, id, folderId, loadedData.path)
+        }
     }
 
     function handleDomainGroupsDataLoaded(loadedData){
@@ -488,7 +501,9 @@ const mapStateToProps = state => {
 const mapDispatchToProps = {
     actionUsersLoaded, 
     actionUsersLoadFailed,
-    actionRoleSelectFolderType
+    actionRoleSelectFolderType,
+    editItemNavbar, 
+    addItemNavbar
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(RoleDesigner);
