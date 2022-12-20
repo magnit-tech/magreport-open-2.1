@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 
 // dataHub
@@ -11,6 +11,7 @@ import { useSnackbar } from 'notistack';
 import {actionLoadedSettings, actionGetJournal, actionGetFullJournal, actionSetSetting, 
     actionSettingValueChanged, actionSettingDisableChanged, actionCloseHistory,
 } from 'redux/actions/admin/actionSettings';
+import { addNavbar } from "redux/actions/navbar/actionNavbar";
 
 // local components
 import DataLoader from 'main/DataLoader/DataLoader';
@@ -24,6 +25,10 @@ function SettingsMenuView(props){
     //const classes = ServerSettingsCSS();
 
     const { enqueueSnackbar } = useSnackbar();
+
+    useEffect(() => {
+        props.addNavbar('Настройки', 'settings')
+    }, [props]);
 
     return(
         <DataLoader
@@ -65,6 +70,7 @@ const mapDispatchToProps = {
     actionSettingValueChanged, 
     actionSettingDisableChanged,
     actionCloseHistory,
+    addNavbar
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(SettingsMenuView);

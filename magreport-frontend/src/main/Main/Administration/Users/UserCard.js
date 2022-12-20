@@ -16,7 +16,7 @@ import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
 import { connect } from 'react-redux';
 import { UsersCSS } from "./UsersCSS";
 //actions
-import { showAlertDialog, hideAlertDialog } from 'redux/actions/actionsAlertDialog'
+import { showAlertDialog, hideAlertDialog } from 'redux/actions/UI/actionsAlertDialog'
 import { actionUserDelete, actionUserChecked } from 'redux/actions/admin/actionUsers'
 
 

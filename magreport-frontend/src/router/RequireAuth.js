@@ -1,13 +1,13 @@
 import React from 'react';
-import { useLocation, Navigate} from 'react-router-dom'
+import { useLocation, Navigate } from 'react-router-dom'
 import { useAuth } from './useAuth';
 
 const RequireAuth = ({children}) => {
 	const location = useLocation()
-	const {user, setUserData} = useAuth()
+	const { user, setUserData } = useAuth()
 
 	if (!user.current) {
-		let userData = JSON.parse(localStorage.getItem('userData'))
+		let userData = localStorage.getItem('userData') ? JSON.parse(localStorage.getItem('userData')) : ''
 
 		if (userData && userData.authtoken && userData.name) {
 			setUserData(userData)

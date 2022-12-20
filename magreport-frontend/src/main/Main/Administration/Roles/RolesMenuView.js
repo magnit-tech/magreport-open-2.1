@@ -1,6 +1,5 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { useNavigateBack} from "components/Navbar/navbarHooks";
 
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 
@@ -8,29 +7,22 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import dataHub from 'ajax/DataHub';
 
 // actions
-import {actionFolderLoaded, actionFolderLoadFailed, actionFolderClick, actionItemClick, actionAddFolder, 
-    actionAddItemClick, actionEditFolder, actionDeleteFolderClick, actionEditItemClick, actionDeleteItemClick, 
-    actionSearchClick, actionSortClick, actionBackEditRoleFromUserClick
+import {actionFolderLoaded, actionFolderLoadFailed, actionAddFolder, actionEditFolder, actionDeleteFolderClick, actionDeleteItemClick, 
+    actionSearchClick, actionSortClick
 } from 'redux/actions/menuViews/folderActions';
-import actionSetSidebarItem from 'redux/actions/sidebar/actionSetSidebarItem';
 
 // components
 import DataLoader from '../../../DataLoader/DataLoader';
 import FolderContent from '../../../FolderContent/FolderContent';
 import SidebarItems from '../../Sidebar/SidebarItems'
-import RoleDesigner from './RoleDesigner'
-import RoleViewer from "./RoleViewer";
 
-// states 
-import {FLOW_STATE_BROWSE_FOLDER, rolesMenuViewFlowStates} from 'redux/reducers/menuViews/flowStates';
 
 function RolesMenuView(props){
 
     const {id} = useParams()
     const navigate = useNavigate()
     const location = useLocation()
-    
-    const navigateBack = useNavigateBack();
+
 
     let state = props.state;
 
@@ -40,80 +32,55 @@ function RolesMenuView(props){
     let isSortingAvailable = true;
 
 
-    function handleExit() {
-        if (state.fromUsers) {
-            //props.actionSetSidebarItem(SidebarItems.admin.subItems.users);
-            props.actionBackEditRoleFromUserClick(folderItemsType);
-        //    navigateBack();
-            
-        }
-        else {
-            navigateBack();
-        }
-    }
-
     function handleFolderClick(folderId) {
-        props.actionFolderClick(folderItemsType, folderId)
         navigate(`/roles/${folderId}`)
     }
 
     function handleItemClick(roleId) {
-        props.actionItemClick(folderItemsType, roleId)
         navigate(`/roles/${id}/view/${roleId}`, {state: location.pathname})
     }
 
     function handleEditItemClick(roleId) {
-        props.actionEditItemClick(folderItemsType, roleId)
         navigate(`/roles/${id}/edit/${roleId}`, {state: location.pathname})
     }
 
-    function handleAddItemClick(folderItemsType) {
-        props.actionAddItemClick(folderItemsType)
+    function handleAddItemClick() {
         navigate(`/roles/${id}/add`, {state: location.pathname})
     }
 
     
     return(
         <div  style={{display: 'flex', flex: 1}}>
-            {
-                state.flowState === FLOW_STATE_BROWSE_FOLDER ?
-                    <DataLoader
-                        loadFunc = {dataHub.roleController.getType}
-                        loadParams = {id ? [Number(id)] : [null]}
-                        reload = {reload}
-                        onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}}
-                        onDataLoadFailed = {(message) => {props.actionFolderLoadFailed(folderItemsType, message)}}
-                    >
-                        <FolderContent
-                            pagination = {true}
-                            itemsType = {folderItemsType}
-                            showAddFolder = {false}
-                            showAddItem = {true}
-                            searchParams = {state.searchParams || {}}
-                            sortParams = {state.sortParams || {}}
-                            data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
-                            // onFolderClick = {(folderId) => {props.actionFolderClick(folderItemsType, folderId)}}
-                            // onItemClick = {(roleId) => {props.actionItemClick(folderItemsType, roleId)}}
-                            // onAddItemClick = {() => {props.actionAddItemClick(folderItemsType)}}
-                            // onEditItemClick = {(roleId) => {props.actionEditItemClick(folderItemsType, roleId)}}
-                            onFolderClick = {handleFolderClick}
-                            onItemClick={handleItemClick}
-                            onEditItemClick={handleEditItemClick}
-                            onAddItemClick={handleAddItemClick}
+            <DataLoader
+                loadFunc = {dataHub.roleController.getType}
+                loadParams = {id ? [Number(id)] : [null]}
+                reload = {reload}
+                onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}}
+                onDataLoadFailed = {(message) => {props.actionFolderLoadFailed(folderItemsType, message)}}
+            >
+                <FolderContent
+                    pagination = {true}
+                    itemsType = {folderItemsType}
+                    showAddFolder = {false}
+                    showAddItem = {true}
+                    searchParams = {state.searchParams || {}}
+                    sortParams = {state.sortParams || {}}
+                    data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
 
+                    onFolderClick = {handleFolderClick}
+                    onItemClick={handleItemClick}
+                    onEditItemClick={handleEditItemClick}
+                    onAddItemClick={handleAddItemClick}
 
-                            onAddFolder = {(name, description) => {props.actionAddFolder(folderItemsType, state.currentFolderData.id, name, description)}}
-                            onDeleteFolderClick = {(folderId) => {props.actionDeleteFolderClick(folderItemsType, state.currentFolderData.id, folderId)}}
-                            onDeleteItemClick = {(roleId) => {props.actionDeleteItemClick(folderItemsType, state.currentFolderId, roleId)}}
-                            onEditFolder = {(folderId, name, description) => {props.actionEditFolder(sidebarItemType, folderItemsType, state.currentFolderData.id, folderId, name, description)}}
-                            onSearchClick ={searchParams => {props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)}}
-                            onSortClick ={sortParams => {props.actionSortClick(folderItemsType, state.currentFolderId, sortParams)}}
-                            contextAllowed
-                        />
-                    </DataLoader>
-
-                : <div>Неизвестное состояние</div>
-            }
+                    onAddFolder = {(name, description) => {props.actionAddFolder(folderItemsType, state.currentFolderData.id, name, description)}}
+                    onDeleteFolderClick = {(folderId) => {props.actionDeleteFolderClick(folderItemsType, state.currentFolderData.id, folderId)}}
+                    onDeleteItemClick = {(roleId) => {props.actionDeleteItemClick(folderItemsType, state.currentFolderId, roleId)}}
+                    onEditFolder = {(folderId, name, description) => {props.actionEditFolder(sidebarItemType, folderItemsType, state.currentFolderData.id, folderId, name, description)}}
+                    onSearchClick ={searchParams => {props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)}}
+                    onSortClick ={sortParams => {props.actionSortClick(folderItemsType, state.currentFolderId, sortParams)}}
+                    contextAllowed
+                />
+            </DataLoader>
         </div>
     )
 }
@@ -127,18 +94,12 @@ const mapStateToProps = state => {
 const mapDispatchToProps = {
     actionFolderLoaded,
     actionFolderLoadFailed,
-    actionFolderClick,
-    actionItemClick,
-    actionEditItemClick,
     actionDeleteItemClick,
     actionAddFolder,
-    actionAddItemClick,
     actionEditFolder,
     actionDeleteFolderClick,
     actionSearchClick,
     actionSortClick,
-    actionSetSidebarItem,
-    actionBackEditRoleFromUserClick
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(RolesMenuView);

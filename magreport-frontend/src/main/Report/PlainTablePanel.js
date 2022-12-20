@@ -127,7 +127,6 @@ export default function PlainTablePanel(props){
 
     function handleRestartReport(){
         navigate(`/report/starter/${props.reportId}?jobId=${props.jobId}`, {state: location.pathname})
-        // props.onRestartReportClick();
     }
 
     function handleViewTypeChange(){

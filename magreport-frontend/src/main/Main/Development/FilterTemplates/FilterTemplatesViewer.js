@@ -1,7 +1,10 @@
 import React, {useState} from 'react';
 import {useSnackbar} from 'notistack';
 
-import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+
+import { useDispatch } from "react-redux";
+import { viewItemNavbar } from "redux/actions/navbar/actionNavbar";
 
 // components
 import Typography from '@material-ui/core/Typography';
@@ -25,6 +28,8 @@ export default function FilterTemplatesViewer() {
     const navigate = useNavigate();
     const location = useLocation();
 
+    const dispatch = useDispatch()
+
     const {enqueueSnackbar} = useSnackbar();
 
     const [data, setData] = useState({});
@@ -35,6 +40,8 @@ export default function FilterTemplatesViewer() {
             ...data,
             ...loadedData
         });
+
+        dispatch(viewItemNavbar('filterTemplate', loadedData.name, id, folderId, loadedData.path))
     }
 
     function handleDataLoadFailed(message) {

@@ -3,6 +3,9 @@ import {useSnackbar} from "notistack";
 
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 
+import { useDispatch } from "react-redux";
+import { viewItemNavbar } from "redux/actions/navbar/actionNavbar";
+
 import dataHub from "ajax/DataHub";
 import DataLoader from "main/DataLoader/DataLoader";
 
@@ -27,6 +30,8 @@ export default function DatasetViewer() {
     const navigate = useNavigate();
     const location = useLocation();
 
+    const dispatch = useDispatch()
+
     const {enqueueSnackbar} = useSnackbar();
 
     const [data, setData] = useState({});
@@ -36,6 +41,7 @@ export default function DatasetViewer() {
 
     function handleDataLoaded(loadedData) {
         setData(loadedData);
+        dispatch(viewItemNavbar('dataset', loadedData.name, id, folderId, loadedData.path))
     }
 
     function handleTypesLoaded(loadedData) {
@@ -47,8 +53,6 @@ export default function DatasetViewer() {
             {variant: "error"});
     }
 
-    // build component
-
     // settings tab
     const settingsPreDataSourceData = [
         {label: "Название набора данных", value: data.name},
@@ -58,6 +62,7 @@ export default function DatasetViewer() {
     let dataSourceCard = data.dataSource ? (
         <ViewerChildCard
             id={data.dataSource.id}
+            parentFolderId={data.dataSource.folderId}
             itemType={FolderItemTypes.datasource}
             name={data.dataSource.name}
         />

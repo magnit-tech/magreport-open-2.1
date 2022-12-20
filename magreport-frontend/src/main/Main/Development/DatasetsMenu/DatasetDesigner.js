@@ -1,12 +1,15 @@
-import React from 'react';
-import {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSnackbar } from 'notistack';
 
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 
+import { useDispatch } from "react-redux";
+import { editItemNavbar, addItemNavbar } from "redux/actions/navbar/actionNavbar";
+
 import Tooltip from '@material-ui/core/Tooltip';
 import UpdateIcon from '@material-ui/icons/Update';
 import IconButton from '@material-ui/core/IconButton';
+
 // local
 import DesignerPage from '../Designer/DesignerPage';
 import PageTabs from 'components/PageTabs/PageTabs';
@@ -38,7 +41,16 @@ export default function DatasetDesigner(){
     const navigate = useNavigate();
     const location = useLocation();
 
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        if(!id) {
+            dataHub.datasetController.getFolder(folderId, handleFoldersLoaded)
+        }
+    }, []) // eslint-disable-line
+
     const { enqueueSnackbar } = useSnackbar();
+
     const classes = DatasetDesignerCSS();
 
     const [data, setData] = useState({
@@ -84,6 +96,12 @@ export default function DatasetDesigner(){
         Data loading
     */
 
+    function handleFoldersLoaded({ok, data}) {
+        if(ok) {
+            dispatch(addItemNavbar('dataset', folderId, data.path))
+        }
+    }
+
     function handleDataLoaded(loadedData){
         setData({
             ...data,
@@ -98,6 +116,10 @@ export default function DatasetDesigner(){
             datasetTypeId : loadedData.typeId
         });
         setPagename("Редактирование набора данных: " + loadedData.name);
+
+        if (id) {
+            dispatch(editItemNavbar('dataset', loadedData.name, id, folderId, loadedData.path))
+        }
     }
 
     function handleTypesLoaded(data){

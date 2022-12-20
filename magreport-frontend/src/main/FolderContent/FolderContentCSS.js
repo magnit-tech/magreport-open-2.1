@@ -1,6 +1,5 @@
 import { withStyles, makeStyles, alpha } from '@material-ui/core/styles';
 import Slider from '@material-ui/core/Slider';
-import StyleConsts from '../../StyleConsts';
 
 export const FolderContentCSS = makeStyles(theme => ({
     relative: {

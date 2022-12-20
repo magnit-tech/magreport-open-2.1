@@ -21,6 +21,7 @@ import dataHub from 'ajax/DataHub';
 
 // actions
 import {actionLoaded, actionLoadedFailed} from "redux/actions/developer/actionReportTemplates";
+import { viewItemNavbar } from "redux/actions/navbar/actionNavbar";
 
 // functions
 import {createViewerPageName} from "../Viewer/viewerHelpers";
@@ -44,7 +45,7 @@ import {createViewerPageName} from "../Viewer/viewerHelpers";
  * @param {actionLoadedFailed} props.actionLoadedFailed - action, вызываемый при ошибке загрузки данных отчета
  */
 
-function ReportDevViewer({actionLoaded = f=>f, actionLoadedFailed = f=>f}) {
+function ReportDevViewer({actionLoaded = f=>f, actionLoadedFailed = f=>f, viewItemNavbar = f=>f}) {
 
     const { id, folderId } = useParams()
     const navigate = useNavigate();
@@ -61,6 +62,7 @@ function ReportDevViewer({actionLoaded = f=>f, actionLoadedFailed = f=>f}) {
             ...data,
             ...loadedData,
         });
+        viewItemNavbar('reportsDev', loadedData.name, id, folderId, loadedData.path)
     }
 
     function handleDataSetLoaded(loadedData) {
@@ -96,6 +98,7 @@ function ReportDevViewer({actionLoaded = f=>f, actionLoadedFailed = f=>f}) {
 
                 <ViewerChildCard
                     id={dataSet.id}
+                    parentFolderId={dataSet.dataSource?.folderId}
                     itemType={FolderItemTypes.dataset}
                     name={dataSet.name}
                 />
@@ -180,13 +183,10 @@ function ReportDevViewer({actionLoaded = f=>f, actionLoadedFailed = f=>f}) {
     );
 }
 
-const mapStateToProps = state => {
-    return {};
-}
-
 const mapDispatchToProps = {
     actionLoaded,
     actionLoadedFailed,
+    viewItemNavbar
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ReportDevViewer);
+export default connect(null, mapDispatchToProps)(ReportDevViewer);

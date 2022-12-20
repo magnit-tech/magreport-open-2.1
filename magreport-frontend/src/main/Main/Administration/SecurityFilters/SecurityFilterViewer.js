@@ -63,6 +63,7 @@ export default function SecurityFilterViewer(props) {
     let filterInstanceCard = data.filterInstance ? (
         <ViewerChildCard
             id={data.filterInstance.id}
+            parentFolderId={data.filterInstance.folderId}
             itemType={FolderItemTypes.filterInstance}
             name={data.filterInstance.name}
         />

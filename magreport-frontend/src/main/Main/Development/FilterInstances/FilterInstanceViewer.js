@@ -1,7 +1,10 @@
 import React, {useState} from "react";
 import {useSnackbar} from "notistack";
 
-import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+
+import { useDispatch } from "react-redux";
+import { viewItemNavbar } from "redux/actions/navbar/actionNavbar";
 
 import dataHub from "ajax/DataHub";
 import DataLoader from "main/DataLoader/DataLoader";
@@ -26,6 +29,8 @@ export default function FilterInstanceViewer() {
     const navigate = useNavigate();
     const location = useLocation();
 
+    const dispatch = useDispatch()
+
     const {enqueueSnackbar} = useSnackbar();
 
     const [data, setData] = useState({});
@@ -35,6 +40,7 @@ export default function FilterInstanceViewer() {
             ...data,
             ...loadedData,
         });
+        dispatch(viewItemNavbar('filterInstance', loadedData.name, id, folderId, loadedData.path))
     }
 
     function handleFilterTemplateDataLoaded(loadedData) {
@@ -66,7 +72,7 @@ export default function FilterInstanceViewer() {
             <ViewerChildCard
                 key={data.filterTemplate.id}
                 id={data.filterTemplate.id}
-                folderId={data.filterTemplate.folderId}
+                parentFolderId={data.filterTemplate.folderId}
                 itemType={FolderItemTypes.filterTemplate}
                 name={data.filterTemplate.name}
             />
@@ -75,7 +81,7 @@ export default function FilterInstanceViewer() {
 
     const filterTemplateType = data.filterTemplate ? data.filterTemplate.type.name : "";
     let fieldsComponent = "";
-
+    
     if(filterTemplateType === 'VALUE_LIST') {
 
         fieldsComponent = 

@@ -3,6 +3,9 @@ import {useSnackbar} from "notistack";
 
 import { useParams, useNavigate } from 'react-router-dom'
 
+import { useDispatch } from "react-redux";
+import { viewItemNavbar } from "redux/actions/navbar/actionNavbar";
+
 // dataHub
 import dataHub from "ajax/DataHub";
 
@@ -21,16 +24,12 @@ import {createViewerPageName} from "main/Main/Development/Viewer/viewerHelpers";
 import {FolderItemTypes} from "main/FolderContent/FolderItemTypes";
 
 
-/**
- * Компонент просмотра расписаний
- * @return {JSX.Element}
- * @constructor
- */
-
 export default function ScheduleViewer() {
     
-    const {id} = useParams()
+    const { id } = useParams()
     const navigate = useNavigate();
+
+    const dispatch = useDispatch()
 
     const {enqueueSnackbar} = useSnackbar();
 
@@ -40,6 +39,7 @@ export default function ScheduleViewer() {
 
     function handleDataLoaded(loadedData) {
         setData(loadedData);
+        dispatch(viewItemNavbar('schedules', loadedData.name, id, null, null))
     }
 
     function handleDataLoadFailed(message) {

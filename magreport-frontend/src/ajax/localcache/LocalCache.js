@@ -266,7 +266,7 @@ function LocalCache(){
         UserRolesInfo
     */
 
-    this.userInfo = JSON.parse(localStorage.getItem('userData'));
+    this.userInfo = localStorage.getItem('userData') ? JSON.parse(localStorage.getItem('userData')) : ''
 
     this.setUserInfo = (userInfo) => {
         userInfo.isAdmin = false

@@ -1,8 +1,10 @@
-import React from 'react';
-import {useState} from 'react';
+import React, { useEffect, useState } from 'react';
+
 import { useSnackbar } from 'notistack';
+
 import { connect } from 'react-redux';
-import { showAlert, hideAlert } from '../../../../redux/actions/actionsAlert'
+import { showAlert, hideAlert } from '../../../../redux/actions/UI/actionsAlert'
+import { editItemNavbar, addItemNavbar } from "redux/actions/navbar/actionNavbar";
 
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 
@@ -31,6 +33,12 @@ function DatasourceDesigner(props){
     const { id, folderId } = useParams()
     const navigate = useNavigate();
     const location = useLocation();
+
+    useEffect(() => {
+        if(!id) {
+            dataHub.datasourceController.getFolder(folderId, handleFoldersLoaded)
+        }
+    }, []) // eslint-disable-line
 
     const classes = ViewerCSS();
 
@@ -71,6 +79,12 @@ function DatasourceDesigner(props){
         loadParams = [id];
     }
 
+    function handleFoldersLoaded({ok, data}) {
+        if(ok) {
+            props.addItemNavbar('datasource', folderId, data.path)
+        }
+    }
+
     /* Data loading */
     function handleDataLoaded(loadedData){
         setData({
@@ -83,13 +97,17 @@ function DatasourceDesigner(props){
             datasourcePoolSize : loadedData.poolSize,
         });
         setPagename("Редактирование источника данных: " + loadedData.name);
+
+        if (id) {
+            props.editItemNavbar('datasource', loadedData.name, id, folderId, loadedData.path)
+        }
     }
+
     function handleTypesLoaded(data){
         setTypesData(data.map((v) => ({id: v.id, name: v.name})));
     }
-    function handleDataLoadFailed(message){
-
-    }
+    
+    function handleDataLoadFailed(message){}
 
     /* Data editing */
     function handleChange(key, value){
@@ -314,7 +332,9 @@ function DatasourceDesigner(props){
 
 const mapDispatchToProps = {
     showAlert,
-    hideAlert
+    hideAlert,
+    editItemNavbar, 
+    addItemNavbar
 }
 
 export default connect(null, mapDispatchToProps)(DatasourceDesigner);

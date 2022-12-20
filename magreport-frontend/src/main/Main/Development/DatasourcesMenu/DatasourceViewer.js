@@ -5,7 +5,8 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom'
 
 import dataHub from "ajax/DataHub";
 import { connect } from 'react-redux';
-import { showAlert, hideAlert } from '../../../../redux/actions/actionsAlert'
+import { showAlert, hideAlert } from '../../../../redux/actions/UI/actionsAlert'
+import { viewItemNavbar } from "redux/actions/navbar/actionNavbar";
 
 import DataLoader from "main/DataLoader/DataLoader";
 
@@ -28,6 +29,7 @@ import { mdiCheckDecagram } from '@mdi/js';
  * @param {Object} props - параметры компонента
  * @constructor
  */
+
 function DatasourceViewer(props) {
 
     const classes = ViewerCSS();
@@ -43,6 +45,7 @@ function DatasourceViewer(props) {
 
     function handleDataLoaded(loadedData) {
         setData(loadedData);
+        props.viewItemNavbar('datasource', loadedData.name, id, folderId, loadedData.path)
     }
 
     function handleDataLoadFailed(message) {
@@ -52,7 +55,6 @@ function DatasourceViewer(props) {
 
     function checkConnection(id) {
         dataHub.datasourceController.check(id,  checkConnectionAnswer);
-    
     }
 
     function checkConnectionAnswer(magrepResponse){
@@ -129,7 +131,8 @@ function DatasourceViewer(props) {
 
 const mapDispatchToProps = {
     showAlert,
-    hideAlert
+    hideAlert,
+    viewItemNavbar
 }
 
 export default connect(null, mapDispatchToProps)(DatasourceViewer);

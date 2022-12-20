@@ -36,10 +36,6 @@ export const DOMAIN_NAME_FIELD = "DOMAIN_NAME_FIELD";
 export const USER_NAME_FIELD = "USER_NAME_FIELD";
 export const FILTER_VALUE_FIELD = "FILTER_VALUE_FIELD";
 
-// designer modes
-export const ASM_DESIGNER_CREATE_MODE = "create";
-export const ASM_DESIGNER_EDIT_MODE = "edit";
-
 // filter instance field types
 export const ID_FIELD = "ID_FIELD";
 export const CODE_FIELD = "CODE_FIELD";

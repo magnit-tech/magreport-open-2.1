@@ -26,7 +26,7 @@ import EmailController from "./controllers/EmailController";
 import ThemeController from "./controllers/ThemeController";
 import UserServiceController from "./controllers/UserServiceController";
 
-const USER_DATA = JSON.parse(localStorage.getItem('userData'))
+const USER_DATA = localStorage.getItem('userData') ? JSON.parse(localStorage.getItem('userData')) : ''
 
 function DataHub(){
     
@@ -131,7 +131,7 @@ function DataHub(){
                 else{
                     if(response.status === 401){
                         if (this.unautorizedHandler){
-                            this.unautorizedHandler();
+                            this.unautorizedHandler(); //!!!!!
                         }
                     }
                     else {

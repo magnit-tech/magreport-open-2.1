@@ -1,8 +1,10 @@
-import React from 'react';
-import {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSnackbar } from 'notistack';
 
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
+
+import { useDispatch } from "react-redux";
+import { editItemNavbar, addItemNavbar } from "redux/actions/navbar/actionNavbar";
 
 // material ui
 import { CircularProgress } from '@material-ui/core';
@@ -32,6 +34,14 @@ export default function FilterInstanceDesigner(){
     const { id, folderId } = useParams()
     const navigate = useNavigate();
     const location = useLocation();
+
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        if(!id) {
+            dataHub.filterInstanceController.getFolder(folderId, handleFoldersLoaded)
+        }
+    }, []) // eslint-disable-line
 
     const { enqueueSnackbar } = useSnackbar();
 
@@ -75,10 +85,19 @@ export default function FilterInstanceDesigner(){
         loadParams = [id];
     }
 
+    function handleFoldersLoaded({ok, data}) {
+        if(ok) {
+            dispatch(addItemNavbar('filterInstance', folderId, data.path))
+        }
+    }
+
     function handleFilterInstanceDataLoaded(filterInstanceData){
         setFilterInstanceData(filterInstanceData);
         setErrorFields({});
         setPagename("Редактирование экземпляра фильтра: " + filterInstanceData.name);
+        if (id) {
+            dispatch(editItemNavbar('filterInstance', filterInstanceData.name, id, folderId, filterInstanceData.path))
+        }
     }
 
     function handleDataLoadFailed(message){

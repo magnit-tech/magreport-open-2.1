@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { useSnackbar } from "notistack";
+
+import { useDispatch } from 'react-redux';
+
+import { addNavbar } from 'redux/actions/navbar/actionNavbar';
 
 import { DesignerCSS } from "../../Development/Designer/DesignerCSS";
 
@@ -19,6 +23,12 @@ import SenderEmailWindow from "../../../FolderContent/ModalWindows/SenderEmailWi
 function EmailMenuView() {
 
     const classes = DesignerCSS();
+
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        dispatch(addNavbar('Рассылка писем', 'mailSender'))
+    }, [dispatch])
 
     const [chooserDestination, setChooserDestination] = useState(false);
     const [showResult, setShowResult] = useState(false)

@@ -1,8 +1,11 @@
-import React, {useState} from "react";
+import React, { useState, useEffect } from "react";
 import {useSnackbar} from "notistack";
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+
+import { useDispatch } from "react-redux";
+import { editItemNavbar, addItemNavbar } from "redux/actions/navbar/actionNavbar";
 
 // dataHub
 import dataHub from "ajax/DataHub";
@@ -39,26 +42,32 @@ import {FolderItemTypes} from "main/FolderContent/FolderItemTypes";
 import ReportStarter from '../../../Report/ReportStarter';
 import {ScheduleTaskTypeMap, ScheduleStatusMap} from '../../../FolderContent/JobFilters/JobStatuses';
 import DesignerTextFieldWithSeparator from 'main/Main/Development/Designer/DesignerTextFieldWithSeparator';
+
 //styles
 import {DesignerCSS} from '../../Development/Designer/DesignerCSS';
-/**
- * @callback onExit
- */
 
 /**
  * Компонент создания и редактирования отчетов на расписании
  * @param {Object} props - параметры компонента
  * @param {String} props.status - статус задания. Если CHANGED, то переход на вкладку "Фильтры обязателен"
-//  * @param {Number} props.reportId - идентификатор отчета на расписании
- * @param {onExit} props.onExit - callback, вызываемый при закрытии формы
  * @return {JSX.Element}
  * @constructor
  */
+
 export default function ScheduleTasksDesigner(props) {
     const classes = DesignerCSS();
     
     const {id} = useParams()
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        if(!id) {
+            dispatch(addItemNavbar('scheduleTasks', null, null))
+        }
+    }, []) // eslint-disable-line
 
     const {enqueueSnackbar} = useSnackbar();
 
@@ -385,21 +394,13 @@ export default function ScheduleTasksDesigner(props) {
 
     function handleAddedEdited(magRepResponse) {
         if (magRepResponse.ok) {
-            handleCancel()
+            location.state ? navigate(location.state) : navigate(`/scheduleTasks`)
             enqueueSnackbar("Отчет на расписании успешно сохранен", {variant : "success"});
         } else {
             setUploading(false);
             const actionWord = id ? "обновлении" : "создании";
             enqueueSnackbar(`При ${actionWord} возникла ошибка: ${magRepResponse.data}`,
                 {variant: "error"});
-        }
-    }
-
-    function handleCancel() {
-        if (id) {
-            navigate(`/scheduleTasks/view/${id}`)
-        } else {
-            navigate(`/scheduleTasks`)
         }
     }
 
@@ -440,6 +441,9 @@ export default function ScheduleTasksDesigner(props) {
             maxFailedStarts: loadedData.maxFailedStarts ,
             failedStart: loadedData.failedStart
         });
+        if (id) {
+            dispatch(editItemNavbar('scheduleTasks', loadedData.name, id, null, null))
+        }
         if  (childGroups.length === 0  && filters.length === 0) {
             setDisableSave(false);
             setHideFilterTab(true);
@@ -463,7 +467,7 @@ export default function ScheduleTasksDesigner(props) {
             <DesignerPage
                 disableSave = {disableSave}
                 onSaveClick={handleSave}
-                onCancelClick={() => navigate(-1)}
+                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/scheduleTasks`)}
             >
                 <DesignerFolderItemPicker
                 //minWidth = {StyleConsts.designerTextFieldMinWidth}
@@ -513,7 +517,7 @@ export default function ScheduleTasksDesigner(props) {
             <DesignerPage
                 disableSave = {disableSave}
                 onSaveClick={handleSave}
-                onCancelClick={handleCancel}
+                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/scheduleTasks`)}
             >
                 <DesignerMultipleSelectField
                    // minWidth = {StyleConsts.designerTextFieldMinWidth}
@@ -591,7 +595,7 @@ export default function ScheduleTasksDesigner(props) {
         <DesignerPage
             disableSave = {disableSave}
             onSaveClick={handleSave}
-            onCancelClick={handleCancel}
+            onCancelClick={() => location.state ? navigate(location.state) : navigate(`/scheduleTasks`)}
         >
             <FormControl component="fieldset" style={{margin: '8px 0px'}}>
                 <FormLabel component="legend">Тип рассылки:</FormLabel>
@@ -685,7 +689,7 @@ export default function ScheduleTasksDesigner(props) {
             <DesignerPage
                 disableSave = {disableSave}
                 onSaveClick={handleSave}
-                onCancelClick={handleCancel}
+                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/scheduleTasks`)}
             >
                 <DesignerTextFieldWithSeparator
                         label = "Адреса"
@@ -775,7 +779,7 @@ export default function ScheduleTasksDesigner(props) {
                         onDataLoadFunction={dataHub.reportController.getScheduleReport}
                         scheduleTaskId={id}
                         parameters = {data.reportJobFilter}
-                        onCancel = {handleCancel}
+                        onCancel = {() => location.state ? navigate(location.state) : navigate(`/scheduleTasks`)}
                         onSave = {handleSave}
                         onSaveScheduleTaskFilterData = {onSaveScheduleTaskFilterData}
                         checkFilters = {handleCheckFilters}

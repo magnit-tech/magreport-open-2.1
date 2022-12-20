@@ -1,6 +1,5 @@
 import React from "react";
 import {connect} from "react-redux";
-import {useNavigateBack} from "components/Navbar/navbarHooks";
 
 import { useParams, useNavigate } from 'react-router-dom'
 
@@ -18,7 +17,7 @@ import {ViewerCSS} from "main/Main/Development/Viewer/ViewerCSS";
 
 import ExternalSecuritySourceViewer from "./ASMSecuritySourceViewer";
 import {actionAsmDataLoaded, actionAsmDataLoadFailed} from "redux/actions/admin/actionAsm";
-import {hideAlertDialog, showAlertDialog} from "redux/actions/actionsAlertDialog";
+import {hideAlertDialog, showAlertDialog} from "redux/actions/UI/actionsAlertDialog";
 import {FolderItemTypes} from "main/FolderContent/FolderItemTypes";
 
 // functions
@@ -53,8 +52,6 @@ function ASMViewer(props) {
 
     const {id} = useParams()
     const navigate = useNavigate();
-
-    const navigateBack = useNavigateBack();
 
     const loadFunc = dataHub.asmController.get;
     const loadParams = [id];
@@ -104,11 +101,6 @@ function ASMViewer(props) {
                 />});
     })
 
-    function back() {
-        navigateBack()
-        navigate('/asm')
-    }
-
     return (
         <DataLoader
             loadFunc={loadFunc}
@@ -120,7 +112,7 @@ function ASMViewer(props) {
                 id={id}
                 itemType={FolderItemTypes.asm}
                 disabledPadding={true}
-                onOkClick={back}
+                onOkClick={() => navigate('/asm')}
                 >
                 <PageTabs
                     tabsdata={tabs}

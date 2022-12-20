@@ -3,6 +3,9 @@ import {useSnackbar} from "notistack";
 
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 
+import { useDispatch } from "react-redux";
+import { viewItemNavbar } from "redux/actions/navbar/actionNavbar";
+
 import dataHub from "ajax/DataHub";
 
 import DataLoader from "main/DataLoader/DataLoader";
@@ -19,10 +22,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 
 import DomainGroupList from "main/Main/Administration/DomainGroups/DomainGroupList";
 import PermittedFoldersList from './PermittedFoldersList';
-import {
-    createViewerTextFields,
-    createViewerPageName
-} from "main/Main/Development/Viewer/viewerHelpers";
+import { createViewerTextFields, createViewerPageName } from "main/Main/Development/Viewer/viewerHelpers";
 
 
 export default function RoleViewer() {
@@ -32,6 +32,8 @@ export default function RoleViewer() {
     const {id, folderId} = useParams()
     const navigate = useNavigate();
     const location = useLocation();
+
+    const dispatch = useDispatch()
 
     const {enqueueSnackbar} = useSnackbar();
 
@@ -47,6 +49,7 @@ export default function RoleViewer() {
 
     function handleDataLoaded(loadedData) {
         setData(loadedData);
+        dispatch(viewItemNavbar('roles', loadedData.name, id, folderId, loadedData.path))
     }
 
     function handleUsersDataLoaded(loadedData) {

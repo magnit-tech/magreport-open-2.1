@@ -9,61 +9,34 @@ import dataHub from 'ajax/DataHub';
 import { useSnackbar } from 'notistack';
 
 // actions
-import {actionFolderLoaded, actionFolderLoadFailed, actionFolderClick, actionItemClick, actionAddFolder, 
-    actionAddItemClick, actionEditFolder, actionDeleteFolderClick, actionDeleteItemClick, actionSearchClick, actionChangeParentFolder, actionCopyFolder, actionSortClick
-} from 'redux/actions/menuViews/folderActions';
+import { actionFolderLoaded, actionFolderLoadFailed, actionAddFolder, actionEditFolder, 
+        actionDeleteFolderClick, actionDeleteItemClick, actionSearchClick, actionChangeParentFolder, actionCopyFolder, actionSortClick } from 'redux/actions/menuViews/folderActions';
 import {actionAddDeleteFavorites} from 'redux/actions/favorites/actionFavorites'
 
 // components
 import DataLoader from '../../DataLoader/DataLoader';
 import FolderContent from '../../FolderContent/FolderContent';
 import SidebarItems from '../Sidebar/SidebarItems'
-import PublishReportDesigner from "./PublishReportDesigner";
 
-// state const
-import {FLOW_STATE_BROWSE_FOLDER, reportsMenuViewFlowStates} from 'redux/reducers/menuViews/flowStates';
-import ReportStarter from 'main/Report/ReportStarter';
 
 function ReportsMenuView(props){
+
     let state = props.state;
 
-    const {id} = useParams()
+    const { id } = useParams()
     const navigate = useNavigate()
     const location = useLocation()
     
     const { enqueueSnackbar } = useSnackbar();
 
-    let loadFunc = dataHub.folderController.getFolder;
-
     let reload = {needReload : state.needReload};
     let folderItemsType = SidebarItems.reports.folderItemType;
     let isSortingAvailable = true;
 
-    function handleDesignerExit(){
-        props.actionFolderClick(folderItemsType, state.currentFolderId);
-    }
-
-    function handleReportCancel(){
-        props.actionFolderClick(folderItemsType, state.currentFolderId);
-    }
-
-    function handleFolderClick(folderId) {
-        props.actionFolderClick(folderItemsType, folderId)
-        navigate(`/${folderItemsType}/${folderId}`)
-    }
-    function handleItemClick(reportId) {
-        props.actionItemClick(folderItemsType, reportId)
-        navigate(`/report/starter/${reportId}`, {state: location.pathname})
-    }
-    function handleAddItemClick(folderItemsType) {
-        props.actionAddItemClick(folderItemsType)
-        navigate(`/reports/${id}/add`)
-    }
-
     return(
         <div style={{display: 'flex', flex: 1}}>
             <DataLoader
-                loadFunc = {loadFunc}
+                loadFunc = {dataHub.folderController.getFolder}
                 loadParams = {id ? [Number(id)] : [null]}
                 reload = {reload}
                 onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}}
@@ -77,13 +50,13 @@ function ReportsMenuView(props){
                     searchParams = {state.searchParams || {}}
                     sortParams = {state.sortParams || {}}
                     
-                    onFolderClick = {handleFolderClick}
-                    onItemClick = {handleItemClick}
-                    onAddItemClick={handleAddItemClick}
+                    onFolderClick = {(folderId) => navigate(`/reports/${folderId}`)}
+                    onItemClick = {(reportId) => navigate(`/report/starter/${reportId}`, {state: location.pathname})}
+                    onAddItemClick={() => navigate(`/reports/${id}/add`)}
 
                     onAddFolder = {(name, description) => {props.actionAddFolder(folderItemsType, state.currentFolderData.id, name, description)}}
                     onEditFolderClick = {(folderId, name, description) => {props.actionEditFolder(folderItemsType, state.currentFolderData.id, folderId, name, description)}}
-                    onEditItemClick = {(reportId) => {props.actionEditItemClick(folderItemsType, reportId)}}
+                    // onEditItemClick = {(reportId) => {props.actionEditItemClick(folderItemsType, reportId)}}
                     onDeleteFolderClick = {(folderId) => {props.actionDeleteFolderClick(folderItemsType, state.currentFolderData.id, folderId)}}
                     onDeleteItemClick = {(reportId) => {props.actionDeleteItemClick(folderItemsType, state.currentFolderId, reportId)}}
                     onSearchClick ={searchParams => {props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)}}
@@ -109,10 +82,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = {
     actionFolderLoaded,
     actionFolderLoadFailed,
-    actionFolderClick,
-    actionItemClick,
     actionAddFolder,
-    actionAddItemClick,
     actionEditFolder,
     actionDeleteFolderClick,
     actionDeleteItemClick,

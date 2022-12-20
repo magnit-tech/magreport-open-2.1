@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 // components
 import Table from '@material-ui/core/Table';
@@ -10,7 +10,7 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead'; 
 import TableRow from '@material-ui/core/TableRow';
 //import Button from '@material-ui/core/Button';
-import Link from '@material-ui/core/Link';
+// import Link from '@material-ui/core/Link';
 
 import {FolderItemTypes} from 'main//FolderContent/FolderItemTypes';
 import DesignerPage from "main/Main/Development/Designer/DesignerPage";
@@ -22,8 +22,6 @@ import {DatasetMenuCSS} from './DatasetsMenu/DatasetMenuCSS'
 
 export default function DependencyViewer(props){
 
-    const navigate = useNavigate()
-
     const classes = DatasetMenuCSS();
 
     const pagename = (props.itemsType === FolderItemTypes.dataset) ? 'Зависимости от набора данных: ' + props.data?.name 
@@ -32,7 +30,7 @@ export default function DependencyViewer(props){
                    : (props.itemsType === FolderItemTypes.filterInstance) ? 'Зависимости от источника данных: ' +  props.data?.name : null ;
 
     const folders = {
-        folders: {name: 'Отчёты', itemsType: 'folders' },
+        folders: {name: 'Отчёты', itemsType: FolderItemTypes.reports },
         reports: {name: 'Отчёты', itemsType: FolderItemTypes.reportsDev},
         filterInstances: {name: 'Экземпляры фильтров', itemsType: FolderItemTypes.filterInstance},
         asmSecurities: {name: 'AMS объекты', itemsType: null},
@@ -40,13 +38,7 @@ export default function DependencyViewer(props){
         dataSets: {name: 'Наборы данных', itemsType: FolderItemTypes.dataset}
     } ;
 
-    function handleLinkPathClick(value, pathArr, event){
-        event.preventDefault()
-        navigate(`/${value}/${pathArr[pathArr.length - 1].id}`)
-    }
-
     let tabs = [];
-
     for (const [key, value] of Object.entries(folders)) {
         if (props.data && props.data[key]?.length > 0 ){
             tabs.push({
@@ -76,11 +68,17 @@ export default function DependencyViewer(props){
                                         <TableCell align="left">
                                             {row.path && row.path.length > 0
                                                 ? 
-                                                    <Link href="#" onClick={event => handleLinkPathClick(value.itemsType, row.path, event)} color="inherit">
+                                                    <Link 
+                                                        to={`/${value.itemsType}/${row.path[row.path.length - 1].id}`} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer"
+                                                        color="inherit"
+                                                        style={{color: 'inherit'}}
+                                                    >
                                                         {`/ ${row.path.map(p => p.name).join(' / ')}`}
-                                                    </Link>                      
+                                                    </Link>                     
                                                 : 
-                                               ''
+                                                    ''
                                             }
                                         </TableCell>
                                     </TableRow>

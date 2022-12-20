@@ -1,6 +1,5 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import {useNavigateBack} from "components/Navbar/navbarHooks";
 
 import { useNavigate } from 'react-router-dom'
 
@@ -10,11 +9,7 @@ import dataHub from 'ajax/DataHub';
 import {
     actionFolderLoaded,
     actionFolderLoadFailed,
-    actionFolderClick,
-    actionItemClick,
-    actionEditItemClick,
     actionDeleteItemClick,
-    actionAddItemClick,
     actionSearchClick,
     actionScheduleTaskRunClick,
     actionSortClick
@@ -23,56 +18,38 @@ import {
 import {actionScheduleTaskSwitch} from 'redux/actions/admin/actionSchedules';
 
 // const
-import {FLOW_STATE_BROWSE_FOLDER , scheduleTasksMenuViewFlowStates} from  'redux/reducers/menuViews/flowStates';
 import {FolderItemTypes} from "main/FolderContent/FolderItemTypes";
 
 // local components
-
 import DataLoader from  '../../../DataLoader/DataLoader';
 import FolderContent from 'main/FolderContent/FolderContent';
-import ScheduleTasksDesigner from './ScheduleTasksDesigner';
-import ScheduleTasksViewer from './ScheduleTasksViewer';
 
 
 function ScheduleTasksMenuView(props){
 
     const navigate = useNavigate()
 
-    const navigateBack = useNavigateBack();
-
     const state = props.state;
-
-    let designerMode = typeof (state.editScheduleTaskId) === "number" ? "edit" : "create";
-
-    let loadFunc = dataHub.scheduleController.taskGetAll;
 
     let reload = {needReload: state.needReload};
     let folderItemsType = FolderItemTypes.scheduleTasks;
     let isSortingAvailable = true;
 
-    function handleExit() {
-        navigateBack();
-    }
 
     function handleItemClick(scheduleTaskId) {
-        props.actionItemClick(folderItemsType, scheduleTaskId)
         navigate(`/scheduleTasks/view/${scheduleTaskId}`)
     }
     function handleEditItemClick(scheduleTaskId) {
-        props.actionEditItemClick(folderItemsType, scheduleTaskId)
         navigate(`/scheduleTasks/edit/${scheduleTaskId}`)
     }
-    function handleAddItemClick(folderItemsType) {
-        props.actionAddItemClick(folderItemsType)
+    function handleAddItemClick() {
         navigate(`/scheduleTasks/add`)
     }
 
-    let component;
-    
-    if (state.flowState === FLOW_STATE_BROWSE_FOLDER) {
-        component = (
+    return (
+        <div style={{display: 'flex', flex: 1}}>
             <DataLoader
-                loadFunc={loadFunc}
+                loadFunc={dataHub.scheduleController.taskGetAll}
                 loadParams={[]}
                 reload={reload}
                 onDataLoaded={(data) => {
@@ -89,18 +66,11 @@ function ScheduleTasksMenuView(props){
                     data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
                     searchParams={state.searchParams || {}} 
                     searchWithoutRecursive
-                    // onItemClick={(scheduleTaskId) => {
-                    //     props.actionItemClick(folderItemsType, scheduleTaskId)
-                    // }}
-                    // onAddItemClick={() => {
-                    //     props.actionAddItemClick(folderItemsType)
-                    // }}
-                    // onEditItemClick={(scheduleTaskId) => {
-                    //     props.actionEditItemClick(folderItemsType, scheduleTaskId)
-                    // }}
+
                     onItemClick={handleItemClick}
                     onAddItemClick={handleAddItemClick}
                     onEditItemClick={handleEditItemClick}
+
                     onDeleteItemClick={(scheduleTaskId) => {
                         props.actionDeleteItemClick(folderItemsType, null, scheduleTaskId)
                     }}
@@ -112,28 +82,6 @@ function ScheduleTasksMenuView(props){
                     onSortClick ={sortParams => {props.actionSortClick(folderItemsType, state.currentFolderId, sortParams)}}
                 />  
             </DataLoader>
-        );
-    // }
-    
-    // else if (state.flowState === scheduleTasksMenuViewFlowStates.scheduleTasksDesigner) {
-    //     component = <ScheduleTasksDesigner
-    //         status={state.editScheduleTaskId ? state.currentFolderData.scheduleTasks?.find((item)=> item.id === state.editScheduleTaskId ).status : 'CHANGED'}
-    //         mode={designerMode}
-    //         scheduleId={state.editScheduleTaskId}
-    //         onExit={handleExit}
-    //     />;
-    // } else if (state.flowState === scheduleTasksMenuViewFlowStates.scheduleTasksViewer) {
-    //     component = <ScheduleTasksViewer
-    //         scheduleId={state.viewScheduleTaskId}
-    //         onOkClick={handleExit}
-    //     />;
-    } else {
-        component = <div>Неизвестное состояние</div>;
-    }
-
-    return (
-        <div style={{display: 'flex', flex: 1}}>
-            {component}
         </div>
     );
 }
@@ -147,11 +95,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = {
     actionFolderLoaded,
     actionFolderLoadFailed,
-    actionFolderClick,
-    actionItemClick,
-    actionEditItemClick,
     actionDeleteItemClick,
-    actionAddItemClick,
     actionSearchClick,
     actionScheduleTaskRunClick,
     actionSortClick,

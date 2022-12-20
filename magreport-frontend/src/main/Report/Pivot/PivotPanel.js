@@ -9,7 +9,7 @@ import Grid from '@material-ui/core/Grid';
 import { useSnackbar } from 'notistack';
 
 //actions
-import { showAlertDialog, hideAlertDialog } from 'redux/actions/actionsAlertDialog'
+import { showAlertDialog, hideAlertDialog } from 'redux/actions/UI/actionsAlertDialog'
 import { setAggModalParams } from 'redux/actions/olap/olapAction.js'
 
 // magreport
@@ -46,8 +46,7 @@ import validateSaveConfig from 'utils/validateSaveConfig';
  * @param {Number} props.reportId - id отчёта
  * @param {Number} props.folderId - id разработческой папки в которой находится отчет
  * @param {String} props.jobOwnerName - login владельца отчета
- * @param {*} props.fullScreen - признак, является ли режим отображения сводной полноэкранным
- * @param {*} props.onRestartReportClick - function() - callback перезапуска отчёта
+ * @param {*} props.fullScreen - признак, является ли режим отображения сводной полноэкранным\
  * @param {*} props.onViewTypeChange - function() - callback смена вида с сводной на простую таблицу
  * @param {*} props.onFullScreen - function - callback полноэкранный режим
 */

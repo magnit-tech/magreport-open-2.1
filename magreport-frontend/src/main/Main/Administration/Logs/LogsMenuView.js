@@ -1,5 +1,16 @@
-import React, {useState} from 'react';
-import {useSnackbar} from 'notistack';
+import React, { useState, useEffect } from 'react';
+
+import { useDispatch } from 'react-redux';
+
+import { useSnackbar } from 'notistack';
+
+import { addNavbar } from 'redux/actions/navbar/actionNavbar';
+
+// styles
+import {LogsCSS} from "./LogsCSS";
+
+// dataHub
+import dataHub from 'ajax/DataHub';
 
 // components
 import {CircularProgress, Grid} from '@material-ui/core';
@@ -10,18 +21,19 @@ import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-
-// styles
-import {LogsCSS} from "./LogsCSS";
+import Divider from "@material-ui/core/Divider";
 
 // local
 import logsHeader from 'images/logsHeader.jpg'
 
-// dataHub
-import dataHub from 'ajax/DataHub';
-import Divider from "@material-ui/core/Divider";
 
-function LogsMenuView() {
+export default function LogsMenuView() {
+
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        dispatch(addNavbar('Логи', 'logs'))
+    }, [dispatch])
 
     const classes = LogsCSS()
 
@@ -129,4 +141,4 @@ function LogsMenuView() {
     )
 }
 
-export default LogsMenuView;
+//  LogsMenuView;

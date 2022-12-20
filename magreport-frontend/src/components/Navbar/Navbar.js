@@ -1,10 +1,10 @@
 import React from 'react';
 
-import {NavbarCSS} from './NavbarCSS'
+import { NavbarCSS } from './NavbarCSS'
 
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import { Breadcrumbs, Chip, Paper } from '@material-ui/core';
 
@@ -14,23 +14,18 @@ function Navbar (){
     const classes = NavbarCSS();
 
     const navigate = useNavigate()
-    const location = useLocation()
 
-    const dispatch = useDispatch()
     const itemsData = useSelector(state => state.navbar.items)
 
     const items = []
 
-    function handleChipClick(itemsType, id) {
-        // dispatch(item.callbackFunc)
-
-        if (location.pathname.indexOf(itemsType) === -1) {
-            navigate(`/${itemsType}${id ? '/' + id : ''}`)
-
+    function handleChipClick(action, itemsType, id, parentId) {
+        if (action) {
+            navigate(`/${itemsType}${parentId ? `/${parentId}` : ''}/${action}${id || id === '0' ? '/' + id : ''}`)
+        } else{
+            navigate(`/${itemsType}${id || id === 0 ? '/' + id : ''}`)
         }
     }
-    
-    
 
     itemsData.forEach((item, index) => {
         items.push(
@@ -41,7 +36,7 @@ function Navbar (){
                 label={item.text}
                 icon={item.icon}
                 variant = {item.isLast ? "default" : "outlined"}
-                onClick={() => handleChipClick(item.itemsType, item.id)}
+                onClick={() => handleChipClick(item.action, item.itemsType, item.id, item.parentId)}
             />
         )
     })

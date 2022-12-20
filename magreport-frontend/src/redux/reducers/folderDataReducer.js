@@ -1,5 +1,4 @@
-import { SIDEBAR_ITEM_CHANGED, 
-    FOLDER_CONTENT_FOLDER_CLICK, 
+import {
     FOLDER_CONTENT_LOAD_FAILED, 
     FOLDER_CONTENT_LOADED,
     FOLDER_CONTENT_FOLDER_ADDED,
@@ -21,7 +20,7 @@ import { SIDEBAR_ITEM_CHANGED,
     FAVORITES_DELETED
 } from 'redux/reduxTypes';
 import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
-import {FLOW_STATE_BROWSE_FOLDER} from './menuViews/flowStates';    
+// import {FLOW_STATE_BROWSE_FOLDER} from './menuViews/flowStates';    
 
 const getItemName = itemsType => {
     return  itemsType === FolderItemTypes.reports ? "reports" :
@@ -47,88 +46,13 @@ const initialState = {
 	currentFolderId : null,
     needReload : true,
     currentFolderData : null,
-    folderContentLoadErrorMessage : null,   
-    flowState : FLOW_STATE_BROWSE_FOLDER
+    folderContentLoadErrorMessage : null,
 }
 
 export function folderDataReducer(state = initialState, action, sidebarItem, folderItemsType){
     switch(action.type){
-        // case SIDEBAR_ITEM_CHANGED:
-        //     if(action.newSidebarItem.key === sidebarItem.key){
-        //         return {
-        //             ...state,
-        //             flowState : FLOW_STATE_BROWSE_FOLDER,
-        //             currentFolderId : null,
-        //             needReload : true
-        //         }
-        //     }
-        //     else{
-        //         return state;
-        //     }           
+        
         case FOLDER_CONTENT_LOADED:
-            // if(action.itemsType === folderItemsType){
-            //     delete state.searchParams;
-
-            //     let itemsName = getItemName(action.itemsType),
-            //         sortParams = JSON.parse(localStorage.getItem("sortParams")),
-            //         childFolders = action.folderData.childFolders,
-            //         items = action.folderData[itemsName];
-
-            //     if(!sortParams) {
-            //         const defaultSortParams = { key: 'name', direction: 'ascending' };
-            //         localStorage.setItem("sortParams", JSON.stringify(defaultSortParams));
-            //         sortParams = defaultSortParams;
-            //     }
-                    
-            //     if (action.isSortingAvailable && (childFolders || items)) {
-            //         if (childFolders && childFolders.length > 0) {
-            //             childFolders.sort((a, b) => {
-            //                 if (a[sortParams.key] < b[sortParams.key]) {
-            //                     return sortParams.direction === 'ascending' ? -1 : 1;
-            //                 }
-            //                 if (a[sortParams.key] > b[sortParams.key]) {
-            //                     return sortParams.direction === 'ascending' ? 1 : -1;
-            //                 }
-            //                     return 0;
-            //             });
-            //         }
-    
-            //         if (items && items.length > 0) {
-            //             items.sort((a, b) => {
-            //                 if (a[sortParams.key] < b[sortParams.key]) {
-            //                     return sortParams.direction === 'ascending' ? -1 : 1;
-            //                 }
-            //                 if (a[sortParams.key] > b[sortParams.key]) {
-            //                     return sortParams.direction === 'ascending' ? 1 : -1;
-            //                 }
-            //                     return 0;
-            //             });
-            //         }
-
-            //         const filteredFolderData = {
-            //             ...action.folderData,
-            //             childFolders,
-            //             [itemsName]: items
-            //         }
-    
-            //         return{
-            //             ...state,
-            //             needReload : false,
-            //             currentFolderData : action.folderData,
-            //             filteredFolderData,
-            //             sortParams
-            //         } 
-            //     } else {
-            //         return{
-            //             ...state,
-            //             needReload : false,
-            //             currentFolderData : action.folderData,
-            //         }
-            //     } 
-            // }
-            // else{
-            //     return state;
-            // }
 			delete state.searchParams;
 
 			let itemsName = getItemName(action.itemsType),
@@ -186,6 +110,7 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
 						currentFolderData : action.folderData,
 					}
 				}
+
         case FOLDER_CONTENT_LOAD_FAILED:
             if(action.itemsType === folderItemsType){
                 return{
@@ -197,45 +122,23 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
             else{
                 return state;
             }
+
         case FOLDER_CONTENT_FOLDER_ADDED:
         case FOLDER_CONTENT_FOLDER_EDITED:
         case FOLDER_CONTENT_FOLDER_DELETED:
-            if(action.itemsType === folderItemsType && action.parentFolderId === state.currentFolderId){
-                return{
-                    ...state,
-                    needReload : true
-                }
-            }
-            else{
-                return state;
-            }            
+            return{
+                ...state,
+                needReload : true
+            } 
+
         case FOLDER_CONTENT_ITEM_ADDED:
         case FOLDER_CONTENT_ITEM_EDITED:
         case FOLDER_CONTENT_ITEM_DELETED:
-            if(action.itemType === folderItemsType && action.parentFolderId === state.currentFolderId){
-                return{
-                    ...state,
-                    needReload : true
-                }
-            }
-            else{
-                return state;
+            return{
+                ...state,
+                needReload : true
             }
 
-        case FOLDER_CONTENT_FOLDER_CLICK:
-            if(action.itemsType === folderItemsType){
-                delete state.filteredFolderData
-                delete state.searchParams
-                return{
-                    ...state,
-                    flowState : FLOW_STATE_BROWSE_FOLDER,
-                    needReload : true,
-                    currentFolderId : action.folderId
-                } 
-            }
-            else{
-                return state;
-            }
         case FOLDER_CONTENT_SEARCH_CLICK:
             if(action.itemsType === folderItemsType){
                 let findStr = action.searchParams.searchString.toLowerCase().trim(),
@@ -325,6 +228,7 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
             else{
                 return state;
             }
+
         case FOLDER_CONTENT_SORT_CLICK:
             if(action.itemsType === folderItemsType){
 
@@ -380,6 +284,7 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
             else{
                 return state;
             }
+
         case FOLDER_CONTENT_SEARCH_RESULTS_LOADED:
             if(action.itemsType === folderItemsType){
                 const findStr = action.searchParams.searchString.toLowerCase().trim()
@@ -411,46 +316,31 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
             else {
                 return state;
             }
+
         case FOLDER_CONTENT_PARENT_FOLDER_CHANGED:
-            if(action.itemsType === folderItemsType){
-                return{
-                    ...state,
-                    needReload : true
-                }
+            return{
+                ...state,
+                needReload : true
             }
-            else{
-                return state;
-            } 
+
         case FOLDER_CONTENT_FOLDER_COPIED:
-            if(action.itemsType === folderItemsType){
-                return{
-                    ...state,
-                    needReload : true
-                }
+            return{
+                ...state,
+                needReload : true
             }
-            else{
-                return state;
-            } 
+
         case FOLDER_CONTENT_ITEM_MOVED:
-            if(action.itemsType === folderItemsType){
-                return{
-                    ...state,
-                    needReload : true
-                }
+            return{
+                ...state,
+                needReload : true
             }
-            else{
-                return state;
-            }
+
         case FOLDER_CONTENT_ITEM_COPIED:
-            if(action.itemsType === folderItemsType){
-                return{
-                    ...state,
-                    needReload : true
-                }
+            return{
+                ...state,
+                needReload : true
             }
-            else{
-                return state;
-            }
+
         case FAVORITES_ADD_START:
         case FAVORITES_DELETE_START:
             return state

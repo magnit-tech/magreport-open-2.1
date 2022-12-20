@@ -3,6 +3,9 @@ import {useSnackbar} from 'notistack';
 
 import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 
+import { useDispatch } from 'react-redux';
+import { addReportStarterNavbar } from "redux/actions/navbar/actionNavbar";
+
 // mui
 import {Button} from '@material-ui/core';
 
@@ -34,9 +37,9 @@ export default function ReportStarter(props){
     const {id} = useParams()
     const navigate = useNavigate();
     const location = useLocation();
-    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams(); // eslint-disable-line
 
-    // console.log(searchParams.get('jobId'));
+    const dispatch = useDispatch()
 
     const [flowState, setFlowState] = useState("filters");
     const [reportMetadata, setReportMetadata] = useState({});
@@ -101,6 +104,8 @@ export default function ReportStarter(props){
             const isValidMandatorygroups = checkMandatoryGroups()
             props.checkFilters(checkMandatoryFiltersResult && checkInvalidValues && isValidMandatorygroups)
         }
+
+        dispatch(addReportStarterNavbar('report/starter', data.name, id))
     }
 
     function mandatoryFilters(data, filtersSet, groupsMap, filterToGrpMap){
@@ -245,10 +250,7 @@ export default function ReportStarter(props){
     return (
         flowState === "filters" ? 
             <DataLoader
-                // loadFunc = {props.onDataLoadFunction}
                 loadFunc = {dataHub.reportController.get}
-                // loadParams = {[props.reportId, props.scheduleTaskId !== undefined ? props.scheduleTaskId : lastParamJobId]}
-                // loadParams = {id ? [Number(id), lastParamJobId] : [null]}
                 loadParams = {[Number(id), props.scheduleTaskId !== undefined ? props.scheduleTaskId : lastParamJobId]}
                 reload = {reloadReportMetadata}
                 onDataLoaded = {handleReportMetadataLoaded}

@@ -1,7 +1,6 @@
 import React, {useState} from "react";
 import {connect} from "react-redux";
 import {useSnackbar} from "notistack";
-import {useNavigateBack} from "components/Navbar/navbarHooks";
 
 import { useParams, useNavigate } from 'react-router-dom'
 
@@ -14,7 +13,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 // local
 import dataHub from "ajax/DataHub";
-import {hideAlertDialog, showAlertDialog} from "redux/actions/actionsAlertDialog";
+import {hideAlertDialog, showAlertDialog} from "redux/actions/UI/actionsAlertDialog";
 import {
     actionAsmDesignerChangeRootData,
     actionAsmDesignerDataTypesLoadFailed,
@@ -34,8 +33,6 @@ import {
     ROLE_TYPE_ID,
     SECURITY_SOURCES,
     IS_DEFAULT_DOMAIN,
-    ASM_DESIGNER_CREATE_MODE,
-    ASM_DESIGNER_EDIT_MODE
 } from "utils/asmConstants";
 import DataLoader from "main/DataLoader/DataLoader";
 import DesignerSelectField from "main/Main/Development/Designer/DesignerSelectField";
@@ -111,8 +108,6 @@ function ASMDesigner(props) {
 
     const {id} = useParams()
     const navigate = useNavigate();
-
-    const navigateBack = useNavigateBack();
 
     const {enqueueSnackbar} = useSnackbar();
     const classes = useStyles();
@@ -196,14 +191,11 @@ function ASMDesigner(props) {
                 enqueueSnackbar(`ASM ${name} ${actionWord} успешно`, {variant: "success"});
                 if (!id) {
                     props.actionAsmListShow();
+                    navigate('/asm')
                 } else {
-                    navigateBack();
+                    navigate(`/asm/view/${id}`)
                 }
             }
-            /*  else {
-                setASMId(magrepResponse.data.id)
-            }
-            */ 
         }
         else{
             let actionWord = id ? "обновлении" : "создании";
@@ -218,7 +210,6 @@ function ASMDesigner(props) {
                     props.actionAsmListShow();
                     navigate('/asm')
                 } else {
-                    navigateBack();
                     navigate(`/asm/view/${id}`)
                 }
             }
