@@ -1,5 +1,9 @@
 import React, {useState} from "react";
 
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+
+import { useDispatch } from "react-redux";
+import { viewItemNavbar } from "redux/actions/navbar/actionNavbar";
 
 import DataLoader from "main/DataLoader/DataLoader";
 import dataHub from "../../../../ajax/DataHub";
@@ -10,33 +14,29 @@ import {FolderItemTypes} from "../../../FolderContent/FolderItemTypes";
 import {createViewerTextFields} from "../../Development/Viewer/viewerHelpers";
 
 
-/**
- * @callback onOkClick
- */
-/**
- * Компонент просмотра расписаний
- * @param {Object} props - параметры компонента
- * @param {Number} props.serverMailTemplateId- идентификатор шаблона
- * @param {onOkClick} props.onOkClick - callback, вызываемый при нажатии кнопки ОК
- * @param {onEditClick} props.onEditClick - callback, вызываемый при нажатии кнопки Редактировать
- * @return {JSX.Element}
- * @constructor
- */
-export default function ServerMailTemplateView(props) {
+export default function ServerMailTemplateView() {
+
+    const { id, folderId } = useParams()
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const dispatch = useDispatch()
+
+    const classes = ViewerCSS();
 
     const {enqueueSnackbar} = useSnackbar();
+
     const [data, setData] = useState({});
-    const classes = ViewerCSS();
 
 
     function actionLoaded(loadData) {
         setData(loadData)
+        dispatch(viewItemNavbar('systemMailTemplates', loadData.name, id, folderId, loadData.path))
     }
 
     function actionFailedLoaded(message) {
         enqueueSnackbar(`При загрузке данных произошла ошибка: ${message}`, {variant: "error"});
     }
-
 
     const fieldsData = [
         {label: "Код шаблона", value: data.code},
@@ -59,7 +59,7 @@ export default function ServerMailTemplateView(props) {
     return (
         <DataLoader
             loadFunc={dataHub.serverMailTemplateController.getMailTemplate}
-            loadParams={[props.serverMailTemplateId]}
+            loadParams={[id]}
             reload={false}
             onDataLoaded={(data) => {
                 actionLoaded(data)
@@ -71,10 +71,10 @@ export default function ServerMailTemplateView(props) {
 
             <ViewerPage
                 id={data.id}
+                folderId = {folderId}
                 itemType={FolderItemTypes.systemMailTemplates}
                 disabledPadding={true}
-                onOkClick={props.onOkClick}
-                actionViewerEditItem={props.onEditClick}
+                onOkClick={() => location.state ? navigate(location.state) : navigate(`/systemMailTemplates/${folderId}`)}
                 pageName={`Просмотр шаблона письма: ${data.name}`}
                 readOnly={!hasRWRight}
             >

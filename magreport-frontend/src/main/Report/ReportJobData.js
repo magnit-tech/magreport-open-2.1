@@ -9,7 +9,6 @@ import PivotPanel from './Pivot/PivotPanel';
  * @param {Number} props.folderId - id разработческой папки в которой находится отчет
  * @param {String} props.jobOwnerName - login владельца отчета
  * @param {Number} props.excelRowLimit - лимит кол-ва строк для выгрузки в Excel
- * @param {*} props.onRestartReportClick - function() - callback перезапуска отчёта
  */
 export default function ReportJobData(props){
     const [viewType, setViewType] = useState('PlainTable');
@@ -25,9 +24,9 @@ export default function ReportJobData(props){
                     jobStatus = {props.jobStatus}
                     canExecute = {props.canExecute}
                     jobId = {props.jobId}
+                    reportId = {props.reportId}
                     excelTemplates = {props.excelTemplates}
                     excelRowLimit = {props.excelRowLimit}
-                    onRestartReportClick = {props.onRestartReportClick}
                     onViewTypeChange = {handleChangeViewType}
                 />
                 :
