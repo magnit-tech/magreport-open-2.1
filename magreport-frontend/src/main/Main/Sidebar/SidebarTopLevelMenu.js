@@ -55,19 +55,6 @@ function SidebarTopLevelMenu(props){
                 }
             })
         }
-        // if (props.sidebarItem.folderItemType === props.path) {
-        //     console.log(props.sidebarItem.folderItemType);
-        //     console.log(props.path);
-        //     return setMenuExpanded(true)
-        // } else {
-        //     arr.forEach(item => {
-        //         if (item.folderItemType === locationName.current) {
-        //             return setMenuExpanded(true)
-        //         }
-        //     })
-        // }
-
-        // return setMenuExpanded(false)
 
     }, [props.sidebarItem, props.sidebarItem.subItems, location.pathname])
 

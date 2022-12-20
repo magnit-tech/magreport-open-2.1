@@ -47,6 +47,7 @@ export const AuthProvider = ({children}) => {
                         name: magrepResponse.data.name,
                         isAdmin: magrepResponse.data.isAdmin,
                         isDeveloper: magrepResponse.data.isDeveloper,
+                        domain: magrepResponse.data.domain
                     }
                     localStorage.setItem('userData', JSON.stringify(user.current))
 					cb()

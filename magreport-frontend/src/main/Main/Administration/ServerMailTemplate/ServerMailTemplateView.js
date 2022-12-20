@@ -2,6 +2,9 @@ import React, {useState} from "react";
 
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 
+import { useDispatch } from "react-redux";
+import { viewItemNavbar } from "redux/actions/navbar/actionNavbar";
+
 import DataLoader from "main/DataLoader/DataLoader";
 import dataHub from "../../../../ajax/DataHub";
 import {useSnackbar} from "notistack";
@@ -17,6 +20,8 @@ export default function ServerMailTemplateView() {
     const navigate = useNavigate();
     const location = useLocation();
 
+    const dispatch = useDispatch()
+
     const classes = ViewerCSS();
 
     const {enqueueSnackbar} = useSnackbar();
@@ -26,6 +31,7 @@ export default function ServerMailTemplateView() {
 
     function actionLoaded(loadData) {
         setData(loadData)
+        dispatch(viewItemNavbar('systemMailTemplates', loadData.name, id, folderId, loadData.path))
     }
 
     function actionFailedLoaded(message) {

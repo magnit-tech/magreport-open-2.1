@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {connect} from "react-redux";
 
 import { useParams, useNavigate } from 'react-router-dom'
-
 
 // data
 import DataLoader from "main/DataLoader/DataLoader";
@@ -18,6 +17,8 @@ import {ViewerCSS} from "main/Main/Development/Viewer/ViewerCSS";
 import ExternalSecuritySourceViewer from "./ASMSecuritySourceViewer";
 import {actionAsmDataLoaded, actionAsmDataLoadFailed} from "redux/actions/admin/actionAsm";
 import {hideAlertDialog, showAlertDialog} from "redux/actions/UI/actionsAlertDialog";
+import { viewItemNavbar } from "redux/actions/navbar/actionNavbar";
+
 import {FolderItemTypes} from "main/FolderContent/FolderItemTypes";
 
 // functions
@@ -105,7 +106,7 @@ function ASMViewer(props) {
         <DataLoader
             loadFunc={loadFunc}
             loadParams={loadParams}
-            onDataLoaded={(loadedData) => props.actionAsmDataLoaded(loadedData)}
+            onDataLoaded={(loadedData) => props.actionAsmDataLoaded(loadedData, 'view')}
             onDataLoadFailed={(error) => props.actionAsmDataLoadFailed(error)}
         >
             <ViewerPage
@@ -134,6 +135,7 @@ const mapDispatchToProps = {
     actionAsmDataLoadFailed,
     showAlertDialog,
     hideAlertDialog,
+    viewItemNavbar
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(ASMViewer);

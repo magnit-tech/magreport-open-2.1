@@ -1,8 +1,10 @@
-import React from 'react';
-import {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSnackbar } from 'notistack';
 
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
+
+import { useDispatch } from "react-redux";
+import { editItemNavbar, addItemNavbar } from "redux/actions/navbar/actionNavbar";
 
 // components
 import { CircularProgress } from '@material-ui/core';
@@ -24,19 +26,20 @@ import { DatasetItemCSS } from "./SecurityFilterCSS";
 import dataHub from 'ajax/DataHub';
 import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
 
-/**
- * @callback onExit
- */
 
-/**
- * Дизайнер Фильтра безопасности
- * @param {Object} props - параметры компонента
- */
-export default function SecurityFilterDesigner(props){
+export default function SecurityFilterDesigner(){
 
     const { id, folderId } = useParams()
     const navigate = useNavigate();
     const location = useLocation();
+
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        if(!id) {
+            dataHub.securityFilterController.getFolder(folderId, handleFoldersLoaded)
+        }
+    }, []) // eslint-disable-line
 
     // const filterDetailsTabIndex = 0;
     // const dataSetsTabIndex = 1;
@@ -79,6 +82,12 @@ export default function SecurityFilterDesigner(props){
         Data loading
     */
 
+    function handleFoldersLoaded({ok, data}) {
+        if(ok) {
+            dispatch(addItemNavbar('securityFilters', folderId, data.path))
+        }
+    }
+
     function handleDataLoaded(loadedData){
 
         // FilterInstance
@@ -104,6 +113,10 @@ export default function SecurityFilterDesigner(props){
         setSelectedFilterInstance(loadedData.filterInstance)
         setEmptyFields(fields)
         setPagename("Редактирование фильтра безопасности: " + loadedData.name);
+
+        if (id) {
+            dispatch(editItemNavbar('securityFilters', loadedData.name, id, folderId, loadedData.path))
+        }
     }
 
     function handleDataLoadFailed(message){
