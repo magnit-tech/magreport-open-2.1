@@ -6,9 +6,12 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import ru.magnit.magreportbackend.domain.serversettings.ServerMailTemplateTypeEnum;
+import ru.magnit.magreportbackend.dto.response.folder.FolderNodeResponse;
 import ru.magnit.magreportbackend.dto.response.user.UserResponse;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 
 @Getter
 @Setter
@@ -27,5 +30,6 @@ public class ServerMailTemplateResponse {
     UserResponse user;
     LocalDateTime created;
     LocalDateTime modified;
+    List<FolderNodeResponse> path = Collections.emptyList();
 
 }

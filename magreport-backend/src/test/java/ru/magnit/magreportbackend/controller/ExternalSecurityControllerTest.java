@@ -190,7 +190,8 @@ class ExternalSecurityControllerTest {
                 new RoleTypeResponse(),
                 true,
                 CREATED,
-                MODIFIED
+                MODIFIED,
+                Collections.emptyList()
         );
     }
 
@@ -204,7 +205,8 @@ class ExternalSecurityControllerTest {
                 new RoleTypeResponse(),
                 true,
                 CREATED,
-                MODIFIED
+                MODIFIED,
+                Collections.emptyList()
         );
     }
 

@@ -24,7 +24,8 @@ function UsersJobsMenuView(props){
     let params = [props.filters?.periodStart ?? null, 
         props.filters?.periodEnd ?? null, 
         props.filters?.selectedStatuses ?? null,
-        props.filters?.users ?? null
+        props.filters?.user ?? null,
+        props.filters?.reportIds ?? null
     ]
     const [reload, setReload] = useState({needReload : false});
 

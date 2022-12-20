@@ -633,7 +633,7 @@ class DataSetServiceTest {
                 null,
                 Collections.singletonList(new ReportResponse().setId(ID)),
                 Collections.singletonList(new FilterInstanceDependenciesResponse().setId(ID)),
-                Collections.singletonList(new SecurityFilterResponse(ID, null, null, null, null, null, null, null, null, null, new ArrayList<>())),
+                Collections.singletonList(new SecurityFilterResponse(ID, null, null, null, null, null, null, null, null, null, null, new ArrayList<>())),
                 null,
                 null,
                 null, null);
