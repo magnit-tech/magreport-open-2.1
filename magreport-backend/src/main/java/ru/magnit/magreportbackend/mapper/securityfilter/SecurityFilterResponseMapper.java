@@ -22,6 +22,7 @@ public class SecurityFilterResponseMapper implements Mapper<SecurityFilterRespon
     public SecurityFilterResponse from(SecurityFilter source) {
         return new SecurityFilterResponse(
             source.getId(),
+            source.getFolder().getId(),
             filterInstanceResponseMapper.from(source.getFilterInstance()),
             source.getOperationType().getTypeEnum(),
             source.getName(),

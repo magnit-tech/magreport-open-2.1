@@ -183,7 +183,9 @@ class ExternalSecurityDomainServiceTest {
                 new RoleTypeResponse(),
                 true,
                 CREATED,
-                MODIFIED
+                MODIFIED,
+                Collections.emptyList()
+
         );
     }
 
@@ -197,7 +199,8 @@ class ExternalSecurityDomainServiceTest {
                 new RoleTypeResponse(),
                 true,
                 CREATED,
-                MODIFIED
+                MODIFIED,
+                Collections.emptyList()
         );
     }
 

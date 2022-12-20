@@ -244,7 +244,7 @@ public class DataSetService {
         var response = domainService.getDataSetDependants(request.getId());
 
         response.getReports().forEach(reportResponse -> reportResponse.setPath(reportDomainService.getPathReport(reportResponse.getId())));
-        response.getSecurityFilters().forEach(securityFilterResponse -> securityFilterResponse.path().addAll(securityFilterDomainService.getPathSecurityFilter(securityFilterResponse.id())));
+        response.getSecurityFilters().forEach(securityFilterResponse -> securityFilterResponse.getPath().addAll(securityFilterDomainService.getPathSecurityFilter(securityFilterResponse.getId())));
         response.getFilterInstances().forEach(filter -> filter.setPath(filterInstanceDomainService.getPathFilter(filter.getId())));
 
         return response;

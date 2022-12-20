@@ -1,6 +1,4 @@
 
-import React from 'react';
-
 export default function isHollyday(){
     let newDate = new Date()
     let date = newDate.getDate();
