@@ -103,14 +103,13 @@ public class ExcelReportDomainService {
         log.debug("\nEncode excel report(" + jobData.id() + "): " + encodeMillis * .001);
     }
 
-    public Path getExcelPivotTable(OlapCubeResponse data, ReportJobMetadataResponse metadata, Map<String, Object> config, OlapExportPivotTableRequest request, Long userId) {
+    public Path getExcelPivotTable(OlapCubeResponse data, ReportJobMetadataResponse metadata, Map<String, Object> config, OlapExportPivotTableRequest request, Long code) {
 
-        var reportPath = getPivotPath(reportFolder, request.getCubeRequest().getJobId(), userId);
-        var rmsInPath = getPivotPath(rmsInFolder, request.getCubeRequest().getJobId(), userId);
-        var rmsOutPath = getPivotPath(rmsOutFolder, request.getCubeRequest().getJobId(), userId);
+        var reportPath = getPivotPath(reportFolder, request.getCubeRequest().getJobId(), code);
+        var rmsInPath = getPivotPath(rmsInFolder, request.getCubeRequest().getJobId(), code);
+        var rmsOutPath = getPivotPath(rmsOutFolder, request.getCubeRequest().getJobId(), code);
 
         try {
-            Files.deleteIfExists(rmsOutPath);
             Files.deleteIfExists(rmsInPath);
             Files.deleteIfExists(reportPath);
         } catch (IOException e) {
@@ -119,7 +118,7 @@ public class ExcelReportDomainService {
 
         if (!Files.isReadable(reportPath) && !Files.isReadable(rmsOutPath) && !Files.isReadable(rmsInPath)) {
             final var startMillis = System.currentTimeMillis();
-            savePivotToExcel(data, metadata, config, request, userId);
+            savePivotToExcel(data, metadata, config, request, code);
             final var exportMillis = System.currentTimeMillis() - startMillis;
             log.debug("\nExport excel pivot table(" + request.getCubeRequest().getJobId() + ") to file: " + exportMillis * .001);
             copyReportToRms(reportPath, rmsInPath);
@@ -253,8 +252,8 @@ public class ExcelReportDomainService {
         return Paths.get(replaceHomeShortcut(folderPath), fileName);
     }
 
-    private Path getPivotPath(String folderPath, long jobId, long userId) {
-        var fileName = String.format("%s_%s.xlsm", jobId, userId);
+    private Path getPivotPath(String folderPath, long jobId, long code) {
+        var fileName = String.format("%s_%s.xlsm", jobId, code);
         return Paths.get(replaceHomeShortcut(folderPath), fileName);
     }
 
@@ -268,7 +267,7 @@ public class ExcelReportDomainService {
         return getReportPath(rmsOutFolder, jobId, templateId);
     }
 
-    public Path getExcelPivotPath(long jobId, long userId) {
-        return getPivotPath(rmsOutFolder, jobId, userId);
+    public Path getExcelPivotPath(long jobId, long code) {
+        return getPivotPath(rmsOutFolder, jobId, code);
     }
 }
