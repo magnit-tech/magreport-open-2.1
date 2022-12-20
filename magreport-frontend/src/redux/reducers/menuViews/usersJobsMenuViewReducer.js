@@ -53,37 +53,13 @@ export function usersJobsMenuViewReducer(state = initialState, action){
                 let newState = {}
                 if (action.filters.isCleared){
                     newState = {...state}
-                    delete newState.filteredJobs
                     delete newState.filters
                 }
                 else {
-                    const tmp = [...state.currentFolderData.jobs]
-                    let arr = tmp.filter(item => {
-                        let flagStart = true
-                        let flagEnd = true
-                        let flagStatus = true
-                        let flagUsername = true
-                        if (action.filters.periodStart && new Date(item.created) < action.filters.periodStart){
-                            flagStart = false
-                        }
-                        if (action.filters.periodEnd && new Date(item.created) > action.filters.periodEnd){
-                            flagEnd = false
-                        }
-                        if (action.filters.selectedStatuses && !action.filters.selectedStatuses.includes(item.status)){
-                            flagStatus = false
-                        }
-                        if (action.filters.user && item.user.name.trim().toLowerCase() !== action.filters.user.trim().toLowerCase()){
-                            flagUsername = false
-                        }
-                        return flagStart && flagEnd && flagStatus && flagUsername
-                    })
-
                     newState = {
-                        ...state, filteredJobs: {jobs: arr}, filters: action.filters
+                        ...state, filters: action.filters
                     }
                 }
-                
-
                 return newState
             }
             else{

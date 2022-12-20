@@ -62,12 +62,13 @@ export default function ReportJobController(dataHub){
         return dataHub.requestService(JOB_EXCEL_REPORT, METHOD, body, callback);          
     }
 
-    this.getAllUsersJobs = (from, to, statuses, users, callback) => {
+    this.getAllUsersJobs = (from, to, statuses, users, reportIds, callback) => {
         const body = {
             from, 
             to, 
             statuses,
-            users
+            users:  users? users.map(i=>i.id): [],
+            reportIds: reportIds? reportIds.map(i=>i.id): []
         };
         return dataHub.requestService(JOB_GET_ALL_USER_JOBS_URL, METHOD, body , magrepResponse => handleExtReponse(magrepResponse, callback));   
     }
