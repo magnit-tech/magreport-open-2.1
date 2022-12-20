@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState, useEffect } from "react";
 import {connect} from "react-redux";
 import {useSnackbar} from "notistack";
 
@@ -21,6 +21,8 @@ import {
 } from "redux/actions/admin/actionAsmDesigner";
 import {actionAsmAdded, actionAsmEdited, actionAsmListShow,
     actionAsmDataLoaded, actionAsmDataLoadFailed} from "redux/actions/admin/actionAsm";
+import { addItemNavbar } from "redux/actions/navbar/actionNavbar";
+
 import {
     selectData,
     selectHasErrors,
@@ -36,6 +38,7 @@ import {
 } from "utils/asmConstants";
 import DataLoader from "main/DataLoader/DataLoader";
 import DesignerSelectField from "main/Main/Development/Designer/DesignerSelectField";
+
 import { ASMCSS as useStyles} from "./ASMCSS";
 
 
@@ -108,6 +111,12 @@ function ASMDesigner(props) {
 
     const {id} = useParams()
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if(!id) {
+            props.addItemNavbar('asm', null, null)
+        }
+    }, []) // eslint-disable-line
 
     const {enqueueSnackbar} = useSnackbar();
     const classes = useStyles();
@@ -281,7 +290,7 @@ function ASMDesigner(props) {
         <DataLoader
             loadFunc={loadFunc}
             loadParams={loadParams}
-            onDataLoaded={(data) => props.actionAsmDataLoaded(data)}
+            onDataLoaded={(data) => props.actionAsmDataLoaded(data, id ? 'edit' : 'add')}
             onDataLoadFailed={(error) => props.actionAsmDataLoadFailed(error)}
         >
             <DataLoader
@@ -323,7 +332,8 @@ const mapDispatchToProps = {
     actionAsmDataLoaded,
     actionAsmDataLoadFailed,
     actionAsmDesignerDataTypesLoaded,
-    actionAsmDesignerDataTypesLoadFailed
+    actionAsmDesignerDataTypesLoadFailed,
+    addItemNavbar
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(ASMDesigner);

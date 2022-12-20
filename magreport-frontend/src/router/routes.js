@@ -73,7 +73,7 @@ import ReportStarter from '../main/Report/ReportStarter';
 
 export const routesName = ['reports', 'favorites', 'job', 'roles', 'users', 'securityFilters', 'userJobs', 'asm', 'logs', 'settings', 
 					'systemMailTemplates', 'mailSender', 'cubes', 'theme', 'datasource', 'dataset', 'filterTemplate', 'filterInstance', 
-					'reportsDev', 'schedules', 'scheduleTasks']
+					'reportsDev', 'schedules', 'scheduleTasks', 'report']
 
 export default function AppRoutes(props) {
 

@@ -1,6 +1,9 @@
-import React, {useState} from "react";
+import React, { useState, useEffect } from "react";
 
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
+
+import { useDispatch } from "react-redux";
+import { editItemNavbar, addItemNavbar } from "redux/actions/navbar/actionNavbar";
 
 import DataLoader from "main/DataLoader/DataLoader";
 import dataHub from "../../../../ajax/DataHub";
@@ -28,6 +31,14 @@ export default function ServerMailTemplateDesigner(props) {
     const navigate = useNavigate();
     const location = useLocation();
 
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        if(!id) {
+            dataHub.serverMailTemplateController.getFolder(folderId, handleFoldersLoaded)
+        }
+    }, []) // eslint-disable-line
+
     const {enqueueSnackbar} = useSnackbar();
     const [data, setData] = useState({});
     const classes = DesignerCSS();
@@ -38,9 +49,22 @@ export default function ServerMailTemplateDesigner(props) {
     const [viewResult, updateViewResult] = useState(false)
 
 
+    /*
+        Data loading
+    */
+
+    function handleFoldersLoaded({ok, data}) {
+        if(ok) {
+            dispatch(addItemNavbar('systemMailTemplates', folderId, data.path))
+        }
+    }
+
     function actionLoaded(loadData) {
         setData(loadData)
         getTags(loadData.type)
+        if (id) {
+            dispatch(editItemNavbar('systemMailTemplates', loadData.name, id, folderId, loadData.path))
+        }
     }
 
     function actionFailedLoaded(message) {

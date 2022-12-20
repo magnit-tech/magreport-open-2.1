@@ -8,7 +8,8 @@ import {
     EDIT_ITEM_NAVBAR,
     ADD_ITEM_NAVBAR,
     ADD_REPORT_NAVBAR,
-    ADD_REPORT_STARTER_NAVBAR
+    ADD_REPORT_STARTER_NAVBAR,
+    ASM_DATA_LOADED
 } from 'redux/reduxTypes';
 
 import SidebarItems from '../../../main/Main/Sidebar/SidebarItems';
@@ -227,6 +228,16 @@ export const navbarReducer = (state = initialState, action) => {
                 items: buildNavigationPathToReportStarter(state.items, action.itemsType, action.name, action.id)
             };
 
+        case ASM_DATA_LOADED:
+            if (action.actionFor === 'view') {
+                return {
+                    items: buildNavigationPathToViewItem('asm', action.data.name, action.data.id, null, null)
+                }
+            }
+            return {
+                items: buildNavigationPathToEditItem(state.items, 'asm', action.data.name, action.data.id, null, null)
+            }
+            
         default:
             return state
     }

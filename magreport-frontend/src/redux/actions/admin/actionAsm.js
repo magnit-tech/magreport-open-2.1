@@ -57,10 +57,11 @@ export const actionAmsRefresh = status => {
     }
 }
 
-export function actionAsmDataLoaded(data) {
+export function actionAsmDataLoaded(data, actionFor) {
     return {
         type: ASM_DATA_LOADED,
-        data
+        data,
+        actionFor
     };
 }
 

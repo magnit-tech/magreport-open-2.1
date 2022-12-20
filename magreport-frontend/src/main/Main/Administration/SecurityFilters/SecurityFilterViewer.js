@@ -3,6 +3,9 @@ import {useSnackbar} from "notistack";
 
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 
+import { useDispatch } from "react-redux";
+import { viewItemNavbar } from "redux/actions/navbar/actionNavbar";
+
 //local
 import dataHub from "ajax/DataHub";
 import DataLoader from "main/DataLoader/DataLoader";
@@ -30,6 +33,8 @@ export default function SecurityFilterViewer(props) {
     const navigate = useNavigate();
     const location = useLocation();
 
+    const dispatch = useDispatch()
+
     const {enqueueSnackbar} = useSnackbar();
 
     const [data, setData] = useState({});
@@ -37,6 +42,7 @@ export default function SecurityFilterViewer(props) {
 
     function handleDataLoaded(loadedData) {
         setData(loadedData);   
+        dispatch(viewItemNavbar('securityFilters', loadedData.name, id, folderId, loadedData.path))
     }
 
     function handleDataLoadFailed(message) {
@@ -99,6 +105,7 @@ export default function SecurityFilterViewer(props) {
             <ViewerChildCard
                 key={dataSet.dataSet.id}
                 id={dataSet.dataSet.id}
+                parentFolderId={dataSet.dataSet.folderId}
                 itemType={FolderItemTypes.dataset}
                 name={dataSet.dataSet.name}
             >
