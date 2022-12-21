@@ -182,7 +182,6 @@ export default function OlapConfig(config){
                 this.createLists(data)
                 return callback(ok)
             }
-
             return callback(ok)
         })
 
