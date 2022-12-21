@@ -4,7 +4,7 @@ export function FilterObject(filterObject){
 
     this.fieldId = filterObject.fieldId;
     this.values  = filterObject.values ?? [];
-    this.filterType = filterObject.filterType ?? 'EQUALS';
+    this.filterType = filterObject.filterType ?? (this.values.length > 0 ? 'EQUALS' : 'BLANK');
     this.invertResult = filterObject.invertResult ?? false;
     this.rounding = (filterObject.rounding || this.values.length === 0) ? filterObject.rounding : this.values.map(i => numOfDecPlaces(i)).reduce((acc, cur) => acc > cur ? acc : cur);
     this.canRounding = filterObject.canRounding ?? false;
