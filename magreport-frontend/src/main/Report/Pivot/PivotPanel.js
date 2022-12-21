@@ -41,6 +41,7 @@ import ConditionalFormattingDialog from './UI/ConditionalFormattingDialog';
 
 //utils
 import validateSaveConfig from 'utils/validateSaveConfig';
+import CreateFieldDialog from './UI/CreateFieldDialog';
 
 
 /**
@@ -111,6 +112,9 @@ function PivotPanel(props){
     // модальное окно задания фильтра
     const [filterModalOpen, setFilterModalOpen] = useState(false);
     const [filterModalStyle, setFilterModalStyle] = useState('');
+
+    // модальное окно создания нового поля
+    const [createFieldDialogOpen, setCreateFieldDialogOpen] = useState(false);
 
     // Индекс поля для которого настраивается фильтрация в списке полей фильтрации
     const [filterFieldIndex, setFilterFieldIndex] = useState(undefined);
@@ -1116,6 +1120,7 @@ function PivotPanel(props){
                                 onSortingDialog = {handleShowSortingDialog}
                                 onClearAllOlap = {handleClearAllOlap}
                                 onExportToExcel = {handleExportToExcel}
+                                onShowCreateFieldDialogue = {(open) => setCreateFieldDialogOpen(open)}
                             />
                             {fieldsVisibility &&
                                 <PivotFieldsList
@@ -1339,6 +1344,13 @@ function PivotPanel(props){
                     usersWithAccess = {usersWithAccessForShareJobDialog}
                     onCancel = {handleShareJobDialog}
                     onSave = {handleSaveShareJob}
+                />
+            }
+            {createFieldDialogOpen &&
+                <CreateFieldDialog
+                    open = {createFieldDialogOpen}
+                    onSave = {()=>{}}
+                    onCancel = {() => {setCreateFieldDialogOpen(false)}}
                 />
             }
         </div>
