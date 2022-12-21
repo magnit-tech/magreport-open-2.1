@@ -100,6 +100,7 @@ export default function DatasetViewer() {
         tabcontent: (
             <div className={classes.viewerTabPage}>
                 <ViewerTable
+                    key={Math.random()}
                     columns={fieldsTableColumns}
                     rows={fieldsTableRows}
                     checkIsValidRow={(row) => row.isValid}
