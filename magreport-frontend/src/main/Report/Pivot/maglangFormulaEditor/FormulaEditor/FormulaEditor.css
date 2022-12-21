@@ -1,0 +1,19 @@
+
+.CodeMirror {
+    font-family: Arial, monospace;
+    font-size: 20px;
+    width: 40em;
+    margin: 5px;
+}
+
+.codeInput {
+    margin: 30px;
+    height : 20em;
+    width : 80em;
+    text-align: left;
+}
+
+.errorViewer {
+    width: 100%;
+    margin: 10px;
+}
