@@ -1,21 +1,21 @@
 import React from 'react';
 
+import { FolderItemTypes } from '../../FolderContent/FolderItemTypes';
+
 import FolderOpenIcon from '@material-ui/icons/FolderOpen';
 import AlarmIcon from '@material-ui/icons/Alarm';
 import BuildIcon from '@material-ui/icons/Build';
 import CodeIcon from '@material-ui/icons/Code';
 import StarsIcon from '@material-ui/icons/Stars';
 import ScheduleIcon from '@material-ui/icons/Schedule';
-import {FolderItemTypes} from '../../FolderContent/FolderItemTypes';
 
-
- const SidebarItems = {
+const SidebarItems = {
     reports : {
         key : "REPORTS_ITEM",
         text : "Отчёты",
         icon : (<FolderOpenIcon/>),
         folderTree : true,
-        folderItemType: FolderItemTypes.report
+        folderItemType: FolderItemTypes.reports
     },
     favorites: {
         key: 'FAVORITES_ITEM',
@@ -45,7 +45,8 @@ import {FolderItemTypes} from '../../FolderContent/FolderItemTypes';
             },
             users : {
                 key : "USERS_ITEM",
-                text : "Пользователи"
+                text : "Пользователи",
+                folderItemType: FolderItemTypes.users
             },
             securityFilters : {
                 key : "SECURITY_FILTERS_ITEM",
@@ -61,15 +62,18 @@ import {FolderItemTypes} from '../../FolderContent/FolderItemTypes';
             },
             ASMAdministration : {
                 key : "ASM_ADMIN_ITEM",
-                text : "Управление ASM"
+                text : "Управление ASM",
+                folderItemType: FolderItemTypes.asm
             },
             logs : {
                 key : "LOGS_ITEM",
-                text : "Логи"
+                text : "Логи",
+                folderItemType: FolderItemTypes.logs
             },
             settings : {
                 key : "ADMIN_SETTINGS",
-                text : "Настройки"
+                text : "Настройки",
+                folderItemType: FolderItemTypes.settings
             },
             mailTexts : {
                 key : "SYSTEM_MAIL_TEXT_ITEM",
@@ -79,7 +83,8 @@ import {FolderItemTypes} from '../../FolderContent/FolderItemTypes';
             },
             mailSender : {
                 key : "MAIL_SENDER",
-                text : "Рассылка писем"
+                text : "Рассылка писем",
+                folderItemType: FolderItemTypes.mailSender
             },
             cubes: {
                 key: "CUBES",

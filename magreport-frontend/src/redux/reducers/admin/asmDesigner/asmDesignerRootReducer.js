@@ -31,7 +31,7 @@ import {
     ASM_DESIGNER_CHANGE_SECURITY_SOURCE_DATA, ASM_DESIGNER_DATA_TYPES_LOAD_FAILED, ASM_DESIGNER_DATA_TYPES_LOADED,
     ASM_DESIGNER_DELETE_SECURITY_SOURCE_SECURITY_FILTER,
     ASM_DESIGNER_SET_SECURITY_SOURCE_DATASET,
-    ASM_DESIGNER_SET_SECURITY_SOURCE_FIELD, ASM_DESIGNER_UPDATE_SECURITY_FILTER_FIELD_MAPPING, ASM_ADD_ITEM_CLICK
+    ASM_DESIGNER_SET_SECURITY_SOURCE_FIELD, ASM_DESIGNER_UPDATE_SECURITY_FILTER_FIELD_MAPPING
 } from "redux/reduxTypes";
 import {asmDesignerDataReducer} from "./asmDesignerDataReducer";
 import {asmDesignerErrorsReducer} from "./asmDesignerErrorsReducer";
@@ -188,7 +188,6 @@ const asmDesignerResponseDataReducer = (state, action) => {
 
 export const asmDesignerRootReducer = (state = initialState, action) => {
     switch (action.type) {
-        case ASM_ADD_ITEM_CLICK:
         case ASM_ADDED:
         case ASM_EDITED:
             return initialState;

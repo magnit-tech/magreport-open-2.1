@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -148,11 +149,11 @@ public class OlapService {
             sortedMetrics = getPageResult(sortedMetrics, new Pair<>(columValues, rowValues), request);
 
             return new OlapCubeResponse()
-                .setColumnValues(columValues)
-                .setRowValues(rowValues)
-                .setMetricValues(getOlapMetricResponse(request, sortedMetrics, sourceCube))
-                .setTotalColumns(measures.getL().totalCount())
-                .setTotalRows(measures.getR().totalCount());
+                    .setColumnValues(columValues)
+                    .setRowValues(rowValues)
+                    .setMetricValues(getOlapMetricResponse(request, sortedMetrics, sourceCube))
+                    .setTotalColumns(measures.getL().totalCount())
+                    .setTotalRows(measures.getR().totalCount());
         }
     }
 
@@ -163,12 +164,12 @@ public class OlapService {
 
         if (numColumns * numRows * numMetrics > maxDataVolume) {
             throw new OlapMaxDataVolumeExceeded(
-                "Превышен допустимый объем обрабатываемых данных:" +
-                    "\nМаксимальный объем - " + maxDataVolume +
-                    "\nЗапрашиваемый объем - " + numColumns * numRows * numMetrics +
-                    "\nКол-во столбцов - " + numColumns +
-                    "\nКол-во строк - " + numRows +
-                    "\nКол-во метрик - " + numMetrics
+                    "Превышен допустимый объем обрабатываемых данных:" +
+                            "\nМаксимальный объем - " + maxDataVolume +
+                            "\nЗапрашиваемый объем - " + numColumns * numRows * numMetrics +
+                            "\nКол-во столбцов - " + numColumns +
+                            "\nКол-во строк - " + numRows +
+                            "\nКол-во метрик - " + numMetrics
             );
         }
     }
@@ -195,8 +196,8 @@ public class OlapService {
 
             startTime = System.currentTimeMillis();
             var measures = getRequestedMeasures(
-                sourceCube, request.getColumnFields(), request.getRowFields(),
-                checkedFilterRows);
+                    sourceCube, request.getColumnFields(), request.getRowFields(),
+                    checkedFilterRows);
             endTime = System.currentTimeMillis() - startTime;
             log.debug("Measures acquired: " + endTime);
 
@@ -258,26 +259,26 @@ public class OlapService {
         request.getCubeRequest().getRowsInterval().setFrom(0).setCount(Integer.MAX_VALUE);
         request.getCubeRequest().getColumnsInterval().setFrom(0).setCount(Integer.MAX_VALUE);
 
-        var user = userDomainService.getCurrentUser();
-
         var resultCube = getCube(request.getCubeRequest());
         var metadata = jobDomainService.getJobMetaData(request.getCubeRequest().getJobId());
         var config = olapConfigurationDomainService.getReportOlapConfiguration(request.getConfiguration());
+        var encrypt = jobDomainService.getJobData(request.getCubeRequest().getJobId()).reportData().encryptFile();
 
-         excelReportDomainService.getExcelPivotTable(resultCube, metadata, objectMapper.readValue(config.getOlapConfig().getData(), HashMap.class), request, user.getId());
+        var code = (long) (Math.random() * 1000000);
+        excelReportDomainService.getExcelPivotTable(resultCube, metadata, objectMapper.readValue(config.getOlapConfig().getData(), HashMap.class), request, code, encrypt);
 
-        return new TokenResponse(tokenService.getToken(request.getCubeRequest().getJobId(), user.getId()));
+        return new TokenResponse(tokenService.getToken(request.getCubeRequest().getJobId(), code));
     }
 
-    public Path getExcelPivotPath(Long jobId, Long userId){
-        return excelReportDomainService.getExcelPivotPath(jobId,userId);
+    public Path getExcelPivotPath(Long jobId, Long code) {
+        return excelReportDomainService.getExcelPivotPath(jobId, code);
     }
 
     private Pair<MeasureData, MeasureData> getRequestedMeasures(
-        CubeData cubeData,
-        LinkedHashSet<Long> columnFields,
-        LinkedHashSet<Long> rowFields,
-        boolean[] checkedFilterRows) {
+            CubeData cubeData,
+            LinkedHashSet<Long> columnFields,
+            LinkedHashSet<Long> rowFields,
+            boolean[] checkedFilterRows) {
         final var columnTuples = new HashSet<List<String>>(DEFAULT_MEASURE_TUPLES_COUNT);
         final var rowTuples = new HashSet<List<String>>(DEFAULT_MEASURE_TUPLES_COUNT);
 
@@ -305,8 +306,8 @@ public class OlapService {
 
         startTime = System.currentTimeMillis();
         final Pair<Set<List<String>>, Set<List<String>>> result = new Pair<>(
-            new LinkedHashSet<>(sortRowSet(columnTuples, typesCol)),
-            new LinkedHashSet<>(sortRowSet(rowTuples, typesRow)));
+                new LinkedHashSet<>(sortRowSet(columnTuples, typesCol)),
+                new LinkedHashSet<>(sortRowSet(rowTuples, typesRow)));
         endTime = System.currentTimeMillis() - startTime;
         log.debug("Measures tuples sorted and trimmed: " + endTime);
 
@@ -316,58 +317,58 @@ public class OlapService {
     private Set<List<String>> sortRowSet(Set<List<String>> rowSet, List<DataTypeEnum> dataTypes) {
         return rowSet.stream().sorted((o1, o2) -> {
 
-                int i = 0;
-                int compare = 0;
-                while (i < dataTypes.size() && compare == 0) {
+                    int i = 0;
+                    int compare = 0;
+                    while (i < dataTypes.size() && compare == 0) {
 
-                    var var1 = o1.get(i);
-                    var var2 = o2.get(i);
+                        var var1 = o1.get(i);
+                        var var2 = o2.get(i);
 
-                    var continueFlag = false;
-                    if (Objects.isNull(var1)) {
-                        compare = -1;
-                        continueFlag = true;
-                    }
-                    if (Objects.isNull(var2)) {
-                        compare = 1;
-                        continueFlag = true;
-                    }
-                    if (Objects.isNull(var1) && Objects.isNull(var2)) compare = 0;
-
-                    if (continueFlag) {
-                        i++;
-                        continue;
-                    }
-
-
-                    compare = switch (dataTypes.get(i)) {
-                        case INTEGER -> Integer.compare(Integer.parseInt(var1), Integer.parseInt(var2));
-                        case STRING -> var1.compareTo(var2);
-                        case DOUBLE -> Double.compare(Double.parseDouble(var1), Double.parseDouble(var2));
-                        case DATE -> LocalDate.parse(var1).compareTo(LocalDate.parse(var2));
-                        case TIMESTAMP -> {
-                            var time1 = LocalDateTime.parse(var1.replace(" ", "T"));
-                            var time2 = LocalDateTime.parse(var2.replace(" ", "T"));
-                            yield time1.compareTo(time2);
+                        var continueFlag = false;
+                        if (Objects.isNull(var1)) {
+                            compare = -1;
+                            continueFlag = true;
                         }
-                        case BOOLEAN -> Boolean.compare(Boolean.parseBoolean(var1), Boolean.parseBoolean(var2));
-                    };
-                    i++;
-                }
-                return compare;
-            })
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+                        if (Objects.isNull(var2)) {
+                            compare = 1;
+                            continueFlag = true;
+                        }
+                        if (Objects.isNull(var1) && Objects.isNull(var2)) compare = 0;
+
+                        if (continueFlag) {
+                            i++;
+                            continue;
+                        }
+
+
+                        compare = switch (dataTypes.get(i)) {
+                            case INTEGER -> Integer.compare(Integer.parseInt(var1), Integer.parseInt(var2));
+                            case STRING -> var1.compareTo(var2);
+                            case DOUBLE -> Double.compare(Double.parseDouble(var1), Double.parseDouble(var2));
+                            case DATE -> LocalDate.parse(var1).compareTo(LocalDate.parse(var2));
+                            case TIMESTAMP -> {
+                                var time1 = LocalDateTime.parse(var1.replace(" ", "T"));
+                                var time2 = LocalDateTime.parse(var2.replace(" ", "T"));
+                                yield time1.compareTo(time2);
+                            }
+                            case BOOLEAN -> Boolean.compare(Boolean.parseBoolean(var1), Boolean.parseBoolean(var2));
+                        };
+                        i++;
+                    }
+                    return compare;
+                })
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private MetricsFunction[][][] calculateMetricsValues(
-        Pair<MeasureData, MeasureData> measures,
-        List<MetricDefinition> metrics,
-        LinkedHashSet<Long> columnFields,
-        LinkedHashSet<Long> rowFields,
-        MetricFilterGroup metricFilterGroup,
-        CubeData reportCube,
-        boolean[] checkedFilterRows,
-        boolean calcForFilter) {
+            Pair<MeasureData, MeasureData> measures,
+            List<MetricDefinition> metrics,
+            LinkedHashSet<Long> columnFields,
+            LinkedHashSet<Long> rowFields,
+            MetricFilterGroup metricFilterGroup,
+            CubeData reportCube,
+            boolean[] checkedFilterRows,
+            boolean calcForFilter) {
         final var result = new MetricsFunction[measures.getL().values().size()][measures.getR().values().size()][metrics.size()];
         final var columnIndices = indexSet(measures.getL().values());
         final var rowIndices = indexSet(measures.getR().values());
@@ -383,9 +384,9 @@ public class OlapService {
 
         final var countDistinctCaches = metrics.stream().map(o -> new HashSet<Triple<Integer, Integer, String>>()).toList();
         final var metricDataTypes = IntStream.range(0, metrics.size()).boxed()
-            .collect(Collectors.toMap(Function.identity(), idx -> reportCube.reportMetaData().getTypeField(metrics.get(idx).getFieldId())));
+                .collect(Collectors.toMap(Function.identity(), idx -> reportCube.reportMetaData().getTypeField(metrics.get(idx).getFieldId())));
         final var metricAggregationTypes = IntStream.range(0, metrics.size()).boxed()
-            .collect(Collectors.toMap(Function.identity(), idx -> metrics.get(idx).getAggregationType()));
+                .collect(Collectors.toMap(Function.identity(), idx -> metrics.get(idx).getAggregationType()));
 
         for (int cubeRow = 0; cubeRow < reportCube.numRows(); cubeRow++) {
             if (!checkedFilterRows[cubeRow]) continue;
@@ -447,10 +448,10 @@ public class OlapService {
         var responses = new ArrayList<OlapMetricResponse>();
         request.getMetrics().forEach(metric -> {
             var response = new OlapMetricResponse()
-                .setFieldId(metric.getFieldId())
-                .setAggregationType(metric.getAggregationType())
-                .setDataType(metric.getAggregationType().getDataTypeMetricFunction(reportCube.reportMetaData().getTypeField(metric.getFieldId())))
-                .setValues(valuesMetrics.get((int) index.getAndIncrement()));
+                    .setFieldId(metric.getFieldId())
+                    .setAggregationType(metric.getAggregationType())
+                    .setDataType(metric.getAggregationType().getDataTypeMetricFunction(reportCube.reportMetaData().getTypeField(metric.getFieldId())))
+                    .setValues(valuesMetrics.get((int) index.getAndIncrement()));
             responses.add(response);
         });
 
@@ -458,7 +459,7 @@ public class OlapService {
     }
 
     private OlapCubeResponse getOlapCubeFilterMetricResponse(
-        OlapCubeRequest request, MetricResult[][][] metrics, Triple<boolean[][], boolean[], boolean[]> filterResult, Pair<List<List<String>>, List<List<String>>> measures, CubeData reportCube) {
+            OlapCubeRequest request, MetricResult[][][] metrics, Triple<boolean[][], boolean[], boolean[]> filterResult, Pair<List<List<String>>, List<List<String>>> measures, CubeData reportCube) {
 
         var result = new OlapMetricResponse2[request.getMetrics().size()];
 
@@ -494,23 +495,23 @@ public class OlapService {
 
 
         return new OlapCubeResponse()
-            .setTotalColumns(totalColumns)
-            .setTotalRows(totalRows)
-            .setColumnValues(columns.values().stream().toList())
-            .setRowValues(rows.values().stream().toList())
-            .setMetricValues(
-                Arrays.stream(result)
-                    .map(r -> {
-                        var response = new OlapMetricResponse();
-                        response.setFieldId(r.getFieldId())
-                            .setAggregationType(r.getAggregationType())
-                            .setDataType(r.getAggregationType().getDataTypeMetricFunction(reportCube.reportMetaData().getTypeField(r.getFieldId())))
-                            .setValues(Arrays.stream(r.getValues()).map(f -> Arrays.stream(f).toList()).collect(Collectors.toList()));
-                        if (response.getValues().isEmpty())
-                            response.getValues().add(Collections.singletonList(""));
+                .setTotalColumns(totalColumns)
+                .setTotalRows(totalRows)
+                .setColumnValues(columns.values().stream().toList())
+                .setRowValues(rows.values().stream().toList())
+                .setMetricValues(
+                        Arrays.stream(result)
+                                .map(r -> {
+                                    var response = new OlapMetricResponse();
+                                    response.setFieldId(r.getFieldId())
+                                            .setAggregationType(r.getAggregationType())
+                                            .setDataType(r.getAggregationType().getDataTypeMetricFunction(reportCube.reportMetaData().getTypeField(r.getFieldId())))
+                                            .setValues(Arrays.stream(r.getValues()).map(f -> Arrays.stream(f).toList()).collect(Collectors.toList()));
+                                    if (response.getValues().isEmpty())
+                                        response.getValues().add(Collections.singletonList(""));
 
-                        return response;
-                    }).toList());
+                                    return response;
+                                }).toList());
     }
 
 
@@ -556,16 +557,16 @@ public class OlapService {
     private MetricResult[][][] sortedResults(OlapCubeRequest request, CubeData reportCube, MetricResult[][][] result, Pair<MeasureData, MeasureData> measures) {
 
         var metricTypes =
-            request
-                .getMetrics()
-                .stream()
-                .map(metric -> {
-                    if (metric.getAggregationType().equals(AggregationType.COUNT) || metric.getAggregationType().equals(AggregationType.COUNT_DISTINCT))
-                        return DataTypeEnum.INTEGER;
-                    else
-                        return reportCube.reportMetaData().getTypeField(metric.getFieldId());
-                })
-                .toList();
+                request
+                        .getMetrics()
+                        .stream()
+                        .map(metric -> {
+                            if (metric.getAggregationType().equals(AggregationType.COUNT) || metric.getAggregationType().equals(AggregationType.COUNT_DISTINCT))
+                                return DataTypeEnum.INTEGER;
+                            else
+                                return reportCube.reportMetaData().getTypeField(metric.getFieldId());
+                        })
+                        .toList();
 
         if (!request.getRowSort().isEmpty()) {
             sortMetrics(result, metricTypes, SortDirection.Row, getSorting(measures.getR().values().stream().toList(), request.getRowSort()));
@@ -659,11 +660,11 @@ public class OlapService {
     private List<Sorting> getSorting(List<List<String>> measure, List<SortingParams> params) {
 
         return params.stream()
-            .map(param -> new Sorting(
-                param.getOrder(),
-                measure.stream().toList().indexOf(param.getTuple()),
-                param.getMetricId()
-            )).toList();
+                .map(param -> new Sorting(
+                        param.getOrder(),
+                        measure.stream().toList().indexOf(param.getTuple()),
+                        param.getMetricId()
+                )).toList();
     }
 
     private Pair<List<List<String>>, List<List<String>>> getResultMeasures(MetricResult[][][] metrics, Pair<MeasureData, MeasureData> measures) {
@@ -763,17 +764,17 @@ public class OlapService {
             log.debug("Derived fields calculated: " + endTime);
         } else {
             cubeRequest = new OlapCubeRequest()
-                .setJobId(request.getJobId())
-                .setColumnsInterval(request.getColumnsInterval())
-                .setRowsInterval(request.getRowsInterval())
-                .setColumnSort(request.getColumnSort())
-                .setRowSort(request.getRowSort())
-                .setMetricPlacement(request.getMetricPlacement())
-                .setColumnFields(columnsFromNew(request))
-                .setRowFields(rowsFromNew(request))
-                .setMetrics(fromNew(request.getMetrics()))
-                .setFilterGroup(request.getFilterGroup() == null ? null : fromNew(request.getFilterGroup()))
-                .setMetricFilterGroup(request.getMetricFilterGroup());
+                    .setJobId(request.getJobId())
+                    .setColumnsInterval(request.getColumnsInterval())
+                    .setRowsInterval(request.getRowsInterval())
+                    .setColumnSort(request.getColumnSort())
+                    .setRowSort(request.getRowSort())
+                    .setMetricPlacement(request.getMetricPlacement())
+                    .setColumnFields(columnsFromNew(request))
+                    .setRowFields(rowsFromNew(request))
+                    .setMetrics(fromNew(request.getMetrics()))
+                    .setFilterGroup(request.getFilterGroup() == null ? null : fromNew(request.getFilterGroup()))
+                    .setMetricFilterGroup(request.getMetricFilterGroup());
 
         }
 
@@ -827,28 +828,28 @@ public class OlapService {
             sortedMetrics = getPageResult(sortedMetrics, new Pair<>(columValues, rowValues), cubeRequest);
 
             return new OlapCubeResponse()
-                .setColumnValues(columValues)
-                .setRowValues(rowValues)
-                .setMetricValues(getOlapMetricResponse(cubeRequest, sortedMetrics, sourceCube))
-                .setTotalColumns(measures.getL().totalCount())
-                .setTotalRows(measures.getR().totalCount());
+                    .setColumnValues(columValues)
+                    .setRowValues(rowValues)
+                    .setMetricValues(getOlapMetricResponse(cubeRequest, sortedMetrics, sourceCube))
+                    .setTotalColumns(measures.getL().totalCount())
+                    .setTotalRows(measures.getR().totalCount());
         }
     }
 
     private FilterGroup fromNew(FilterGroupNew filterGroup) {
         return new FilterGroup(
-            filterGroup.getOperationType(),
-            filterGroup.isInvertResult(),
-            filterGroup.getChildGroups().stream().map(this::fromNew).toList(),
-            filterGroup.getFilters().stream().map(filter -> new FilterDefinition(
-                    filter.getField().getFieldId(),
-                    filter.getFilterType(),
-                    filter.isInvertResult(),
-                    filter.getRounding(),
-                    filter.isCanRounding(),
-                    filter.getValues()
-                ))
-                .toList()
+                filterGroup.getOperationType(),
+                filterGroup.isInvertResult(),
+                filterGroup.getChildGroups().stream().map(this::fromNew).toList(),
+                filterGroup.getFilters().stream().map(filter -> new FilterDefinition(
+                                filter.getField().getFieldId(),
+                                filter.getFilterType(),
+                                filter.isInvertResult(),
+                                filter.getRounding(),
+                                filter.isCanRounding(),
+                                filter.getValues()
+                        ))
+                        .toList()
         );
     }
 

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useSnackbar } from 'notistack';
 
+import { useNavigate, useParams } from 'react-router-dom';
+
 // components 
 import { CircularProgress } from '@material-ui/core';
 
@@ -15,12 +17,11 @@ import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
 // styles
 import { PublishReportDesignerCSS } from '../Development/Designer/DesignerCSS'
 
-/**
- * 
- * @param {*} props.folderId : id папки в которой размещается объект при создании (имеет значение только при mode == 'create')
- * @param {*} props.onExit : callback при выходе
- */
-export default function PublishReportDesigner(props){
+
+export default function PublishReportDesigner(){
+
+    const { folderId } = useParams()
+    const navigate = useNavigate();
 
     const classes = PublishReportDesignerCSS();
 
@@ -32,7 +33,7 @@ export default function PublishReportDesigner(props){
     
     function handleChange(reportId){
         setUploading(true);
-        dataHub.folderController.addReport(props.folderId, reportId, handleAddAnswer);    
+        dataHub.folderController.addReport(folderId, reportId, handleAddAnswer);    
     }
 
     function handleAddAnswer(magrepResponse){
@@ -44,12 +45,12 @@ export default function PublishReportDesigner(props){
         else{
             enqueueSnackbar("Ошибка при публикации объекта: " + magrepResponse.data, {variant : "error"});
         }
-        props.onExit()
+        navigate(`/reports/${folderId}`)
     }
 
     const handleClose = () => {
         setDialogOpen(false)
-        props.onExit()
+        navigate(`/reports/${folderId}`)
     }
     
     return(

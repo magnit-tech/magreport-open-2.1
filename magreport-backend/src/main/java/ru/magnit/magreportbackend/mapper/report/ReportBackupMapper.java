@@ -20,7 +20,8 @@ public class ReportBackupMapper implements Mapper<ReportBackupTuple, Report> {
                 source.getName(),
                 source.getDescription(),
                 source.getCreatedDateTime(),
-                source.getModifiedDateTime()
+                source.getModifiedDateTime(),
+                source.getEncryptFile()
         );
     }
 }

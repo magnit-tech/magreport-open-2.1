@@ -11,7 +11,7 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 
 //actions
-import { showAlertDialog, hideAlertDialog } from 'redux/actions/actionsAlertDialog';
+import { showAlertDialog, hideAlertDialog } from 'redux/actions/UI/actionsAlertDialog';
 import { actionRoleDelete } from 'redux/actions/admin/actionRoles';
 
 // styles 

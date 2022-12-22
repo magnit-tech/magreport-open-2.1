@@ -1,4 +1,4 @@
-import { SHOWALERT, HIDEALERT } from '../reduxTypes'
+import { SHOWALERT, HIDEALERT } from '../../reduxTypes'
 
 export const showAlert = (title, text, buttons, callback) =>{
     return {

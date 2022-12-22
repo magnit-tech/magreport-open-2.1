@@ -112,7 +112,8 @@ class DerivedFieldServiceTest {
             "TEST",
             "CUBE_TABLE",
             getReportFields(),
-            null
+            null,
+                true
         );
     }
 

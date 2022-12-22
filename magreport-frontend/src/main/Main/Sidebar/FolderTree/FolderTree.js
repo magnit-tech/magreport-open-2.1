@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 // components
 import List from '@material-ui/core/List';
@@ -17,9 +18,8 @@ import ReportProblemIcon from '@material-ui/icons/ReportProblem';
 import DragAndDrop from "main/DragAndDrop/DragAndDrop";
 
 // actions
-import { actionFolderClick, actionChangeParentFolderTree } from 'redux/actions/menuViews/folderActions';    
+import { actionChangeParentFolderTree } from 'redux/actions/menuViews/folderActions';    
 import { foldersLoading, foldersTreeToggle, foldersSetInit } from 'redux/actions/sidebar/actionFolderTree';
-import actionSetSidebarItem from 'redux/actions/sidebar/actionSetSidebarItem';
 
 // styles
 import { FolderTreeCSS } from './FolderTreeCSS'
@@ -31,6 +31,8 @@ function FolderTree(props){
 
     const classes = FolderTreeCSS();
 
+    const navigate = useNavigate()
+
     const entity = props.entity;
 
     const foldersTreeEntity = props.foldersTreeEntity[props.entity.key]
@@ -40,15 +42,15 @@ function FolderTree(props){
     const ROOT_FOLDER_ID = null;
 
     useEffect(() => {
+        if (foldersTreeEntity.status === 'init' && props.menuExpanded){
+            props.foldersLoading(ROOT_FOLDER_ID, entity.key, []);
+        }
         // вызывается при размонтировании компонента, нужно чтобы если в дереве нет данных при следующем развороте заново началась загрузка данных с бэка
         return () => {
             props.foldersSetInit(entity.key)
         }
     }, []) // eslint-disable-line
 
-    if (foldersTreeEntity.status === 'init' && props.menuExpanded){
-        props.foldersLoading(ROOT_FOLDER_ID, entity.key, []);
-    }
 
     function handleFolderIconClick(folderId, foldersPath, expanded) {
         if (expanded !== undefined){
@@ -60,8 +62,8 @@ function FolderTree(props){
     }
 
     function handleFolderClick(folderId){
-        props.actionSetSidebarItem(entity)
-        props.actionFolderClick(props.folderItemType, folderId)
+        navigate(`/${props.folderItemType}/${folderId}`)
+
     }
 
     function handleDropBefore(e, parentFolderId, folderId) {
@@ -199,17 +201,15 @@ function FolderTree(props){
 const mapStateToProps = state => {
     return {
         foldersTreeEntity: state.folderTree,
-        drawerOpen: state.drawer.open
+        drawerOpen: state.sidebar.drawerOpen
     }
 }
 
 const mapDispatchToProps = {
-    actionFolderClick, 
     actionChangeParentFolderTree,
     foldersLoading, 
     foldersTreeToggle, 
     foldersSetInit,
-    actionSetSidebarItem,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(FolderTree);

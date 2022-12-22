@@ -1,4 +1,4 @@
-import { SHOWSNACKBAR, HIDESNACKBAR } from '../reduxTypes'
+import { SHOWSNACKBAR, HIDESNACKBAR } from '../../reduxTypes'
 
 export const showSnackbar = (text, color) =>{
     return {

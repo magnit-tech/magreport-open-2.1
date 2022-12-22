@@ -12,7 +12,8 @@ public record ReportData(
         String schemaName,
         String tableName,
         List<ReportFieldData> fields,
-        ReportFilterGroupData filterGroup
+        ReportFilterGroupData filterGroup,
+        boolean encryptFile
 ) {
 
     public List<ReportFieldData> getVisibleFields() {

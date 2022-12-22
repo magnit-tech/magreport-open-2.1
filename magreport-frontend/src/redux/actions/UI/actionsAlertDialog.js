@@ -1,4 +1,4 @@
-import { SHOWALERTDIALOG, HIDEALERTDIALOG } from '../reduxTypes'
+import { SHOWALERTDIALOG, HIDEALERTDIALOG } from '../../reduxTypes'
 
 export const showAlertDialog = (title, entityType, entity, callback) =>{
     return {

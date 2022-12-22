@@ -1,51 +1,41 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 
+import { useNavigate } from 'react-router-dom'
 
 // local
 import dataHub from 'ajax/DataHub';
 import { actionAsmListLoaded, actionAsmListLoadFailed } from "redux/actions/admin/actionAsm";
-import { asmAdministrationMenuViewFlowStates } from "redux/reducers/menuViews/flowStates";
 
 // components
 import DataLoader from "../../../DataLoader/DataLoader";
-import ExternalSecurityDesigner from "./ASMDesigner";
-import ExternalSecurityViewer from "./ASMViewer";
 import ExternalSecurityList from "./ASMList";
 
 
-function ASMAdministrationMenuView(props){
-    const state = props.state;
-    const needReload = state.needReload;
-    const designerMode = state.designerMode;
+function ASMAdministrationMenuView(){
 
-    const loadFunc = dataHub.asmController.getAll;
+    const navigate = useNavigate()
+
+    function handleAddItemClick() {
+        navigate(`/asm/add`)
+    }
+
+    const [data, setData] = useState()
 
     return (
         <div  style={{display: 'flex', flex: 1}}>
-            {
-                state.flowState === asmAdministrationMenuViewFlowStates.externalSecurityList ?
-                    <DataLoader
-                        loadFunc={loadFunc}
-                        loadParams={[]}
-                        reload={{needReload}}
-                        onDataLoaded={(data) => props.actionAsmListLoaded(data)}
-                        onDataLoadFailed={(error) => props.actionAsmListLoadFailed(error)}
-                    >
-                        <ExternalSecurityList
-                            data={state.data}/>
-                    </DataLoader>
-                    : state.flowState === asmAdministrationMenuViewFlowStates.externalSecurityViewer ?
-                    <ExternalSecurityViewer
-                        asmId={state.viewASMId}
-                    />
-                    : state.flowState === asmAdministrationMenuViewFlowStates.externalSecurityDesigner ?
-                    <ExternalSecurityDesigner
-                        designerMode={designerMode}
-                        asmId={state.editASMId}
-                    />
-                    : <div>Неизвестное состояние</div>
-            }
+            <DataLoader
+                loadFunc={dataHub.asmController.getAll}
+                loadParams={[]}
+                reload={false}
+                onDataLoaded={(data) => setData(data)}
+                onDataLoadFailed={(error) => setData(error)}
+            >
+                <ExternalSecurityList
+                    data={data}
+                    onAddAsmClick={handleAddItemClick}
+                />
+            </DataLoader>
         </div>
     );
 }
@@ -58,7 +48,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = {
     actionAsmListLoaded,
-    actionAsmListLoadFailed
+    actionAsmListLoadFailed,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(ASMAdministrationMenuView);
