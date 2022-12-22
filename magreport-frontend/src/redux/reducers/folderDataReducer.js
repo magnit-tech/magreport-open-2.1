@@ -140,93 +140,88 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
             }
 
         case FOLDER_CONTENT_SEARCH_CLICK:
-            if(action.itemsType === folderItemsType){
-                let findStr = action.searchParams.searchString.toLowerCase().trim(),
-                    sortParams = state.sortParams,
-                    itemsName = getItemName(action.itemsType);
+            let findStr = action.searchParams.searchString.toLowerCase().trim()
+            let sortParamsForSearch = state.sortParams
+            let itemsNameForSearch = getItemName(action.itemsType)
 
-                if(!sortParams) {
-                    const defaultSortParams = { key: 'name', direction: 'ascending' };
-                    localStorage.setItem("sortParams", JSON.stringify(defaultSortParams));
-                    sortParams = defaultSortParams;
-                }
-
-                if (findStr.length > 0){
-                    const childFolders = state.currentFolderData.childFolders.filter(folder => folder.name.toLowerCase().includes(findStr)),
-                          items = state.currentFolderData[itemsName].filter(item => item.name.toLowerCase().includes(findStr));
-
-                    if (childFolders.length > 0) {
-                        childFolders.sort((a, b) => {
-                            if (a[sortParams.key] < b[sortParams.key]) {
-                                return sortParams.direction === 'ascending' ? -1 : 1;
-                            }
-                            if (a[sortParams.key] > b[sortParams.key]) {
-                                return sortParams.direction === 'ascending' ? 1 : -1;
-                            }
-                                return 0;
-                        });
-                    }
-    
-                    if (items.length > 0) {
-                        items.sort((a, b) => {
-                            if (a[sortParams.key] < b[sortParams.key]) {
-                                return sortParams.direction === 'ascending' ? -1 : 1;
-                            }
-                            if (a[sortParams.key] > b[sortParams.key]) {
-                                return sortParams.direction === 'ascending' ? 1 : -1;
-                            }
-                                return 0;
-                        });
-                    }
-
-                    const filteredFolderData = {
-                        ...state.currentFolderData,
-                        childFolders,
-                        [itemsName]: items
-                    }
-
-                    return {...state, filteredFolderData, searchParams: action.searchParams}
-                }
-                else {
-                    const childFolders = state.currentFolderData.childFolders,
-                          items = state.currentFolderData[itemsName];
-
-                    if (childFolders.length > 0) {
-                        childFolders.sort((a, b) => {
-                            if (a[sortParams.key] < b[sortParams.key]) {
-                                return sortParams.direction === 'ascending' ? -1 : 1;
-                            }
-                            if (a[sortParams.key] > b[sortParams.key]) {
-                                return sortParams.direction === 'ascending' ? 1 : -1;
-                            }
-                                return 0;
-                        });
-                    }
-    
-                    if (items.length > 0) {
-                        items.sort((a, b) => {
-                            if (a[sortParams.key] < b[sortParams.key]) {
-                                return sortParams.direction === 'ascending' ? -1 : 1;
-                            }
-                            if (a[sortParams.key] > b[sortParams.key]) {
-                                return sortParams.direction === 'ascending' ? 1 : -1;
-                            }
-                                return 0;
-                        });
-                    }
-                    
-                    const filteredFolderData = {
-                        ...state.currentFolderData,
-                        childFolders,
-                        [itemsName]: items
-                    }
-
-                    delete state.searchParams
-                    return {...state, filteredFolderData}
-                }
+            if(!sortParamsForSearch) {
+                const defaultSortParams = { key: 'name', direction: 'ascending' };
+                localStorage.setItem("sortParams", JSON.stringify(defaultSortParams));
+                sortParamsForSearch = defaultSortParams;
             }
-            else{
-                return state;
+
+            if (findStr.length > 0){
+                const childFolders = state.currentFolderData.childFolders.filter(folder => folder.name.toLowerCase().includes(findStr)),
+                    items = state.currentFolderData[itemsNameForSearch].filter(item => item.name.toLowerCase().includes(findStr));
+
+                if (childFolders.length > 0) {
+                    childFolders.sort((a, b) => {
+                        if (a[sortParamsForSearch.key] < b[sortParamsForSearch.key]) {
+                            return sortParamsForSearch.direction === 'ascending' ? -1 : 1;
+                        }
+                        if (a[sortParamsForSearch.key] > b[sortParamsForSearch.key]) {
+                            return sortParamsForSearch.direction === 'ascending' ? 1 : -1;
+                        }
+                            return 0;
+                    });
+                }
+
+                if (items.length > 0) {
+                    items.sort((a, b) => {
+                        if (a[sortParamsForSearch.key] < b[sortParamsForSearch.key]) {
+                            return sortParamsForSearch.direction === 'ascending' ? -1 : 1;
+                        }
+                        if (a[sortParamsForSearch.key] > b[sortParamsForSearch.key]) {
+                            return sortParamsForSearch.direction === 'ascending' ? 1 : -1;
+                        }
+                            return 0;
+                    });
+                }
+
+                const filteredFolderData = {
+                    ...state.currentFolderData,
+                    childFolders,
+                    [itemsNameForSearch]: items
+                }
+
+                return {...state, filteredFolderData, searchParams: action.searchParams}
+            }
+            else {
+                const childFolders = state.currentFolderData.childFolders,
+                    items = state.currentFolderData[itemsNameForSearch];
+
+                if (childFolders.length > 0) {
+                    childFolders.sort((a, b) => {
+                        if (a[sortParamsForSearch.key] < b[sortParamsForSearch.key]) {
+                            return sortParamsForSearch.direction === 'ascending' ? -1 : 1;
+                        }
+                        if (a[sortParamsForSearch.key] > b[sortParamsForSearch.key]) {
+                            return sortParamsForSearch.direction === 'ascending' ? 1 : -1;
+                        }
+                            return 0;
+                    });
+                }
+
+                if (items.length > 0) {
+                    items.sort((a, b) => {
+                        if (a[sortParamsForSearch.key] < b[sortParamsForSearch.key]) {
+                            return sortParamsForSearch.direction === 'ascending' ? -1 : 1;
+                        }
+                        if (a[sortParamsForSearch.key] > b[sortParamsForSearch.key]) {
+                            return sortParamsForSearch.direction === 'ascending' ? 1 : -1;
+                        }
+                            return 0;
+                    });
+                }
+                
+                const filteredFolderData = {
+                    ...state.currentFolderData,
+                    childFolders,
+                    [itemsNameForSearch]: items
+                }
+
+                delete state.searchParams
+                return {...state, filteredFolderData}
             }
 
         case FOLDER_CONTENT_SORT_CLICK:
