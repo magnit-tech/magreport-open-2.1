@@ -1,6 +1,6 @@
 import { withStyles, makeStyles, alpha } from '@material-ui/core/styles';
 import Slider from '@material-ui/core/Slider';
-import StyleConsts from '../../StyleConsts';
+//import StyleConsts from '../../StyleConsts';
 
 export const FolderContentCSS = makeStyles(theme => ({
     relative: {
@@ -45,10 +45,15 @@ export const FolderContentCSS = makeStyles(theme => ({
     filterButton: {
         position: 'fixed',
         right: '20px',
-        top: '36px',
+        top: '110px',//!!!'36px',
         margin: '20px',
         zIndex: 2,
         paddingTop: '25px'
+    },
+    badge: {
+        zIndex: 100,
+        transform: 'scale(1) translate(90%, -100%)'
+
     },
     refreshButton: {
         position: 'fixed',

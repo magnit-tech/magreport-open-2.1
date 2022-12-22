@@ -136,7 +136,7 @@ public class ReportJobService {
         final var templatePath = excelTemplateDomainService.getTemplatePathForReport(jobData.reportData().id(), request.getExcelTemplateId());
 
         excelReportDomainService.saveReportToExcel(jobData, templatePath, request.getExcelTemplateId());
-        excelReportDomainService.moveReportToRms(request.getId(), request.getExcelTemplateId());
+        excelReportDomainService.moveReportToRms(request.getId(), request.getExcelTemplateId(), jobData.reportData().encryptFile());
     }
 
     public ReportJobResponse addJob(ReportJobAddRequest request) {

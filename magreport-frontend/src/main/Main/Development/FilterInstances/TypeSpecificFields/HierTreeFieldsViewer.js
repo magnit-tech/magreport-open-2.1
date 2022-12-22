@@ -136,6 +136,7 @@ export default function HierTreeFieldsViewer(props) {
                 {
                     <ViewerChildCard
                         id={localData.dataSetId}
+                        parentFolderId={datasetData.folderId}
                         name = {datasetData && datasetData.name ?  datasetData.schemaName + '.' + datasetData.name + ' (' + datasetData.dataSource.name  +')' : null}
                         itemType={FolderItemTypes.dataset}
                     />

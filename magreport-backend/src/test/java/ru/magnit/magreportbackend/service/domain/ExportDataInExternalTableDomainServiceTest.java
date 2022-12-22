@@ -76,7 +76,8 @@ class ExportDataInExternalTableDomainServiceTest {
                         NAME,
                         NAME,
                         Collections.emptyList(),
-                        null),
+                        null,
+                        true),
                 Collections.emptyList(),
                 Collections.emptyList()
         );
@@ -143,7 +144,8 @@ class ExportDataInExternalTableDomainServiceTest {
                                         Collections.emptyList(),
                                         Collections.emptyList()
 
-                                )))
+                                ))),
+                        true
                 ),
                 Collections.singletonList(new ReportJobFilterData(
                         ID,

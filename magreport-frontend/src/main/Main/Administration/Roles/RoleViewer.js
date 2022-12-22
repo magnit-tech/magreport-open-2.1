@@ -1,12 +1,17 @@
 import React, {useState} from "react";
 import {useSnackbar} from "notistack";
 
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+
+import { useDispatch } from "react-redux";
+import { viewItemNavbar } from "redux/actions/navbar/actionNavbar";
+
 import dataHub from "ajax/DataHub";
 
 import DataLoader from "main/DataLoader/DataLoader";
 
 import Paper from "@material-ui/core/Paper";
-import PageTabs from "main/PageTabs/PageTabs";
+import PageTabs from "components/PageTabs/PageTabs";
 
 import {FolderItemTypes} from "main/FolderContent/FolderItemTypes";
 import ViewerPage from "main/Main/Development/Viewer/ViewerPage";
@@ -17,25 +22,18 @@ import MenuItem from '@material-ui/core/MenuItem';
 
 import DomainGroupList from "main/Main/Administration/DomainGroups/DomainGroupList";
 import PermittedFoldersList from './PermittedFoldersList';
-import {
-    createViewerTextFields,
-    createViewerPageName
-} from "main/Main/Development/Viewer/viewerHelpers";
+import { createViewerTextFields, createViewerPageName } from "main/Main/Development/Viewer/viewerHelpers";
 
 
-/**
- * @callback onOkClick
- */
-/**
- * Компонент просмотра роли
- * @param {Object} props - параметры компонента
- * @param {Number} props.roleId - ID роли
- * @param {onOkClick} props.onOkClick - callback вызываемый при нажатии кнопки ОК
- * @constructor
- */
-export default function RoleViewer(props) {
+export default function RoleViewer() {
 
     const classes = ViewerCSS();
+
+    const {id, folderId} = useParams()
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const dispatch = useDispatch()
 
     const {enqueueSnackbar} = useSnackbar();
 
@@ -48,11 +46,10 @@ export default function RoleViewer(props) {
     const [permittedFolders, setPermittedFolders] = useState({loadedData: {}, namesList: []});
     const [selectedPermittedFolder, setSelectedPermittedFolder] = useState('');
 
-    let loadFunc = dataHub.roleController.get;
-    let loadParams = [props.roleId];
 
     function handleDataLoaded(loadedData) {
         setData(loadedData);
+        dispatch(viewItemNavbar('roles', loadedData.name, id, folderId, loadedData.path))
     }
 
     function handleUsersDataLoaded(loadedData) {
@@ -107,8 +104,6 @@ export default function RoleViewer(props) {
     let authority = data.authority
 
     let hasRWRight = isAdmin || (isDeveloper && authority === "WRITE");
-
-
     
     // build component
 
@@ -135,7 +130,7 @@ export default function RoleViewer(props) {
                 <Paper elevation={3} className={classes.userListPaper}>
                     <DataLoader
                         loadFunc={dataHub.roleController.getUsers}
-                        loadParams={loadParams}
+                        loadParams={[id]}
                         onDataLoaded={handleUsersDataLoaded}
                         onDataLoadFailed={handleDataLoadFailed}
                     >
@@ -143,7 +138,7 @@ export default function RoleViewer(props) {
                             itemsType={FolderItemTypes.roles}
                             items={users}
                             showDeleteButton={false}
-                            roleId={props.roleId}
+                            roleId={id}
                         />
                     </DataLoader>
                 </Paper>
@@ -159,7 +154,7 @@ export default function RoleViewer(props) {
                 <Paper elevation={3} className={classes.userListPaper}>
                     <DataLoader
                         loadFunc={dataHub.roleController.getDomainGroups}
-                        loadParams={loadParams}
+                        loadParams={[id]}
                         onDataLoaded={handleDomainGroupsDataLoaded}
                         onDataLoadFailed={handleDataLoadFailed}
                     >
@@ -167,7 +162,7 @@ export default function RoleViewer(props) {
                             itemsType={FolderItemTypes.roles}
                             items={domainGroups}
                             showDeleteButton={false}
-                            roleId={props.roleId}
+                            roleId={id}
                         />
                     </DataLoader>
                 </Paper>
@@ -175,7 +170,7 @@ export default function RoleViewer(props) {
         )
     };
 
-    const permittedFoldersTab = props.roleTypeId === 2 ? {
+    const permittedFoldersTab = Number(folderId) === 2 ? {
         tablabel:"Права",
         tabcontent:
             <div style={{display: 'flex', flex: 1, flexDirection: 'column'}}>
@@ -203,7 +198,7 @@ export default function RoleViewer(props) {
                 <Paper elevation={3} className={classes.permittedListPaper}>
                     <DataLoader
                         loadFunc = {dataHub.roleController.getPertmittedFolders}
-                        loadParams = {[props.roleId]}
+                        loadParams = {[id]}
                         reload = {/*reload*/ false}
                         onDataLoaded = {handlePermittedFoldersLoaded}
                         onDataLoadFailed = {(message) => enqueueSnackbar(`При получении данных возникла ошибка: ${message}`, {variant: "error"})}
@@ -217,22 +212,23 @@ export default function RoleViewer(props) {
                 </Paper>
 
             </div>
-        } : {};
+    } : {};
 
     // component
     return (
         <DataLoader
-            loadFunc={loadFunc}
-            loadParams={loadParams}
+            loadFunc={dataHub.roleController.get}
+            loadParams={[id]}
             onDataLoaded={handleDataLoaded}
             onDataLoadFailed={handleDataLoadFailed}
         >
             <ViewerPage
                 id={data.id}
                 name={data.name}
+                folderId = {folderId}
                 itemType={FolderItemTypes.roles}
                 disabledPadding={true}
-                onOkClick={props.onOkClick}
+                onOkClick={() => location.state ? navigate(location.state) : navigate(`/roles/${folderId}`)}
                 readOnly={!hasRWRight}
             >
                 <PageTabs
