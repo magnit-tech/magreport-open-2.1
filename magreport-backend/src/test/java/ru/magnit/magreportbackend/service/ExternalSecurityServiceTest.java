@@ -187,7 +187,9 @@ class ExternalSecurityServiceTest {
                 new RoleTypeResponse(),
                 true,
                 ASM_SECURITY_CREATED_DATETIME,
-                ASM_SECURITY_MODIFIED_DATETIME
+                ASM_SECURITY_MODIFIED_DATETIME,
+                Collections.emptyList()
+
         );
     }
 

@@ -18,6 +18,7 @@ import ru.magnit.magreportbackend.dto.request.user.DomainGroupRequest;
 import ru.magnit.magreportbackend.dto.request.user.RoleAddRequest;
 import ru.magnit.magreportbackend.dto.request.user.RoleDomainGroupSetRequest;
 import ru.magnit.magreportbackend.dto.request.user.RoleUsersSetRequest;
+import ru.magnit.magreportbackend.dto.response.folder.FolderNodeResponse;
 import ru.magnit.magreportbackend.dto.response.folder.FolderSearchResponse;
 import ru.magnit.magreportbackend.dto.response.folder.FolderSearchResultResponse;
 import ru.magnit.magreportbackend.dto.response.role.RoleSearchResultResponse;
@@ -90,7 +91,10 @@ public class RoleDomainService {
 
     @Transactional
     public RoleResponse getRole(Long roleId) {
-        return roleResponseMapper.from(repository.getReferenceById(roleId));
+        var role = repository.getReferenceById(roleId);
+        var response = roleResponseMapper.from(role);
+        response.setPath(getPathRoleType(role.getRoleType()));
+        return response;
     }
 
     @Transactional
@@ -101,7 +105,10 @@ public class RoleDomainService {
                     .setChildTypes(roleTypeResponseMapper.shallowMap(roleTypeRepository.findAll()));
 
         } else {
-            return roleTypeResponseMapper.from(roleTypeRepository.getReferenceById(roleId));
+            var roleType = roleTypeRepository.getReferenceById(roleId);
+            var response = roleTypeResponseMapper.from(roleType);
+            response.setPath(getPathRoleType(roleType));
+            return response;
         }
     }
 
@@ -311,6 +318,19 @@ public class RoleDomainService {
     private FolderSearchResultResponse mapFolder(RoleType path) {
         return new FolderSearchResultResponse(
                 Collections.singletonList(folderNodeResponseRoleTypeMapper.from(path)), folderNodeResponseRoleTypeMapper.from(path));
+    }
+
+    private List<FolderNodeResponse> getPathRoleType (RoleType roleType){
+        return Collections.singletonList(
+                new FolderNodeResponse(
+                        roleType.getId(),
+                        null,
+                        roleType.getName(),
+                        roleType.getDescription(),
+                        roleType.getCreatedDateTime(),
+                        roleType.getModifiedDateTime()
+                )
+        );
     }
 
 }

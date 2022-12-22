@@ -147,8 +147,8 @@ class FilterInstanceDomainServiceTest {
         assertEquals(CREATED_TIME, response.getCreated());
         assertEquals(MODIFIED_TIME, response.getModified());
 
-        verify(folderRepository).existsById(anyLong());
-        verify(folderRepository).getReferenceById(anyLong());
+        verify(folderRepository, times(2)).existsById(anyLong());
+        verify(folderRepository, times(2)).getReferenceById(anyLong());
         verifyNoMoreInteractions(folderRepository);
         verify(filterInstanceFolderResponseMapper).from((FilterInstanceFolder) any());
         verifyNoMoreInteractions(filterInstanceFolderResponseMapper);
@@ -360,6 +360,8 @@ class FilterInstanceDomainServiceTest {
     void getFilterInstance() {
         when(filterInstanceResponseMapper.from(any(FilterInstance.class))).thenReturn(getFilterInstanceResponse());
         when(filterInstanceRepository.getReferenceById(any())).thenReturn(getFilterInstance(getDataset()));
+        when(folderRepository.existsById(anyLong())).thenReturn(true);
+        when(folderRepository.getReferenceById(anyLong())).thenReturn(new FilterInstanceFolder());
 
         assertNotNull(domainService.getFilterInstance(ID));
 
@@ -566,7 +568,9 @@ class FilterInstanceDomainServiceTest {
                 .setDescription(DESCRIPTION)
                 .setCode("1234")
                 .setDataSet(dataSet)
-                .setFolder(new FilterInstanceFolder().setParentFolder(new FilterInstanceFolder()))
+                .setFolder(new FilterInstanceFolder()
+                        .setId(ID)
+                        .setParentFolder(new FilterInstanceFolder()))
                 .setFields(new ArrayList<>(Collections.singletonList(
                         new FilterInstanceField()
                                 .setId(ID)

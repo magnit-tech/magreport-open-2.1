@@ -135,7 +135,6 @@ class ServerMailTemplateServiceTest {
 
         verify(serverMailTemplateDomainService).getServerMailTemplate(anyLong());
         verifyNoMoreInteractions(serverMailTemplateDomainService);
-        verifyNoInteractions(serverMailTemplateTypeDomainService);
     }
 
     @Test

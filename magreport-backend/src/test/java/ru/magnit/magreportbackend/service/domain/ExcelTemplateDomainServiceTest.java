@@ -26,6 +26,7 @@ import ru.magnit.magreportbackend.mapper.exceltemplate.ExcelTemplateFolderMapper
 import ru.magnit.magreportbackend.mapper.exceltemplate.ExcelTemplateFolderResponseMapper;
 import ru.magnit.magreportbackend.mapper.exceltemplate.ExcelTemplateMapper;
 import ru.magnit.magreportbackend.mapper.exceltemplate.ExcelTemplateResponseMapper;
+import ru.magnit.magreportbackend.mapper.exceltemplate.FolderNodeResponseExcelTemplateFolderMapper;
 import ru.magnit.magreportbackend.mapper.exceltemplate.ReportExcelTemplateResponseMapper;
 import ru.magnit.magreportbackend.repository.ExcelTemplateFolderRepository;
 import ru.magnit.magreportbackend.repository.ExcelTemplateRepository;
@@ -41,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -81,6 +83,9 @@ class ExcelTemplateDomainServiceTest {
 
     @Mock
     private ReportExcelTemplateResponseMapper reportExcelTemplateResponseMapper;
+
+    @Mock
+    private FolderNodeResponseExcelTemplateFolderMapper folderNodeResponseExcelTemplateFolderMapper;
 
     @Test
     void addFolder() {
@@ -127,8 +132,8 @@ class ExcelTemplateDomainServiceTest {
 
         verify(excelTemplateFolderResponseMapper).from((ExcelTemplateFolder) any());
         verifyNoMoreInteractions(excelTemplateFolderResponseMapper);
-        verify(folderRepository).getReferenceById(anyLong());
-        verify(folderRepository).existsById(anyLong());
+        verify(folderRepository, times(2)).getReferenceById(anyLong());
+        verify(folderRepository, times(2)).existsById(anyLong());
         verifyNoMoreInteractions(folderRepository);
 
 

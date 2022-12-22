@@ -59,6 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -154,8 +155,8 @@ class DataSetDomainServiceTest {
 
         verify(dataSetFolderResponseMapper).from((DataSetFolder) any());
         verifyNoMoreInteractions(dataSetFolderResponseMapper);
-        verify(folderRepository).getReferenceById(anyLong());
-        verify(folderRepository).existsById(anyLong());
+        verify(folderRepository, times(2)).getReferenceById(anyLong());
+        verify(folderRepository, times(2)).existsById(anyLong());
         verifyNoMoreInteractions(folderRepository);
 
         when(folderRepository.getAllByParentFolderIsNull()).thenReturn(Collections.emptyList());
@@ -245,7 +246,8 @@ class DataSetDomainServiceTest {
     @Test
     void getDataSet() {
         when(dataSetRepository.existsById(anyLong())).thenReturn(true);
-        when(dataSetRepository.getReferenceById(anyLong())).thenReturn(new DataSet());
+        when(folderRepository.existsById(anyLong())).thenReturn(true);
+        when(dataSetRepository.getReferenceById(anyLong())).thenReturn(getDataset(TYPE_ID));
         when(dataSetResponseMapper.from((DataSet) any())).thenReturn(getDataSetResponse());
 
         DataSetResponse response = service.getDataSet(ID);
@@ -621,7 +623,7 @@ class DataSetDomainServiceTest {
         return new DataSet()
                 .setId(ID)
                 .setType(new DataSetType().setId(idType))
-                .setFolder(new DataSetFolder());
+                .setFolder(new DataSetFolder().setId(ID));
     }
 
     private DataSetField getDataSetField(){

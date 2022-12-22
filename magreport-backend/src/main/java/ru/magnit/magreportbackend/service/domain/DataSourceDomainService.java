@@ -102,7 +102,9 @@ public class DataSourceDomainService {
         } else {
             var folder = folderRepository.getReferenceById(id);
 
-            return dataSourceFolderResponseMapper.from(folder);
+            var response =  dataSourceFolderResponseMapper.from(folder);
+            response.setPath(getPathToFolder(id));
+            return response;
         }
     }
 
@@ -219,8 +221,11 @@ public class DataSourceDomainService {
         checkDataSourceExists(id);
 
         var dataSource = dataSourceRepository.getReferenceById(id);
+        var result = dataSourceResponseMapper.from(dataSource);
 
-        return dataSourceResponseMapper.from(dataSource);
+        result.setPath(getPathToFolder(dataSource.getFolder().getId()));
+
+        return result;
     }
 
     @Transactional

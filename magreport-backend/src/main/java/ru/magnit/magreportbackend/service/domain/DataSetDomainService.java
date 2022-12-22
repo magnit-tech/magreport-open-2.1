@@ -120,7 +120,9 @@ public class DataSetDomainService {
         } else {
             var folder = folderRepository.getReferenceById(id);
 
-            return dataSetFolderResponseMapper.from(folder);
+            var response =  dataSetFolderResponseMapper.from(folder);
+            response.setPath(getPathToFolder(id));
+            return response;
         }
     }
 
@@ -218,8 +220,10 @@ public class DataSetDomainService {
     @Transactional
     public DataSetResponse getDataSet(Long id) {
         checkDataSetExists(id);
-
-        return dataSetResponseMapper.from(dataSetRepository.getReferenceById(id));
+        var dataset = dataSetRepository.getReferenceById(id);
+        var response =  dataSetResponseMapper.from(dataset);
+        response.setPath(getPathToFolder(dataset.getFolder().getId()));
+        return response;
     }
 
     @Transactional

@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import ru.magnit.magreportbackend.domain.datasource.DataSourceFolder;
 import ru.magnit.magreportbackend.domain.filtertemplate.FilterTemplate;
 import ru.magnit.magreportbackend.domain.filtertemplate.FilterTemplateFolder;
 import ru.magnit.magreportbackend.dto.request.folder.FolderAddRequest;
@@ -20,6 +21,7 @@ import ru.magnit.magreportbackend.mapper.filtertemplate.FilterTemplateFolderMapp
 import ru.magnit.magreportbackend.mapper.filtertemplate.FilterTemplateFolderResponseMapper;
 import ru.magnit.magreportbackend.mapper.filtertemplate.FilterTemplateResponseMapper;
 import ru.magnit.magreportbackend.mapper.filtertemplate.FilterTypeResponseMapper;
+import ru.magnit.magreportbackend.mapper.filtertemplate.FolderNodeResponseFilterTemplateFolderMapper;
 import ru.magnit.magreportbackend.repository.FilterFieldTypeRepository;
 import ru.magnit.magreportbackend.repository.FilterOperationTypeRepository;
 import ru.magnit.magreportbackend.repository.FilterTemplateFolderRepository;
@@ -36,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -85,6 +88,9 @@ class FilterTemplateDomainServiceTest {
     @Mock
     private FilterTemplateResponseMapper filterTemplateResponseMapper;
 
+    @Mock
+    private FolderNodeResponseFilterTemplateFolderMapper folderNodeResponseFilterTemplateFolderMapper;
+
     @Test
     void getFolder() {
         when(folderRepository.existsById(anyLong())).thenReturn(true);
@@ -101,8 +107,8 @@ class FilterTemplateDomainServiceTest {
         assertEquals(CREATED_TIME, response.getCreated());
         assertEquals(MODIFIED_TIME, response.getModified());
 
-        verify(folderRepository).existsById(anyLong());
-        verify(folderRepository).getReferenceById(anyLong());
+        verify(folderRepository, times(2)).existsById(anyLong());
+        verify(folderRepository, times(2)).getReferenceById(anyLong());
         verify(filterTemplateFolderResponseMapper).from((FilterTemplateFolder) any());
         verifyNoMoreInteractions(folderRepository, filterTemplateFolderResponseMapper);
 
@@ -254,8 +260,10 @@ class FilterTemplateDomainServiceTest {
     @Test
     void getFilterTemplate() {
 
-        when(filterTemplateRepository.getReferenceById(anyLong())).thenReturn(new FilterTemplate());
+        when(filterTemplateRepository.getReferenceById(anyLong())).thenReturn(getFilterTemplateObject());
         when(filterTemplateResponseMapper.from(any(FilterTemplate.class))).thenReturn(new FilterTemplateResponse());
+        when(folderRepository.existsById(anyLong())).thenReturn(true);
+        when(folderRepository.getReferenceById(anyLong())).thenReturn(new FilterTemplateFolder());
 
         assertNotNull(domainService.getFilterTemplate(anyLong()));
 
@@ -312,6 +320,12 @@ class FilterTemplateDomainServiceTest {
                 .setId(ID)
                 .setName(NAME)
                 .setDescription(DESCRIPTION);
+    }
+
+    private FilterTemplate getFilterTemplateObject(){
+        return new FilterTemplate()
+                .setId(ID)
+                .setFolder(new FilterTemplateFolder(ID));
     }
 
 

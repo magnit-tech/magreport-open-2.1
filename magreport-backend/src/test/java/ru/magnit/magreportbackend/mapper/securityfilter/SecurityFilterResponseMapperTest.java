@@ -55,16 +55,17 @@ class SecurityFilterResponseMapperTest {
 
         var response = mapper.from(getSecurityFilter());
 
-        Assertions.assertEquals(ID, response.id());
-        Assertions.assertNotNull(response.filterInstance());
-        Assertions.assertEquals(FilterOperationTypeEnum.IS_NOT_IN_LIST, response.operationType());
-        Assertions.assertEquals(NAME, response.name());
-        Assertions.assertEquals(1, response.dataSets().size());
-        Assertions.assertEquals(1, response.roleSettings().size());
-        Assertions.assertEquals(USER, response.userName());
-        Assertions.assertEquals(CREATE_TIME, response.created());
-        Assertions.assertEquals(MODIFIED_TIME, response.modified());
-        Assertions.assertEquals(0, response.path().size());
+
+        Assertions.assertEquals(ID, response.getId());
+        Assertions.assertNotNull(response.getFilterInstance());
+        Assertions.assertEquals(FilterOperationTypeEnum.IS_NOT_IN_LIST, response.getOperationType());
+        Assertions.assertEquals(NAME, response.getName());
+        Assertions.assertEquals(1, response.getDataSets().size());
+        Assertions.assertEquals(1, response.getRoleSettings().size());
+        Assertions.assertEquals(USER, response.getUserName());
+        Assertions.assertEquals(CREATE_TIME, response.getCreated());
+        Assertions.assertEquals(MODIFIED_TIME, response.getModified());
+        Assertions.assertEquals(0, response.getPath().size());
 
         Mockito.verify(filterInstanceResponseMapper).from(Mockito.any(FilterInstance.class));
         Mockito.verify(securityFilterDataSetResponseMapper).from(Mockito.anyList());
@@ -84,16 +85,16 @@ class SecurityFilterResponseMapperTest {
         Assertions.assertEquals(1, responses.size());
         var response = responses.get(0);
 
-        Assertions.assertEquals(ID, response.id());
-        Assertions.assertNotNull(response.filterInstance());
-        Assertions.assertEquals(FilterOperationTypeEnum.IS_NOT_IN_LIST, response.operationType());
-        Assertions.assertEquals(NAME, response.name());
-        Assertions.assertEquals(1, response.dataSets().size());
-        Assertions.assertEquals(1, response.roleSettings().size());
-        Assertions.assertEquals(USER, response.userName());
-        Assertions.assertEquals(CREATE_TIME, response.created());
-        Assertions.assertEquals(MODIFIED_TIME, response.modified());
-        Assertions.assertEquals(0, response.path().size());
+        Assertions.assertEquals(ID, response.getId());
+        Assertions.assertNotNull(response.getFilterInstance());
+        Assertions.assertEquals(FilterOperationTypeEnum.IS_NOT_IN_LIST, response.getOperationType());
+        Assertions.assertEquals(NAME, response.getName());
+        Assertions.assertEquals(1, response.getDataSets().size());
+        Assertions.assertEquals(1, response.getRoleSettings().size());
+        Assertions.assertEquals(USER, response.getUserName());
+        Assertions.assertEquals(CREATE_TIME, response.getCreated());
+        Assertions.assertEquals(MODIFIED_TIME, response.getModified());
+        Assertions.assertEquals(0, response.getPath().size());
 
         Mockito.verify(filterInstanceResponseMapper).from(Mockito.any(FilterInstance.class));
         Mockito.verify(securityFilterDataSetResponseMapper).from(Mockito.anyList());

@@ -126,6 +126,7 @@ class SecurityFilterFolderResponseMapperTest {
 
     private SecurityFilterResponse getSecurityFilterResponse() {
         return new SecurityFilterResponse(1L,
+                1L,
                 new FilterInstanceResponse(),
                 FilterOperationTypeEnum.IS_BETWEEN,
                 "name",
