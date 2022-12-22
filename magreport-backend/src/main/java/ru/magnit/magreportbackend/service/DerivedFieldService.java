@@ -74,14 +74,14 @@ public class DerivedFieldService {
     public Pair<CubeData, OlapCubeRequest> preProcessCube(CubeData sourceCube, OlapCubeRequestNew request) {
         final var derivedFields = getDerivedFields(sourceCube.reportMetaData().id());
         final var fieldTypes = sourceCube.reportMetaData().fields()
-            .stream()
-            .collect(Collectors.toMap(ReportFieldData::id, ReportFieldData::dataType));
+                .stream()
+                .collect(Collectors.toMap(ReportFieldData::id, ReportFieldData::dataType));
 
         // Получаем набор производных полей, на которые есть прямые ссылки в запросе
         final var reqDerivedFieldSet = request.getAllFields()
-            .stream()
-            .filter(field -> field.getFieldType() == OlapFieldTypes.DERIVED_FIELD)
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+                .stream()
+                .filter(field -> field.getFieldType() == OlapFieldTypes.DERIVED_FIELD)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
         final var requestDerivedFields = new LinkedHashSet<>(reqDerivedFieldSet);
 
         // Добавляем все поля, от которых зависят производные поля
@@ -89,12 +89,12 @@ public class DerivedFieldService {
         var prevStepFields = new LinkedHashSet<>(reqDerivedFieldSet);
         while (callDepth-- > 0) {
             final var currentStepFields = prevStepFields.stream()
-                .map(field -> derivedFields.get(field.getFieldId()))
-                .flatMap(field -> field.getUsedDerivedFieldIds().stream())
-                .map(fieldId -> new FieldDefinition()
-                    .setFieldId(fieldId)
-                    .setFieldType(OlapFieldTypes.DERIVED_FIELD))
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+                    .map(field -> derivedFields.get(field.getFieldId()))
+                    .flatMap(field -> field.getUsedDerivedFieldIds().stream())
+                    .map(fieldId -> new FieldDefinition()
+                            .setFieldId(fieldId)
+                            .setFieldType(OlapFieldTypes.DERIVED_FIELD))
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
 
             if (currentStepFields.isEmpty()) break;
             reqDerivedFieldSet.addAll(currentStepFields);
@@ -109,9 +109,9 @@ public class DerivedFieldService {
         reqDerivedFieldSet.addAll(usedDerivedFields);
 
         final var fieldIndexes = sourceCube.fieldIndexes().entrySet()
-            .stream()
-            .map(entry -> new Pair<>(new FieldDefinition(entry.getKey(), OlapFieldTypes.REPORT_FIELD), entry.getValue()))
-            .collect(Collectors.toMap(Pair::getL, entry -> new Pair<>(entry.getR(), fieldTypes.get(entry.getL().getFieldId()))));
+                .stream()
+                .map(entry -> new Pair<>(new FieldDefinition(entry.getKey(), OlapFieldTypes.REPORT_FIELD), entry.getValue()))
+                .collect(Collectors.toMap(Pair::getL, entry -> new Pair<>(entry.getR(), fieldTypes.get(entry.getL().getFieldId()))));
 
         var fieldCount = fieldIndexes.keySet().size();
         for (final var derivedField : usedDerivedFields) {
@@ -120,14 +120,14 @@ public class DerivedFieldService {
 
         final var processedCube = initResultCube(sourceCube, fieldCount);
         final var fieldExpressions = usedDerivedFields
-            .stream()
-            .map(field -> derivedFields.get(field.getFieldId()))
-            .map(field -> field.getExpression().getType().init(
-                    field.getExpression(),
-                    new ExpressionCreationContext(fieldIndexes, processedCube, field)
+                .stream()
+                .map(field -> derivedFields.get(field.getFieldId()))
+                .map(field -> field.getExpression().getType().init(
+                                field.getExpression(),
+                                new ExpressionCreationContext(fieldIndexes, processedCube, field)
+                        )
                 )
-            )
-            .toList();
+                .toList();
 
         // Рассчитываем значения всех полей и добавляем в куб
         final int startColumn = processDerivedFields(sourceCube, usedDerivedFields, fieldIndexes, processedCube, fieldExpressions);
@@ -135,9 +135,9 @@ public class DerivedFieldService {
         final var resultCube = initResultCube(sourceCube, startColumn + requestDerivedFields.size());
         var fieldNumber = 0;
         final var reportFieldIndex = sourceCube.reportMetaData().fields()
-            .stream()
-            .map(ReportFieldData::id)
-            .max(Long::compareTo).orElseThrow() + 1L;
+                .stream()
+                .map(ReportFieldData::id)
+                .max(Long::compareTo).orElseThrow() + 1L;
 
         final var cubeFields = new ArrayList<>(sourceCube.reportMetaData().fields());
         final var derivedFieldsColumns = new HashMap<Long, Long>();
@@ -149,26 +149,27 @@ public class DerivedFieldService {
         final OlapCubeRequest processedRequest = transformOlapRequest(request, derivedFieldsColumns);
 
         return new Pair<>(new CubeData(
-            new ReportData(
-                sourceCube.reportMetaData().id(),
-                sourceCube.reportMetaData().name(),
-                sourceCube.reportMetaData().description(),
-                sourceCube.reportMetaData().schemaName(),
-                sourceCube.reportMetaData().tableName(),
-                cubeFields,
-                sourceCube.reportMetaData().filterGroup()
-            ),
-            sourceCube.numRows(),
-            resultFieldIndexes,
-            resultCube
+                new ReportData(
+                        sourceCube.reportMetaData().id(),
+                        sourceCube.reportMetaData().name(),
+                        sourceCube.reportMetaData().description(),
+                        sourceCube.reportMetaData().schemaName(),
+                        sourceCube.reportMetaData().tableName(),
+                        cubeFields,
+                        sourceCube.reportMetaData().filterGroup(),
+                        sourceCube.reportMetaData().encryptFile()
+                ),
+                sourceCube.numRows(),
+                resultFieldIndexes,
+                resultCube
         ), processedRequest);
     }
 
     private void checkCallDepth(Collection<FieldDefinition> prevStepFields, Map<Long, DerivedFieldResponse> derivedFields) {
         final var depFieldCount = prevStepFields.stream()
-            .map(field -> derivedFields.get(field.getFieldId()))
-            .mapToLong(field -> field.getUsedDerivedFieldIds().size())
-            .sum();
+                .map(field -> derivedFields.get(field.getFieldId()))
+                .mapToLong(field -> field.getUsedDerivedFieldIds().size())
+                .sum();
         if (depFieldCount > 0) {
             throw new InvalidExpression("Глубина вложенности ссылок на производные поля превышает установленный максимум: " + maxCallDepth);
         }
@@ -176,17 +177,17 @@ public class DerivedFieldService {
 
     private OlapCubeRequest transformOlapRequest(OlapCubeRequestNew request, HashMap<Long, Long> derivedFieldsColumns) {
         return new OlapCubeRequest()
-            .setJobId(request.getJobId())
-            .setColumnsInterval(request.getColumnsInterval())
-            .setRowsInterval(request.getRowsInterval())
-            .setColumnSort(request.getColumnSort())
-            .setRowSort(request.getRowSort())
-            .setMetricPlacement(request.getMetricPlacement())
-            .setColumnFields(columnsFromNew(request, derivedFieldsColumns))
-            .setRowFields(rowsFromNew(request, derivedFieldsColumns))
-            .setMetrics(fromNew(request.getMetrics(), derivedFieldsColumns))
-            .setFilterGroup(request.getFilterGroup() == null ? null : fromNew(request.getFilterGroup(), derivedFieldsColumns))
-            .setMetricFilterGroup(request.getMetricFilterGroup());
+                .setJobId(request.getJobId())
+                .setColumnsInterval(request.getColumnsInterval())
+                .setRowsInterval(request.getRowsInterval())
+                .setColumnSort(request.getColumnSort())
+                .setRowSort(request.getRowSort())
+                .setMetricPlacement(request.getMetricPlacement())
+                .setColumnFields(columnsFromNew(request, derivedFieldsColumns))
+                .setRowFields(rowsFromNew(request, derivedFieldsColumns))
+                .setMetrics(fromNew(request.getMetrics(), derivedFieldsColumns))
+                .setFilterGroup(request.getFilterGroup() == null ? null : fromNew(request.getFilterGroup(), derivedFieldsColumns))
+                .setMetricFilterGroup(request.getMetricFilterGroup());
     }
 
     @SuppressWarnings("java:S107")
@@ -194,13 +195,13 @@ public class DerivedFieldService {
         for (final var derivedField : reportDerivedFieldSet) {
             resultCube[startColumn + fieldNumber] = processedCube[fieldIndexes.get(derivedField).getL()];
             cubeFields.add(new ReportFieldData(
-                reportFieldIndex + fieldNumber,
-                (int) reportFieldIndex + fieldNumber,
-                true,
-                fieldIndexes.get(derivedField).getR(),
-                "",
-                derivedFields.get(derivedField.getFieldId()).getName(),
-                derivedFields.get(derivedField.getFieldId()).getDescription()));
+                    reportFieldIndex + fieldNumber,
+                    (int) reportFieldIndex + fieldNumber,
+                    true,
+                    fieldIndexes.get(derivedField).getR(),
+                    "",
+                    derivedFields.get(derivedField.getFieldId()).getName(),
+                    derivedFields.get(derivedField.getFieldId()).getDescription()));
             derivedFieldsColumns.put(derivedField.getFieldId(), reportFieldIndex + fieldNumber);
             fieldNumber++;
         }
@@ -231,24 +232,24 @@ public class DerivedFieldService {
 
     private List<MetricDefinition> fromNew(List<MetricDefinitionNew> metrics, Map<Long, Long> derivedFieldsColumns) {
         return metrics
-            .stream()
-            .map(metric -> new MetricDefinition(metric.getField().getFieldType() == OlapFieldTypes.REPORT_FIELD ? metric.getField().getFieldId() : derivedFieldsColumns.get(metric.getField().getFieldId()), metric.getAggregationType()))
-            .toList();
+                .stream()
+                .map(metric -> new MetricDefinition(metric.getField().getFieldType() == OlapFieldTypes.REPORT_FIELD ? metric.getField().getFieldId() : derivedFieldsColumns.get(metric.getField().getFieldId()), metric.getAggregationType()))
+                .toList();
     }
 
     private FilterGroup fromNew(FilterGroupNew filterGroup, Map<Long, Long> derivedFieldsColumns) {
         return new FilterGroup(
-            filterGroup.getOperationType(),
-            filterGroup.isInvertResult(),
-            filterGroup.getChildGroups().stream().map(o -> fromNew(o, derivedFieldsColumns)).toList(),
-            filterGroup.getFilters().stream().map(filter -> new FilterDefinition(
-                filter.getField().getFieldType() == OlapFieldTypes.REPORT_FIELD ? filter.getField().getFieldId() : derivedFieldsColumns.get(filter.getField().getFieldId()),
-                filter.getFilterType(),
-                filter.isInvertResult(),
-                filter.getRounding(),
-                filter.isCanRounding(),
-                filter.getValues()
-            )).toList()
+                filterGroup.getOperationType(),
+                filterGroup.isInvertResult(),
+                filterGroup.getChildGroups().stream().map(o -> fromNew(o, derivedFieldsColumns)).toList(),
+                filterGroup.getFilters().stream().map(filter -> new FilterDefinition(
+                        filter.getField().getFieldType() == OlapFieldTypes.REPORT_FIELD ? filter.getField().getFieldId() : derivedFieldsColumns.get(filter.getField().getFieldId()),
+                        filter.getFilterType(),
+                        filter.isInvertResult(),
+                        filter.getRounding(),
+                        filter.isCanRounding(),
+                        filter.getValues()
+                )).toList()
         );
     }
 
@@ -264,7 +265,7 @@ public class DerivedFieldService {
     private Map<Long, DerivedFieldResponse> getDerivedFields(long reportId) {
         final var derivedFields = domainService.getDerivedFieldsForReport(reportId);
         return derivedFields.stream()
-            .collect(Collectors.toMap(DerivedFieldResponse::getId, Function.identity()));
+                .collect(Collectors.toMap(DerivedFieldResponse::getId, Function.identity()));
     }
 
     public List<DerivedFieldResponse> getDerivedFieldsByReport(ReportRequest request) {

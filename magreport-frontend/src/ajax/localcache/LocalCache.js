@@ -1,5 +1,6 @@
 import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
 
+
 function LocalCache(){
 
     /*
@@ -18,7 +19,7 @@ function LocalCache(){
         }
         let itemsTypeMap = this.folderDataMap.get(folderItemsType);
 
-        if (folderItemsType === FolderItemTypes.report) {
+        if (folderItemsType === FolderItemTypes.reports) {
             for (let r of folderData.reports){
                 if (r.path){
                     for (let p of r.path){
@@ -42,14 +43,14 @@ function LocalCache(){
             this.itemDataMap.set(folderItemsType, new Map());
         }
         if (folderItemsType === FolderItemTypes.reportsDev){
-            if(!this.itemDataMap.get(FolderItemTypes.report)){
-                this.itemDataMap.set(FolderItemTypes.report, new Map());
+            if(!this.itemDataMap.get(FolderItemTypes.reports)){
+                this.itemDataMap.set(FolderItemTypes.reports, new Map());
             }
         }
         itemsTypeMap = this.itemDataMap.get(folderItemsType);
-        let itemsReportMap = this.itemDataMap.get(FolderItemTypes.report);
+        let itemsReportMap = this.itemDataMap.get(FolderItemTypes.reports);
 
-        let items =  folderItemsType === FolderItemTypes.report ? folderData.reports
+        let items =  folderItemsType === FolderItemTypes.reports ? folderData.reports
                     :folderItemsType === FolderItemTypes.reportsDev ? folderData.reports
                     :folderItemsType === FolderItemTypes.datasource ? folderData.dataSources
                     :folderItemsType === FolderItemTypes.dataset ? folderData.dataSets
@@ -151,11 +152,11 @@ function LocalCache(){
     this.reportInfoMap = new Map();
 
     this.setReportInfo = (reportInfo) => {
-        this.setItemData(FolderItemTypes.report, reportInfo);
+        this.setItemData(FolderItemTypes.reports, reportInfo);
     }
 
     this.getReportInfo = (reportId) => {
-        return this.getItemData(FolderItemTypes.report, reportId);
+        return this.getItemData(FolderItemTypes.reports, reportId);
     }
 
     /*
@@ -265,7 +266,7 @@ function LocalCache(){
         UserRolesInfo
     */
 
-    this.userInfo = null;
+    this.userInfo = localStorage.getItem('userData') ? JSON.parse(localStorage.getItem('userData')) : ''
 
     this.setUserInfo = (userInfo) => {
         userInfo.isAdmin = false

@@ -89,6 +89,7 @@ class ReportDataMapperTest {
                 .setRequirementsLink(LINK)
                 .setFields(Collections.singletonList(new ReportField(ID).setName("field1").setOrdinal(1).setVisible(true)))
                 .setCreatedDateTime(CREATED_DATE_TIME)
-                .setModifiedDateTime(MODIFIED_DATE_TIME);
+                .setModifiedDateTime(MODIFIED_DATE_TIME)
+                .setEncryptFile(true);
     }
 }

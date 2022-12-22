@@ -1,6 +1,10 @@
-import React from 'react';
-import {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSnackbar } from 'notistack';
+
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+
+import { useDispatch } from "react-redux";
+import { editItemNavbar, addItemNavbar } from "redux/actions/navbar/actionNavbar";
 
 // components
 import { CircularProgress } from '@material-ui/core';
@@ -12,7 +16,7 @@ import Box from '@material-ui/core/Box';
 import DesignerPage from '../../Development/Designer/DesignerPage';
 import DesignerTextField from '../../Development/Designer/DesignerTextField';
 import DesignerFolderItemPicker from '../../Development/Designer/DesignerFolderItemPicker';
-import PageTabs from 'main/PageTabs/PageTabs';
+import PageTabs from 'components/PageTabs/PageTabs';
 import DataLoader from 'main/DataLoader/DataLoader';
 import DatasetItem from './DatasetItem'
 import SecurityFilterRoles from "./SecurityFilterRoles";
@@ -22,19 +26,20 @@ import { DatasetItemCSS } from "./SecurityFilterCSS";
 import dataHub from 'ajax/DataHub';
 import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
 
-/**
- * @callback onExit
- */
 
-/**
- * Дизайнер Фильтра безопасности
- * @param {Object} props - параметры компонента
- * @param {String} props.mode - 'edit', 'create' - режим редактирования или создания нового объекта
- * @param {Number} props.securityFilterId - id объекта при редактировании (имеет значение только при mode == 'edit')
- * @param {Number} props.folderId - id папки в которой размещается объект при создании (имеет значение только при mode == 'create')
- * @param {onExit} props.onExit - callback при выходе
- */
-export default function SecurityFilterDesigner(props){
+export default function SecurityFilterDesigner(){
+
+    const { id, folderId } = useParams()
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        if(!id) {
+            dataHub.securityFilterController.getFolder(folderId, handleFoldersLoaded)
+        }
+    }, []) // eslint-disable-line
 
     // const filterDetailsTabIndex = 0;
     // const dataSetsTabIndex = 1;
@@ -42,7 +47,7 @@ export default function SecurityFilterDesigner(props){
     
     const { enqueueSnackbar } = useSnackbar();
     const classes = DatasetItemCSS();
-    const [isAdd, setIsAdd] = useState(props.mode === 'edit' ? false : true)
+    const [isAdd, setIsAdd] = useState(id ? false : true)
 
     const [data, setData] = useState({
         securityFilterName : '',
@@ -58,25 +63,30 @@ export default function SecurityFilterDesigner(props){
         securityFilterDataSets : "Наборы данных"  
     }
 
-    const [pagename, setPagename] = useState(props.mode === 'create' ? "Создание фильтра безопасности" : "Редактирование фильтра безопасности");
+    const [pagename, setPagename] = useState(id ? "Редактирование фильтра безопасности" : "Создание фильтра безопасности");
 
     const [uploading, setUploading] = useState(false);
     const [errorField, setErrorField] = useState({});
     const [selectedFilterInstance, setSelectedFilterInstance] = useState(null)
     const [emptyFields, setEmptyFields] = useState([])
-    const [SFId, setSFId] = useState(props.securityFilterId)
 
     let loadFunc;
     let loadParams = [];
 
-    if(props.mode === 'edit'){
+    if (id) {
         loadFunc = dataHub.securityFilterController.get;
-        loadParams = [SFId];
+        loadParams = [id];
     }
 
     /*
         Data loading
     */
+
+    function handleFoldersLoaded({ok, data}) {
+        if(ok) {
+            dispatch(addItemNavbar('securityFilters', folderId, data.path))
+        }
+    }
 
     function handleDataLoaded(loadedData){
 
@@ -103,6 +113,10 @@ export default function SecurityFilterDesigner(props){
         setSelectedFilterInstance(loadedData.filterInstance)
         setEmptyFields(fields)
         setPagename("Редактирование фильтра безопасности: " + loadedData.name);
+
+        if (id) {
+            dispatch(editItemNavbar('securityFilters', loadedData.name, id, folderId, loadedData.path))
+        }
     }
 
     function handleDataLoadFailed(message){
@@ -162,7 +176,7 @@ export default function SecurityFilterDesigner(props){
         Save and cancel
     */
 
-    function handleSave(needExit=true){
+    function handleSave(needExit = true){
 
         let errorExists = checkHasErrors();
 
@@ -179,11 +193,11 @@ export default function SecurityFilterDesigner(props){
             }
             let dataSets =  data.dataSets.map( (v) => ({dataSetId : v.dataSet.id, fields: v.fields}) ); 
 
-            if(props.mode === 'create' && isAdd === true){
+            if (!id && isAdd === true){
                 setIsAdd(false);
                 dataHub.securityFilterController.add(
                     null,
-                    props.folderId,
+                    Number(folderId),
                     data.securityFilterName,
                     data.securityFilterDescription,
                     operationType,
@@ -195,8 +209,8 @@ export default function SecurityFilterDesigner(props){
             }
             else{
                 dataHub.securityFilterController.edit(
-                    props.securityFilterId || SFId,
-                    props.folderId,
+                    Number(id),
+                    Number(folderId),
                     data.securityFilterName,
                     data.securityFilterDescription,
                     operationType,
@@ -208,23 +222,16 @@ export default function SecurityFilterDesigner(props){
         }
     }
 
-    function handleCancel(){
-        props.onExit();
-    }
-
     function handleAddEditAnswer(needExit, magrepResponse){
         setUploading(false);
         if(magrepResponse.ok){
-            if (needExit){
-                props.onExit();
+            if (needExit) {
+                location.state ? navigate(location.state) : navigate(`/securityFilters/${folderId}`)
+                enqueueSnackbar("Фильтр безопасности успешно сохранен", {variant : "success"});
             }
-            else {
-                setSFId(magrepResponse.data.id)
-            }
-            
         }
         else{
-            let actionWord = props.mode === 'create' ? "создании" : "обновлении";
+            let actionWord = id ? "обновлении" : "создании";
             enqueueSnackbar("Ошибка при " + actionWord + " объекта: " + magrepResponse.data, {variant : "error"});
         }
     }
@@ -348,7 +355,7 @@ export default function SecurityFilterDesigner(props){
         tabcontent: uploading ? <CircularProgress className={classes.progress}/> :
         <DesignerPage 
             onSaveClick={handleSave}
-            onCancelClick={handleCancel}
+            onCancelClick={() => location.state ? navigate(location.state) : navigate(`/securityFilters/${folderId}`)}
             //name = {pagename}
         >
             <DesignerTextField
@@ -377,17 +384,18 @@ export default function SecurityFilterDesigner(props){
                 displayBlock
                 fullWidth
                 error = {errorField.securityFilterInstanceId}
-                disabled={!!SFId}
+                disabled={!!id}
             />
         </DesignerPage>
     })
+
     tabs.push({
         tablabel: "Наборы данных",
         //tabdisabled: data.securityFilterName && data.securityFilterDescription && selectedFilterInstance ? false: true,
         tabcontent: uploading ? <CircularProgress className={classes.progress}/>:
         <DesignerPage
             onSaveClick={handleSave}
-            onCancelClick={handleCancel}
+            onCancelClick={() => () => location.state ? navigate(location.state) : navigate(`/securityFilters/${folderId}`)}
         >
             <div style={{marginTop: '8px'}}>
             {data.dataSets.map((item, index) => 
@@ -423,9 +431,9 @@ export default function SecurityFilterDesigner(props){
         //tabdisabled: data.securityFilterName && data.securityFilterDescription && selectedFilterInstance ? false: true,
         tabcontent: uploading ? <CircularProgress className={classes.progress}/> :
             <SecurityFilterRoles 
-                securityFilterId={SFId}
+                securityFilterId={id}
                 filterInstance={{...selectedFilterInstance}}
-                onExit={props.onExit}
+                onExit={() => location.state ? navigate(location.state) : navigate(`/securityFilters/${folderId}`)}
                 mode='edit'
             />
     })

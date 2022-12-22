@@ -1,5 +1,10 @@
 import React from "react";
-import {connect} from "react-redux";
+
+import { ViewerCSS } from './ViewerCSS';
+
+import { Link } from "react-router-dom";
+
+
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import CardHeader from "@material-ui/core/CardHeader";
@@ -10,18 +15,8 @@ import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
 import {Pageview} from "@material-ui/icons"
 import TableBody from '@material-ui/core/TableBody';
-import {ViewerCSS} from './ViewerCSS';
 
-import {actionViewerViewItem} from "redux/actions/actionViewer";
 import {folderItemTypeName} from "main/FolderContent/FolderItemTypes";
-
-
-/**
- * @callback actionViewerViewItem
- * @param {String} itemType
- * @param {Number} itemId
- * @return {{type: String, itemType: String,  itemId: Number}}
- */
 
 /**
  * Карточка, отображающая дочерний объект в просмотрщике объектов
@@ -31,11 +26,11 @@ import {folderItemTypeName} from "main/FolderContent/FolderItemTypes";
  * @param {String} props.name - имя объекта (отображается в заголовке)
  * @param {Object} props.extraData - дополнительные данные, которые нужно отобразить на карточке
  * @param {Array} props.children - вложенные элементы
- * @param {actionViewerViewItem} props.actionViewerViewItem - action, вызываемый при нажатии иконки "просмотр"
  * @return {JSX.Element}
  * @constructor
  */
-function ViewerChildCard(props) {
+
+export default function ViewerChildCard(props) {
 
     const classes = ViewerCSS();
 
@@ -57,15 +52,6 @@ function ViewerChildCard(props) {
             </TableRow>);
     }
 
-    function onViewItemClick() {
-        if (props.name) {
-            props.actionViewerViewItem(props.itemType, props.id, props.name);
-        } else {
-            props.actionViewerViewItem(props.itemType, props.id);
-        }
-        
-    }
-
     return (
         <Card
             className={classes.field}
@@ -74,10 +60,15 @@ function ViewerChildCard(props) {
             title={props.name || ""}
             subheader={itemTypeName}
             action={
-                <IconButton aria-label="viewItem"
-                            onClick={onViewItemClick}>
-                    <Pageview/>
-                </IconButton>
+                <Link 
+                    to={`/${props.itemType}${props.parentFolderId ? `/${props.parentFolderId}/view/${props.id}` : `/${props.id}`}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                >
+                    <IconButton aria-label="viewItem">
+                        <Pageview/>
+                    </IconButton>
+                </Link>
             }
         />
         <CardContent>
@@ -95,9 +86,3 @@ function ViewerChildCard(props) {
         </CardContent>
     </Card>)
 }
-
-const mapActionsToProps = {
-    actionViewerViewItem,
-}
-
-export default connect(null, mapActionsToProps)(ViewerChildCard);

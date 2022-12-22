@@ -27,6 +27,8 @@ public class ReportDataMapper implements Mapper<ReportData, Report> {
                 source.getDataSet().getSchemaName(),
                 source.getDataSet().getObjectName(),
                 reportFieldMapper.from(source.getFields()).stream().sorted(Comparator.comparingLong(ReportFieldData::ordinal)).collect(Collectors.toList()),
-                filtersMapper.from(source.getFilterReportGroups().stream().filter(o -> o.getParentGroup() == null).findFirst().orElse(null)));
+                filtersMapper.from(source.getFilterReportGroups().stream().filter(o -> o.getParentGroup() == null).findFirst().orElse(null)),
+                source.getEncryptFile()
+        );
     }
 }

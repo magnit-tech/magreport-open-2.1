@@ -9,7 +9,7 @@ import Grid from '@material-ui/core/Grid';
 import { useSnackbar } from 'notistack';
 
 //actions
-import { showAlertDialog, hideAlertDialog } from 'redux/actions/actionsAlertDialog'
+import { showAlertDialog, hideAlertDialog } from 'redux/actions/UI/actionsAlertDialog'
 import { setAggModalParams } from 'redux/actions/olap/olapAction.js'
 
 // magreport
@@ -46,8 +46,7 @@ import validateSaveConfig from 'utils/validateSaveConfig';
  * @param {Number} props.reportId - id отчёта
  * @param {Number} props.folderId - id разработческой папки в которой находится отчет
  * @param {String} props.jobOwnerName - login владельца отчета
- * @param {*} props.fullScreen - признак, является ли режим отображения сводной полноэкранным
- * @param {*} props.onRestartReportClick - function() - callback перезапуска отчёта
+ * @param {*} props.fullScreen - признак, является ли режим отображения сводной полноэкранным\
  * @param {*} props.onViewTypeChange - function() - callback смена вида с сводной на простую таблицу
  * @param {*} props.onFullScreen - function - callback полноэкранный режим
 */
@@ -289,12 +288,10 @@ function PivotPanel(props){
                     newConfiguration.setColumnFrom(0);
                     newConfiguration.setRowFrom(0);
                 }
-
-                const {rowSort, columnSort} = newConfiguration.sortOrder
                 
                 let sortingValuesAreValide = true
 
-                if (!rowSort && !columnSort) {
+                if (!newConfiguration.sortOrder?.rowSort && !newConfiguration.sortOrder?.columnSort) {
                     sortingValuesAreValide = false
                 }
 
@@ -308,8 +305,8 @@ function PivotPanel(props){
                 setSortingValues(sortingValuesAreValide ? newConfiguration.sortOrder : {})
 
             } else {
-                enqueueSnackbar('Не удалось загрузить конфигурацию', {variant : "error"});
-                handleDeleteConfig({id: responseData.reportOlapConfigId})
+                enqueueSnackbar('Не удалось загрузить конфигурацию. Поля в конфигурации не соответсвуют отчету', {variant : "error"});
+                // handleDeleteConfig({id: responseData.reportOlapConfigId})
             }
 
         }
@@ -416,8 +413,8 @@ function PivotPanel(props){
             })
         }
 
-        enqueueSnackbar('Не удалось загрузить конфигурацию. Некорректные данные.', {variant : "error"})
-        return configOlap.current.loadChosenConfig(reportOlapConfigId)
+        enqueueSnackbar('Не удалось загрузить конфигурацию. Поля в конфигурации не соответсвуют отчету', {variant : "error"})
+        return configOlap.current.loadChosenConfig(reportOlapConfigId, (ok) => {})
     }
 
     // Сохраняем по умолчанию для отчета/задания

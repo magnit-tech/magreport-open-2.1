@@ -35,6 +35,7 @@ import static ru.magnit.magreportbackend.controller.ReportController.REPORT_ADD_
 import static ru.magnit.magreportbackend.controller.ReportController.REPORT_DELETE_FAVORITES;
 import static ru.magnit.magreportbackend.controller.ReportController.REPORT_GET;
 import static ru.magnit.magreportbackend.controller.ReportController.REPORT_GET_FAVORITES;
+import static ru.magnit.magreportbackend.controller.ReportController.REPORT_ENCRYPT;
 import static ru.magnit.magreportbackend.controller.ReportJobController.REPORT_JOB_GET_ALL_JOBS;
 import static ru.magnit.magreportbackend.controller.ReportJobController.REPORT_JOB_GET_EXCEL_REPORT_GET;
 import static ru.magnit.magreportbackend.controller.ScheduleController.SCHEDULE_TASK_GET_EXCEL_REPORT;
@@ -78,6 +79,7 @@ public class WebSecurity {
                 .antMatchers(OLAP_GET_PIVOT_TABLE_EXCEL_GET).permitAll()
                 .antMatchers(OLAP_REGISTER_EXTERNAL_SERVICE).permitAll()
                 .antMatchers(OLAP_GET_EXTERNAL_SERVICES).hasAnyAuthority(ADMIN.name())
+                .antMatchers(REPORT_ENCRYPT).hasAnyAuthority(ADMIN.name())
                 .antMatchers(DOMAIN_LIST_SERVICE).permitAll()
                 .antMatchers(EVENT_REGISTER).permitAll()
                 .antMatchers(SCHEDULE_TASK_PROLONGATION, SCHEDULE_TASK_GET_EXCEL_REPORT, SCHEDULE_TASK_MANUAL_START).permitAll()
