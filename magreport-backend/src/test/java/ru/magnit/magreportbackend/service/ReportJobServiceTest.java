@@ -388,7 +388,7 @@ class ReportJobServiceTest {
         verify(jobDomainService).getJobData(any());
         verify(excelTemplateDomainService).getTemplatePathForReport(anyLong(), anyLong());
         verify(excelReportDomainService).saveReportToExcel(any(), any(), anyLong());
-        verify(excelReportDomainService).moveReportToRms(anyLong(), anyLong());
+        verify(excelReportDomainService).moveReportToRms(anyLong(), anyLong(),any(Boolean.class));
         verifyNoMoreInteractions(jobDomainService, excelTemplateDomainService, excelReportDomainService);
     }
 
@@ -441,7 +441,7 @@ class ReportJobServiceTest {
                 3L,
                 isComplete,
                 new DataSourceData(1L, DataSourceTypeEnum.TERADATA, "url", "user", "pwd", Short.valueOf("1")),
-                new ReportData(1L, "name", "desc", "schema", "table", Collections.emptyList(), new ReportFilterGroupData(1L, 1L, "test code", "test code", BinaryBooleanOperations.AND, Collections.emptyList(), Collections.emptyList())),
+                new ReportData(1L, "name", "desc", "schema", "table", Collections.emptyList(), new ReportFilterGroupData(1L, 1L, "test code", "test code", BinaryBooleanOperations.AND, Collections.emptyList(), Collections.emptyList()), true),
                 Collections.emptyList(),
                 Collections.emptyList());
     }

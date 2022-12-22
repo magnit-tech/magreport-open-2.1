@@ -383,9 +383,11 @@ class JobDomainServiceTest {
                                 "PARENT_CODE",
                                 BinaryBooleanOperations.AND,
                                 Collections.emptyList(),
-                                Collections.emptyList())),
+                                Collections.emptyList()),
+                        true),
                 Collections.emptyList(),
                 Collections.emptyList()
+
         );
     }
 

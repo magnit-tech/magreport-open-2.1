@@ -27,6 +27,7 @@ import ru.magnit.magreportbackend.dto.request.folder.FolderTypes;
 import ru.magnit.magreportbackend.dto.request.report.ReportAddFavoritesRequest;
 import ru.magnit.magreportbackend.dto.request.report.ReportAddRequest;
 import ru.magnit.magreportbackend.dto.request.report.ReportEditRequest;
+import ru.magnit.magreportbackend.dto.request.report.ReportEncryptRequest;
 import ru.magnit.magreportbackend.dto.request.report.ReportIdRequest;
 import ru.magnit.magreportbackend.dto.response.dataset.DataSetFieldResponse;
 import ru.magnit.magreportbackend.dto.response.folder.FolderNodeResponse;
@@ -230,6 +231,7 @@ public class ReportDomainService {
         report.setFields(reportFieldMapperDataSet.from(dataSet.getFields()));
         report.getFields().forEach(field -> field.setReport(report).setOrdinal(columnCounter.getAndIncrement()));
         report.setUser(new User(currentUser.getId()));
+        report.setEncryptFile(true);
         reportRepository.save(report);
 
         return report.getId();
@@ -434,6 +436,16 @@ public class ReportDomainService {
             folderCopyIds.add(newFolderId);
         });
         return folderCopyIds;
+    }
+
+    @Transactional
+    public void setReportEncrypt(ReportEncryptRequest request){
+
+        var report = reportRepository.getReferenceById(request.reportId());
+        report.setEncryptFile(request.encrypt());
+        report.setModifiedDateTime(LocalDateTime.now());
+        reportRepository.save(report);
+
     }
 
     private ReportFolder copyFolder(ReportFolder originalFolder, ReportFolder parentFolder, User currentUser, List<ReportFolderRole> destParentFolderRoles) {
