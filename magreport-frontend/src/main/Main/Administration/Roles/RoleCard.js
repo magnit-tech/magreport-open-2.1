@@ -17,12 +17,10 @@ import Checkbox from '@material-ui/core/Checkbox';
 import {FolderItemTypes} from  '../../../FolderContent/FolderItemTypes';
 
 //actions
-import { showAlertDialog, hideAlertDialog } from 'redux/actions/actionsAlertDialog'
+import { showAlertDialog, hideAlertDialog } from 'redux/actions/UI/actionsAlertDialog'
 import { actionRolesChangeWriteRights } from 'redux/actions/admin/actionRoles'
-import { actionEditRoleFromUserClick , actionEditItemClick, actionFolderClick} from 'redux/actions/menuViews/folderActions';
-import actionSetSidebarItem from 'redux/actions/sidebar/actionSetSidebarItem';
+import { actionEditRoleFromUserClick } from 'redux/actions/menuViews/folderActions';
 import { foldersLoading} from 'redux/actions/sidebar/actionFolderTree';
-import {actionViewerViewItem} from "redux/actions/actionViewer";
 
 function RoleCard(props){
 
@@ -51,9 +49,9 @@ function RoleCard(props){
         props.actionRolesChangeWriteRights(props.index, !canWrite)
     }    
 
-    function handleClickView(){
-        props.actionViewerViewItem(FolderItemTypes.roles, props.data.id, props.data.name);
-    }
+    // function handleClickView(){
+    //     props.actionViewerViewItem(FolderItemTypes.roles, props.data.id, props.data.name);
+    // }
 
     function handleRoleEdit(){      
         props.actionEditRoleFromUserClick(FolderItemTypes.roles, props.data.typeId, props.data.id, props.data.name)
@@ -91,7 +89,7 @@ function RoleCard(props){
                 <IconButton 
                     aria-label="view" 
                     color="primary" 
-                    onClick={handleClickView}
+                    // onClick={handleClickView}
                 >
                     <PageviewIcon />
                 </IconButton>
@@ -135,12 +133,8 @@ const mapDispatchToProps = {
     showAlertDialog, 
     hideAlertDialog,
     actionRolesChangeWriteRights,
-    actionEditItemClick,
     actionEditRoleFromUserClick,
-    actionFolderClick,
-    actionSetSidebarItem,
     foldersLoading,
-    actionViewerViewItem
 }
 
 export default connect(null, mapDispatchToProps)(RoleCard);

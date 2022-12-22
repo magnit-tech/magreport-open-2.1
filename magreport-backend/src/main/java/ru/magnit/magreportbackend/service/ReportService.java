@@ -22,6 +22,7 @@ import ru.magnit.magreportbackend.dto.request.folderreport.RoleAddPermissionRequ
 import ru.magnit.magreportbackend.dto.request.report.ReportAddFavoritesRequest;
 import ru.magnit.magreportbackend.dto.request.report.ReportAddRequest;
 import ru.magnit.magreportbackend.dto.request.report.ReportEditRequest;
+import ru.magnit.magreportbackend.dto.request.report.ReportEncryptRequest;
 import ru.magnit.magreportbackend.dto.request.report.ReportIdRequest;
 import ru.magnit.magreportbackend.dto.request.report.ReportRequest;
 import ru.magnit.magreportbackend.dto.request.report.ScheduleReportRequest;
@@ -273,6 +274,10 @@ public class ReportService {
                 });
 
         return reportDomainService.changeParentFolder(request);
+    }
+
+    public void setReportEncrypt(ReportEncryptRequest request){
+        reportDomainService.setReportEncrypt(request);
     }
 
     private void decodeTuples(List<ReportJobFilterResponse> lastParameters) {

@@ -239,6 +239,18 @@ export default function PivotDataProvider(jobId, onTableDataReady, onTableDataLo
                 );
 
                 if(loadingStatus >= 2){
+                    
+                    if(cacheTableData.metrics.length > 0) {
+                        for (let i=0; i<cacheTableData.metrics.length; i++){
+                            cacheTableData.metrics[i].values.forEach((item, index, arr)=> {  
+                                if(item === 'null') {arr[index] = ''}
+                                else if (typeof item ==='object'){
+                                        item.forEach((it, ind, ar)=> {if (it === 'null') {ar[ind] = ''}})
+                                }
+                            })
+                        }
+                    }
+
                     tableData = cacheTableData.subTable(reqWindow.columnFrom, reqWindow.columnCount, reqWindow.rowFrom, reqWindow.rowCount);
                     if(tableData.metrics.length > 0) tableData.metrics.map( (v, index) => (fieldsLists.setDataType(index, v.dataType)) ) 
                     onTableDataReady(tableData);

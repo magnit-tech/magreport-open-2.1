@@ -5,24 +5,17 @@ import {dataHubItemController, folderItemTypeName, FolderItemTypes} from 'main/F
 import {
     FOLDER_CONTENT_LOAD_FAILED,
     FOLDER_CONTENT_LOADED,
-    FOLDER_CONTENT_FOLDER_CLICK, 
-    FOLDER_CONTENT_ITEM_CLICK,
-    FOLDER_CONTENT_EDIT_ITEM_CLICK,
     FOLDER_CONTENT_EDIT_ROLE_USER_CLICK,
-    FOLDER_CONTENT_BACK_EDIT_ROLE_USER_CLICK,
     FOLDER_CONTENT_ITEM_DELETED,
     FOLDER_CONTENT_ITEM_DELETE_FAILED,
     FOLDER_CONTENT_ADD_FOLDER,
     FOLDER_CONTENT_ADD_FOLDER_FAILED,
     FOLDER_CONTENT_FOLDER_ADDED,
-    FOLDER_CONTENT_ADD_ITEM_CLICK,
     FOLDER_CONTENT_EDIT_FOLDER,
     FOLDER_CONTENT_FOLDER_EDITED,
     FOLDER_CONTENT_EDIT_FOLDER_FAILED,
     FOLDER_CONTENT_FOLDER_DELETED,
     FOLDER_CONTENT_DELETE_FOLDER_FAILED,
-    ROLE_USERS_LIST_LOADED,
-    ROLE_USERS_LIST_LOAD_FAILED,
     HIDEALERTDIALOG,
     SHOWALERTDIALOG,
     FOLDER_CONTENT_SEARCH_CLICK,
@@ -33,9 +26,6 @@ import {
     FOLDERS_TREE_CHANGE_PARENT_STARTED, 
     FOLDERS_TREE_PARENT_CHANGED, 
     FOLDERS_TREE_PARENT_CHANGED_FAIL,
-    FOLDER_CONTENT_GET_DEPENDENCIES_START,
-    FOLDER_CONTENT_GET_DEPENDENCIES_LOADED,
-    FOLDER_CONTENT_GET_DEPENDENCIES_FAILED,
     SCHEDULE_TASK_RUN_OK,
     SCHEDULE_TASK_RUN_FAILED,
     FOLDER_CONTENT_CHANGE_PARENT_FOLDER,
@@ -70,57 +60,9 @@ export function actionFolderLoaded(itemsType, folderData, isSortingAvailable=fal
     }
 }
 
-export function actionFolderClick(itemsType, folderId, isFolderItemPicker=false){
-    return{
-        type: FOLDER_CONTENT_FOLDER_CLICK,
-        itemsType : itemsType,
-        folderId : folderId,
-        isFolderItemPicker
-    }
-}
-
-function handleClickRole(magrepResponse){
-    let type = magrepResponse.ok ? ROLE_USERS_LIST_LOADED : ROLE_USERS_LIST_LOAD_FAILED;
-    let data = magrepResponse.data;
-
-    store.dispatch({
-        type: type,
-        data : data
-    });
-}
-
-export function actionItemClick(itemType, itemId){
-    if (itemType === FolderItemTypes.roles){
-        dataHub.roleController.getUsers(itemId, handleClickRole)
-    }
-    return {
-        type: FOLDER_CONTENT_ITEM_CLICK,
-        itemType : itemType,
-        itemId : itemId
-    }
-}
-
-export function actionEditItemClick(itemType, itemId){
-    return {
-        type: FOLDER_CONTENT_EDIT_ITEM_CLICK,
-        itemType : itemType,
-        itemId : itemId
-    }
-}
-
 export function actionEditRoleFromUserClick(itemType, folderId, itemId, itemName){
     return {
         type: FOLDER_CONTENT_EDIT_ROLE_USER_CLICK,
-        itemType : itemType,
-        folderId : folderId,
-        itemId   : itemId,
-        itemName: itemName
-    }
-}
-
-export function actionBackEditRoleFromUserClick(itemType, folderId, itemId, itemName){
-    return {
-        type: FOLDER_CONTENT_BACK_EDIT_ROLE_USER_CLICK,
         itemType : itemType,
         folderId : folderId,
         itemId   : itemId,
@@ -159,7 +101,7 @@ function handleDeleteItemAlertAnswer(answer, entityType, entity){
         }
         
         const itemData = dataHub.localCache.getItemData(entity.itemType, entity.itemId);
-        if (entity.itemType === FolderItemTypes.report){
+        if (entity.itemType === FolderItemTypes.reports){
             serviceCallFunction(entity.parentFolderId, entity.itemId, 
                 magrepResponse => {handleItemDeleted(entity.itemType, entity.parentFolderId, itemData, magrepResponse)});
         }
@@ -332,13 +274,6 @@ export function actionDeleteFolderClick(itemsType, parentFolderId, folderId){
     }
 }
 
-export function actionAddItemClick(itemsType){
-    return {
-        type: FOLDER_CONTENT_ADD_ITEM_CLICK,
-        itemsType: itemsType,
-    }
-}
-
 export function actionSearchClick(itemsType, folderId, searchParams){
     if (searchParams.isRecursive){
         const serviceCallFunction = dataHubItemController(itemsType).search;
@@ -430,32 +365,6 @@ function handleParentFolderTreeChanged(itemsType, folderId, parentFolderId, magr
         itemsType,
         folderId,
         parentFolderId,
-        errorMessage: magrepResponse.ok === false && magrepResponse.data 
-    });
-}
-
-export function actionGetDependencies(itemsType, itemId){
-
-
-    const serviceCallFunction = dataHubItemController(itemsType).getDependencies;
-    
-    serviceCallFunction(itemId, magrepResponse => handleGetDependencies(itemsType, itemId, magrepResponse));
-    
-    return {
-        type: FOLDER_CONTENT_GET_DEPENDENCIES_START,
-        itemsType,
-        itemId,
-    }
-}
-
-function handleGetDependencies(itemsType, itemId, magrepResponse){
-    const type = magrepResponse.ok ? FOLDER_CONTENT_GET_DEPENDENCIES_LOADED : FOLDER_CONTENT_GET_DEPENDENCIES_FAILED
-
-    store.dispatch({
-        type,
-        itemsType,
-        itemId,
-        dependenciesData: magrepResponse.data,
         errorMessage: magrepResponse.ok === false && magrepResponse.data 
     });
 }

@@ -300,7 +300,7 @@ class FilterReportDomainServiceTest {
                 false,
                 new DataSourceData(null, null, null, null, null, null),
                 new ReportData(ID, "", "", "", "", Collections.emptyList(), new ReportFilterGroupData(
-                        ID, ID, "", "", null, Collections.emptyList(), Collections.emptyList())),
+                        ID, ID, "", "", null, Collections.emptyList(), Collections.emptyList()), true),
                 new ArrayList<>(Arrays.asList(
                         new ReportJobFilterData(ID, -1L, ID,"", FilterTypeEnum.VALUE_LIST, FilterOperationTypeEnum.IS_BETWEEN, "*", Collections.singletonList(
                                 new ReportJobTupleData(

@@ -16,22 +16,19 @@ import AddButton from '../../../FolderContent/AddButton';
 
 // local
 import dataHub from "ajax/DataHub";
-import {actionAsmAddItemClick, actionAmsRefresh} from "redux/actions/admin/actionAsm";
-import {ASMCSS} from "./ASMCSS";
-
-/**
- * @callback actionAsmAddItemClick
- */
+import { actionAmsRefresh } from "redux/actions/admin/actionAsm";
+import { addNavbar } from "redux/actions/navbar/actionNavbar";
+import { ASMCSS } from "./ASMCSS";
 
 /**
  * Список всех объектов ASM
  * @param {Object} props - component properties
  * @param {Array} props.data - начальное состояние компонента
- * @param {actionAsmAddItemClick} props.actionAsmAddItemClick - callback, вызываемый при нажатии кнопки "Добавить"
  * @returns {JSX.Element}
  * @constructor
  */
 function ASMList(props) {
+    
     const classes = ASMCSS();
     const {enqueueSnackbar} = useSnackbar();
 
@@ -41,17 +38,14 @@ function ASMList(props) {
     const [isSel, setIsSel] = useState(false);
 
     useEffect(() => {
+        props.addNavbar('Управление ASM', 'asm')
         setData(props.data);
-    }, [props.data]);
+    }, [props.data, props]);
 
     function handleSelect(e) {
         const newData = data.map(item => ({...item, isSelected: e}));
         setData(newData);
         setIsSel(e);
-    }
-
-    function handleAddButtonClick() {
-        props.actionAsmAddItemClick();
     }
 
     function handleRefreshButtonClick() {
@@ -140,7 +134,7 @@ function ASMList(props) {
             <AddButton
                 showCreateItem = {true}
                 itemName = {"объект ASM"}
-                onAddItemClick = {handleAddButtonClick}
+                onAddItemClick = {() => props.onAddAsmClick()}
             />
 
         </div>
@@ -154,8 +148,8 @@ const mapStateToProps = state => {
 };
 
 const mapDispatchToProps = {
-    actionAsmAddItemClick,
     actionAmsRefresh,
+    addNavbar
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ASMList);

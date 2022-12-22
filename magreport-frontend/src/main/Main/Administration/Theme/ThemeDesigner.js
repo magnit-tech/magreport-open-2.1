@@ -35,7 +35,7 @@ import dataHub from "ajax/DataHub";
 //local
 import { actionThemeDesignSetValue } from  '../../../../redux/actions/admin/actionThemeDesign';
 import DataLoader from "main/DataLoader/DataLoader";
-import PageTabs from "main/PageTabs/PageTabs";
+import PageTabs from "components/PageTabs/PageTabs";
 import DesignerTextField from "main/Main/Development/Designer/DesignerTextField";
 
 // styles
