@@ -49,6 +49,9 @@ public class Report extends EntityWithName {
     @Column(name = "REQUIREMENTS_URL")
     private String requirementsLink;
 
+    @Column(name = "ENCRYPT_FILE")
+    private Boolean encryptFile;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "REPORT_FOLDER_ID")
     private ReportFolder folder;
