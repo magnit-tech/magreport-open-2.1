@@ -19,6 +19,7 @@ import ru.magnit.magreportbackend.dto.request.folder.FolderSearchRequest;
 import ru.magnit.magreportbackend.dto.request.report.ReportAddFavoritesRequest;
 import ru.magnit.magreportbackend.dto.request.report.ReportAddRequest;
 import ru.magnit.magreportbackend.dto.request.report.ReportEditRequest;
+import ru.magnit.magreportbackend.dto.request.report.ReportEncryptRequest;
 import ru.magnit.magreportbackend.dto.request.report.ReportIdRequest;
 import ru.magnit.magreportbackend.dto.request.report.ReportRequest;
 import ru.magnit.magreportbackend.dto.request.report.ScheduleReportRequest;
@@ -57,6 +58,7 @@ public class ReportController {
     public static final String REPORT_SEARCH = "/api/v1/report/search";
     public static final String REPORT_GET_SCHEDULE = "/api/v1/report/get-schedule";
     public static final String REPORT_COPY_FOLDER = "/api/v1/report/copy-folder";
+    public static final String REPORT_ENCRYPT = "/api/v1/report/encrypt";
 
     private final ReportService service;
 
@@ -425,6 +427,28 @@ public class ReportController {
                 .success(true)
                 .message("Folders successfully copied")
                 .data(service.copyReportFolder(request))
+                .build();
+
+        LogHelper.logInfoUserMethodEnd();
+        return response;
+    }
+
+    @Operation(summary = "Управление шифрованием выгрузки в файл")
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping(value = REPORT_ENCRYPT,
+            consumes = APPLICATION_JSON_VALUE,
+            produces = APPLICATION_JSON_VALUE)
+    public ResponseBody<Object> setReportEncrypt(
+            @RequestBody
+            ReportEncryptRequest request) {
+        LogHelper.logInfoUserMethodStart();
+
+        service.setReportEncrypt(request);
+
+        var response = ResponseBody.builder()
+                .success(true)
+                .message("Encrypt report successfully updated")
+                .data(null)
                 .build();
 
         LogHelper.logInfoUserMethodEnd();

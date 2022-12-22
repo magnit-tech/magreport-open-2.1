@@ -13,7 +13,8 @@ public record ReportBackupTuple(
         String name,
         String description,
         LocalDateTime created,
-        LocalDateTime modified
+        LocalDateTime modified,
+        Boolean encrypt
 
 ) {
 }

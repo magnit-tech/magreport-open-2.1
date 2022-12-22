@@ -262,9 +262,10 @@ public class OlapService {
         var resultCube = getCube(request.getCubeRequest());
         var metadata = jobDomainService.getJobMetaData(request.getCubeRequest().getJobId());
         var config = olapConfigurationDomainService.getReportOlapConfiguration(request.getConfiguration());
+        var encrypt = jobDomainService.getJobData(request.getCubeRequest().getJobId()).reportData().encryptFile();
 
         var code = (long) (Math.random() * 1000000);
-        excelReportDomainService.getExcelPivotTable(resultCube, metadata, objectMapper.readValue(config.getOlapConfig().getData(), HashMap.class), request, code);
+        excelReportDomainService.getExcelPivotTable(resultCube, metadata, objectMapper.readValue(config.getOlapConfig().getData(), HashMap.class), request, code, encrypt);
 
         return new TokenResponse(tokenService.getToken(request.getCubeRequest().getJobId(), code));
     }
