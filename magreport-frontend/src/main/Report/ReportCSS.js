@@ -23,8 +23,7 @@ export const ReportDataCSS = makeStyles(theme => ({
     container: {
         position: 'absolute',
         top: 0,
-        bottom: 0
-        //maxHeight: `calc(100vh - ${StyleConsts.headerHeight} - ${StyleConsts.breadHeight} - ${StyleConsts.reportPaginationHeight} - 12px)`,      
+        bottom: 0     
     },
     repExec: {
         display: 'flex',
@@ -101,7 +100,6 @@ export const ReportStarterCSS = makeStyles(theme => ({
     filterRoot: {
         overflow: 'auto',
         padding: "12px 16px",
-        //maxHeight: `calc(100vh  - 60px -  ${StyleConsts.headerHeight} - ${StyleConsts.breadHeight})`,
         minWidth: '510px'
     },
     reportStarterRelative: {

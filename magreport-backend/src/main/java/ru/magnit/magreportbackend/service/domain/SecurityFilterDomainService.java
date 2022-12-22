@@ -112,7 +112,11 @@ public class SecurityFilterDomainService {
 
     @Transactional
     public SecurityFilterResponse getSecurityFilter(Long securityFilterId) {
-        return securityFilterResponseMapper.from(repository.getReferenceById(securityFilterId));
+
+        var securityFilter = repository.getReferenceById(securityFilterId);
+        var response = securityFilterResponseMapper.from(securityFilter);
+        response.setPath(getPathToFolder(securityFilter.getFolder().getId()));
+        return response;
     }
 
     @Transactional
@@ -183,12 +187,16 @@ public class SecurityFilterDomainService {
                 securityFilterFolderResponseMapper.shallowMap(folderRepository.getAllByParentFolderIsNull()),
                 Collections.emptyList(),
                 FolderAuthorityEnum.NONE,
+                Collections.emptyList(),
                 LocalDateTime.now(),
                 LocalDateTime.now());
         } else {
             var folder = folderRepository.getReferenceById(folderId);
 
-            return securityFilterFolderResponseMapper.from(folder);
+            var response = securityFilterFolderResponseMapper.from(folder);
+            response.setPath(getPathToFolder(folderId));
+
+            return response;
         }
     }
 

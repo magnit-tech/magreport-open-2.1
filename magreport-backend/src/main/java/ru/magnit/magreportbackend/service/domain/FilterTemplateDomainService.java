@@ -77,7 +77,9 @@ public class FilterTemplateDomainService {
                     .setModified(LocalDateTime.now());
         } else {
             var folder = folderRepository.getReferenceById(id);
-            return filterTemplateFolderResponseMapper.from(folder);
+            var response = filterTemplateFolderResponseMapper.from(folder);
+            response.setPath(getPathToFolder(id));
+            return response;
         }
     }
 
@@ -180,7 +182,9 @@ public class FilterTemplateDomainService {
     @Transactional
     public FilterTemplateResponse getFilterTemplate(Long id) {
         var filterTemplate = filterTemplateRepository.getReferenceById(id);
-        return filterTemplateResponseMapper.from(filterTemplate);
+        var response =  filterTemplateResponseMapper.from(filterTemplate);
+        response.setPath(getPathToFolder(filterTemplate.getFolder().getId()));
+        return response;
     }
 
     @Transactional
