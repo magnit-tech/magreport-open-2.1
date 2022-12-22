@@ -130,7 +130,7 @@ export default function PlainTablePanel(props){
     }
 
     function handleViewTypeChange(){
-        props.onViewTypeChange('PivotTable');
+        props.onViewTypeChange('pivot');
     }
     
     function TablePaginationActions(props) {

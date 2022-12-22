@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { connect } from 'react-redux';
 
+import { useSearchParams } from 'react-router-dom'
+
 import { DragDropContext } from  'react-beautiful-dnd';
 import Measure from 'react-measure';
 import Dialog from '@material-ui/core/Dialog';
@@ -55,6 +57,8 @@ function PivotPanel(props){
 
     const styles = PivotCSS();
     const { enqueueSnackbar } = useSnackbar();
+
+    const [searchParams, setSearchParams] = useSearchParams();
 
     useEffect(() => {
         // Проверка пользователя на разработчика отчета
@@ -209,8 +213,15 @@ function PivotPanel(props){
         let newConfiguration = new PivotConfiguration(pivotConfiguration);
         newConfiguration.create({}, data);
 
-        // Загрузка текущей конфигурации
-        dataHub.olapController.getCurrentConfig(props.jobId, ({ok, data}) => ok && handleGetCurrentConfig(data, newConfiguration))
+        const configId = searchParams.get('configId')
+
+        if(configId) {
+            // Загрузка определенной конфигурации
+            dataHub.olapController.getCurrentConfig(props.jobId, ({ok, data}) => ok && handleGetChoosenCurrentConfig(data, newConfiguration, configId))
+        } else {
+            // Загрузка текущей конфигурации
+            dataHub.olapController.getCurrentConfig(props.jobId, ({ok, data}) => ok && handleGetCurrentConfig(data, newConfiguration))
+        }
     }
 
     function handleTableDataReady(newTableData){
@@ -271,13 +282,53 @@ function PivotPanel(props){
     // Получение текущей конфигурации
     function handleGetCurrentConfig(responseData, newConfiguration){
         configOlap.current.createLists(responseData)
-
+        
         if (responseData.olapConfig.data.length > 0) {
+            const configData = JSON.parse(responseData.olapConfig.data)
+            const { columnFrom, columnCount, rowFrom, rowCount } = configData
 
-            const configData = JSON.parse(responseData.olapConfig.data),
-                  { columnFrom, columnCount, rowFrom, rowCount } = configData
+            // Проверка на валидацию сохраненных полей конфигурации olapConfig с полями из Metadata
+            const isSaveConfigValide = !validateSaveConfig(configData.fieldsLists, newConfiguration.fieldsLists.allFields)
 
-            
+            if (isSaveConfigValide) {
+                newConfiguration.restore(configData);
+                if (columnFrom>columnCount || rowFrom>rowCount ) {
+                    newConfiguration.setColumnFrom(0);
+                    newConfiguration.setRowFrom(0);
+                }
+                
+                let sortingValuesAreValide = true
+
+                if (!newConfiguration.sortOrder?.rowSort && !newConfiguration.sortOrder?.columnSort) {
+                    sortingValuesAreValide = false
+                }
+
+                dataProviderRef.current.loadDataForNewFieldsLists(newConfiguration.fieldsLists, newConfiguration.filterGroup, newConfiguration.metricFilterGroup, sortingValuesAreValide ? newConfiguration.sortOrder : {}, newConfiguration.columnFrom, columnCount, newConfiguration.rowFrom, rowCount);
+    
+                oldAndNewConfiguration.current = {
+                    oldConfiguration: new PivotConfiguration(pivotConfiguration),
+                    newConfiguration: new PivotConfiguration(newConfiguration)
+                }
+
+                setSortingValues(sortingValuesAreValide ? newConfiguration.sortOrder : {})
+
+            } else {
+                enqueueSnackbar('Не удалось загрузить конфигурацию. Поля в конфигурации не соответсвуют отчету', {variant : "error"});
+            }
+        }
+
+        setSearchParams({view: 'pivot'})
+
+        setPivotConfiguration(newConfiguration);
+    }
+
+    // Получение выбранной конфигурации
+    function handleGetChoosenCurrentConfig(responseData, newConfiguration, configId){
+        configOlap.current.createLists(responseData)
+        
+        dataHub.olapController.getChoosenConfig(configId, ({ok, data}) => { if(ok) {
+            const configData = JSON.parse(data.olapConfig.data),
+                    { columnFrom, columnCount, rowFrom, rowCount } = configData
 
             // Проверка на валидацию сохраненных полей конфигурации olapConfig с полями из Metadata
             const isSaveConfigValide = !validateSaveConfig(configData.fieldsLists, newConfiguration.fieldsLists.allFields)
@@ -304,12 +355,21 @@ function PivotPanel(props){
 
                 setSortingValues(sortingValuesAreValide ? newConfiguration.sortOrder : {})
 
+                configOlap.current.loadChosenConfig(data.olapConfig.data, (ok) => {
+                    if (ok) {
+                        handleSetConfigDialog('closeConfigDialog')
+                        enqueueSnackbar('Конфигурация "' + data.olapConfig.name + '" успешно загружена' , {variant : "success"});
+                    } else {
+                        enqueueSnackbar('Не удалось загрузить конфигурацию "' + data.olapConfig.name + '". Некорректные данные.', {variant : "error"});
+                    }
+                })
+
             } else {
                 enqueueSnackbar('Не удалось загрузить конфигурацию. Поля в конфигурации не соответсвуют отчету', {variant : "error"});
-                // handleDeleteConfig({id: responseData.reportOlapConfigId})
             }
+        }})
 
-        }
+        setSearchParams({view: 'pivot'})
 
         setPivotConfiguration(newConfiguration);
     }
@@ -403,6 +463,7 @@ function PivotPanel(props){
 
         if (isCertainConfigValide) {
             setTableDataLoadStatus(1);
+            setSearchParams({view: 'pivot'})
             return configOlap.current.loadChosenConfig(data, (ok) => {
                 if (ok) {
                     resetDataLoader()
