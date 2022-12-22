@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
 @Controller
@@ -20,7 +21,9 @@ public class IndexHtmlController {
     }
 
     @GetMapping(value = "/ui/{*ignored}")
-    public RedirectView redirectUIToIndex(@PathVariable String ignored) {
-        return new RedirectView(indexHtmlUrl);
+    public ModelAndView redirectUIToIndex(@PathVariable String ignored) {
+        final var modelAndView = new ModelAndView();
+        modelAndView.setViewName(indexHtmlUrl);
+        return modelAndView;
     }
 }
