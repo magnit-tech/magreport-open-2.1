@@ -224,7 +224,7 @@ export default function FilterInstanceDesigner(){
 
     function handleAddEditResult(magrepResponse){
         if(magrepResponse.ok){
-            location.state ? navigate(location.state) : navigate(`/filterInstance/${folderId}`)
+            location.state ? navigate(location.state) : navigate(`/ui/filterInstance/${folderId}`)
             enqueueSnackbar("Экземпляр фильтра успешно сохранен", {variant : "success"});
         }
         else{
@@ -251,7 +251,7 @@ export default function FilterInstanceDesigner(){
 
                     <DesignerPage 
                         onSaveClick={handleSave}
-                        onCancelClick={() => location.state ? navigate(location.state) : navigate(`/filterInstance/${folderId}`)}
+                        onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/filterInstance/${folderId}`)}
                         name = {pageName}
                     >
                         <DesignerTextField

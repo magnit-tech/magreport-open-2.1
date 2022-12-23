@@ -226,7 +226,7 @@ export default function SecurityFilterDesigner(){
         setUploading(false);
         if(magrepResponse.ok){
             if (needExit) {
-                location.state ? navigate(location.state) : navigate(`/securityFilters/${folderId}`)
+                location.state ? navigate(location.state) : navigate(`/ui/securityFilters/${folderId}`)
                 enqueueSnackbar("Фильтр безопасности успешно сохранен", {variant : "success"});
             }
         }
@@ -355,7 +355,7 @@ export default function SecurityFilterDesigner(){
         tabcontent: uploading ? <CircularProgress className={classes.progress}/> :
         <DesignerPage 
             onSaveClick={handleSave}
-            onCancelClick={() => location.state ? navigate(location.state) : navigate(`/securityFilters/${folderId}`)}
+            onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/securityFilters/${folderId}`)}
             //name = {pagename}
         >
             <DesignerTextField
@@ -395,7 +395,7 @@ export default function SecurityFilterDesigner(){
         tabcontent: uploading ? <CircularProgress className={classes.progress}/>:
         <DesignerPage
             onSaveClick={handleSave}
-            onCancelClick={() => () => location.state ? navigate(location.state) : navigate(`/securityFilters/${folderId}`)}
+            onCancelClick={() => () => location.state ? navigate(location.state) : navigate(`/ui/securityFilters/${folderId}`)}
         >
             <div style={{marginTop: '8px'}}>
             {data.dataSets.map((item, index) => 
@@ -433,7 +433,7 @@ export default function SecurityFilterDesigner(){
             <SecurityFilterRoles 
                 securityFilterId={id}
                 filterInstance={{...selectedFilterInstance}}
-                onExit={() => location.state ? navigate(location.state) : navigate(`/securityFilters/${folderId}`)}
+                onExit={() => location.state ? navigate(location.state) : navigate(`/ui/securityFilters/${folderId}`)}
                 mode='edit'
             />
     })

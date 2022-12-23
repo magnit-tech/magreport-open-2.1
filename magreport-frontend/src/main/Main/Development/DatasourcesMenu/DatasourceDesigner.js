@@ -179,7 +179,7 @@ function DatasourceDesigner(props){
     function handleAddEditAnswer(magrepResponse){
         setUploading(false);
         if(magrepResponse.ok){
-            location.state ? navigate(location.state) : navigate(`/datasource/${folderId}`)
+            location.state ? navigate(location.state) : navigate(`/ui/datasource/${folderId}`)
         }
         else{
             let actionWord = id ? "обновлении" : "создании";
@@ -225,7 +225,7 @@ function DatasourceDesigner(props){
 
                 <DesignerPage 
                     onSaveClick={handleSave}
-                    onCancelClick={() => location.state ? navigate(location.state) : navigate(`/datasource/${folderId}`)}
+                    onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/datasource/${folderId}`)}
                     name = {pageName}
                 >
                     <DesignerTextField
