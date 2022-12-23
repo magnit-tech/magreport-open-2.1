@@ -42,7 +42,7 @@ import Typography from '@material-ui/core/Typography';
     const classes = ViewerCSS();
 
     function onEditClick() {
-        navigate(`/${props.itemType}/${props.folderId ? props.folderId + '/' : ''}edit/${props.id}`, {state: location.pathname})
+        navigate(`/ui/${props.itemType}/${props.folderId ? props.folderId + '/' : ''}edit/${props.id}`, {state: location.pathname})
     }
 
     return (

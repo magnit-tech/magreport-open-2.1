@@ -105,7 +105,7 @@ export default function ServerMailTemplateDesigner(props) {
             enqueueSnackbar(`При обновлении шаблона возникла ошибка: ${response.data}`,
                 {variant: "error"});
         } else {
-            location.state ? navigate(location.state) : navigate(`/systemMailTemplates/${folderId}`)
+            location.state ? navigate(location.state) : navigate(`/ui/systemMailTemplates/${folderId}`)
             enqueueSnackbar("Шаблон письма успешно сохранен", {variant : "success"});
         }
     }
@@ -174,7 +174,7 @@ export default function ServerMailTemplateDesigner(props) {
     >
         <DesignerPage
             onSaveClick={handleSave}
-            onCancelClick={() => location.state ? navigate(location.state) : navigate(`/systemMailTemplates/${folderId}`)}
+            onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/systemMailTemplates/${folderId}`)}
             name={'Редактирование письма отправки: ' + data.code}
         >
             <DesignerTextField

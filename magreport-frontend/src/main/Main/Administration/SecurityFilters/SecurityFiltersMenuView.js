@@ -30,16 +30,16 @@ function SecurityFiltersMenuView(props){
 
 
     function handleFolderClick(folderId) {
-        navigate(`/securityFilters/${folderId}`)
+        navigate(`/ui/securityFilters/${folderId}`)
     }
     function handleItemClick(securityFilterId) {
-        navigate(`/securityFilters/${id}/view/${securityFilterId}`, {state: location.pathname})
+        navigate(`/ui/securityFilters/${id}/view/${securityFilterId}`, {state: location.pathname})
     }
     function handleEditItemClick(securityFilterId) {
-        navigate(`/securityFilters/${id}/edit/${securityFilterId}`, {state: location.pathname})
+        navigate(`/ui/securityFilters/${id}/edit/${securityFilterId}`, {state: location.pathname})
     }
     function handleAddItemClick(folderItemsType) {
-        navigate(`/securityFilters/${id}/add`, {state: location.pathname})
+        navigate(`/ui/securityFilters/${id}/add`, {state: location.pathname})
     }
 
     return(

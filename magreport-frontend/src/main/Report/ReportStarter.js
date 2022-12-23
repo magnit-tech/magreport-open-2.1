@@ -189,7 +189,7 @@ export default function ReportStarter(props){
     }
 
     function handleCancel(){
-        location.state ? navigate(location.state) : navigate('/reports')
+        location.state ? navigate(location.state) : navigate('/ui/reports')
     }
 
     function handleChangeFilterValue(newFilterValue){
@@ -236,7 +236,7 @@ export default function ReportStarter(props){
         // data - ответ от /report-job/add
         // console.log(data.id);
         // setReportJobId(data.id);
-        navigate(`/report/${data.id}`)
+        navigate(`/ui/report/${data.id}`)
 
     }
 
