@@ -17,7 +17,8 @@ import {
     FAVORITES_ADD_START, 
     FAVORITES_ADDED, 
     FAVORITES_DELETE_START, 
-    FAVORITES_DELETED
+    FAVORITES_DELETED,
+    JOBS_FILTER
 } from 'redux/reduxTypes';
 import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
 // import {FLOW_STATE_BROWSE_FOLDER} from './menuViews/flowStates';    
@@ -367,7 +368,18 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
             else {
                 return state
             }
-        
+        case JOBS_FILTER:
+            let newState = {}
+                if (action.filters.isCleared){
+                    newState = {...state}
+                    delete newState.filters
+                }
+                else {
+                    newState = {
+                        ...state, filters: action.filters
+                    }
+                }
+                return newState
         default:
             return state;
     }    

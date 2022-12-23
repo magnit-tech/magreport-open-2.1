@@ -61,10 +61,8 @@ function UsersJobsMenuView(props){
                     showItemControls = {false}
                     pagination = {true}
                     dialog = {props.dialog}
-
                     onItemClick = {handleItemClick}
                     onReportRunClick = {handleReportRunClick}
-
                     onFilterClick = {filters => {props.actionFilterJobs(folderItemsType, filters)}}
                     onRefreshClick = {handleRefreshFolder}
                     onJobCancelClick = {(jobIndex, jobId) => {props.actionJobCancel(folderItemsType, jobIndex, jobId)}}
@@ -81,7 +79,6 @@ const mapStateToProps = state => {
     return {
         state : state.folderData,
         currentFolderData : state.folderData.currentFolderData,
-        filteredJobs : state.folderData.filteredJobs,
         filters : state.folderData.filters
     }
 }
