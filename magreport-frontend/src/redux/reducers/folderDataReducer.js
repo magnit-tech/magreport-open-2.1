@@ -18,7 +18,8 @@ import {
     FAVORITES_ADDED, 
     FAVORITES_DELETE_START, 
     FAVORITES_DELETED,
-    JOBS_FILTER
+    JOBS_FILTER,
+    TASK_SWITCHED
 } from 'redux/reduxTypes';
 import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
 // import {FLOW_STATE_BROWSE_FOLDER} from './menuViews/flowStates';    
@@ -349,18 +350,39 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
             return {...state, currentFolderData: folderData}
 
         case JOBS_FILTER:
-            let newState = {}
-            if (action.filters.isCleared){
-                newState = {...state}
-                delete newState.filters
-            }
-            else {
-                newState = {
-                    ...state, filters: action.filters
+            let newStateJF = {}
+                if (action.filters.isCleared){
+                    newStateJF = {...state}
+                    delete newStateJF.filters
                 }
-            }
-            return newState
-
+                else {
+                    newStateJF = {
+                        ...state, filters: action.filters
+                    }
+                }
+                return newStateJF
+        case TASK_SWITCHED:
+                        let newStateTS = {...state}
+                        const fullArr = [...state.currentFolderData.scheduleTasks]
+                        const filteredArr = [...state.filteredFolderData.scheduleTasks]
+        
+                        let newTask = {};
+        
+                        if (state.searchParams){
+                            newTask = {...filteredArr[action.taskIndex], status: action.status}
+                            let indexFullArr = fullArr.findIndex(item => item.id === action.taskId)
+                            filteredArr.splice(action.taskIndex, 1, newTask)
+                            fullArr.splice(indexFullArr, 1, newTask)
+                            
+                        }
+                        else {
+                            newTask = {...fullArr[action.taskIndex], status: action.status}
+                            fullArr.splice(action.taskIndex, 1, newTask)
+                            filteredArr.splice(action.taskIndex, 1, newTask)
+                        }
+                        newStateTS.filteredFolderData.scheduleTasks = filteredArr;
+                        newStateTS.currentFolderData.scheduleTasks = fullArr;
+                        return newStateTS
         default:
             return state;
     }    
