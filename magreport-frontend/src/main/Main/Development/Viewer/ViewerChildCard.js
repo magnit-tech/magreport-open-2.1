@@ -61,7 +61,7 @@ export default function ViewerChildCard(props) {
             subheader={itemTypeName}
             action={
                 <Link 
-                    to={`/${props.itemType}${props.parentFolderId ? `/${props.parentFolderId}/view/${props.id}` : `/${props.id}`}`} 
+                    to={`/ui/${props.itemType}${props.parentFolderId ? `/${props.parentFolderId}/view/${props.id}` : `/${props.id}`}`} 
                     target="_blank" 
                     rel="noopener noreferrer"
                 >

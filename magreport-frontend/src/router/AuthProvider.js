@@ -74,7 +74,7 @@ export const AuthProvider = ({children}) => {
 	const signout = () => {
         user.current = null
         localStorage.removeItem('userData')
-		navigate('/login')
+		navigate('/ui/login')
 	}
 
     const setUserData = (userData) => {

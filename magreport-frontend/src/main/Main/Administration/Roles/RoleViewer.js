@@ -228,7 +228,7 @@ export default function RoleViewer() {
                 folderId = {folderId}
                 itemType={FolderItemTypes.roles}
                 disabledPadding={true}
-                onOkClick={() => location.state ? navigate(location.state) : navigate(`/roles/${folderId}`)}
+                onOkClick={() => location.state ? navigate(location.state) : navigate(`/ui/roles/${folderId}`)}
                 readOnly={!hasRWRight}
             >
                 <PageTabs

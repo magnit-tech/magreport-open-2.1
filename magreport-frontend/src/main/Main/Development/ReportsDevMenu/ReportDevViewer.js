@@ -169,7 +169,7 @@ function ReportDevViewer({actionLoaded = f=>f, actionLoadedFailed = f=>f, viewIt
                     id={data.id}
                     folderId = {folderId}
                     itemType={FolderItemTypes.reportsDev}
-                    onOkClick={() => location.state ? navigate(location.state) : navigate(`/reportsDev/${folderId}`)}
+                    onOkClick={() => location.state ? navigate(location.state) : navigate(`/ui/reportsDev/${folderId}`)}
                     disabledPadding={true}
                 >
                     <PageTabs

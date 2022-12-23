@@ -45,12 +45,12 @@ export default function PublishReportDesigner(){
         else{
             enqueueSnackbar("Ошибка при публикации объекта: " + magrepResponse.data, {variant : "error"});
         }
-        navigate(`/reports/${folderId}`)
+        navigate(`/ui/reports/${folderId}`)
     }
 
     const handleClose = () => {
         setDialogOpen(false)
-        navigate(`/reports/${folderId}`)
+        navigate(`/ui/reports/${folderId}`)
     }
     
     return(

@@ -61,10 +61,10 @@ function FilterTemplatesMenuView(props){
 
     
     function handleFolderClick(folderId) {
-        navigate(`/filterTemplate/${folderId}`)
+        navigate(`/ui/filterTemplate/${folderId}`)
     }
     function handleItemClick(filterTemplateId) {
-        navigate(`/filterTemplate/${id}/view/${filterTemplateId}`, {state: location.pathname})
+        navigate(`/ui/filterTemplate/${id}/view/${filterTemplateId}`, {state: location.pathname})
     }
 
 

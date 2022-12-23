@@ -69,7 +69,7 @@ export default function DependencyViewer(props){
                                             {row.path && row.path.length > 0
                                                 ? 
                                                     <Link 
-                                                        to={`/${value.itemsType}/${row.path[row.path.length - 1].id}`} 
+                                                        to={`/ui/${value.itemsType}/${row.path[row.path.length - 1].id}`} 
                                                         target="_blank" 
                                                         rel="noopener noreferrer"
                                                         color="inherit"
