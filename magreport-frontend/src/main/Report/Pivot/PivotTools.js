@@ -27,7 +27,7 @@ import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
 export default function PivotTools(props){
 
     function handleViewTypeChange(){
-        props.onViewTypeChange('PlainTable');
+        props.onViewTypeChange('plain');
     }
 
     return(
