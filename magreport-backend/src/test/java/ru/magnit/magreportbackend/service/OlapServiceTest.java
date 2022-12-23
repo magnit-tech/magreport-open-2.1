@@ -1,5 +1,7 @@
 package ru.magnit.magreportbackend.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,10 +18,17 @@ import ru.magnit.magreportbackend.dto.request.olap.Interval;
 import ru.magnit.magreportbackend.dto.request.olap.MetricDefinition;
 import ru.magnit.magreportbackend.dto.request.olap.MetricFilterGroup;
 import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequest;
+import ru.magnit.magreportbackend.dto.request.olap.OlapExportPivotTableRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldItemsRequest;
+import ru.magnit.magreportbackend.dto.response.olap.OlapConfigResponse;
+import ru.magnit.magreportbackend.dto.response.olap.ReportOlapConfigResponse;
+import ru.magnit.magreportbackend.service.domain.ExcelReportDomainService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
+import ru.magnit.magreportbackend.service.domain.OlapConfigurationDomainService;
 import ru.magnit.magreportbackend.service.domain.OlapDomainService;
+import ru.magnit.magreportbackend.service.domain.TokenService;
 
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -28,6 +37,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
@@ -45,6 +55,17 @@ class OlapServiceTest {
 
     @Mock
     private JobDomainService jobDomainService;
+
+    @Mock
+    private ObjectMapper objectMapper;
+
+    @Mock
+    private ExcelReportDomainService excelReportDomainService;
+
+    @Mock
+    private TokenService tokenService;
+    @Mock
+    private OlapConfigurationDomainService olapConfigurationDomainService;
 
     @Test
     void getCube() {
@@ -114,6 +135,49 @@ class OlapServiceTest {
         verify(domainService).getCubeData(any());
         verify(domainService).filterCubeData(any(), any());
         verifyNoMoreInteractions(jobDomainService, domainService);
+
+    }
+
+
+    @Test
+    void getInfoAboutCubes() {
+        when(domainService.getInfoAboutCubes()).thenReturn(Collections.emptyList());
+
+        var result = service.getInfoAboutCubes();
+
+        assertTrue(result.isEmpty());
+
+        verify(domainService).getInfoAboutCubes();
+        verifyNoMoreInteractions(domainService);
+    }
+
+    @Test
+    void exportPivotTableExcel() throws JsonProcessingException {
+
+        when(domainService.getCubeData(any())).thenReturn(getTestCubeData());
+        when(domainService.filterCubeData(any(), any())).thenReturn(getTrueStatusRows());
+        when(olapConfigurationDomainService.getReportOlapConfiguration(anyLong())).thenReturn(getReportOlapConfigResponse());
+        when(jobDomainService.getJobData(anyLong())).thenReturn(getReportJobData());
+        when(tokenService.getToken(anyLong(),anyLong())).thenReturn("123456");
+
+
+        var result = service.exportPivotTableExcel(getOlapExportPivotTableRequest());
+
+        assertEquals("123456", result.token());
+
+    }
+
+    @Test
+    void getExcelPivotPath(){
+
+        when(excelReportDomainService.getExcelPivotPath(anyLong(),anyLong())).thenReturn(Path.of(""));
+
+        var result = service.getExcelPivotPath(1l,2l);
+
+        assertNotNull(result);
+
+        verify(excelReportDomainService).getExcelPivotPath(anyLong(),anyLong());
+        verifyNoMoreInteractions(excelReportDomainService);
 
     }
 
@@ -255,4 +319,34 @@ class OlapServiceTest {
         return result;
     }
 
+    private OlapExportPivotTableRequest getOlapExportPivotTableRequest() {
+        return new OlapExportPivotTableRequest()
+                .setCubeRequest(getOlapRequest())
+                .setStylePivotTable(true)
+                .setConfiguration(1L);
+    }
+
+    private ReportJobData getReportJobData() {
+        return new ReportJobData(
+                1l,
+                1l,
+                1l,
+                1l,
+                1l,
+                null,
+                1l,
+                1l,
+                1l,
+                true,
+                null,
+                new ReportData(1l,null,null,null,null,null,null,true),
+                null,
+                null);
+    }
+
+    private ReportOlapConfigResponse getReportOlapConfigResponse(){
+        return new ReportOlapConfigResponse()
+                .setOlapConfig(
+                        new OlapConfigResponse());
+    }
 }
