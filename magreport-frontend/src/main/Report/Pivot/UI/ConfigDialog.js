@@ -10,7 +10,7 @@ import { Paper, Dialog, DialogTitle, DialogActions, Button, Box, Typography} fro
 import CustomList from './CustomList';
 
 //actions
-import { showAlertDialog, hideAlertDialog } from 'redux/actions/actionsAlertDialog'
+import { showAlertDialog, hideAlertDialog } from 'redux/actions/UI/actionsAlertDialog'
 
 /**
 	* @param {Boolean} props.open - boolean-значение отображения модального окна

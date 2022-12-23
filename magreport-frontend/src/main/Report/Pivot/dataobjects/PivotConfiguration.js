@@ -77,7 +77,7 @@ export default function PivotConfiguration(pivotConfiguration){
     */
 
     function replacer(key, value) {
-        if (typeof value === 'object' && value.hasOwnProperty('forSave')) {
+        if (typeof value === 'object' && value !== null && value.hasOwnProperty('forSave')) {
             return value.forSave()
         } else {
             return value
@@ -146,16 +146,18 @@ export default function PivotConfiguration(pivotConfiguration){
         this.filterGroup = new PivotFilterGroup();
         this.filterGroup.replaceFilter(this.fieldsLists.filterFields.filter((item, index) => item.aggFuncName === "" && index !== i && !item.isOff));
 
+
         this.metricFilterGroup = new PivotFilterGroup();
-        this.metricFilterGroup.replaceFilter(this.fieldsLists.filterFields.filter(item => item.aggFuncName !== "" && !item.isOff).map(i =>
-            ({...i, filter: {
+        this.metricFilterGroup.replaceFilter(this.fieldsLists.filterFields.filter(item => item.aggFuncName !== "" && !item.isOff).map(i =>{
+            return (
+            {...i, filter: {
                 metricId: this.fieldsLists.metricFields.findIndex(m => m.fieldId === i.filter.fieldId && m.aggFuncName === i.aggFuncName),
-                filterType: i.filter.filterType, 
+                filterType: (i.filter.values === '' || i.filter.values === null || i.filter.values.length === 0) ? 'BLANK' : i.filter.filterType, 
                 invertResult: i.filter.invertResult, 
                 values: i.filter.values,
                 rounding: i.formatting.find(item => item.aggFuncName === i.aggFuncName).rounding
             }})
-        ));
+        }));
     }
     
     /*

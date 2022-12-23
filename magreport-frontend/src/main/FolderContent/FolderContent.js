@@ -255,7 +255,7 @@ export default function FolderContent(props){
         }
     }
 
-    const itemName =  props.itemsType === FolderItemTypes.report || props.itemsType === FolderItemTypes.reportsDev ? "отчёт"
+    const itemName =  props.itemsType === FolderItemTypes.reports || props.itemsType === FolderItemTypes.reportsDev ? "отчёт"
                     : props.itemsType === FolderItemTypes.job || props.itemsType === FolderItemTypes.userJobs ? "задание"
                     : props.itemsType === FolderItemTypes.datasource ? "источник данных"
                     : props.itemsType === FolderItemTypes.dataset ? "набор данных"
@@ -348,7 +348,7 @@ export default function FolderContent(props){
         Формируем карточки объектов
     */
 
-    let items = props.itemsType === FolderItemTypes.report ? props.data.reports :
+    let items = props.itemsType === FolderItemTypes.reports ? props.data.reports :
                 props.itemsType === FolderItemTypes.favorites ? props.data.reports :
                 props.itemsType === FolderItemTypes.job || props.itemsType === FolderItemTypes.userJobs ? props.data.jobs :
                 props.itemsType === FolderItemTypes.datasource ? props.data.dataSources :
@@ -622,7 +622,7 @@ export default function FolderContent(props){
 				</div>
             </div>
             {
-                (props.itemsType === FolderItemTypes.report || props.itemsType === FolderItemTypes.dataset || 
+                (props.itemsType === FolderItemTypes.reports || props.itemsType === FolderItemTypes.dataset || 
                 props.itemsType === FolderItemTypes.datasource || props.itemsType === FolderItemTypes.filterTemplate ||
                 props.itemsType === FolderItemTypes.filterInstance || (props.itemsType === FolderItemTypes.roles && props.data.name !== 'SYSTEM') ||
                 props.itemsType === FolderItemTypes.reportsDev || props.itemsType === FolderItemTypes.securityFilters ||

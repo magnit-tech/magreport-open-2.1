@@ -1,19 +1,15 @@
 import {
-    ASM_ADD_ITEM_CLICK,
     ASM_ADDED,
     ASM_DATA_LOAD_FAILED,
     ASM_DATA_LOADED,
     ASM_DELETED,
-    ASM_EDIT_ITEM_CLICK,
     ASM_EDITED,
     ASM_LIST_LOAD_FAILED,
     ASM_LIST_LOADED,
     ASM_LIST_SHOW,
     ASM_REFRESH_FINISH,
-    ASM_REFRESH_START,
-    ASM_VIEW_ITEM_CLICK
+    ASM_REFRESH_START
 } from "redux/reduxTypes";
-import {FolderItemTypes} from "../../../main/FolderContent/FolderItemTypes";
 
 export const actionAsmListShow = () => {
     return {type: ASM_LIST_SHOW};
@@ -30,29 +26,6 @@ export const actionAsmListLoadFailed = (error) => {
     return {
         type: ASM_LIST_LOAD_FAILED,
         error
-    };
-}
-
-export const actionAsmAddItemClick = () => {
-    return {
-        type: ASM_ADD_ITEM_CLICK,
-        itemType: FolderItemTypes.asm,
-    };
-}
-
-export const actionAsmViewItemClick = (itemId) => {
-    return {
-        type: ASM_VIEW_ITEM_CLICK,
-        itemId,
-        itemType: FolderItemTypes.asm,
-    };
-}
-
-export const actionAsmEditItemClick = (itemId) => {
-    return {
-        type: ASM_EDIT_ITEM_CLICK,
-        itemId,
-        itemType: FolderItemTypes.asm,
     };
 }
 
@@ -84,10 +57,11 @@ export const actionAmsRefresh = status => {
     }
 }
 
-export function actionAsmDataLoaded(data) {
+export function actionAsmDataLoaded(data, actionFor) {
     return {
         type: ASM_DATA_LOADED,
-        data
+        data,
+        actionFor
     };
 }
 

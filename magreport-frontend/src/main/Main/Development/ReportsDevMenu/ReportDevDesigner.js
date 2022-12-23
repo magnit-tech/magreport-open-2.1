@@ -1,6 +1,8 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useSnackbar } from 'notistack';
+
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 
 // components
 import Backdrop from '@material-ui/core/Backdrop';
@@ -12,7 +14,7 @@ import DesignerTextField from '../Designer/DesignerTextField';
 import DesignerFolderItemPicker from '../Designer/DesignerFolderItemPicker'
 import ReportFields from './ReportFields'
 import ReportFiltersTab from './ReportFilters/ReportFiltersTab'
-import PageTabs from 'main/PageTabs/PageTabs';
+import PageTabs from 'components/PageTabs/PageTabs';
 import ReportTemplates from './ReportTemplates'
 import DataLoader from 'main/DataLoader/DataLoader';
 import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
@@ -29,6 +31,7 @@ import {actionFiltersLoaded, actionFiltersAdd, actionFiltersGroupAdd, actionFilt
     actionFiltersGroupChange, actionFiltersChange, actionFiltersChangeOrdinal, actionMoveBefore, actionMoveInto
 } from 'redux/actions/developer/actionReportFilters'
 import {actionLoaded, actionLoadedFailed} from 'redux/actions/developer/actionReportTemplates'
+import { editItemNavbar, addItemNavbar } from "redux/actions/navbar/actionNavbar";
 
 // styles
 import {DesignerCSS} from '../../Development/Designer/DesignerCSS';
@@ -54,11 +57,7 @@ import ReorderList from 'utils/ReorderList'
 /**
  * Компонент для создания и редактирования отчета
  * @param {Object } props - параметры компонента
- * @param {String} props.mode : 'edit', 'create' - режим редактирования или создания нового объекта
- * @param {Number} props.reportId - id объекта при редактировании (имеет значение только при mode == 'edit')
- * @param {Number} props.folderId - id папки в которой размещается объект при создании (имеет значение только при mode == 'create')
  * @param {Object} props.reportFiltersGroup - корневая группа фильтров отчета
- * @param {onExit} props.onExit - callback при выходе
  * @param {actionLoaded} props.actionLoaded - action, вызываемый при загрузке данных отчета
  * @param {actionLoadedFailed} props.actionLoadedFailed - action, вызываемый при ошибке загрузки данных отчета
  * @param {actionFiltersLoaded} props.actionFiltersLoaded - action, вызываемый при ошибке загрузки данных отчета
@@ -73,7 +72,18 @@ import ReorderList from 'utils/ReorderList'
  */
 function ReportDevDesigner(props){
 
+    const { id, folderId } = useParams()
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        if(!id) {
+            dataHub.reportController.getFolder(folderId, handleFoldersLoaded)
+        }
+    }, []) // eslint-disable-line
+
     const { enqueueSnackbar } = useSnackbar();
+
     const classes = DesignerCSS();
 
     const [fieldValues, setFieldValues] = useState(null)
@@ -84,7 +94,7 @@ function ReportDevDesigner(props){
         reportName: '',
         reportRequirementsLink: '',
         reportFields: [],
-        reportId: props.reportId
+        reportId: id
     });
 
     const [selectedDataset, setSelectedDataset] = useState([]);
@@ -102,27 +112,33 @@ function ReportDevDesigner(props){
         },
     }
 
-    const [pagename, setPagename] = useState(props.mode === 'create' ? "Создание отчета" : "Редактирование отчета");
+    const [pagename, setPagename] = useState(id ? "Редактирование отчета" : "Создание отчета");
     // const [loadedFilters, setLoadedFilters] = useState({})
 
     const [uploading, setUploading] = useState(false);
     const [errorField, setErrorField] = useState({});
-    const [needSave, setNeedSave] = useState(props.mode === 'create');
+    const [needSave, setNeedSave] = useState(id ? false : true);
 
     let loadFunc;
     let loadFuncDataSet;
     let loadParams = [];
     
     
-    if(props.mode === 'edit'){
+    if(id){
         loadFunc = dataHub.reportController.get;
-        loadParams = [props.reportId, undefined];
+        loadParams = [id, undefined];
         loadFuncDataSet=dataHub.datasetController.get;
     }
 
     /*
         Data loading
     */
+
+    function handleFoldersLoaded({ok, data}) {
+        if(ok) {
+            props.addItemNavbar('reportsDev', folderId, data.path)
+        }
+    }
 
     function handleDataLoaded(loadedData){
 
@@ -136,8 +152,12 @@ function ReportDevDesigner(props){
             reportRequirementsLink : loadedData.requirementsLink,
         });
         setFieldValues(sortByOrdinal(loadedData.fields))
-        props.actionFiltersLoaded(loadedData, props.reportId)
+        props.actionFiltersLoaded(loadedData, id)
         setPagename("Редактирование отчета: " + loadedData.name);
+
+        if (id) {
+            props.editItemNavbar('reportsDev', loadedData.name, id, folderId, loadedData.path)
+        }
     }
 
     /*
@@ -188,14 +208,13 @@ function ReportDevDesigner(props){
         }
         else{
             setUploading(true);
-            let folderId = props.folderId
-            if (folderId === null || folderId === undefined){
-                const itemInfo = dataHub.localCache.getItemData(FolderItemTypes.reportsDev, props.reportId)
-                if (itemInfo){
-                    folderId = itemInfo.folderId
-                }
-            }
-            if(props.mode === 'create' && needSave){
+            // if (folderId === null || folderId === undefined){
+            //     const itemInfo = dataHub.localCache.getItemData(FolderItemTypes.reportsDev, id)
+            //     if (itemInfo){
+            //         folderId = itemInfo.folderId
+            //     }
+            // }
+            if(!id && needSave){
                 dataHub.reportController.add(
                     data.reportDataSetId,
                     data.reportDescription,
@@ -237,11 +256,11 @@ function ReportDevDesigner(props){
     function handleAddEditAnswer(magrepResponse){
         setUploading(false);
         if(magrepResponse.ok){
-            props.onExit();
+            location.state ? navigate(location.state) : navigate(`/ui/reportsDev/${folderId}`)
             enqueueSnackbar("Отчет успешно сохранен", {variant : "success"});
         }
         else{
-            let actionWord = props.mode === 'create' ? "создании" : "обновлении";
+            let actionWord = id ? "обновлении" : "создании";
             enqueueSnackbar("Ошибка при " + actionWord + " объекта: " + magrepResponse.data, {variant : "error"});
         }
     }
@@ -287,12 +306,13 @@ function ReportDevDesigner(props){
     }
 
     let tabs = []
+    
     tabs.push({
         tablabel: "Заголовки",
         tabcontent:  uploading ? <CircularProgress /> :
             <DesignerPage 
                 onSaveClick={()=>{handleSave(handleAddEditAnswer)}}
-                onCancelClick={() => props.onExit()}
+                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/reportsDev/${folderId}`)}
             >
                 <DesignerTextField
                     label = {fieldLabels.reportName}
@@ -344,7 +364,7 @@ function ReportDevDesigner(props){
         tabcontent:  uploading ? <CircularProgress /> :
             <DesignerPage 
                 onSaveClick={()=>{handleSave(handleAddEditAnswer)}}
-                onCancelClick={() => props.onExit()}
+                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/reportsDev/${folderId}`)}
                 twoColumn = {true}
             >
                 <ReportFields 
@@ -363,7 +383,7 @@ function ReportDevDesigner(props){
         tabcontent:  uploading ? <CircularProgress /> :
             <DesignerPage 
                 onSaveClick={()=>{handleSave(handleAddEditAnswer)}}
-                onCancelClick={() => props.onExit()}
+                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/reportsDev/${folderId}`)}
             >
                 <ReportFiltersTab 
                     childGroupsMap={props.reportFiltersGroup}
@@ -388,10 +408,10 @@ function ReportDevDesigner(props){
         tabcontent:  uploading ? <CircularProgress /> :
             <DesignerPage 
                 onSaveClick={()=>{handleSave(handleAddEditAnswer)}}
-                onCancelClick={() => props.onExit()}
+                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/reportsDev/${folderId}`)}
             >
                 <ReportTemplates 
-                    reportId={props.reportId}
+                    reportId={id}
                 />
             </DesignerPage>
     });
@@ -411,9 +431,9 @@ function ReportDevDesigner(props){
             >
                 <DataLoader
                     loadFunc = {dataHub.excelTemplateController.get}
-                    loadParams = {[props.reportId]}
-                    onDataLoaded = {data => props.actionLoaded(props.reportId, data)}
-                    onDataLoadFailed = {data => props.actionLoadedFailed(props.reportId, data)}
+                    loadParams = {[id]}
+                    onDataLoaded = {data => props.actionLoaded(id, data)}
+                    onDataLoadFailed = {data => props.actionLoadedFailed(id, data)}
                 >
                     <div className={classes.rel}> 
                         <div className={classes.abs}>
@@ -451,6 +471,8 @@ const mapDispatchToProps = {
     actionMoveInto,
     actionLoaded, 
     actionLoadedFailed,
+    editItemNavbar,
+    addItemNavbar
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(ReportDevDesigner);

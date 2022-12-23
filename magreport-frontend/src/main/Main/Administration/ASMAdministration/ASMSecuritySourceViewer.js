@@ -16,7 +16,7 @@ import ViewerFieldMapping from "../../Development/Viewer/ViewerFieldMapping";
  * @constructor
  */
 export default function ASMSecuritySourceViewer(props) {
-
+    
     const classes = ViewerCSS();
 
     const securitySource = props.securitySource;
@@ -71,16 +71,19 @@ export default function ASMSecuritySourceViewer(props) {
 
             securityFilterFieldMappings.push(
                 <ViewerFieldMapping
+                    key={Math.random()}
                     leftLabel={"Поле набора данных"}
                     leftValue={dataSetFieldName}
                     rightLabel={"Поле фильтра"}
                     rightValue={filterInstanceFieldName}
                 />)
         })
+
         securityFilterItems.push(
             <ViewerChildCard
                 key={securityFilterIndex}
                 id={securityFilter.id}
+                parentFolderId={securityFilter.folderId}
                 name={securityFilter.name}
                 itemType={FolderItemTypes.securityFilters}
             >
@@ -101,6 +104,7 @@ export default function ASMSecuritySourceViewer(props) {
             />
             <ViewerChildCard
                 id={dataSet.id}
+                parentFolderId={dataSet.folderId}
                 name={dataSet.name}
                 itemType={FolderItemTypes.dataset}
             />

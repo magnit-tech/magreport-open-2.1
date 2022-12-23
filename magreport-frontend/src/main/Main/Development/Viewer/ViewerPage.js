@@ -1,5 +1,9 @@
 import React from 'react'
-import {connect} from "react-redux";
+
+import {ViewerCSS} from './ViewerCSS';
+
+import { useNavigate, useLocation } from 'react-router-dom'
+
 import clsx from 'clsx';
 
 import Button from '@material-ui/core/Button';
@@ -8,9 +12,6 @@ import Paper from '@material-ui/core/Paper';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 
-import {actionViewerEditItem} from "redux/actions/actionViewer";
-
-import {ViewerCSS} from './ViewerCSS';
 
 /**
  * @callback onOkClick
@@ -19,32 +20,29 @@ import {ViewerCSS} from './ViewerCSS';
 
 
 /**
- * @callback actionViewerEditItem
- * @param {String} itemType
- * @param {Number} itemId
- * @return {{type: String, itemType: String, itemId: Number}}
- */
-
-/**
  * Компонент для просмотра содержания объектов
  * @param {Object} props - параметры компонента
  * @param {String} [props.pageName=""] - опционально. Имя страницы
  * @param {Number} props.id - ID объекта
  * @param {String} props.itemType - тип объекта из FolderItemTypes
+ * @param {String} props.folderId - id папки в которой размещается объект
  * @param {Array} props.children - вложенные компоненты
  * @param {boolean} [props.disabledPadding=false] - опционально. true - отключает отступы внутрь контейнера
  * @param {boolean} [props.readOnly=false] - опционально. true - компонент только для чтения, скрывается кнопка "Редактировать"
  * @param {onOkClick} props.onOkClick - callback, вызываемый при нажатии кнопки "ОК"
- * @param {actionViewerEditItem} props.actionViewerEditItem - action, выполняемый при нажатии кнопки "Редактировать"
  * @returns {JSX.Element}
  * @constructor
  */
-function ViewerPage(props) {
+
+ export default function ViewerPage(props) {
+
+    const navigate = useNavigate()
+    const location = useLocation();
 
     const classes = ViewerCSS();
 
     function onEditClick() {
-        props.actionViewerEditItem(props.itemType, props.id, props.name)
+        navigate(`/ui/${props.itemType}/${props.folderId ? props.folderId + '/' : ''}edit/${props.id}`, {state: location.pathname})
     }
 
     return (
@@ -98,8 +96,3 @@ function ViewerPage(props) {
     );
 }
 
-const mapActionsToProps = {
-    actionViewerEditItem,
-};
-
-export default connect(null, mapActionsToProps)(ViewerPage);
