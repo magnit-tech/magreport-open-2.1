@@ -5,7 +5,6 @@ import {dataHubItemController, folderItemTypeName, FolderItemTypes} from 'main/F
 import {
     FOLDER_CONTENT_LOAD_FAILED,
     FOLDER_CONTENT_LOADED,
-    FOLDER_CONTENT_EDIT_ROLE_USER_CLICK,
     FOLDER_CONTENT_ITEM_DELETED,
     FOLDER_CONTENT_ITEM_DELETE_FAILED,
     FOLDER_CONTENT_ADD_FOLDER,
@@ -57,16 +56,6 @@ export function actionFolderLoaded(itemsType, folderData, isSortingAvailable=fal
         folderData : folderData,
         isSortingAvailable,
         isFolderItemPicker
-    }
-}
-
-export function actionEditRoleFromUserClick(itemType, folderId, itemId, itemName){
-    return {
-        type: FOLDER_CONTENT_EDIT_ROLE_USER_CLICK,
-        itemType : itemType,
-        folderId : folderId,
-        itemId   : itemId,
-        itemName: itemName
     }
 }
 
