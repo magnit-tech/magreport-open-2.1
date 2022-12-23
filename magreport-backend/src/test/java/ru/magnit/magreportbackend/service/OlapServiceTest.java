@@ -203,7 +203,8 @@ class OlapServiceTest {
                 "TEST",
                 "CUBE_TABLE",
                 getReportFields(),
-                null
+                null,
+                true
         );
     }
 

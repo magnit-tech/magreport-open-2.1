@@ -1,46 +1,53 @@
 import React, {useState} from 'react';
 import { connect } from 'react-redux';
 
+import { useLocation, useNavigate } from 'react-router-dom'
+
+import { useAuth } from 'router/useAuth';
+
 // dataHub
 import dataHub from 'ajax/DataHub';
 
 // redux
-import {FLOW_STATE_BROWSE_FOLDER, jobsMenuViewFlowStates} from 'redux/reducers/menuViews/flowStates';
-import {actionFolderLoaded, actionFolderLoadFailed, actionItemClick} from 'redux/actions/menuViews/folderActions';
-import {actionFilterJobs, actionJobCancel, showSqlDialog, actionShowStatusHistory, actionJobAddComment} from 'redux/actions/jobs/actionJobs';
-import actionSetSidebarItem from 'redux/actions/sidebar/actionSetSidebarItem';
-import {startReport} from 'redux/actions/menuViews/reportActions';
+import { actionFolderLoaded, actionFolderLoadFailed } from 'redux/actions/menuViews/folderActions';
+import { actionFilterJobs, actionJobCancel, showSqlDialog, actionShowStatusHistory, actionJobAddComment } from 'redux/actions/jobs/actionJobs';
 
 // components
 import DataLoader from 'main/DataLoader/DataLoader';
 import FolderContent from 'main/FolderContent/FolderContent';
 
 import SidebarItems from '../Sidebar/SidebarItems';
-import ReportJob from 'main/Report/ReportJob';
-import ReportStarter from 'main/Report/ReportStarter';
+
 
 function JobsMenuView(props){
-    let state = props.state;
+    
+    const navigate = useNavigate()
+    const location = useLocation()
+    
+    const { user } = useAuth()
+
     let params = [props.filters?.periodStart ?? null, 
         props.filters?.periodEnd ?? null, 
         props.filters?.users ?? null, 
         props.filters?.reportIds ?? null, 
         props.filters?.selectedStatuses ?? null
     ];
+    
     const [reload, setReload] = useState({needReload : false})
 
     let folderItemsType = SidebarItems.jobs.folderItemType;
 
-    function handleReportCancel(){
-        props.actionSetSidebarItem(SidebarItems.jobs);
-    }
-
-    function handleRestartReportClick(reportId, jobId){
-        props.startReport(reportId, jobId, SidebarItems.jobs.key);
-    }
 
     function handleRefreshFolder(){
         setReload({needReload : true})
+    }
+
+    function handleItemClick(jobId) {
+        navigate(`/ui/report/${jobId}`)
+    }
+
+    function handleReportRunClick(reportId, jobId) {
+        navigate(`/ui/report/starter/${reportId}?jobId=${jobId}`, {state: location.pathname})
     }
 
     function handleCancelClick(folderItemsType, jobIndex, jobId){
@@ -50,8 +57,6 @@ function JobsMenuView(props){
 
     return(
         <div  style={{display: 'flex', flex: 1}}>
-        {
-            state.flowState === FLOW_STATE_BROWSE_FOLDER ?
             <DataLoader
                 loadFunc = {dataHub.reportJobController.getMyJobs}
                 loadParams = {params}
@@ -67,9 +72,11 @@ function JobsMenuView(props){
                     showAddItem = {false}
                     showItemControls = {false}
                     pagination = {true}
-                    currentUser = {props.currentUser}
-                    onItemClick = {jobId => {props.actionItemClick(folderItemsType, jobId)}}
-                    onReportRunClick = {(reportId, jobId) => {props.startReport(reportId, jobId, SidebarItems.jobs.key, SidebarItems.jobs.folderItemType)}}
+                    currentUser = {user.current.name}
+
+                    onItemClick = {handleItemClick}
+                    onReportRunClick = {handleReportRunClick}
+
                     onFilterClick = {filters => {props.actionFilterJobs(folderItemsType, filters)}}
                     onJobCancelClick = {(jobIndex, jobId) => handleCancelClick(folderItemsType, jobIndex, jobId)}
                     onRefreshClick = {handleRefreshFolder}
@@ -79,46 +86,23 @@ function JobsMenuView(props){
                 />
 
             </DataLoader>
-
-            : state.flowState === jobsMenuViewFlowStates.reportJob ?
-            <div style={{display: 'flex', flex: 1, flexDirection: 'column', overflow: 'auto'}}>
-                <ReportJob
-                    jobId = {state.jobId}
-                    excelTemplates={state.excelTemplates}
-                    onRestartReportClick = {handleRestartReportClick}
-                />
-            </div>
-            : state.flowState === jobsMenuViewFlowStates.startReport ?
-                <ReportStarter
-                    reportId = {state.reportId}
-                    jobId = {state.jobId}
-                    onCancel = {handleReportCancel}
-                    onDataLoadFunction={dataHub.reportController.get}
-                />
-
-            : <div>Неизвестное состояние</div>
-        }
         </div>
     )
 }
 
 const mapStateToProps = state => {
     return {
-        state : state.jobsMenuView,
-        currentFolderData : state.jobsMenuView.currentFolderData,
-        filters : state.jobsMenuView.filters,
-        currentUser: state.login.userName
+        state : state.folderData,
+        currentFolderData : state.folderData.currentFolderData,
+        filters : state.folderData.filters
     }
 }
 
 const mapDispatchToProps = {
     actionFolderLoaded,
     actionFolderLoadFailed,
-    actionItemClick,
     actionFilterJobs,
-    actionSetSidebarItem,
     actionJobCancel,
-    startReport,
     showSqlDialog,
     actionShowStatusHistory,
     actionJobAddComment

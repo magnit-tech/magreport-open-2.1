@@ -2,7 +2,7 @@ import React from 'react';
 import MuiAlert from '@material-ui/lab/Alert';
 import Snackbar from '@material-ui/core/Snackbar';
 import { connect } from 'react-redux';
-import { hideSnackbar } from '../../redux/actions/actionSnackbar'
+import { hideSnackbar } from '../../redux/actions/UI/actionSnackbar'
 
 function Alert(props) {
     return <MuiAlert elevation={6} variant="filled" {...props} />;

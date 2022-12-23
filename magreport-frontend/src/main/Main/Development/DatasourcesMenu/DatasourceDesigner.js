@@ -1,9 +1,12 @@
-import React from 'react';
-import {useState} from 'react';
-import { useSnackbar } from 'notistack';
-import { connect } from 'react-redux';
-import { showAlert, hideAlert } from '../../../../redux/actions/actionsAlert'
+import React, { useEffect, useState } from 'react';
 
+import { useSnackbar } from 'notistack';
+
+import { connect } from 'react-redux';
+import { showAlert, hideAlert } from '../../../../redux/actions/UI/actionsAlert'
+import { editItemNavbar, addItemNavbar } from "redux/actions/navbar/actionNavbar";
+
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 
 // local
 import DesignerPage from '../Designer/DesignerPage';
@@ -18,20 +21,24 @@ import DataLoader from 'main/DataLoader/DataLoader';
 import { CircularProgress } from '@material-ui/core';
 
 import Button from '@material-ui/core/Button';
-import Alerts from "main/Alerts/Alerts";
+import Alerts from "components/Alerts/Alerts";
 
 import Icon from '@mdi/react'  
 import { mdiCheckDecagram } from '@mdi/js';
 import { mdiCloseOctagon } from '@mdi/js';
 
-/**
- * 
- * @param {*} props.mode : 'edit', 'create' - режим редактирования или создания нового объекта
- * @param {*} props.datasourceId : id объекта при редактировании (имеет значение только при mode == 'edit')
- * @param {*} props.folderId : id папки в которой размещается объект при создании (имеет значение только при mode == 'create')
- * @param {*} props.onExit : callback при выходе
- */
+
 function DatasourceDesigner(props){
+
+    const { id, folderId } = useParams()
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    useEffect(() => {
+        if(!id) {
+            dataHub.datasourceController.getFolder(folderId, handleFoldersLoaded)
+        }
+    }, []) // eslint-disable-line
 
     const classes = ViewerCSS();
 
@@ -59,18 +66,23 @@ function DatasourceDesigner(props){
         datasourcePoolSize : "Размер пула коннектов"
     }
 
-    const [pageName, setPagename] = useState(props.mode === 'create' ? "Создание источника данных" : "Редактирование источника данных");
+    const [pageName, setPagename] = useState(id ? "Редактирование источника данных" : "Создание источника данных");
 
     const [uploading, setUploading] = useState(false);
     const [errorField, setErrorField] = useState({});
 
     let loadFunc;
     let loadParams = [];
-    
 
-    if(props.mode === 'edit'){
+    if (id) {
         loadFunc = dataHub.datasourceController.get;
-        loadParams = [props.datasourceId];
+        loadParams = [id];
+    }
+
+    function handleFoldersLoaded({ok, data}) {
+        if(ok) {
+            props.addItemNavbar('datasource', folderId, data.path)
+        }
     }
 
     /* Data loading */
@@ -85,13 +97,17 @@ function DatasourceDesigner(props){
             datasourcePoolSize : loadedData.poolSize,
         });
         setPagename("Редактирование источника данных: " + loadedData.name);
+
+        if (id) {
+            props.editItemNavbar('datasource', loadedData.name, id, folderId, loadedData.path)
+        }
     }
+
     function handleTypesLoaded(data){
         setTypesData(data.map((v) => ({id: v.id, name: v.name})));
     }
-    function handleDataLoadFailed(message){
-
-    }
+    
+    function handleDataLoadFailed(message){}
 
     /* Data editing */
     function handleChange(key, value){
@@ -127,13 +143,13 @@ function DatasourceDesigner(props){
                     errorExists = true;
                 } );
         
-        if(errorExists){
+        if (errorExists) {
             setErrorField(errors);
         }
-        else{
-            if(props.mode === 'create'){
+        else {
+            if (!id) {
                 dataHub.datasourceController.add(
-                    props.folderId, 
+                    Number(folderId), 
                     data.datasourceName, 
                     data.datasourceDescription,
                     data.datasourceTypeId,
@@ -143,10 +159,10 @@ function DatasourceDesigner(props){
                     data.datasourcePoolSize,
                     handleAddEditAnswer);
             }
-            else{
+            else {
                 dataHub.datasourceController.edit(
-                    props.folderId,
-                    props.datasourceId,
+                    Number(folderId),
+                    Number(id),
                     data.datasourceName, 
                     data.datasourceDescription,
                     data.datasourceTypeId,
@@ -159,16 +175,14 @@ function DatasourceDesigner(props){
             setUploading(true);
         }
     }
-    function handleCancel(){
-        props.onExit();
-    }
+
     function handleAddEditAnswer(magrepResponse){
         setUploading(false);
         if(magrepResponse.ok){
-            props.onExit();
+            location.state ? navigate(location.state) : navigate(`/ui/datasource/${folderId}`)
         }
         else{
-            let actionWord = props.mode === 'create' ? "создании" : "обновлении";
+            let actionWord = id ? "обновлении" : "создании";
             enqueueSnackbar("Ошибка при " + actionWord + " объекта: " + magrepResponse.data, {variant : "error"});
         }
     }
@@ -176,8 +190,8 @@ function DatasourceDesigner(props){
     /* Check-connection */
     function checkConnection() {
         dataHub.datasourceController.checkConnect(data.datasourcePassword, data.datasourceUrl, data.datasourceUserName,  checkConnectionAnswer);
-    
     }
+
     function checkConnectionAnswer(magrepResponse){
 
         function callback(){
@@ -211,7 +225,7 @@ function DatasourceDesigner(props){
 
                 <DesignerPage 
                     onSaveClick={handleSave}
-                    onCancelClick={handleCancel}
+                    onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/datasource/${folderId}`)}
                     name = {pageName}
                 >
                     <DesignerTextField
@@ -318,7 +332,9 @@ function DatasourceDesigner(props){
 
 const mapDispatchToProps = {
     showAlert,
-    hideAlert
+    hideAlert,
+    editItemNavbar, 
+    addItemNavbar
 }
 
 export default connect(null, mapDispatchToProps)(DatasourceDesigner);

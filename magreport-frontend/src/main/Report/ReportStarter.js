@@ -1,9 +1,14 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useRef, useState} from 'react';
 import {useSnackbar} from 'notistack';
+
+import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
+
+import { useDispatch } from 'react-redux';
+import { addReportStarterNavbar } from "redux/actions/navbar/actionNavbar";
 
 // mui
 import {Button} from '@material-ui/core';
-//import { Button, ThemeProvider } from '@material-ui/core';
+
 // dataHub
 import dataHub from 'ajax/DataHub';
 
@@ -20,7 +25,6 @@ import {ReportStarterCSS} from "./ReportCSS";
  * Запуск отчёта
  * @param {*} props.reportId - id отчёта
  * @param {*} props.parameters - фильтры отчета для отчетов на расписании
- * @param {*} props.jobId - id задания, из которого требуется получить параметры
  * @param {*} props.scheduleTaskId - id задания по расписанию, из которого требуется получить параметры
  * @param {*} props.onDataLoadFunction - функция загрузки отчета
  * @param {*} props.onSave - сохранение (для отчетов на расписании)
@@ -28,8 +32,14 @@ import {ReportStarterCSS} from "./ReportCSS";
  * @param {*} props.onSaveScheduleTaskFilterData - для сохранения значений фильтра отчетов на расписании
  */
 export default function ReportStarter(props){
-
     const classes = ReportStarterCSS();
+
+    const {id} = useParams()
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [searchParams, setSearchParams] = useSearchParams(); // eslint-disable-line
+
+    const dispatch = useDispatch()
 
     const [flowState, setFlowState] = useState("filters");
     const [reportMetadata, setReportMetadata] = useState({});
@@ -37,11 +47,11 @@ export default function ReportStarter(props){
     const [reloadRunReport, setReloadRunReport] = useState({needReload:false}); // управление перезапуском отчёта
     const [toggleClearFilters, setToggleClearFilters] = useState(false); // переключатель очистки фильтра - если изменилось значение, надо очистить фильтры
     const [reportJobId, setReportJobId] = useState(null);
-    const [lastParamJobId, setLastParamJobId] = useState(props.jobId);
+    const [lastParamJobId, setLastParamJobId] = useState(searchParams.get('jobId'));
 
-    useEffect( () => {
-        setLastParamJobId(props.jobId);
-    }, [props.jobId])
+    // useEffect( () => {
+    //     setLastParamJobId(props.jobId);
+    // }, [props.jobId])
     
     const lastFilterValues = useRef(new FilterValues()); // Значения параметров предыдущего запуска отчёта
 
@@ -55,6 +65,7 @@ export default function ReportStarter(props){
     const [filterToGroupMap, setFilterToGroupMap] = useState(new Map())
     const [excelTemplates, setExcelTemplates] = useState([])
     const [disabledSaveBtn, setDisabledSaveBtn] = useState(false)
+    
 
     function handleReportMetadataLoaded(data){
         setExcelTemplates(data.excelTemplates)
@@ -93,6 +104,8 @@ export default function ReportStarter(props){
             const isValidMandatorygroups = checkMandatoryGroups()
             props.checkFilters(checkMandatoryFiltersResult && checkInvalidValues && isValidMandatorygroups)
         }
+
+        dispatch(addReportStarterNavbar('report/starter', data.name, id))
     }
 
     function mandatoryFilters(data, filtersSet, groupsMap, filterToGrpMap){
@@ -176,7 +189,7 @@ export default function ReportStarter(props){
     }
 
     function handleCancel(){
-        props.onCancel();
+        location.state ? navigate(location.state) : navigate('/ui/reports')
     }
 
     function handleChangeFilterValue(newFilterValue){
@@ -221,7 +234,10 @@ export default function ReportStarter(props){
 
     function handleReportStarted(data){
         // data - ответ от /report-job/add
-        setReportJobId(data.id);
+        // console.log(data.id);
+        // setReportJobId(data.id);
+        navigate(`/ui/report/${data.id}`)
+
     }
 
     function handleRestartReportClick(reportId, jobId){
@@ -234,8 +250,8 @@ export default function ReportStarter(props){
     return (
         flowState === "filters" ? 
             <DataLoader
-                loadFunc = {props.onDataLoadFunction}
-                loadParams = {[props.reportId, props.scheduleTaskId !== undefined ? props.scheduleTaskId : lastParamJobId]}
+                loadFunc = {dataHub.reportController.get}
+                loadParams = {[Number(id), props.scheduleTaskId !== undefined ? props.scheduleTaskId : lastParamJobId]}
                 reload = {reloadReportMetadata}
                 onDataLoaded = {handleReportMetadataLoaded}
             >
@@ -270,12 +286,12 @@ export default function ReportStarter(props){
         : flowState === "reportJob" ?
             <DataLoader
                 loadFunc = {reportJobId === null ? dataHub.reportJobController.add : null}
-                loadParams = {[props.reportId, addJobParameters.current]}
+                loadParams = {[Number(id), addJobParameters.current]}
                 reload = {reloadRunReport}
                 onDataLoaded = {handleReportStarted}
             >
                 <ReportJob
-                    reportId = {props.reportId}
+                    reportId = {Number(id)}
                     jobId = {reportJobId}
                     excelTemplates = {excelTemplates}
                     onRestartReportClick = {handleRestartReportClick}

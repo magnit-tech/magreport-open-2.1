@@ -190,7 +190,8 @@ class OlapDomainServiceTest {
                 "TEST",
                 "CUBE_TABLE",
                 getReportFields(),
-                null
+                null,
+                true
         );
     }
 }

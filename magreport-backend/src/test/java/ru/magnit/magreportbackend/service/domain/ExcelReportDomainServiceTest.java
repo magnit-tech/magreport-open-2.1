@@ -63,6 +63,7 @@ class ExcelReportDomainServiceTest {
         ReflectionTestUtils.setField(domainService, "reportFolder", "test/reportFolder");
         ReflectionTestUtils.setField(domainService, "rmsInFolder", "test/rmsInFolder");
         ReflectionTestUtils.setField(domainService, "rmsOutFolder", "test/rmsOutFolder");
+        ReflectionTestUtils.setField(domainService, "decryptOutFolder", "test/outFolder");
 
         Files.createDirectories(Path.of("test/reportFolder"));
         Files.createDirectory(Path.of("test/rmsInFolder"));
@@ -83,13 +84,13 @@ class ExcelReportDomainServiceTest {
     }
 
     @Test
-    void copyReportToRms() {
+    void copyReportToFolder() {
 
         var path1 = Path.of("test/reportFolder");
         var path2 = Path.of("test/rmsInFolder");
 
         assertThrows(ReportExportException.class, () ->
-                ReflectionTestUtils.invokeMethod(domainService, "copyReportToRms", path1, path2));
+                ReflectionTestUtils.invokeMethod(domainService, "copyReportToFolder", path1, path2));
 
     }
 
@@ -101,6 +102,7 @@ class ExcelReportDomainServiceTest {
         ReflectionTestUtils.setField(domainService, "reportFolder", "test/reportFolder");
         ReflectionTestUtils.setField(domainService, "rmsInFolder", "test/rmsInFolder");
         ReflectionTestUtils.setField(domainService, "rmsOutFolder", "test/rmsOutFolder");
+        ReflectionTestUtils.setField(domainService, "decryptOutFolder", "test/outFolder");
 
         when(readerFactory.createReader(any(ReportJobData.class), any())).thenReturn(getReader());
         when(writerFactory.createWriter(any(Reader.class), any(ReportData.class), any())).thenReturn(getWriter());
@@ -119,14 +121,16 @@ class ExcelReportDomainServiceTest {
         ReflectionTestUtils.setField(domainService, "reportFolder", "test/reportFolder");
         ReflectionTestUtils.setField(domainService, "rmsInFolder", "test/rmsInFolder");
         ReflectionTestUtils.setField(domainService, "rmsOutFolder", "test/rmsOutFolder");
+        ReflectionTestUtils.setField(domainService, "decryptOutFolder", "test/outFolder");
+
 
         Files.createDirectories(Path.of("test/reportFolder"));
         Files.createDirectory(Path.of("test/rmsInFolder"));
         Files.createFile(Path.of("test/reportFolder/" + ID + "-" + ID + TEMPLATE_EXTENSION));
 
-        domainService.moveReportToRms(ID, ID);
+        domainService.moveReportToRms(ID, ID, true);
 
-        assertThrows(ReportExportException.class, () -> domainService.moveReportToRms(ID, ID));
+        assertThrows(ReportExportException.class, () -> domainService.moveReportToRms(ID, ID, true));
 
     }
 
@@ -174,7 +178,8 @@ class ExcelReportDomainServiceTest {
                         "",
                         "",
                         Collections.emptyList(),
-                        null
+                        null,
+                        true
                 ),
                 Collections.emptyList(),
                 Collections.emptyList());

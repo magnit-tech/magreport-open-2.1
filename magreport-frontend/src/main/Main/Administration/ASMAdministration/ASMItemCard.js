@@ -1,6 +1,8 @@
 import React from "react";
 import {useSnackbar} from "notistack";
 
+import { useNavigate } from 'react-router-dom'
+
 import Card from "@material-ui/core/Card";
 import CardHeader from "@material-ui/core/CardHeader";
 import CardContent from "@material-ui/core/CardContent";
@@ -19,23 +21,13 @@ import IconButton from "@material-ui/core/IconButton";
 // local
 import { ASMCSS as useStyles} from "./ASMCSS";
 import dataHub from "ajax/DataHub";
-import {actionAsmDeleted, actionAsmViewItemClick, actionAsmEditItemClick} from "redux/actions/admin/actionAsm";
-import {hideAlertDialog, showAlertDialog} from "redux/actions/actionsAlertDialog";
+import {actionAsmDeleted} from "redux/actions/admin/actionAsm";
+import {hideAlertDialog, showAlertDialog} from "redux/actions/UI/actionsAlertDialog";
 import {connect} from "react-redux";
 
 /**
  * @callback actionAsmDeleted
  * @param {Object} data
- */
-
-/**
- * @callback actionAsmEditItemClick
- * @param {Number} id
- */
-
-/**
- * @callback actionAsmViewItemClick
- * @param {Number} id
  */
 
 /**
@@ -70,8 +62,6 @@ import {connect} from "react-redux";
  * @param {Number} props.modified - Unix-timestamp времени изменения объекта ASM
  * @param {Boolean} props.isSelected - элемент выбран/не выбран
  * @param {actionAsmDeleted} props.actionAsmDeleted - action успешного удаления ASM
- * @param {actionAsmViewItemClick} props.actionAsmViewItemClick - action, открывает объект ASM для просмотра
- * @param {actionAsmEditItemClick} props.actionAsmEditItemClick - action открывает дизайнер ASM для редактирования объекта
  * @param {showAlertDialog} props.showAlertDialog - показать диалоговое окно
  * @param {hideAlertDialog} props.hideAlertDialog - скрыть диалоговое окно
  * @param {onClick} props.onClick - выполняется при нажатии на карточку
@@ -79,6 +69,9 @@ import {connect} from "react-redux";
  * @constructor
  */
 function ASMItemCard(props) {
+
+    const navigate = useNavigate()
+
     const {enqueueSnackbar} = useSnackbar();
     const classes = useStyles();
 
@@ -93,11 +86,11 @@ function ASMItemCard(props) {
 
     //event handlers
     function handleViewButtonClick() {
-        props.actionAsmViewItemClick(id);
+        navigate(`/ui/asm/view/${id}`)
     }
 
     function handleEditButtonClick() {
-        props.actionAsmEditItemClick(id);
+        navigate(`/ui/asm/edit/${id}`)
     }
 
     function handleDeleteButtonClick() {
@@ -182,18 +175,10 @@ function ASMItemCard(props) {
         );
 }
 
-const mapStateToProps = (state) => {
-    return {
-
-    }
-};
-
 const mapDispatchToProps = {
     actionAsmDeleted,
-    actionAsmViewItemClick,
-    actionAsmEditItemClick,
     showAlertDialog,
     hideAlertDialog
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(ASMItemCard);
+export default connect(null, mapDispatchToProps)(ASMItemCard);

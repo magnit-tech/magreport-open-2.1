@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportJobData;
-import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapExportPivotTableRequest;
 import ru.magnit.magreportbackend.dto.response.olap.OlapCubeResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobMetadataResponse;
@@ -44,6 +43,9 @@ public class ExcelReportDomainService {
     @Value("${magreport.reports.rms-out-folder}")
     private String rmsOutFolder;
 
+    @Value("${magreport.reports.decrypt-out-folder}")
+    private String decryptOutFolder;
+
     @Value(value = "${magreport.excel-template.folder}")
     private String templatesPath;
 
@@ -60,17 +62,27 @@ public class ExcelReportDomainService {
         var reportPath = getReportPath(reportFolder, jobData.id(), templateId);
         var rmsInPath = getReportPath(rmsInFolder, jobData.id(), templateId);
         var rmsOutPath = getReportPath(rmsOutFolder, jobData.id(), templateId);
+        var decryptOutPath = getReportPath(decryptOutFolder, jobData.id(), templateId);
 
-        if (!Files.isReadable(reportPath) && !Files.isReadable(rmsOutPath) && !Files.isReadable(rmsInPath)) {
+        if (!Files.isReadable(reportPath) && !Files.isReadable(rmsOutPath) && !Files.isReadable(rmsInPath) && !Files.isReadable(decryptOutPath)) {
             final var startMillis = System.currentTimeMillis();
             saveReportToExcel(jobData, templatePath, templateId);
             final var exportMillis = System.currentTimeMillis() - startMillis;
             log.debug("\nExport excel report(" + jobData.id() + ") to file: " + exportMillis * .001);
-            copyReportToRms(reportPath, rmsInPath);
-            final var copyMillis = System.currentTimeMillis() - startMillis - exportMillis;
-            log.debug("\nCopy excel report(" + jobData.id() + ") to encode folder: " + copyMillis * .001);
+            if (jobData.reportData().encryptFile()) {
+                copyReportToFolder(reportPath, rmsInPath);
+                final var copyMillis = System.currentTimeMillis() - startMillis - exportMillis;
+                log.debug("\nCopy excel report(" + jobData.id() + ") to encode folder: " + copyMillis * .001);
+            } else {
+                copyReportToFolder(reportPath,decryptOutPath);
+                final var copyMillis = System.currentTimeMillis() - startMillis - exportMillis;
+                log.debug("\nCopy excel report(" + jobData.id() + ") to without encrypt folder: " + copyMillis * .001);
+            }
         }
+
         if (Files.isReadable(rmsOutPath)) return getStreamExcelFile(rmsOutPath);
+        if (Files.isReadable(decryptOutPath)) return getStreamExcelFile(decryptOutPath);
+
 
         final var startMillis = System.currentTimeMillis();
         waitForRmsEncode(rmsOutPath);
@@ -85,17 +97,27 @@ public class ExcelReportDomainService {
         var reportPath = getReportPath(reportFolder, jobData.id(), templateId);
         var rmsInPath = getReportPath(rmsInFolder, jobData.id(), templateId);
         var rmsOutPath = getReportPath(rmsOutFolder, jobData.id(), templateId);
+        var decryptOutPath = getReportPath(decryptOutFolder, jobData.id(), templateId);
 
-        if (!Files.isReadable(reportPath) && !Files.isReadable(rmsOutPath) && !Files.isReadable(rmsInPath)) {
+        if (!Files.isReadable(reportPath) && !Files.isReadable(rmsOutPath) && !Files.isReadable(rmsInPath)  && !Files.isReadable(decryptOutPath)) {
             final var startMillis = System.currentTimeMillis();
             saveReportToExcel(jobData, templatePath, templateId);
             final var exportMillis = System.currentTimeMillis() - startMillis;
             log.debug("\nExport excel report(" + jobData.id() + ") to file: " + exportMillis * .001);
-            copyReportToRms(reportPath, rmsInPath);
-            final var copyMillis = System.currentTimeMillis() - startMillis - exportMillis;
-            log.debug("\nCopy excel report(" + jobData.id() + ") to encode folder: " + copyMillis * .001);
+
+            if (jobData.reportData().encryptFile()) {
+                copyReportToFolder(reportPath, rmsInPath);
+                final var copyMillis = System.currentTimeMillis() - startMillis - exportMillis;
+                log.debug("\nCopy excel report(" + jobData.id() + ") to encode folder: " + copyMillis * .001);
+            }
+            else {
+                copyReportToFolder(reportPath,decryptOutPath);
+                final var copyMillis = System.currentTimeMillis() - startMillis - exportMillis;
+                log.debug("\nCopy excel report(" + jobData.id() + ") to without encrypt folder: " + copyMillis * .001);
+            }
         }
-        if (Files.isReadable(rmsOutPath)) return;
+        if (Files.isReadable(rmsOutPath) || Files.isReadable(decryptOutPath) ) return;
+
 
         final var startMillis = System.currentTimeMillis();
         waitForRmsEncode(rmsOutPath);
@@ -103,30 +125,41 @@ public class ExcelReportDomainService {
         log.debug("\nEncode excel report(" + jobData.id() + "): " + encodeMillis * .001);
     }
 
-    public Path getExcelPivotTable(OlapCubeResponse data, ReportJobMetadataResponse metadata, Map<String, Object> config, OlapExportPivotTableRequest request, Long userId) {
+    public Path getExcelPivotTable(OlapCubeResponse data, ReportJobMetadataResponse metadata, Map<String, Object> config, OlapExportPivotTableRequest request, Long code, boolean encrypt) {
 
-        var reportPath = getPivotPath(reportFolder, request.getCubeRequest().getJobId(), userId);
-        var rmsInPath = getPivotPath(rmsInFolder, request.getCubeRequest().getJobId(), userId);
-        var rmsOutPath = getPivotPath(rmsOutFolder, request.getCubeRequest().getJobId(), userId);
+        var reportPath = getPivotPath(reportFolder, request.getCubeRequest().getJobId(), code);
+        var rmsInPath = getPivotPath(rmsInFolder, request.getCubeRequest().getJobId(), code);
+        var rmsOutPath = getPivotPath(rmsOutFolder, request.getCubeRequest().getJobId(), code);
+        var decryptOutPath = getPivotPath(decryptOutFolder, request.getCubeRequest().getJobId(), code);
 
         try {
-            Files.deleteIfExists(rmsOutPath);
             Files.deleteIfExists(rmsInPath);
             Files.deleteIfExists(reportPath);
+            Files.deleteIfExists(decryptOutPath);
         } catch (IOException e) {
              throw new ReportExportException("Error deleting old excel pivot table file", e);
         }
 
-        if (!Files.isReadable(reportPath) && !Files.isReadable(rmsOutPath) && !Files.isReadable(rmsInPath)) {
+        if (!Files.isReadable(reportPath) && !Files.isReadable(rmsOutPath) && !Files.isReadable(rmsInPath)  && !Files.isReadable(decryptOutPath)) {
             final var startMillis = System.currentTimeMillis();
-            savePivotToExcel(data, metadata, config, request, userId);
+            savePivotToExcel(data, metadata, config, request, code);
             final var exportMillis = System.currentTimeMillis() - startMillis;
             log.debug("\nExport excel pivot table(" + request.getCubeRequest().getJobId() + ") to file: " + exportMillis * .001);
-            copyReportToRms(reportPath, rmsInPath);
-            final var copyMillis = System.currentTimeMillis() - startMillis - exportMillis;
-            log.debug("\nCopy excel pivot table(" + request.getCubeRequest().getJobId() + ") to encode folder: " + copyMillis * .001);
+
+            if (encrypt) {
+                copyReportToFolder(reportPath, rmsInPath);
+                final var copyMillis = System.currentTimeMillis() - startMillis - exportMillis;
+                log.debug("\nCopy excel pivot table(" + request.getCubeRequest().getJobId() + ") to encode folder: " + copyMillis * .001);
+            }
+            else {
+                copyReportToFolder(reportPath,decryptOutPath);
+                final var copyMillis = System.currentTimeMillis() - startMillis - exportMillis;
+                log.debug("\nCopy excel report(" + request.getCubeRequest().getJobId()  + ")to without encrypt folder: " + copyMillis * .001);
+            }
         }
         if (Files.isReadable(rmsOutPath)) return rmsOutPath;
+        if (Files.isReadable(decryptOutPath)) return decryptOutPath;
+
 
         final var startMillis = System.currentTimeMillis();
         waitForRmsEncode(rmsOutPath);
@@ -153,9 +186,9 @@ public class ExcelReportDomainService {
         }
     }
 
-    private void copyReportToRms(Path reportPath, Path rmsInPath) {
+    private void copyReportToFolder(Path reportPath, Path folderPath) {
         try {
-            Files.copy(reportPath, rmsInPath);
+            Files.copy(reportPath, folderPath);
             Files.delete(reportPath);
         } catch (IOException ex) {
             log.error(ERROR_TRYING_TO_COPY_FILE_TO_RMS_FOLDER, ex);
@@ -163,12 +196,17 @@ public class ExcelReportDomainService {
         }
     }
 
-    public void moveReportToRms(Long jobId, Long templateId) {
+    public void moveReportToRms(Long jobId, Long templateId, boolean encrypt) {
         try {
             var reportPath = getReportPath(reportFolder, jobId, templateId);
             var rmsInPath = getReportPath(rmsInFolder, jobId, templateId);
+            var decryptOutPath = getReportPath(decryptOutFolder, jobId, templateId);
 
-            Files.copy(reportPath, rmsInPath);
+           if (encrypt)
+               Files.copy(reportPath, rmsInPath);
+           else
+               Files.copy(reportPath, decryptOutPath);
+
             Files.delete(reportPath);
         } catch (IOException ex) {
             log.error(ERROR_TRYING_TO_COPY_FILE_TO_RMS_FOLDER, ex);
@@ -253,8 +291,8 @@ public class ExcelReportDomainService {
         return Paths.get(replaceHomeShortcut(folderPath), fileName);
     }
 
-    private Path getPivotPath(String folderPath, long jobId, long userId) {
-        var fileName = String.format("%s_%s.xlsm", jobId, userId);
+    private Path getPivotPath(String folderPath, long jobId, long code) {
+        var fileName = String.format("%s_%s.xlsm", jobId, code);
         return Paths.get(replaceHomeShortcut(folderPath), fileName);
     }
 
@@ -265,10 +303,14 @@ public class ExcelReportDomainService {
     }
 
     public Path getExcelReportPath(long jobId, long templateId) {
-        return getReportPath(rmsOutFolder, jobId, templateId);
+        var path = getReportPath( rmsOutFolder, jobId, templateId);
+        if (Files.exists(path)) return path;
+        else return getReportPath(decryptOutFolder, jobId, templateId);
     }
 
-    public Path getExcelPivotPath(long jobId, long userId) {
-        return getPivotPath(rmsOutFolder, jobId, userId);
+    public Path getExcelPivotPath(long jobId, long code) {
+        var path =  getPivotPath( rmsOutFolder, jobId, code);
+        if (Files.exists(path)) return path;
+        else  return getPivotPath(decryptOutFolder, jobId, code);
     }
 }

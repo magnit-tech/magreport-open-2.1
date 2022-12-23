@@ -1,4 +1,14 @@
 import React, {useState} from 'react';
+
+import { LoginFormCSS } from './LoginFormCSS'
+
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from 'router/useAuth';
+
+import { connect } from 'react-redux';
+import { showLoader, hideLoader } from '../../redux/actions/UI/actionLoader'
+import { showAlert, hideAlert } from '../../redux/actions/UI/actionsAlert'
+
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -6,11 +16,7 @@ import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
-import { connect } from 'react-redux';
-import { appLogin } from '../../redux/actions/actionsLogin';
-import { hideAlert } from '../../redux/actions/actionsAlert';
-import { LoginFormCSS } from './LoginFormCSS'
-import dataHub from 'ajax/DataHub'
+
 import CircularProgress from '@material-ui/core/CircularProgress';
 import IconButton from '@material-ui/core/IconButton';
 import OutlinedInput from '@material-ui/core/OutlinedInput';
@@ -23,26 +29,27 @@ import VisibilityOff from '@material-ui/icons/VisibilityOff';
 //local
 import StyleConsts from 'StyleConsts.js';
 
+
 function LoginForm(props){
     const classes = LoginFormCSS();
+
+    const location = useLocation()
+    const navigate = useNavigate()
+    const {signin} = useAuth()
 
     const { loader } = props;
 
     const [form, setForm] = useState({login: '', password: ''});
     const [showPassword, setShowPassword] = useState(false);
 
-    
-      const handleClickShowPassword = () => {
+    const handleClickShowPassword = () => {
         setShowPassword(!showPassword );
-      };
-    
-      const handleMouseDownPassword = (event) => {
+    };
+
+    const handleMouseDownPassword = (event) => {
         event.preventDefault();
-      };
+    };
 
-
-
-    
     function handleChange(e){
         props.hideAlert();
         setForm( {...form, [e.target.name]: e.target.value}, );
@@ -50,9 +57,12 @@ function LoginForm(props){
 
     function handleSubmit(e){
         e.preventDefault();
+        props.showLoader()
+
         let loginParts = form.login.split("\\");
         let domainName;
         let userName;
+
         if(loginParts.length > 1){
             domainName = loginParts[0];
             userName = loginParts[1];
@@ -60,10 +70,12 @@ function LoginForm(props){
         else{
             userName = loginParts[0];
         }
-        props.appLogin(userName, domainName, form.password, dataHub);
+
         if (!localStorage.getItem('drawerWidth')) {
             localStorage.setItem('drawerWidth', StyleConsts.drawerWidth);
         }
+        
+        signin(userName, domainName, form.password, () => navigate(location.state?.from?.pathname || '/ui/reports', {replace: true}))
     }
 
     return(
@@ -162,8 +174,10 @@ const mapStateToProps = state => {
 }
 
 const mapDispatchToProps = {
-    appLogin,
-    hideAlert
+    showAlert,
+    hideAlert,
+    showLoader, 
+    hideLoader
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoginForm);

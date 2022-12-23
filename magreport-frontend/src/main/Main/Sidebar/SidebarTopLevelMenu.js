@@ -1,6 +1,9 @@
-import React from 'react';
-import {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
+
+import { useLocation, useNavigate} from 'react-router-dom';
+
+import { routesName } from 'router/routes';
 
 // material-ui
 import List from '@material-ui/core/List';
@@ -12,7 +15,6 @@ import Collapse from '@material-ui/core/Collapse';
 
 //actions
 import { foldersTreeToggle } from '../../../redux/actions/sidebar/actionFolderTree';
-import actionSetSidebarItem from "../../../redux/actions/sidebar/actionSetSidebarItem";
 
 // local
 import FolderTree from './FolderTree/FolderTree';
@@ -20,6 +22,7 @@ import SidebarSubMenu from './SidebarSubMenu'
 
 // css
 import { SidebarCSS } from './SidebarCSS';
+import { useRef } from 'react';
 
 /**
  * 
@@ -29,25 +32,51 @@ function SidebarTopLevelMenu(props){
 
     const classes = SidebarCSS();
 
-    const[menuExpanded, setMenuExpanded] = useState(false);
+    const location = useLocation()
+    const navigate = useNavigate()
+    const locationName = useRef(null)
+
+    const [menuExpanded, setMenuExpanded] = useState(false);
+
+    useEffect(() => {
+        const arr = props.sidebarItem.subItems ? Object.values(props.sidebarItem.subItems) : []
+
+        routesName.forEach(name => {
+            if (location.pathname.indexOf(name) !== -1) {
+                locationName.current = name
+            }
+        })
+        if (props.sidebarItem.folderItemType === locationName.current) {
+            return setMenuExpanded(true)
+        } else {
+            arr.forEach(item => {
+                if (item.folderItemType === locationName.current) {
+                    return setMenuExpanded(true)
+                }
+            })
+        }
+
+    }, [props.sidebarItem, props.sidebarItem.subItems, location.pathname])
 
     function handleClick(){
-        if(!props.sidebarItem.subItems){
-            props.actionSetSidebarItem(props.sidebarItem);
+        if(!props.sidebarItem.subItems && locationName.current !== props.sidebarItem.folderItemType){
+            navigate('/ui/' + props.sidebarItem.folderItemType)
         }
     }
 
     function handleSubitemClick(item){
-        props.actionSetSidebarItem(item);
+        // console.log(item);
+        // props.actionSetSidebarItem(item);
     }
 
     function handleExpand(){
         if(props.sidebarItem.folderTree){
             foldersTreeToggle(props.sidebarItem.key, []);
         }
-        if(props.sidebarItem.folderTree || props.sidebarItem.subItems){
+        if (props.sidebarItem.folderTree || props.sidebarItem.subItems){
             setMenuExpanded(!menuExpanded);
         }
+        
         handleClick();
     }
 
@@ -56,7 +85,9 @@ function SidebarTopLevelMenu(props){
 			<List className={classes.listClassMain}>
 				<Paper key={props.sidebarItem.key} className={classes.paperRoot} elevation={5}>
 					<ListItem 
-						className={classes.listItem + ' ' + (props.currentSidebarItemKey === props.sidebarItem.key ? classes.folderListItemActive : null)} 
+						// className={classes.listItem + ' ' + (location.pathname.indexOf(locationName.current) !== -1 ? classes.folderListItemActive : null)} 
+						className={classes.listItem + ' '} 
+                        // className={classes.listItem + ' ' + (menuExpanded ? classes.folderListItemActive : null)}
 						onClick={(props.drawerOpen ? handleExpand : handleClick)} button key={props.sidebarItem.key}
 					>
 						{props.sidebarItem.icon && <ListItemIcon className={classes.listIconClass} >{props.sidebarItem.icon}</ListItemIcon>}
@@ -77,7 +108,7 @@ function SidebarTopLevelMenu(props){
 									key={item.key} 
 									drawerOpen={props.drawerOpen} 
                                     item={item}
-                                    focus={props.currentSidebarItemKey === item.key}
+                                    focus={menuExpanded}
 									onClick={handleSubitemClick}/>
 							))}
 						</List>
@@ -91,15 +122,14 @@ function SidebarTopLevelMenu(props){
 
 const mapStateToProps = state => (
     {
-        drawerOpen : state.drawer.open,
-        currentSidebarItemKey : state.currentSidebarItemKey
+        drawerOpen : state.sidebar.drawerOpen,
+        currentSidebarItemKey : state.sidebar.currentSidebarItemKey,
+        state: state,
     }
 )
 
 const mapDispatchToProps = {
     foldersTreeToggle,
-    actionSetSidebarItem
 }
-
 
 export default connect(mapStateToProps, mapDispatchToProps)(SidebarTopLevelMenu);

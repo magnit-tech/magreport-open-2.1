@@ -57,6 +57,7 @@ export default function ValueListFieldsViewer(props) {
             >
                 {
                     <ViewerChildCard
+                        parentFolderId={datasetData.folderId}
                         id={localData.dataSetId}
                         name = {datasetData && datasetData.name ?  datasetData.schemaName + '.' + datasetData.name + ' (' + datasetData.dataSource.name  +')' : null}
                         itemType={FolderItemTypes.dataset}

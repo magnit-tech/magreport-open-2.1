@@ -1,5 +1,9 @@
-import React, {useState} from "react";
+import React, { useState, useEffect } from "react";
 
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+
+import { useDispatch } from "react-redux";
+import { editItemNavbar, addItemNavbar } from "redux/actions/navbar/actionNavbar";
 
 import DataLoader from "main/DataLoader/DataLoader";
 import dataHub from "../../../../ajax/DataHub";
@@ -16,19 +20,24 @@ import Grid from "@material-ui/core/Grid";
 
 
 /**
- * @callback onOkClick
- */
-/**
  * Компонент просмотра расписаний
  * @param {Object} props - параметры компонента
- * @param {Number} props.serverMailTemplateId- идентификатор шаблона
- * @param {onOkClick} props.onOkClick - callback, вызываемый при нажатии кнопки ОК
- * @param {onEditClick} props.onEditClick - callback, вызываемый при нажатии кнопки Редактировать
- * @param {onExitClick} props.onExitClick - callback, вызываемый при нажатии кнопки ОК
  * @return {JSX.Element}
  * @constructor
  */
 export default function ServerMailTemplateDesigner(props) {
+
+    const { id, folderId } = useParams()
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        if(!id) {
+            dataHub.serverMailTemplateController.getFolder(folderId, handleFoldersLoaded)
+        }
+    }, []) // eslint-disable-line
 
     const {enqueueSnackbar} = useSnackbar();
     const [data, setData] = useState({});
@@ -40,9 +49,22 @@ export default function ServerMailTemplateDesigner(props) {
     const [viewResult, updateViewResult] = useState(false)
 
 
+    /*
+        Data loading
+    */
+
+    function handleFoldersLoaded({ok, data}) {
+        if(ok) {
+            dispatch(addItemNavbar('systemMailTemplates', folderId, data.path))
+        }
+    }
+
     function actionLoaded(loadData) {
         setData(loadData)
         getTags(loadData.type)
+        if (id) {
+            dispatch(editItemNavbar('systemMailTemplates', loadData.name, id, folderId, loadData.path))
+        }
     }
 
     function actionFailedLoaded(message) {
@@ -77,17 +99,14 @@ export default function ServerMailTemplateDesigner(props) {
             )
     }
 
-    function handleCancel() {
-        props.onExitClick()
-    }
-
     function handleEdited(response) {
 
         if (!response.ok) {
             enqueueSnackbar(`При обновлении шаблона возникла ошибка: ${response.data}`,
                 {variant: "error"});
         } else {
-            props.onOkClick()
+            location.state ? navigate(location.state) : navigate(`/ui/systemMailTemplates/${folderId}`)
+            enqueueSnackbar("Шаблон письма успешно сохранен", {variant : "success"});
         }
     }
 
@@ -108,8 +127,6 @@ export default function ServerMailTemplateDesigner(props) {
             }
         }
     }
-
-
 
     function getTags(type) {
         switch (type) {
@@ -146,7 +163,7 @@ export default function ServerMailTemplateDesigner(props) {
 
     return (<DataLoader
         loadFunc={dataHub.serverMailTemplateController.getMailTemplate}
-        loadParams={[props.serverMailTemplateId]}
+        loadParams={[id]}
         reload={false}
         onDataLoaded={(data) => {
             actionLoaded(data)
@@ -157,7 +174,7 @@ export default function ServerMailTemplateDesigner(props) {
     >
         <DesignerPage
             onSaveClick={handleSave}
-            onCancelClick={handleCancel}
+            onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/systemMailTemplates/${folderId}`)}
             name={'Редактирование письма отправки: ' + data.code}
         >
             <DesignerTextField

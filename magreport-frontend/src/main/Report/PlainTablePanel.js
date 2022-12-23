@@ -1,4 +1,7 @@
 import React, {useState, Fragment, useRef, useEffect } from 'react';
+
+import { useLocation, useNavigate } from 'react-router-dom';
+
 import Icon from '@mdi/react'
 import Measure from 'react-measure';
 import { Scrollbars } from 'react-custom-scrollbars'
@@ -35,12 +38,15 @@ import { ReportDataCSS } from "./ReportCSS";
 
 /**
  * @param {*} props.jobId - id задания
+ * @param {*} props.reportId - id отчёта
  * @param {*} props.excelTemplates - массив шаблонов Excel
  * @param {*} props.excelRowLimit - лимит кол-ва строк для выгрузки в Excel
  * @param {*} props.onViewTypeChange - function() - callback смена вида с таблицы на сводную
- * @param {*} props.onRestartReportClick - function() - callback перезапуска отчёта
  */
 export default function PlainTablePanel(props){
+
+    const navigate = useNavigate()
+    const location = useLocation()
 
     const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     const ScrollbarsRef = useRef(null);
@@ -90,6 +96,7 @@ export default function PlainTablePanel(props){
 
     function handleExcelExport(event, id){
         let excelTemplateId = id
+
         if (id === null || id === undefined) excelTemplateId = excelTemplates.filter(i => i.default)[0].excelTemplateId
 
         // setErrorExport(0);
@@ -119,11 +126,11 @@ export default function PlainTablePanel(props){
     }
 
     function handleRestartReport(){
-        props.onRestartReportClick();
+        navigate(`/ui/report/starter/${props.reportId}?jobId=${props.jobId}`, {state: location.pathname})
     }
 
     function handleViewTypeChange(){
-        props.onViewTypeChange('PivotTable');
+        props.onViewTypeChange('pivot');
     }
     
     function TablePaginationActions(props) {

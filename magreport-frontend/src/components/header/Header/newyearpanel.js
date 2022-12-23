@@ -1,5 +1,5 @@
 import React from 'react';
-import isHollyday from  '../../HollydayFunctions';
+import isHollyday from  '../../../HollydayFunctions';
 
 export default function NewYearPanel(props){
     const value = isHollyday();

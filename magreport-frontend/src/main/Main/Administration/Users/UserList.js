@@ -1,5 +1,17 @@
 import React, {useState, useEffect} from 'react';
 
+import {useSnackbar} from "notistack";
+
+import { useDispatch } from 'react-redux';
+
+import { addNavbar } from 'redux/actions/navbar/actionNavbar';
+
+// styles 
+import { UsersCSS} from "./UsersCSS";
+
+// dataHub
+import dataHub from 'ajax/DataHub';
+
 // componenets
 import Button from '@material-ui/core/Button';
 import BlockIcon from '@material-ui/icons/Block';
@@ -14,37 +26,34 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import Icon from '@mdi/react';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import { mdiWeb } from '@mdi/js';
-import { 
-    Card,
-    List,
-    Toolbar,
-    Typography,
-    InputBase,
-	TextField
-} from '@material-ui/core';
+import { Card, List, Toolbar, Typography, InputBase, TextField } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import Filter9PlusIcon from '@material-ui/icons/Filter9Plus';
-import {useSnackbar} from "notistack";
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import AddIcon from '@material-ui/icons/Add';
-// dataHub
-import dataHub from 'ajax/DataHub';
 
 // local
 import DataLoader from "../../../DataLoader/DataLoader";
 import UserCard from './UserCard';
 import AsyncAutocomplete from '../../../../main/AsyncAutocomplete/AsyncAutocomplete';
 
-// styles 
-import { UsersCSS} from "./UsersCSS";
 
-function UserList(props){
+export default function UserList(props){
+	
     const classes = UsersCSS();
 
     const {enqueueSnackbar} = useSnackbar();
+
+	const dispatch = useDispatch()
+
+    useEffect(() => {
+		if(!props.roleId) {
+			dispatch(addNavbar('Пользователи', 'users'))
+		}
+    }, [dispatch, props.roleId])
 
     const [userPage, setUserPage] = useState(0)
     const [viewAll, setViewAll] = useState(false)
@@ -370,5 +379,3 @@ function UserList(props){
         </DataLoader> 
     )
 }
-
-export default UserList

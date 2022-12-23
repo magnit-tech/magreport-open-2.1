@@ -1,18 +1,24 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import App from './App';
+
+import { BrowserRouter } from "react-router-dom"
+
 //import 'fontsource-roboto';
 import "fontsource-roboto/300.css"; // All styles included.
 import "fontsource-roboto/400.css"; // All styles included.
 import "fontsource-roboto/500.css";// All styles included.
 //import './index.css';
-import App from './App';
+
 import { Provider } from 'react-redux'
 import * as serviceWorker from './serviceWorker';
 import store from 'redux/store';
 
 const app = (
     <Provider store={store}>
-        <App />
+        <BrowserRouter>
+            <App />
+        </BrowserRouter>
     </Provider>
 )
 

@@ -1,5 +1,9 @@
 import React from 'react';
+
+import { useAuth } from 'router/useAuth';
+
 import Draggable from 'react-draggable';
+
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -8,8 +12,9 @@ import IconButton from '@material-ui/core/IconButton';
 import LogoIcon from '../LogoIcon/LogoIcon';
 import HelpIcon from '@material-ui/icons/Help';
 import { HeaderCSS } from './HeaderCSS'
+
 import { connect } from 'react-redux';
-import { appLogout } from '../../redux/actions/admin/actionThemeDesign'
+
 import Brightness5Icon from '@material-ui/icons/Brightness5';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -24,7 +29,7 @@ import Paper from '@material-ui/core/Paper';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 
-import { setLightTheme, setDarkTheme } from '../../redux/actions/admin/actionThemeDesign';
+import { setLightTheme, setDarkTheme } from '../../../redux/actions/admin/actionThemeDesign';
 import NewYearPanel from './newyearpanel';
 
 function PaperComponent(props) {
@@ -33,12 +38,13 @@ function PaperComponent(props) {
         <Paper {...props} />
       </Draggable>
     );
-  }
+}
 
 function Header(props){
+
     const classes = HeaderCSS();
-    
-    const { userName } = props.userName;
+
+    const {user, signout} = useAuth()
 
     const themeLightness  = props.themeLightness;
     const tooltipTitle = props.themeLightness ? 'Светлый фон': 'Тёмный фон';
@@ -65,7 +71,8 @@ function Header(props){
       };
 
     function handleClick(){
-        props.appLogout();
+        // props.appLogout();
+        signout()
     }
 
     function handleThemeClick(){
@@ -73,6 +80,7 @@ function Header(props){
         if  (themeLightness ) {props.setLightTheme() }
         else { props.setDarkTheme () }
     }
+
     return(
         <AppBar position="static" className={classes.appBar}>
             <NewYearPanel/>
@@ -129,8 +137,8 @@ function Header(props){
                         }
                     </IconButton> 
                 </Tooltip>         
-                <Typography variant="overline" className={classes.userNameClass}>{userName}</Typography>
-                { userName ?
+                <Typography variant="overline" className={classes.userNameClass}>{user.current ? user.current.name : ''}</Typography>
+                { user.current?.name ?
                     <Tooltip title = 'Выйти'>
                         <IconButton 
                             className={classes.iconButton}
@@ -148,13 +156,13 @@ function Header(props){
 
 const mapStateToProps = state => {
     return {
-        userName: state.login,
+        // userName: state.login,
         themeLightness: state.themesMenuView.darkTheme
     }
 }
 
 const mapDispatchToProps = {
-    appLogout,
+    // appLogout,
     setLightTheme,
     setDarkTheme
 }
