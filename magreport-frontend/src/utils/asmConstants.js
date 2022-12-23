@@ -9,6 +9,7 @@ export const SECURITY_SOURCES = "securitySources";
 // Security Source fields
 export const SOURCE_TYPE = "sourceType";
 export const DATASET_ID = "dataSetId";
+export const ROLE_DESCRIPTION = "roleDescription";
 export const PRE_SQL = "preSql";
 export const POST_SQL = "postSql";
 export const FIELDS = "fields";
