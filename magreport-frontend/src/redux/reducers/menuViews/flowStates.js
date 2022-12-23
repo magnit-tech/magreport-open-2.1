@@ -6,11 +6,6 @@ export const jobsMenuViewFlowStates = {
     startReport : "startReport"
 }
 
-export const rolesMenuViewFlowStates = {
-    roleDesigner : "roleDesigner",
-    roleViewer : "roleViewer"
-}
-
 export const asmAdministrationMenuViewFlowStates = {
     externalSecurityList: "externalSecurityList",
     externalSecurityViewer: "externalSecurityViewer",

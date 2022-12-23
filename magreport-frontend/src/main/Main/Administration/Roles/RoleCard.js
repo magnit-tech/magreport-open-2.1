@@ -1,6 +1,8 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
+import { Link } from "react-router-dom";
+
 // components
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -13,14 +15,10 @@ import EditIcon from '@material-ui/icons/Edit';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 
-//local
-import {FolderItemTypes} from  '../../../FolderContent/FolderItemTypes';
-
 //actions
 import { showAlertDialog, hideAlertDialog } from 'redux/actions/UI/actionsAlertDialog'
 import { actionRolesChangeWriteRights } from 'redux/actions/admin/actionRoles'
-import { actionEditRoleFromUserClick } from 'redux/actions/menuViews/folderActions';
-import { foldersLoading} from 'redux/actions/sidebar/actionFolderTree';
+import { foldersLoading } from 'redux/actions/sidebar/actionFolderTree';
 
 function RoleCard(props){
 
@@ -49,13 +47,6 @@ function RoleCard(props){
         props.actionRolesChangeWriteRights(props.index, !canWrite)
     }    
 
-    // function handleClickView(){
-    //     props.actionViewerViewItem(FolderItemTypes.roles, props.data.id, props.data.name);
-    // }
-
-    function handleRoleEdit(){      
-        props.actionEditRoleFromUserClick(FolderItemTypes.roles, props.data.typeId, props.data.id, props.data.name)
-    }
     return (
         <ListItem  
             button 
@@ -85,28 +76,39 @@ function RoleCard(props){
         }
         {
             props.showViewButton ?
-            <ListItemIcon>
-                <IconButton 
-                    aria-label="view" 
-                    color="primary" 
-                    // onClick={handleClickView}
+                <Link 
+                    to={`/ui/roles/${props.data.typeId}/view/${props.data.id}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
                 >
-                    <PageviewIcon />
-                </IconButton>
-            </ListItemIcon>
+                    <ListItemIcon>
+                        <IconButton 
+                            aria-label="view" 
+                            color="primary" 
+                        >
+                            <PageviewIcon />
+                        </IconButton>
+                    </ListItemIcon>
+                </Link>
             : ""
         }
         {
             props.showEditButton ?
-            <ListItemIcon>
-                <IconButton 
-                    aria-label="edit-role" 
-                    color="primary" 
-                    onClick={handleRoleEdit}
-                >
-                    <EditIcon />
-                </IconButton>
-            </ListItemIcon>
+            <Link 
+                to={`/ui/roles/${props.data.typeId}/edit/${props.data.id}`} 
+                target="_blank" 
+                rel="noopener noreferrer"
+            >
+                <ListItemIcon>
+                    <IconButton 
+                        aria-label="edit-role" 
+                        color="primary"
+                    >
+                        <EditIcon />
+                    </IconButton>
+                </ListItemIcon>
+            </Link>
+
             : ""
         }
         {
@@ -133,7 +135,6 @@ const mapDispatchToProps = {
     showAlertDialog, 
     hideAlertDialog,
     actionRolesChangeWriteRights,
-    actionEditRoleFromUserClick,
     foldersLoading,
 }
 
