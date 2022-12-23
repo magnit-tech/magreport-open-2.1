@@ -58,16 +58,16 @@ function DatasetsMenuView(props){
     
 
     function handleFolderClick(folderId) {
-        navigate(`/dataset/${folderId}`)
+        navigate(`/ui/dataset/${folderId}`)
     }
     function handleItemClick(datasetId) {
-        navigate(`/dataset/${id}/view/${datasetId}`, {state: location.pathname})
+        navigate(`/ui/dataset/${id}/view/${datasetId}`, {state: location.pathname})
     }
     function handleEditItemClick(datasetId) {
-        navigate(`/dataset/${id}/edit/${datasetId}`, {state: location.pathname})
+        navigate(`/ui/dataset/${id}/edit/${datasetId}`, {state: location.pathname})
     }
     function handleAddItemClick() {
-        navigate(`/dataset/${id}/add`, {state: location.pathname})
+        navigate(`/ui/dataset/${id}/add`, {state: location.pathname})
     }
 
     // Dependency
