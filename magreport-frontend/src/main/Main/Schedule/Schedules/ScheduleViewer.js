@@ -88,7 +88,7 @@ export default function ScheduleViewer() {
         <ViewerPage
             itemType={FolderItemTypes.schedules}
             id={id}
-            onOkClick={() => navigate('/schedules')}
+            onOkClick={() => navigate('/ui/schedules')}
             disabledPadding={true}
             readOnly={!hasRWRight}
         >

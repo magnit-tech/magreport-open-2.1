@@ -21,9 +21,9 @@ function Navbar (){
 
     function handleChipClick(action, itemsType, id, parentId) {
         if (action) {
-            navigate(`/${itemsType}${parentId ? `/${parentId}` : ''}/${action}${id || id === '0' ? '/' + id : ''}`)
+            navigate(`/ui/${itemsType}${parentId ? `/${parentId}` : ''}/${action}${id || id === '0' ? '/' + id : ''}`)
         } else{
-            navigate(`/${itemsType}${id || id === 0 ? '/' + id : ''}`)
+            navigate(`/ui/${itemsType}${id || id === 0 ? '/' + id : ''}`)
         }
     }
 

@@ -113,7 +113,7 @@ function ASMViewer(props) {
                 id={id}
                 itemType={FolderItemTypes.asm}
                 disabledPadding={true}
-                onOkClick={() => navigate('/asm')}
+                onOkClick={() => navigate('/ui/asm')}
                 >
                 <PageTabs
                     tabsdata={tabs}
