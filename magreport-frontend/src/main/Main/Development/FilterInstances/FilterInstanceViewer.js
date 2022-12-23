@@ -165,7 +165,7 @@ export default function FilterInstanceViewer() {
                     id={data.id}
                     folderId = {folderId}
                     itemType={FolderItemTypes.filterInstance}
-                    onOkClick={() => location.state ? navigate(location.state) : navigate(`/filterInstance/${folderId}`)}
+                    onOkClick={() => location.state ? navigate(location.state) : navigate(`/ui/filterInstance/${folderId}`)}
                     readOnly={!hasRWRight}
                 >
                     {children}

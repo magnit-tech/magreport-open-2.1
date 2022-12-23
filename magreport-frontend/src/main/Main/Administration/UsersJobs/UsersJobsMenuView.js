@@ -36,11 +36,11 @@ function UsersJobsMenuView(props){
     }
 
     function handleItemClick(jobId) {
-        navigate(`/report/${jobId}`)
+        navigate(`/ui/report/${jobId}`)
     }
 
     function handleReportRunClick(reportId, jobId) {
-        navigate(`/report/starter/${reportId}?jobId=${jobId}`, {state: location.pathname})
+        navigate(`/ui/report/starter/${reportId}?jobId=${jobId}`, {state: location.pathname})
     }
 
     return (

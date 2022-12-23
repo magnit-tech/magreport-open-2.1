@@ -56,17 +56,17 @@ function DatasourcesMenuView(props){
 
 
     function handleFolderClick(folderId) {
-        navigate(`/datasource/${folderId}`)
+        navigate(`/ui/datasource/${folderId}`)
     }
     function handleItemClick(datasourceId) {
-        navigate(`/datasource/${id}/view/${datasourceId}`, {state: location.pathname})
+        navigate(`/ui/datasource/${id}/view/${datasourceId}`, {state: location.pathname})
     }
     function handleEditItemClick(datasourceId) {
-        navigate(`/datasource/${id}/edit/${datasourceId}`, {state: location.pathname})
+        navigate(`/ui/datasource/${id}/edit/${datasourceId}`, {state: location.pathname})
     }
 
     function handleAddItemClick(folderItemsType) {
-        navigate(`/datasource/${id}/add`, {state: location.pathname})
+        navigate(`/ui/datasource/${id}/add`, {state: location.pathname})
     }
 
     // Dependency

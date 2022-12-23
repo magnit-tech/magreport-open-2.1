@@ -129,7 +129,7 @@ export default function FilterTemplatesViewer() {
                     id={data.id}
                     folderId = {folderId}
                     itemType={FolderItemTypes.filterTemplate}
-                    onOkClick={() => location.state ? navigate(location.state) : navigate(`/filterTemplate/${folderId}`)}
+                    onOkClick={() => location.state ? navigate(location.state) : navigate(`/ui/filterTemplate/${folderId}`)}
                     readOnly
                 >
                     <ViewerTextField

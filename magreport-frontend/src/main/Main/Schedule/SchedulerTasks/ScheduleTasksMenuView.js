@@ -37,13 +37,13 @@ function ScheduleTasksMenuView(props){
 
 
     function handleItemClick(scheduleTaskId) {
-        navigate(`/scheduleTasks/view/${scheduleTaskId}`)
+        navigate(`/ui/scheduleTasks/view/${scheduleTaskId}`)
     }
     function handleEditItemClick(scheduleTaskId) {
-        navigate(`/scheduleTasks/edit/${scheduleTaskId}`)
+        navigate(`/ui/scheduleTasks/edit/${scheduleTaskId}`)
     }
     function handleAddItemClick() {
-        navigate(`/scheduleTasks/add`)
+        navigate(`/ui/scheduleTasks/add`)
     }
 
     return (

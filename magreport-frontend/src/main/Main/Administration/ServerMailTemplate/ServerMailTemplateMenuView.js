@@ -31,13 +31,13 @@ function MailTemplatesMenuView(props){
 
 
     function handleFolderClick(folderId) {
-        navigate(`/systemMailTemplates/${folderId}`)
+        navigate(`/ui/systemMailTemplates/${folderId}`)
     }
     function handleItemClick(templateId) {
-        navigate(`/systemMailTemplates/${id}/view/${templateId}`, {state: location.pathname})
+        navigate(`/ui/systemMailTemplates/${id}/view/${templateId}`, {state: location.pathname})
     }
     function handleEditItemClick(templateId) {
-        navigate(`/systemMailTemplates/${id}/edit/${templateId}`, {state: location.pathname})
+        navigate(`/ui/systemMailTemplates/${id}/edit/${templateId}`, {state: location.pathname})
     }
 
     return(

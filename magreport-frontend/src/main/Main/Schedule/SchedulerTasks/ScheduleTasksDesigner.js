@@ -394,7 +394,7 @@ export default function ScheduleTasksDesigner(props) {
 
     function handleAddedEdited(magRepResponse) {
         if (magRepResponse.ok) {
-            location.state ? navigate(location.state) : navigate(`/scheduleTasks`)
+            location.state ? navigate(location.state) : navigate(`/ui/scheduleTasks`)
             enqueueSnackbar("Отчет на расписании успешно сохранен", {variant : "success"});
         } else {
             setUploading(false);
@@ -467,7 +467,7 @@ export default function ScheduleTasksDesigner(props) {
             <DesignerPage
                 disableSave = {disableSave}
                 onSaveClick={handleSave}
-                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/scheduleTasks`)}
+                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/scheduleTasks`)}
             >
                 <DesignerFolderItemPicker
                 //minWidth = {StyleConsts.designerTextFieldMinWidth}
@@ -517,7 +517,7 @@ export default function ScheduleTasksDesigner(props) {
             <DesignerPage
                 disableSave = {disableSave}
                 onSaveClick={handleSave}
-                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/scheduleTasks`)}
+                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/scheduleTasks`)}
             >
                 <DesignerMultipleSelectField
                    // minWidth = {StyleConsts.designerTextFieldMinWidth}
@@ -595,7 +595,7 @@ export default function ScheduleTasksDesigner(props) {
         <DesignerPage
             disableSave = {disableSave}
             onSaveClick={handleSave}
-            onCancelClick={() => location.state ? navigate(location.state) : navigate(`/scheduleTasks`)}
+            onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/scheduleTasks`)}
         >
             <FormControl component="fieldset" style={{margin: '8px 0px'}}>
                 <FormLabel component="legend">Тип рассылки:</FormLabel>
@@ -689,7 +689,7 @@ export default function ScheduleTasksDesigner(props) {
             <DesignerPage
                 disableSave = {disableSave}
                 onSaveClick={handleSave}
-                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/scheduleTasks`)}
+                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/scheduleTasks`)}
             >
                 <DesignerTextFieldWithSeparator
                         label = "Адреса"
@@ -779,7 +779,7 @@ export default function ScheduleTasksDesigner(props) {
                         onDataLoadFunction={dataHub.reportController.getScheduleReport}
                         scheduleTaskId={id}
                         parameters = {data.reportJobFilter}
-                        onCancel = {() => location.state ? navigate(location.state) : navigate(`/scheduleTasks`)}
+                        onCancel = {() => location.state ? navigate(location.state) : navigate(`/ui/scheduleTasks`)}
                         onSave = {handleSave}
                         onSaveScheduleTaskFilterData = {onSaveScheduleTaskFilterData}
                         checkFilters = {handleCheckFilters}

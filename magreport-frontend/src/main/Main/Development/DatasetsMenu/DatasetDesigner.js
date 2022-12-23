@@ -288,7 +288,7 @@ export default function DatasetDesigner(){
     function handleAddEditAnswer(magrepResponse){
         
         if(magrepResponse.ok){
-            location.state ? navigate(location.state) : navigate(`/dataset/${folderId}`)
+            location.state ? navigate(location.state) : navigate(`/ui/dataset/${folderId}`)
             enqueueSnackbar("Набор данных успешно сохранен", {variant : "success"});
         }
         else{
@@ -305,7 +305,7 @@ export default function DatasetDesigner(){
         tabcontent:
         <DesignerPage 
             onSaveClick={handleSave}
-            onCancelClick={() => location.state ? navigate(location.state) : navigate(`/dataset/${folderId}`)}
+            onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/dataset/${folderId}`)}
             //name = {pagename}
         >
             <DesignerTextField

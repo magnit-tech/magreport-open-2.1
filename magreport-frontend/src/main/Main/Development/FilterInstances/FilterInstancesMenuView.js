@@ -56,16 +56,16 @@ function FilterInstancesMenuView(props){
     
 
     function handleFolderClick(folderId) {
-        navigate(`/filterInstance/${folderId}`)
+        navigate(`/ui/filterInstance/${folderId}`)
     }
     function handleItemClick(filterInstanceId) {
-        navigate(`/filterInstance/${id}/view/${filterInstanceId}`, {state: location.pathname})
+        navigate(`/ui/filterInstance/${id}/view/${filterInstanceId}`, {state: location.pathname})
     }
     function handleEditItemClick(filterInstanceId) {
-        navigate(`/filterInstance/${id}/edit/${filterInstanceId}`, {state: location.pathname})
+        navigate(`/ui/filterInstance/${id}/edit/${filterInstanceId}`, {state: location.pathname})
     }
     function handleAddItemClick(folderItemsType) {
-        navigate(`/filterInstance/${id}/add`, {state: location.pathname})
+        navigate(`/ui/filterInstance/${id}/add`, {state: location.pathname})
     }
 
     // Dependency
