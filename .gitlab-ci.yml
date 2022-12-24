@@ -17,6 +17,9 @@ workflow:
 build:
   stage: build
   script:
+    - TMP_REACT_APP_VERSION=`cat version`
+    - if [ $CI_COMMIT_BRANCH == "citest" ]; then REACT_APP_VERSION=$TMP_REACT_APP_VERSION.$CI_RUNNER_ID't'; else REACT_APP_VERSION=$TMP_REACT_APP_VERSION.$CI_RUNNER_ID; fi
+    - if [ $CI_COMMIT_BRANCH == "citest" ]; then ENVIRONMENT=test; else ENVIRONMENT=prod; fi
     - echo "============================================================="
     - echo "Start building maven project"
     - echo "============================================================="
@@ -24,9 +27,6 @@ build:
     - echo "============================================================="
     - echo "Start coping files"
     - echo "============================================================="
-    - TMP_REACT_APP_VERSION=`cat version`
-    - if [ $CI_COMMIT_BRANCH == "citest" ]; then REACT_APP_VERSION=$TMP_REACT_APP_VERSION.$CI_RUNNER_ID't'; else REACT_APP_VERSION=$TMP_REACT_APP_VERSION.$CI_RUNNER_ID; fi
-    - if [ $CI_COMMIT_BRANCH == "citest" ]; then ENVIRONMENT=test; else ENVIRONMENT=prod; fi
     - rm -rf $CI_PROJECT_DIR/package
     - mkdir -p $CI_PROJECT_DIR/package
     - mkdir -p $CI_PROJECT_DIR/package/etc/sysconfig
