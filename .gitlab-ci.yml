@@ -17,7 +17,7 @@ workflow:
 build:
   stage: build
   variables:
-    REACT_APP_VERSION: '123'
+    REACT_APP_VERSION: '1234'
   script:
     - TMP_REACT_APP_VERSION=`cat version`
     - if [ $CI_COMMIT_BRANCH == "citest" ]; then REACT_APP_VERSION=$TMP_REACT_APP_VERSION.$CI_RUNNER_ID't'; else REACT_APP_VERSION=$TMP_REACT_APP_VERSION.$CI_RUNNER_ID; fi
