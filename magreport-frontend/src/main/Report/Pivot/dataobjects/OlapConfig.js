@@ -46,7 +46,7 @@ export default function OlapConfig(config){
                 "olapConfigId": config?.olapConfig?.id || null,
                 "olapConfigName": config?.olapConfig?.name || ''
             },
-            "reportId": config?.report || null,
+            "reportId": config?.report?.id || null,
             'reportOlapConfigId': config?.reportOlapConfigId || null,
             "userId": config?.user?.id || null
         }
@@ -163,7 +163,6 @@ export default function OlapConfig(config){
 
 	// Загрузка выбранной конфигурации
     this.loadChosenConfig = (obj, callback) => {
-        
         const { olapConfigDescription, olapConfigId, olapConfigName } = this.configData.olapConfig
 
         let payloadData = {
@@ -184,7 +183,6 @@ export default function OlapConfig(config){
             }
             return callback(ok)
         })
-
 
     }
 

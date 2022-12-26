@@ -64,13 +64,13 @@ function SchedulesMenuView(props) {
     let isSortingAvailable = true;
 
     function handleItemClick(scheduleId) {
-        navigate(`/schedules/view/${scheduleId}`)
+        navigate(`/ui/schedules/view/${scheduleId}`)
     }
     function handleEditItemClick(scheduleId) {
-        navigate(`/schedules/edit/${scheduleId}`)
+        navigate(`/ui/schedules/edit/${scheduleId}`)
     }
     function handleAddItemClick() {
-        navigate(`/schedules/add`)
+        navigate(`/ui/schedules/add`)
     }
 
     return (

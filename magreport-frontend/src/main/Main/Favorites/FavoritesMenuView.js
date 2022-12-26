@@ -34,7 +34,7 @@ function FavoritesMenuView(props){
 
 
     function handleItemClick(reportId) {
-        navigate(`/report/starter/${reportId}`, {state: location.pathname})
+        navigate(`/ui/report/starter/${reportId}`, {state: location.pathname})
     }
 
     return(

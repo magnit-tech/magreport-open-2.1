@@ -10,7 +10,7 @@ export const sidebarReducer = (state = initialState, action) => {
     switch (action.type){
 
         case DRAWERTOOGLE:
-            return { ...state, open: !state.open }
+            return { ...state, drawerOpen: !state.drawerOpen }
 			
         default:
             return state

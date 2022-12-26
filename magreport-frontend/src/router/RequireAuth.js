@@ -12,7 +12,7 @@ const RequireAuth = ({children}) => {
 		if (userData && userData.authtoken && userData.name) {
 			setUserData(userData)
 		} else {
-			return <Navigate to="/login" state={{from: location}}/>
+			return <Navigate to="/ui/login" state={{from: location}}/>
 		}
 	}
 	

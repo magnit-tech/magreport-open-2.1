@@ -200,9 +200,9 @@ function ASMDesigner(props) {
                 enqueueSnackbar(`ASM ${name} ${actionWord} успешно`, {variant: "success"});
                 if (!id) {
                     props.actionAsmListShow();
-                    navigate('/asm')
+                    navigate('/ui/asm')
                 } else {
-                    navigate(`/asm/view/${id}`)
+                    navigate(`/ui/asm/view/${id}`)
                 }
             }
         }
@@ -217,9 +217,9 @@ function ASMDesigner(props) {
             if (isOk) {
                 if (!id) {
                     props.actionAsmListShow();
-                    navigate('/asm')
+                    navigate('/ui/asm')
                 } else {
-                    navigate(`/asm/view/${id}`)
+                    navigate(`/ui/asm/view/${id}`)
                 }
             }
             props.hideAlertDialog();
