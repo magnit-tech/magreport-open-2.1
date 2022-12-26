@@ -130,9 +130,11 @@ function DataHub(){
                 }
                 else{
                     if(response.status === 401){
-                        if (this.unautorizedHandler){
-                            this.unautorizedHandler(); //!!!!!
-                        }
+                        localStorage.removeItem('userData')
+                        window.location.reload();
+                        // if (this.unautorizedHandler){
+                        //     this.unautorizedHandler(); 
+                        // }
                     }
                     else {
                         callback(new MagrepResponse(false, "Request failed. Response status: " + response.status, requestId));

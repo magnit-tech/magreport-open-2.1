@@ -41,6 +41,7 @@ import {
 import {
     DATASET_FIELD_ID,
     DESCRIPTION,
+    ROLE_DESCRIPTION,
     FIELD_TYPE,
     FIELDS,
     FILTER_VALUE_FIELD,
@@ -114,6 +115,7 @@ function ASMSecuritySourceCard(props) {
     const sourceType = selectDataVal(SOURCE_TYPE);
     const name = selectDataVal(NAME);
     const description = selectDataVal(DESCRIPTION);
+    const roleDescription = selectDataVal(ROLE_DESCRIPTION);
     const fields = selectDataVal(FIELDS);
     const preSql = selectDataVal(PRE_SQL);
     const postSql = selectDataVal(POST_SQL);
@@ -214,6 +216,14 @@ function ASMSecuritySourceCard(props) {
                 fullWidth
                 onChange={value => props.changeData(index, DESCRIPTION, value)}
                 error={selectErrorValue(DESCRIPTION)}
+            />
+            <DesignerTextField
+                label="Описание роли"
+                value={roleDescription}
+                //displayBlock
+                fullWidth
+                onChange={value => props.changeData(index, ROLE_DESCRIPTION, value)}
+                error={selectErrorValue(ROLE_DESCRIPTION)}
             />
             <DesignerFolderItemPicker
                 label={"Набор данных"}
