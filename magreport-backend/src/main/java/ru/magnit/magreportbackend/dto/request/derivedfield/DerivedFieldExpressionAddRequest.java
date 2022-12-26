@@ -10,6 +10,7 @@ import lombok.experimental.Accessors;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.domain.enums.Expressions;
 
+import java.util.Collections;
 import java.util.List;
 
 @Getter
@@ -24,5 +25,5 @@ public class DerivedFieldExpressionAddRequest {
     private Long referenceId;
     private String constantValue;
     private DataTypeEnum constantType;
-    private List<DerivedFieldExpressionAddRequest> parameters;
+    private List<DerivedFieldExpressionAddRequest> parameters = Collections.emptyList();
 }
