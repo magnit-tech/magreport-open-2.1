@@ -189,7 +189,7 @@ export default function SecurityFilterViewer(props) {
                 folderId = {folderId}
                 itemType={FolderItemTypes.securityFilters}
                 disabledPadding={true}
-                onOkClick={() => location.state ? navigate(location.state) : navigate(`/securityFilters/${folderId}`)}
+                onOkClick={() => location.state ? navigate(location.state) : navigate(`/ui/securityFilters/${folderId}`)}
                 readOnly={!hasRWRight}
             >
                 {children}

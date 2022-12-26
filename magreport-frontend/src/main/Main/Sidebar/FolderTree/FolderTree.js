@@ -62,7 +62,7 @@ function FolderTree(props){
     }
 
     function handleFolderClick(folderId){
-        navigate(`/${props.folderItemType}/${folderId}`)
+        navigate(`/ui/${props.folderItemType}/${folderId}`)
 
     }
 

@@ -75,7 +75,7 @@ function LoginForm(props){
             localStorage.setItem('drawerWidth', StyleConsts.drawerWidth);
         }
         
-        signin(userName, domainName, form.password, () => navigate(location.state?.from?.pathname || '/', {replace: true}))
+        signin(userName, domainName, form.password, () => navigate(location.state?.from?.pathname || '/ui/reports', {replace: true}))
     }
 
     return(

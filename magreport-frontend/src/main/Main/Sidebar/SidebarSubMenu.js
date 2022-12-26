@@ -32,7 +32,7 @@ function SidebarSubMenu(props){
             setMenuExpanded(!menuExpanded)
         }
         props.onClick(item)
-        navigate(item.folderItemType)
+        navigate('/ui/' + item.folderItemType)
     }
 
     return (

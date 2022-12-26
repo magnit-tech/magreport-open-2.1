@@ -60,7 +60,7 @@ function SidebarTopLevelMenu(props){
 
     function handleClick(){
         if(!props.sidebarItem.subItems && locationName.current !== props.sidebarItem.folderItemType){
-            navigate(props.sidebarItem.folderItemType)
+            navigate('/ui/' + props.sidebarItem.folderItemType)
         }
     }
 
