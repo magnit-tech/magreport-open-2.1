@@ -34,7 +34,7 @@ import {ViewerCSS} from "../Viewer/ViewerCSS";
  * @return {JSX.Element}
  * @constructor
  */
-export default function ReportFieldItem(props) {
+export default function ReportFieldItemViewer(props) {
     const classes = ReportFieldItemCSS();
 
     const viewerClasses = ViewerCSS();
