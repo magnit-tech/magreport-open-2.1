@@ -1,5 +1,6 @@
 package ru.magnit.magreportbackend.dto.response.derivedfield;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,6 +30,7 @@ public class DerivedFieldResponse {
     private LocalDateTime modified;
     private FieldExpressionResponse expression;
 
+    @JsonIgnore
     public List<FieldExpressionResponse> getAllExpressions(){
         final var result = new ArrayList<FieldExpressionResponse>();
         result.add(expression);
@@ -36,6 +38,7 @@ public class DerivedFieldResponse {
         return result;
     }
 
+    @JsonIgnore
     public List<Long> getUsedDerivedFieldIds() {
         return getAllExpressions().stream()
             .filter(expr -> expr.getType() == Expressions.DERIVED_FIELD_VALUE)
