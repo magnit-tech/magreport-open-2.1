@@ -9,4 +9,5 @@ public interface FavReportRepository extends JpaRepository<FavReport, Long> {
     List<FavReport> findAllByUserId(Long userId);
     boolean existsByUserIdAndReportId(Long userId, Long reportId);
     void deleteByUserIdAndReportId (Long userId, Long reportId);
+    void deleteByReportId (Long reportId);
 }

@@ -172,6 +172,7 @@ public class ReportService {
         olapConfigurationDomainService.deleteReportOlapConfigurationByReport(request.getId());
         scheduleTaskDomainService.deleteScheduleTaskByReport(request.getId());
         excelTemplateDomainService.removeReportExcelTemplate(request.getId());
+        reportDomainService.deleteFavReportsByReportId(request.getId());
         reportDomainService.deleteReport(request.getId());
 
     }

@@ -283,6 +283,7 @@ class ReportServiceTest {
         verify(scheduleTaskDomainService).deleteScheduleTaskByReport(anyLong());
         verify(olapConfigurationDomainService).deleteReportOlapConfigurationByReport(anyLong());
         verify(excelTemplateDomainService).removeReportExcelTemplate(anyLong());
+        verify(domainService).deleteFavReportsByReportId(anyLong());
         verifyNoMoreInteractions(domainService);
     }
 
