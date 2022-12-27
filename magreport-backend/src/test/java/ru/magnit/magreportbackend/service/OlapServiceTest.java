@@ -9,17 +9,31 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
+import ru.magnit.magreportbackend.domain.enums.BinaryBooleanOperations;
 import ru.magnit.magreportbackend.domain.olap.AggregationType;
+import ru.magnit.magreportbackend.domain.olap.FilterType;
+import ru.magnit.magreportbackend.domain.olap.MetricFilterType;
+import ru.magnit.magreportbackend.domain.olap.SortingOrder;
 import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportFieldData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportJobData;
+import ru.magnit.magreportbackend.dto.request.olap.FieldDefinition;
+import ru.magnit.magreportbackend.dto.request.olap.FilterDefinition;
+import ru.magnit.magreportbackend.dto.request.olap.FilterDefinitionNew;
+import ru.magnit.magreportbackend.dto.request.olap.FilterGroup;
+import ru.magnit.magreportbackend.dto.request.olap.FilterGroupNew;
 import ru.magnit.magreportbackend.dto.request.olap.Interval;
 import ru.magnit.magreportbackend.dto.request.olap.MetricDefinition;
+import ru.magnit.magreportbackend.dto.request.olap.MetricDefinitionNew;
+import ru.magnit.magreportbackend.dto.request.olap.MetricFilterDefinition;
 import ru.magnit.magreportbackend.dto.request.olap.MetricFilterGroup;
 import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequest;
+import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequestNew;
 import ru.magnit.magreportbackend.dto.request.olap.OlapExportPivotTableRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldItemsRequest;
+import ru.magnit.magreportbackend.dto.request.olap.OlapFieldTypes;
+import ru.magnit.magreportbackend.dto.request.olap.SortingParams;
 import ru.magnit.magreportbackend.dto.response.olap.OlapConfigResponse;
 import ru.magnit.magreportbackend.dto.response.olap.ReportOlapConfigResponse;
 import ru.magnit.magreportbackend.service.domain.ExcelReportDomainService;
@@ -27,6 +41,8 @@ import ru.magnit.magreportbackend.service.domain.JobDomainService;
 import ru.magnit.magreportbackend.service.domain.OlapConfigurationDomainService;
 import ru.magnit.magreportbackend.service.domain.OlapDomainService;
 import ru.magnit.magreportbackend.service.domain.TokenService;
+import ru.magnit.magreportbackend.util.Pair;
+import ru.magnit.magreportbackend.util.Triple;
 
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -39,10 +55,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static ru.magnit.magreportbackend.dto.request.olap.OlapFieldTypes.DERIVED_FIELD;
+import static ru.magnit.magreportbackend.dto.request.olap.OlapFieldTypes.REPORT_FIELD;
 
 @ExtendWith(MockitoExtension.class)
 class OlapServiceTest {
@@ -67,11 +88,15 @@ class OlapServiceTest {
     @Mock
     private OlapConfigurationDomainService olapConfigurationDomainService;
 
+    @Mock
+    private DerivedFieldService derivedFieldService;
+
     @Test
-    void getCube() {
+    void getCubeTest1() {
         when(jobDomainService.getJobData(anyLong())).thenReturn(getTestJobData());
         when(domainService.getCubeData(any())).thenReturn(getTestCubeData());
         when(domainService.filterCubeData(any(), any())).thenReturn(getTrueStatusRows());
+        when(domainService.filterMetricResult(any(),any(),any())).thenReturn(getTrueStatusMetricValue());
 
         final var result1 = service.getCube(getOlapRequest());
         assertNotNull(result1);
@@ -85,6 +110,42 @@ class OlapServiceTest {
         assertEquals("10", result1.getMetricValues().get(3).getValues().get(1).get(1));
         assertEquals("3", result1.getMetricValues().get(4).getValues().get(1).get(1));
         assertEquals("1", result1.getMetricValues().get(5).getValues().get(1).get(1));
+
+        verify(jobDomainService).getJobData(any());
+        verify(jobDomainService).checkAccessForJob(any());
+        verify(jobDomainService).updateJobStats(any(),anyBoolean(),anyBoolean(),anyBoolean());
+        verify(domainService).getCubeData(any());
+        verify(domainService).filterCubeData(any(),any());
+        verify(domainService).filterMetricResult(any(),any(),any());
+        verifyNoMoreInteractions(jobDomainService,domainService,derivedFieldService,tokenService,excelReportDomainService);
+    }
+
+    @Test
+    void getCubeTest2() {
+        when(jobDomainService.getJobData(anyLong())).thenReturn(getTestJobData());
+        when(domainService.getCubeData(any())).thenReturn(getTestCubeData());
+        when(domainService.filterCubeData(any(), any())).thenReturn(getTrueStatusRows());
+
+        final var result1 = service.getCube(getOlapRequest().setMetricFilterGroup(new MetricFilterGroup()));
+        assertNotNull(result1);
+        assertEquals("2021-11-03", result1.getColumnValues().get(1).get(0));
+        assertEquals(5, result1.getRowValues().size());
+        assertEquals(2, result1.getColumnValues().size());
+        assertEquals(6, result1.getMetricValues().size());
+        assertEquals("30", result1.getMetricValues().get(0).getValues().get(1).get(1));
+        assertEquals("10", result1.getMetricValues().get(1).getValues().get(1).get(1));
+        assertEquals("10", result1.getMetricValues().get(2).getValues().get(1).get(1));
+        assertEquals("10", result1.getMetricValues().get(3).getValues().get(1).get(1));
+        assertEquals("3", result1.getMetricValues().get(4).getValues().get(1).get(1));
+        assertEquals("1", result1.getMetricValues().get(5).getValues().get(1).get(1));
+
+        verify(jobDomainService).getJobData(any());
+        verify(jobDomainService).checkAccessForJob(any());
+        verify(jobDomainService).updateJobStats(any(),anyBoolean(),anyBoolean(),anyBoolean());
+        verify(domainService).getCubeData(any());
+        verify(domainService).filterCubeData(any(),any());
+        verifyNoMoreInteractions(jobDomainService,domainService,derivedFieldService,tokenService,excelReportDomainService);
+
     }
 
     @Test
@@ -158,27 +219,134 @@ class OlapServiceTest {
         when(domainService.filterCubeData(any(), any())).thenReturn(getTrueStatusRows());
         when(olapConfigurationDomainService.getReportOlapConfiguration(anyLong())).thenReturn(getReportOlapConfigResponse());
         when(jobDomainService.getJobData(anyLong())).thenReturn(getReportJobData());
-        when(tokenService.getToken(anyLong(),anyLong())).thenReturn("123456");
+        when(tokenService.getToken(anyLong(), anyLong())).thenReturn("123456");
+        when(domainService.filterMetricResult(any(),any(),any())).thenReturn(getTrueStatusMetricValue());
 
 
         var result = service.exportPivotTableExcel(getOlapExportPivotTableRequest());
 
         assertEquals("123456", result.token());
 
+        verify(domainService).getCubeData(any());
+        verify(domainService).filterCubeData(any(),any());
+        verify(olapConfigurationDomainService).getReportOlapConfiguration(anyLong());
+        verify(jobDomainService, times(2)).getJobData(any());
+        verify(jobDomainService).updateJobStats(any(),anyBoolean(),anyBoolean(),anyBoolean());
+        verify(jobDomainService).getJobMetaData(any());
+        verify(tokenService).getToken(anyLong(), anyLong());
+        verify(domainService).filterMetricResult(any(),any(),any());
+        verify(jobDomainService).checkAccessForJob(any());
+        verify(excelReportDomainService).getExcelPivotTable(any(),any(),any(),any(),anyLong(),anyBoolean());
+        verifyNoMoreInteractions(jobDomainService,domainService,derivedFieldService,tokenService,excelReportDomainService);
+
     }
 
     @Test
-    void getExcelPivotPath(){
+    void getExcelPivotPath() {
 
-        when(excelReportDomainService.getExcelPivotPath(anyLong(),anyLong())).thenReturn(Path.of(""));
+        when(excelReportDomainService.getExcelPivotPath(anyLong(), anyLong())).thenReturn(Path.of(""));
 
-        var result = service.getExcelPivotPath(1l,2l);
+        var result = service.getExcelPivotPath(1l, 2l);
 
         assertNotNull(result);
 
-        verify(excelReportDomainService).getExcelPivotPath(anyLong(),anyLong());
+        verify(excelReportDomainService).getExcelPivotPath(anyLong(), anyLong());
         verifyNoMoreInteractions(excelReportDomainService);
 
+    }
+
+    @Test
+    void getCubeNewTest1() {
+
+        when(jobDomainService.getJobData(anyLong())).thenReturn(getTestJobData());
+        when(domainService.getCubeData(any())).thenReturn(getTestCubeData());
+        when(domainService.filterCubeData(any(), any())).thenReturn(getTrueStatusRows());
+        when(domainService.filterMetricResult(any(),any(),any())).thenReturn(getTrueStatusMetricValue());
+        when(derivedFieldService.preProcessCube(any(),any())).thenReturn(new Pair<>(getTestCubeData(),getOlapRequest()));
+
+
+        var result = service.getCubeNew(getOlapCubeRequestNew(DERIVED_FIELD));
+
+        assertNotNull(result);
+        assertEquals("2021-11-03", result.getColumnValues().get(1).get(0));
+        assertEquals(5, result.getRowValues().size());
+        assertEquals(2, result.getColumnValues().size());
+        assertEquals(6, result.getMetricValues().size());
+        assertEquals("30", result.getMetricValues().get(0).getValues().get(1).get(1));
+        assertEquals("10", result.getMetricValues().get(1).getValues().get(1).get(1));
+        assertEquals("10", result.getMetricValues().get(2).getValues().get(1).get(1));
+        assertEquals("10", result.getMetricValues().get(3).getValues().get(1).get(1));
+        assertEquals("3", result.getMetricValues().get(4).getValues().get(1).get(1));
+        assertEquals("1", result.getMetricValues().get(5).getValues().get(1).get(1));
+
+        verify(jobDomainService).getJobData(any());
+        verify(jobDomainService).checkAccessForJob(any());
+        verify(jobDomainService).updateJobStats(any(),anyBoolean(),anyBoolean(),anyBoolean());
+        verify(domainService).getCubeData(any());
+        verify(domainService).filterCubeData(any(),any());
+        verify(domainService).filterMetricResult(any(),any(),any());
+        verify(derivedFieldService).preProcessCube(any(),any());
+        verifyNoMoreInteractions(jobDomainService,domainService,derivedFieldService,tokenService,excelReportDomainService);
+    }
+
+    @Test
+    void getCubeNewTest2() {
+
+        when(jobDomainService.getJobData(anyLong())).thenReturn(getTestJobData());
+        when(domainService.getCubeData(any())).thenReturn(getTestCubeData());
+        when(domainService.filterCubeData(any(), any())).thenReturn(getTrueStatusRows());
+        when(domainService.filterMetricResult(any(),any(),any())).thenReturn(getTrueStatusMetricValue());
+
+        var result = service.getCubeNew(getOlapCubeRequestNew(REPORT_FIELD));
+
+        assertNotNull(result);
+        assertEquals("2021-11-03", result.getColumnValues().get(1).get(0));
+        assertEquals(5, result.getRowValues().size());
+        assertEquals(2, result.getColumnValues().size());
+        assertEquals(6, result.getMetricValues().size());
+        assertEquals("30", result.getMetricValues().get(0).getValues().get(1).get(1));
+        assertEquals("10", result.getMetricValues().get(1).getValues().get(1).get(1));
+        assertEquals("10", result.getMetricValues().get(2).getValues().get(1).get(1));
+        assertEquals("10", result.getMetricValues().get(3).getValues().get(1).get(1));
+        assertEquals("3", result.getMetricValues().get(4).getValues().get(1).get(1));
+        assertEquals("1", result.getMetricValues().get(5).getValues().get(1).get(1));
+
+        verify(jobDomainService).getJobData(any());
+        verify(jobDomainService).checkAccessForJob(any());
+        verify(jobDomainService).updateJobStats(any(),anyBoolean(),anyBoolean(),anyBoolean());
+        verify(domainService).getCubeData(any());
+        verify(domainService).filterCubeData(any(),any());
+        verify(domainService).filterMetricResult(any(),any(),any());
+        verifyNoMoreInteractions(jobDomainService,domainService,derivedFieldService,tokenService,excelReportDomainService);
+    }
+
+    @Test
+    void getCubeNewTest3() {
+
+        when(jobDomainService.getJobData(anyLong())).thenReturn(getTestJobData());
+        when(domainService.getCubeData(any())).thenReturn(getTestCubeData());
+        when(domainService.filterCubeData(any(), any())).thenReturn(getTrueStatusRows());
+
+        var result = service.getCubeNew(getOlapCubeRequestNew(REPORT_FIELD).setMetricFilterGroup(new MetricFilterGroup()));
+
+        assertNotNull(result);
+        assertEquals("2021-11-03", result.getColumnValues().get(1).get(0));
+        assertEquals(5, result.getRowValues().size());
+        assertEquals(2, result.getColumnValues().size());
+        assertEquals(6, result.getMetricValues().size());
+        assertEquals("30", result.getMetricValues().get(0).getValues().get(1).get(1));
+        assertEquals("10", result.getMetricValues().get(1).getValues().get(1).get(1));
+        assertEquals("10", result.getMetricValues().get(2).getValues().get(1).get(1));
+        assertEquals("10", result.getMetricValues().get(3).getValues().get(1).get(1));
+        assertEquals("3", result.getMetricValues().get(4).getValues().get(1).get(1));
+        assertEquals("1", result.getMetricValues().get(5).getValues().get(1).get(1));
+
+        verify(jobDomainService).getJobData(any());
+        verify(jobDomainService).checkAccessForJob(any());
+        verify(jobDomainService).updateJobStats(any(),anyBoolean(),anyBoolean(),anyBoolean());
+        verify(domainService).getCubeData(any());
+        verify(domainService).filterCubeData(any(),any());
+        verifyNoMoreInteractions(jobDomainService,domainService,derivedFieldService,tokenService,excelReportDomainService);
     }
 
     private OlapCubeRequest getOlapRequest() {
@@ -193,7 +361,30 @@ class OlapServiceTest {
                         new MetricDefinition(6L, AggregationType.AVG),
                         new MetricDefinition(6L, AggregationType.COUNT),
                         new MetricDefinition(6L, AggregationType.COUNT_DISTINCT)))
-                .setMetricFilterGroup(new MetricFilterGroup())
+                .setMetricFilterGroup(new MetricFilterGroup()
+                        .setChildGroups(Collections.emptyList())
+                        .setInvertResult(true)
+                        .setOperationType(BinaryBooleanOperations.OR)
+                        .setFilters(Collections.singletonList(
+                                new MetricFilterDefinition()
+                                        .setMetricId(0L)
+                                        .setFilterType(MetricFilterType.EMPTY)
+                                        .setValues(Collections.emptyList())
+                                        .setRounding(0)
+                                        .setInvertResult(true))))
+                .setFilterGroup(new FilterGroup()
+                        .setOperationType(BinaryBooleanOperations.OR)
+                        .setInvertResult(false)
+                        .setChildGroups(Collections.emptyList())
+                        .setFilters(
+                                Collections.singletonList(
+                                        new FilterDefinition()
+                                                .setFieldId(0L)
+                                                .setInvertResult(true)
+                                                .setCanRounding(false)
+                                                .setValues(Collections.emptyList())
+                                                .setFilterType(FilterType.EQUALS)
+                                )))
                 .setColumnsInterval(new Interval(0, 10))
                 .setRowsInterval(new Interval(0, 10));
     }
@@ -309,6 +500,19 @@ class OlapServiceTest {
         return new boolean[getDataArray().length];
     }
 
+
+    private Triple<boolean[][], boolean[], boolean[]> getTrueStatusMetricValue(){
+
+        var res1 = new boolean[2][5];
+        var res2 = new boolean[2];
+        var res3 = new boolean[5];
+
+        Arrays.fill(res2, false);
+        Arrays.fill(res3, false);
+
+        return new Triple<>(res1,res2,res3);
+    }
+
     private boolean[] getMixedStatusRows() {
         var result = new boolean[getDataArray().length];
 
@@ -339,14 +543,72 @@ class OlapServiceTest {
                 1l,
                 true,
                 null,
-                new ReportData(1l,null,null,null,null,null,null,true),
+                new ReportData(1l, null, null, null, null, null, null, true),
                 null,
                 null);
     }
 
-    private ReportOlapConfigResponse getReportOlapConfigResponse(){
+    private ReportOlapConfigResponse getReportOlapConfigResponse() {
         return new ReportOlapConfigResponse()
                 .setOlapConfig(
                         new OlapConfigResponse());
+    }
+
+    private OlapCubeRequestNew getOlapCubeRequestNew(OlapFieldTypes type) {
+
+        return new OlapCubeRequestNew()
+                .setJobId(1L)
+                .setColumnFields(new LinkedHashSet<>(Collections.singleton(new FieldDefinition(0L, REPORT_FIELD))))
+                .setRowFields(new LinkedHashSet<>(Collections.singleton(new FieldDefinition(2L, type))))
+                .setMetrics(List.of(
+                        new MetricDefinitionNew(new FieldDefinition(6L, REPORT_FIELD), AggregationType.SUM),
+                        new MetricDefinitionNew(new FieldDefinition(6L, REPORT_FIELD), AggregationType.MIN),
+                        new MetricDefinitionNew(new FieldDefinition(6L, REPORT_FIELD), AggregationType.MAX),
+                        new MetricDefinitionNew(new FieldDefinition(6L, REPORT_FIELD), AggregationType.AVG),
+                        new MetricDefinitionNew(new FieldDefinition(6L, REPORT_FIELD), AggregationType.COUNT),
+                        new MetricDefinitionNew(new FieldDefinition(6L, REPORT_FIELD), AggregationType.COUNT_DISTINCT)))
+                .setColumnsInterval(new Interval(0, 10))
+                .setRowsInterval(new Interval(0, 10))
+                .setMetricFilterGroup(new MetricFilterGroup()
+                        .setChildGroups(Collections.emptyList())
+                        .setInvertResult(true)
+                        .setOperationType(BinaryBooleanOperations.OR)
+                        .setFilters(Collections.singletonList(
+                                new MetricFilterDefinition()
+                                        .setMetricId(0L)
+                                        .setFilterType(MetricFilterType.EMPTY)
+                                        .setValues(Collections.emptyList())
+                                        .setRounding(0)
+                                        .setInvertResult(true))))
+                .setFilterGroup(new FilterGroupNew()
+                        .setOperationType(BinaryBooleanOperations.OR)
+                        .setInvertResult(false)
+                        .setChildGroups(Collections.emptyList())
+                        .setFilters(
+                                Collections.singletonList(
+                                        new FilterDefinitionNew()
+                                                .setField(new FieldDefinition(0L,REPORT_FIELD))
+                                                .setInvertResult(true)
+                                                .setCanRounding(false)
+                                                .setValues(Collections.emptyList())
+                                                .setFilterType(FilterType.EQUALS)
+                                )))
+                .setColumnSort(
+                        Collections.singletonList(
+                                new SortingParams()
+                                        .setMetricId((short) 0)
+                                        .setOrder(SortingOrder.Descending)
+                                        .setTuple(Collections.emptyList())
+
+                        ))
+                .setRowSort(
+                        Collections.singletonList(
+                                new SortingParams()
+                                        .setMetricId((short) 0)
+                                        .setOrder(SortingOrder.Descending)
+                                        .setTuple(Collections.emptyList())
+
+                        ));
+
     }
 }
