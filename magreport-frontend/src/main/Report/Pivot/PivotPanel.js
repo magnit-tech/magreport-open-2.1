@@ -39,6 +39,8 @@ import SortingDialog from './UI/SortingDialog/index';
 import FormattingDialog from './UI/FormattingDialog';
 import ConditionalFormattingDialog from './UI/ConditionalFormattingDialog';
 
+import FormulaEditor, {nodeType} from "./maglangFormulaEditor/FormulaEditor/FormulaEditor";
+
 //utils
 import validateSaveConfig from 'utils/validateSaveConfig';
 import CreateFieldDialog from './UI/CreateFieldDialog';
@@ -126,8 +128,6 @@ function PivotPanel(props){
     // Объект конфигурации
     const [pivotConfiguration, setPivotConfiguration] = useState(new PivotConfiguration());
 
-    const dataProvider = useRef()
-
     // Предоставление данных для таблицы - dataProvider
     const dataProviderRef = useRef(new PivotDataProvider(props.jobId, handleTableDataReady, handleTableDataLoadFailed/*, initialColumnCount, initialRowCount*/));
 
@@ -207,10 +207,9 @@ function PivotPanel(props){
     */
 
     function handleMetadataLoaded(data){
-        dataProvider.current = data
         let fieldIdToNameMapping = new Map();
         for(let v of data.fields){
-            fieldIdToNameMapping[v.id] = v.name;
+            fieldIdToNameMapping.set(v.id, v.name);
         }
         dataProviderRef.current.setFieldIdToNameMapping(fieldIdToNameMapping);
 
@@ -662,6 +661,8 @@ function PivotPanel(props){
                 || destination.index !== source.index 
                 || destination.droppableId === "metricFields"
                 || destination.droppableId === "filterFields")
+            && 
+            destination.droppableId !== "derivedFields"
             )
         {
             
@@ -1084,6 +1085,28 @@ function PivotPanel(props){
         handleSaveCurrentConfig(newPivotConfiguration.stringify())
     }
 
+    /*
+        ***************************************************
+        Производные поля
+        ***************************************************
+    */
+
+    function handleDerivedFieldSave(derivedFieldObject){
+        if(derivedFieldObject.id === undefined){
+            dataHub.derivedFieldController.add(
+                props.reportId, 
+                derivedFieldObject.fieldName, 
+                derivedFieldObject.fieldDesc, 
+                derivedFieldObject.expression,
+                ()=>{});
+            //console.log(derivedFieldObject.expression);
+        }
+        else{
+
+        }
+        setCreateFieldDialogOpen(false);
+    }
+
     function result(){ 
         return (
             <DragDropContext
@@ -1130,6 +1153,15 @@ function PivotPanel(props){
                                     direction = "horizontal"
                                     onlyUnused = {onlyUnused}
                                     onOnlyUnusedClick = {handleOnlyUnusedClick}
+                                />
+                            }
+
+                            {fieldsVisibility &&
+                                <PivotFieldsList
+                                    name = "Производные поля"
+                                    droppableId = {"derivedFields"}
+                                    fields = {pivotConfiguration.fieldsLists.derivedFields}
+                                    direction = "horizontal"
                                 />
                             }
 
@@ -1263,8 +1295,8 @@ function PivotPanel(props){
     return (
         <div  style={{display: 'flex', flex: 1}}>
             <DataLoader
-                loadFunc = {dataHub.olapController.getJobMetadata}
-                loadParams = {[props.jobId]}
+                loadFunc = {dataHub.olapController.getJobMetadataExtended}
+                loadParams = {[props.jobId, props.reportId]}
                 onDataLoaded = {handleMetadataLoaded}
                 key = {resetComponentKey}
             >
@@ -1349,7 +1381,9 @@ function PivotPanel(props){
             {createFieldDialogOpen &&
                 <CreateFieldDialog
                     open = {createFieldDialogOpen}
-                    onSave = {()=>{}}
+                    jobId = {props.jobId}
+                    reportId = {props.reportId}
+                    onSave = {handleDerivedFieldSave}
                     onCancel = {() => {setCreateFieldDialogOpen(false)}}
                 />
             }

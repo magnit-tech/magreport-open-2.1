@@ -28,7 +28,7 @@ export function TableData() {
         this.totalRows = response.data.totalRows;
 
         for(let v of this.metrics){
-            v.metricName = fieldIdToNameMapping[v.fieldId];
+            v.metricName = fieldIdToNameMapping.get(v.fieldId);
         }
     }
 

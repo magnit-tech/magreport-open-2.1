@@ -45,7 +45,7 @@ export default function PivotConfiguration(pivotConfiguration){
     this.create = (pivotConfiguration, reportMetada) => {
         restoreObjectData(this, pivotConfiguration);
         this.fieldsLists = new FieldsLists(this.fieldsLists);
-        this.fieldsLists.updateByReportFields(reportMetada.fields);
+        this.fieldsLists.updateByFields(reportMetada.fields, reportMetada.derivedFields);
     };
 
     // Используется для загрузки сохранённой конфигурации

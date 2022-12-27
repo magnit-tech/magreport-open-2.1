@@ -32,6 +32,8 @@ export default function PivotFieldsList(props){
     const styles = PivotCSS();
     const ScrollbarsRef = useRef(null);
 
+    if(props.droppableId === "derivedFields") {console.log(props.fields)}
+
     return(
                            
         <Droppable 
@@ -43,8 +45,7 @@ export default function PivotFieldsList(props){
                     className={clsx({
                         [styles.verticalList] : props.direction === "vertical",
                         [styles.horizontalList] : props.direction === "horizontal",
-                        [styles.listDraggingOver] : snapshot.isDraggingOver,
-                      //  [styles.filterFieldsList] : props.droppableId === "filterFields"
+                        [styles.listDraggingOver] : snapshot.isDraggingOver
                     })}
                     innerRef = {provided.innerRef}
                     {...provided.droppableProps}
@@ -106,7 +107,9 @@ export default function PivotFieldsList(props){
                                     }
                                 >
                                     {props.fields.length > 0 ?
-                                        props.fields.map((v, ind) => ( 
+                                        props.fields.map((v, ind) => {
+                                            if(props.name === "derivedFields") {console.log(v)}
+                                            return ( 
                                             <PivotField
                                                 key = {v.fieldId + "-" + ind}
                                                 listName = {props.droppableId}
@@ -122,7 +125,7 @@ export default function PivotFieldsList(props){
                                                 onChooseAggForMetric = {(funcName, index) => props.onChooseAggForMetric(funcName, index)}
                                                 onCloseAggModal = {props.onCloseAggModal}
                                             />
-                                        )) :
+                                        )}) :
                                           
                                         <Box 
                                             fontSize={12} 
@@ -131,7 +134,6 @@ export default function PivotFieldsList(props){
                                                 [styles.panelNameVertical]: props.direction === "vertical",
                                                 [styles.panelNameHorizontal]: props.direction === "horizontal",
                                             })}
-                                               //</div>style={props.direction === "vertical" ? {width: '10px', wordWrap: 'break-word', margin: '8px auto'}: {margin: '4px'}}
                                         > 
                                             {props.name}
 

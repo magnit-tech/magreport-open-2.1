@@ -1,4 +1,4 @@
-import React, {useRef, useState, useCallback} from "react";
+import React, {useRef, useState, useCallback, useMemo} from "react";
 import CodeMirror from '@uiw/react-codemirror';
 import { createTheme } from '@uiw/codemirror-themes';
 import {completeFromList} from "@codemirror/autocomplete";
@@ -108,19 +108,30 @@ export default function FormulaEditor(props){
       Mappings between names and ids
     */
 
-    const functionNameToId = new Map();
-    const functionIdToName = new Map();
-    props.functions.forEach((f) => {functionIdToName.set(f.functionId, f.functionName); functionNameToId.set(f.functionName, f.functionId)});
-    const originalFieldNameToId = new Map();
-    const originalFieldIdToName = new Map();
-    props.originalFields.forEach((f) => {originalFieldIdToName.set(f.fieldId, f.fieldName); originalFieldNameToId.set(f.fieldName, f.fieldId)});
-    const derivedFieldNameToId = new Map();
-    const derivedFieldIdToName = new Map();
-    props.derivedFields.forEach((f) => {derivedFieldIdToName.set(f.fieldId, f.fieldName); derivedFieldNameToId.set(f.fieldName, f.fieldId)});
-    
+    const [functionIdToName, functionNameToId] = useMemo(() => {
+        let mIdtoName = new Map();
+        let mNametoId = new Map();
+        props.functions.forEach((f) => {mIdtoName.set(f.functionId, f.functionName); mNametoId.set(f.functionName, f.functionId)});
+        return [mIdtoName, mNametoId];
+      }, [props.functions]);
+
+    const [originalFieldIdToName, originalFieldNameToId] = useMemo( () =>{
+        let mIdtoName = new Map();
+        let mNametoId = new Map();
+        props.originalFields.forEach((f) => {mIdtoName.set(f.fieldId, f.fieldName); mNametoId.set(f.fieldName, f.fieldId)});
+        return [mIdtoName, mNametoId];
+      }, [props.originalFields]);
+
+    const [derivedFieldIdToName, derivedFieldNameToId] = useMemo( () =>{
+        let mIdtoName = new Map();
+        let mNametoId = new Map();
+        props.derivedFields.forEach((f) => {mIdtoName.set(f.fieldId, f.fieldName); mNametoId.set(f.fieldName, f.fieldId)});
+        return [mIdtoName, mNametoId];
+      }, [props.derivedFields]);       
+
     /*
       Decode input code from IDs to names
-      */
+    */
 
       function replaceIdWithNames(codeWithId){
         let pattern = /(\[\d+\])|(\[\[\d+\]\])/g;
@@ -151,7 +162,7 @@ export default function FormulaEditor(props){
         return codeWithId.replace(pattern, replacer);
       }
   
-      const initialCode = replaceIdWithNames(props.initialCode);
+      const initialCode = useMemo(() => replaceIdWithNames(props.initialCode), [props.initialCode]);
 
       function replaceNamesWithId(code){
         return code;
@@ -164,7 +175,7 @@ export default function FormulaEditor(props){
     */
 
 
-    let createOutNode = (syntNode, code, errorList) => {
+    let createOutNode = useCallback((syntNode, code, errorList) => {
 
         let outNode;
 
@@ -296,9 +307,9 @@ export default function FormulaEditor(props){
         }
 
         return outNode;
-    }
+      }, [functionNameToId, originalFieldNameToId, derivedFieldNameToId]);
 
-    let processOutChildren = (parent, children) => {
+    let processOutChildren = useCallback((parent, children) => {
 
       parent.children = [];
       for(let child of children){
@@ -314,9 +325,9 @@ export default function FormulaEditor(props){
         parent.isError = parent.isError || child.isError;
       }
 
-    }
+      }, []);
 
-    let createOutputTree = (syntNode, code, errorList) => {
+    let createOutputTree = useCallback((syntNode, code, errorList) => {
 
         let outNode = createOutNode(syntNode, code, errorList);
         let outChildren = [];
@@ -327,7 +338,7 @@ export default function FormulaEditor(props){
         }
         processOutChildren(outNode, outChildren);
         return outNode;
-    }   
+      }, [processOutChildren, createOutNode]);
 
     const handleChange = useCallback((value, viewUpdate) => {
 
@@ -339,28 +350,28 @@ export default function FormulaEditor(props){
         setErrorMessages(errorList.map(e => e.errorMessage).join("\n"));
         
         props.onChange({
-          success : root.isError,
+          success : !root.isError,
           textToSave : replaceNamesWithId(value),
           treeRoot : root,
           errorList : errorList
         });
 
-    }, []);
+    }, [props.onChange, createOutputTree]);
 
       return (
-        <>
+        <div className="FormulaEditor">
             <CodeMirror
-            className="CodeMirror"
-            ref={editor}
-            value={initialCode}
-            height={props.height}
-            theme={codeEditorTheme}
-            extensions={[new LanguageSupport(MagreportLanguage, [completion])]}
-            onChange={handleChange}
+              className="CodeMirror"
+              ref={editor}
+              value={initialCode}
+              height={props.height}
+              theme={codeEditorTheme}
+              extensions={[new LanguageSupport(MagreportLanguage, [completion])]}
+              onChange={handleChange}
             />
             <textarea className="errorViewer" readOnly rows="10" value={errorMessages}>
             </textarea>
 
-        </>
+        </div>
       );
 }
