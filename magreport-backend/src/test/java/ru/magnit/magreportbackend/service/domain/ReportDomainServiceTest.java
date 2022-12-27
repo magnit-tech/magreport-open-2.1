@@ -484,6 +484,16 @@ class ReportDomainServiceTest {
 
     }
 
+    @Test
+    void deleteFavReportsByReportId(){
+
+        domainService.deleteFavReportsByReportId(ID);
+
+        verify(favReportRepository).deleteByReportId(anyLong());
+        verifyNoMoreInteractions(favReportRepository);
+
+    }
+
     private ReportResponse getReportResponse() {
         return new ReportResponse()
                 .setId(ID)

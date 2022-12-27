@@ -220,6 +220,11 @@ public class ReportDomainService {
     }
 
     @Transactional
+    public void deleteFavReportsByReportId(Long reportId){
+        favReportRepository.deleteByReportId(reportId);
+    }
+
+    @Transactional
     public Long addReport(UserView currentUser, ReportAddRequest request) {
 
         checkFolderExists(request.getFolderId());
