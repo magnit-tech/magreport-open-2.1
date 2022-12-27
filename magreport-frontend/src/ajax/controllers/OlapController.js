@@ -1,7 +1,11 @@
+import MagrepResponse from "ajax/MagrepResponse";
+
 const CONTROLLER_URL = '/olap';
 const METHOD = 'POST';
 
 const GET_JOB_METADATA = '/report-job/get-metadata';
+const GET_DERIVED_FIELDS = '/derived-field/get-by-report'
+
 const GET_CUBE = CONTROLLER_URL + '/get-cube';
 const GET_FIELD_VALUES = CONTROLLER_URL + '/get-field-values';
 const GET_INFO_CUBES = CONTROLLER_URL + '/get-info-cubes';
@@ -26,6 +30,48 @@ export default function OlapController(dataHub){
         }
 
         return dataHub.requestService(GET_JOB_METADATA, METHOD, body, callback); 
+    }
+
+    this.getJobMetadataExtended = (jobId, reportId, callback) => {
+
+        const getMetadataRequest = {
+            serviceUrl: GET_JOB_METADATA,
+            method: METHOD,
+            body: {
+                jobId: jobId
+            }
+        }
+
+        const getDerivedFieldRequest = {
+            serviceUrl: GET_DERIVED_FIELDS,
+            method: METHOD,
+            body: {
+                id: reportId
+            }
+        }
+
+        let requestId;
+
+        const middlewareCallback = (responses) => {
+            let ok = responses[0].ok && responses[1].ok;
+            let data;
+            if(ok){
+                data = responses[0].data;
+                //data.derivedFields = responses[1].data.map((f) => ({id: f.id, name: f.name, description: f.description, userName: f.userName, type: "NONE"}));
+                // ЗАГЛУШКА:
+                data.derivedFields = [{id: 1, name: "ТЕСТ", description: "ЗАГЛУШКА", userName: "suhov_vb", type: "NONE"}]
+            }
+            else{
+                data = (!responses[0].ok ? responses[0].data : "") + (!responses[0].ok && !responses[1].ok ? "; " : "") + (!responses[1].ok ? responses[1].data : "");
+            }
+
+            callback(new MagrepResponse(ok, data, requestId));
+        }
+
+        //requestId = dataHub.doMultipleRequests([getMetadataRequest, getDerivedFieldRequest], middlewareCallback);
+        // ЗАГЛУШКА:
+        requestId = dataHub.doMultipleRequests([getMetadataRequest, getMetadataRequest], middlewareCallback);
+        return requestId;
     }
 
     this.getCube = (olapRequest, callback) => {

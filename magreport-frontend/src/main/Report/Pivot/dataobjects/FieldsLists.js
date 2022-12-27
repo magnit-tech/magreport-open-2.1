@@ -10,6 +10,7 @@ export function FieldsLists(fieldsLists){
     this.createLists = (fieldsLists) => {
         this.allFields = fieldsLists ? Array.from(fieldsLists.allFields) : [];
         this.unusedFields = fieldsLists ? Array.from(fieldsLists.unusedFields) :[];
+        this.derivedFields = fieldsLists ? Array.from(fieldsLists.derivedFields) : [];
         this.rowFields = fieldsLists ? Array.from(fieldsLists.rowFields) :[];
         this.columnFields = fieldsLists ? Array.from(fieldsLists.columnFields) :[];
         this.metricFields = fieldsLists ? Array.from(fieldsLists.metricFields) :[];
@@ -21,6 +22,7 @@ export function FieldsLists(fieldsLists){
     this._arrayElementConstructor = {
         allFields : FieldData,
         unusedFields : FieldData,
+        derivedFields : FieldData,
         rowFields : FieldData,
         columnFields : FieldData,
         metricFields : FieldData,
@@ -28,7 +30,7 @@ export function FieldsLists(fieldsLists){
     }
 
     // Создаёт списки полей по метаданным отчёта
-    this.createByReportFields = (reportFields) => {
+    this.createByFields = (reportFields, derivedFields) => {
         this.createLists();
         for(let f of reportFields){
             if(f.visible){
@@ -37,14 +39,20 @@ export function FieldsLists(fieldsLists){
                 this.unusedFields.push(fd);    
             }
         }
+        for(let f of derivedFields){
+            let fd = new FieldData(f);
+            fd.original = false;
+            this.derivedFields.push(fd);  
+        }
 
+        console.log(this.derivedFields)
     }
 
     // Обновляет списки полей по метадынным отчёта - удаляет отсутствующие поля и добавляет новые
-    this.updateByReportFields = (reportFields) => {
+    this.updateByFields = (reportFields, derivedFields) => {
         // TODO
         // ЗАГЛУШКА!!!
-        this.createByReportFields(reportFields);
+        this.createByFields(reportFields, derivedFields);
     }
 
     // Обновляет списки полей из сохраненной конфигурации

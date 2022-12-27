@@ -197,7 +197,7 @@ export default function PivotTools(props){
                             <IconButton
                                 size="small"
                                 aria-label="sortingDialog"
-                                onClick={() => {console.log("!"); props.onShowCreateFieldDialogue(true)} }
+                                onClick={() => {props.onShowCreateFieldDialogue(true)} }
                             >
                                 <Icon path={mdiApplicationArrayOutline }
                                     size={1}

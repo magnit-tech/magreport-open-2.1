@@ -10,7 +10,8 @@ export default function FieldData(fieldData){
     this.name = "";
     this.type = '';
     this.visible = true;
-    this.dataType = ''
+    this.dataType = '';
+    this.original = true; // true - исходное поле отчёта, false - производное поле отчёта
 
     // Добавленные на уровне сводной свойства:
     this.aggFuncName = "";
