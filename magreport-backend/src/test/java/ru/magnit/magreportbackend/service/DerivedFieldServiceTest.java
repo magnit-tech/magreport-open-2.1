@@ -203,7 +203,8 @@ class DerivedFieldServiceTest {
                             )
                         )
                     )
-                )
+                ),
+                ""
             ),
             new DerivedFieldResponse(
                 2L,
@@ -235,7 +236,8 @@ class DerivedFieldServiceTest {
                             Collections.emptyList()
                         )
                     )
-                )
+                ),
+                ""
             ),
             new DerivedFieldResponse(
                 3L,
@@ -282,7 +284,8 @@ class DerivedFieldServiceTest {
                             Collections.emptyList()
                         )
                     )
-                )
+                ),
+                ""
             )
         );
     }
