@@ -74,8 +74,11 @@ build:
     - echo "============================================================="
     - ssh -i /root/.ssh/id_rsa_mg $SSH_USER@$SSH_HOST cd /home/"$SSH_USER"
     - ssh -i /root/.ssh/id_rsa_mg $SSH_USER@$SSH_HOST bash ./build-magreport2-rpm.sh
-    - echo "============================================================="
-    - echo "Install rpm"
-    - echo "============================================================="
-    - ssh -i /root/.ssh/id_rsa_mg $SSH_USER@$SSH_HOST cd /home/$SSH_USER
-    - ssh -i /root/.ssh/id_rsa_mg $SSH_USER@$SSH_HOST sudo bash ./install-release.sh
+    - > 
+      if [ $CI_COMMIT_BRANCH == "citest" ]; then 
+        echo "============================================================="
+        echo "Install rpm"
+        echo "============================================================="
+        ssh -i /root/.ssh/id_rsa_mg $SSH_USER@$SSH_HOST cd /home/$SSH_USER
+        ssh -i /root/.ssh/id_rsa_mg $SSH_USER@$SSH_HOST sudo bash ./install-release.sh
+      fi
