@@ -216,7 +216,7 @@ public class DerivedFieldService {
                     final var fieldDefinition = reqDerivedFields.get(columnIndex);
                     fieldIndexes.put(fieldDefinition, new Pair<>(fieldIndexes.get(fieldDefinition).getL(), expResult.getR()));
                 }
-                processedCube[startColumn + columnIndex][rowIndex] = expResult.getL().intern();
+                processedCube[startColumn + columnIndex][rowIndex] = expResult.getL() == null ? null : expResult.getL().intern();
             }
         }
         return startColumn;

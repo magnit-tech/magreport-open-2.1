@@ -29,6 +29,7 @@ public class DerivedFieldResponse {
     private LocalDateTime created;
     private LocalDateTime modified;
     private FieldExpressionResponse expression;
+    private String expressionText;
 
     @JsonIgnore
     public List<FieldExpressionResponse> getAllExpressions(){
