@@ -62,6 +62,10 @@ export default function PivotDataProvider(jobId, onTableDataReady, onTableDataLo
         fieldIdToNameMapping = newFieldIdToNameMapping;
     }
 
+    this.setDerivedFieldIdToNameMapping = (newDerivedFieldIdToNameMapping) => {
+        derivedFieldIdToNameMapping = newDerivedFieldIdToNameMapping;
+    }
+
     /*
         Предоставление данных
     */
@@ -163,9 +167,12 @@ export default function PivotDataProvider(jobId, onTableDataReady, onTableDataLo
     function buildOlapRequest(fieldsLists, filterGroup, metricFilterGroup, valuesToSort, win){
         let rqst = {
             jobId : jobId,
-            columnFields : fieldsLists.columnFields.map( (v) => (v.fieldId)),
-            rowFields : fieldsLists.rowFields.map( (v) => (v.fieldId)),
-            metrics : fieldsLists.metricFields.map( (v) => ({fieldId: v.fieldId, aggregationType : v.aggFuncName}) ),
+            columnFields : fieldsLists.columnFields.map( (v) => ({fieldId: v.fieldId, fieldType: dataHub.olapController.getFieldType(v.original)})),
+            rowFields : fieldsLists.rowFields.map( (v) => ({fieldId: v.fieldId, fieldType: dataHub.olapController.getFieldType(v.original)})),
+            metrics : fieldsLists.metricFields.map( (v) => ({
+                                                            field: {fieldId: v.fieldId, fieldType: dataHub.olapController.getFieldType(v.original)}, 
+                                                            aggregationType : v.aggFuncName
+                                                            }) ),
             columnsInterval : {from: win.columnFrom, count: win.columnCount},
             rowsInterval : {from: win.rowFrom, count: win.rowCount},
         };

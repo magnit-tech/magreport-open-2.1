@@ -39,13 +39,16 @@ export function FieldsLists(fieldsLists){
                 this.unusedFields.push(fd);    
             }
         }
+        this.createDerivedFields(derivedFields);
+    }
+
+    this.createDerivedFields = (derivedFields) => {
+        this.derivedFields = [];
         for(let f of derivedFields){
             let fd = new FieldData(f);
             fd.original = false;
             this.derivedFields.push(fd);  
         }
-
-        console.log(this.derivedFields)
     }
 
     // Обновляет списки полей по метадынным отчёта - удаляет отсутствующие поля и добавляет новые

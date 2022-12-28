@@ -216,4 +216,15 @@ export default function PivotConfiguration(pivotConfiguration){
     this.changeSortOrder = (newSortObj) => {
         this.sortOrder = newSortObj;
     }
+
+    /*
+        ****************
+        Производные поля
+        ****************
+    */
+
+    this.createDerivedFields = (derivedFields) => {
+        this.fieldsLists = new FieldsLists(this.fieldsLists);
+        this.fieldsLists.createDerivedFields(derivedFields);
+    }
 }

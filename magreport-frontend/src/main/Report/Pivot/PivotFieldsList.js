@@ -32,8 +32,6 @@ export default function PivotFieldsList(props){
     const styles = PivotCSS();
     const ScrollbarsRef = useRef(null);
 
-    if(props.droppableId === "derivedFields") {console.log(props.fields)}
-
     return(
                            
         <Droppable 
