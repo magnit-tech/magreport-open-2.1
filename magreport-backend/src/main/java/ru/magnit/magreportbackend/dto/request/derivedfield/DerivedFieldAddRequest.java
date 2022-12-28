@@ -17,4 +17,5 @@ public class DerivedFieldAddRequest {
     private String name;
     private String description;
     private DerivedFieldExpressionAddRequest expression;
+    private String expressionText;
 }
