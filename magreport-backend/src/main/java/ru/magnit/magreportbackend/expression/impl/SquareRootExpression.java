@@ -18,10 +18,9 @@ public class SquareRootExpression extends ParameterizedExpression {
         final var parameterValue = parameters.get(0).calculate(rowNumber);
         final var parameter = parameters.get(0);
 
-        checkParameterNotNull(parameter, parameterValue);
         checkParameterHasAnyType(parameter, parameterValue, DataTypeEnum.INTEGER, DataTypeEnum.DOUBLE);
 
-        result.setL(String.valueOf(Math.sqrt(Double.parseDouble(parameterValue.getL()))));
+        result.setL(parameterValue.getL() == null ? null : String.valueOf(Math.sqrt(Double.parseDouble(parameterValue.getL()))));
 
         return result;
     }
