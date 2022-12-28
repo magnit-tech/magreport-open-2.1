@@ -6,7 +6,7 @@ const METHOD = 'POST';
 const GET_JOB_METADATA = '/report-job/get-metadata';
 const GET_DERIVED_FIELDS = '/derived-field/get-by-report'
 
-const GET_CUBE = CONTROLLER_URL + '/get-cube';
+const GET_CUBE = CONTROLLER_URL + '/get-cube-new';
 const GET_FIELD_VALUES = CONTROLLER_URL + '/get-field-values';
 const GET_INFO_CUBES = CONTROLLER_URL + '/get-info-cubes';
 const GET_LOG_INFO = CONTROLLER_URL + '/get-log-info';
@@ -57,25 +57,25 @@ export default function OlapController(dataHub){
             let data;
             if(ok){
                 data = responses[0].data;
-                //data.derivedFields = responses[1].data.map((f) => ({id: f.id, name: f.name, description: f.description, userName: f.userName, type: "NONE"}));
-                // ЗАГЛУШКА:
-                data.derivedFields = [{id: 1, name: "ТЕСТ", description: "ЗАГЛУШКА", userName: "suhov_vb", type: "NONE"}]
+                data.derivedFields = responses[1].data.map((f) => ({id: f.id, name: f.name, description: f.description, userName: f.userName, type: "DOUBLE"}));
             }
             else{
-                data = (!responses[0].ok ? responses[0].data : "") + (!responses[0].ok && !responses[1].ok ? "; " : "") + (!responses[1].ok ? responses[1].data : "");
+                data = responses.filter((r) => !r.ok).join("; ");
             }
 
             callback(new MagrepResponse(ok, data, requestId));
         }
 
-        //requestId = dataHub.doMultipleRequests([getMetadataRequest, getDerivedFieldRequest], middlewareCallback);
-        // ЗАГЛУШКА:
-        requestId = dataHub.doMultipleRequests([getMetadataRequest, getMetadataRequest], middlewareCallback);
+        requestId = dataHub.doMultipleRequests([getMetadataRequest, getDerivedFieldRequest], middlewareCallback);
         return requestId;
     }
 
     this.getCube = (olapRequest, callback) => {
         return dataHub.requestService(GET_CUBE, METHOD, olapRequest, callback);
+    }
+
+    this.getFieldType = (originalField) => {
+        return originalField ? "REPORT_FIELD" : "DERIVED_FIELD";
     }
 
     this.getFieldValues = (fieldRequest, callback) => {

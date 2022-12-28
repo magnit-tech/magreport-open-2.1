@@ -46,10 +46,19 @@ export default function CreateFieldDialog(props){
         Загрузка полей
     */
 
+    const [functionsList, setFunctionsList] = useState([]);
     const [originalFieldsList, setOriginalFieldsList] = useState([]);
-    let handleOriginalFieldsLoaded = (data) => {
-        let newOriginalFieldsList = data.fields.map((f) => ({fieldId: f.id, fieldName: f.name, fieldDesc: f.description, valueType: f.type}));
+    const [derivedFieldsList, setDerivedFieldsList] = useState([]);
+    let handleFieldsAndExpressionsLoaded = (data) => {
+        let newFunctionsList = data.expressions.map(
+            (f) => ({functionId: f.id, functionName: f.name, functionDesc: f.description, functionSignature: ""}));
+        let newOriginalFieldsList = data.fields.filter((f) => (f.visible)).map(
+                (f) => ({fieldId: f.id, fieldName: f.name, fieldDesc: f.description, valueType: f.type}));
+        let newDerivedFieldsList = data.derivedFields.map(
+                (f) => ({fieldId: f.id, fieldName: f.name, fieldDesc: f.description, valueType: f.type, fieldOwner: f.userName}));
+        setFunctionsList(newFunctionsList);
         setOriginalFieldsList(newOriginalFieldsList);
+        setDerivedFieldsList(newDerivedFieldsList);
     }
 
     /*
@@ -132,14 +141,8 @@ export default function CreateFieldDialog(props){
             }
         }  
         else if(node.nodeType === nodeType.functionCall){
-            let type;
+            let type = node.functionName;
             let parameters = [];
-            if(node.functionName === "sqrt"){
-                type = "SQUARE_ROOT";
-            }
-            else{
-                type = "???";
-            }
 
             for(let child of node.children){
                 parameters.push(getExpressionForNode(child));
@@ -173,9 +176,9 @@ export default function CreateFieldDialog(props){
             <DialogTitle style={{ cursor: 'move' }} id="drag-title"> Производное поле </DialogTitle>
 
             <DataLoader
-                loadFunc = {dataHub.olapController.getJobMetadata}
-                loadParams = {[props.jobId]}
-                onDataLoaded = {handleOriginalFieldsLoaded}
+                loadFunc = {dataHub.derivedFieldController.getFieldsAndExpressions}
+                loadParams = {[props.jobId, props.reportId]}
+                onDataLoaded = {handleFieldsAndExpressionsLoaded}
             >
 
                 <TextField
@@ -210,9 +213,9 @@ export default function CreateFieldDialog(props){
                 <FormulaEditor
                     height = "200px"
                     initialCode={""}
-                    functions = {[{functionId:0, functionName: "sqrt", functionDesc: "Квадратный корень", functionSignature: "sqrt(x)"}]}
+                    functions = {functionsList}
                     originalFields = {originalFieldsList}
-                    derivedFields = {[]}
+                    derivedFields = {derivedFieldsList}
                     onChange = {handleFormulaChange}
                 />
 

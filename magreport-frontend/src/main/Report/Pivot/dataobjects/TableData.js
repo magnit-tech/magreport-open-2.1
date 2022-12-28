@@ -27,8 +27,13 @@ export function TableData() {
         this.totalColumns = response.data.totalColumns;
         this.totalRows = response.data.totalRows;
 
+        /* Старый вариант
         for(let v of this.metrics){
             v.metricName = fieldIdToNameMapping.get(v.fieldId);
+        }*/
+
+        for(let i in this.metrics){
+            this.metrics[i].metricName = fieldsLists.metricFields[i].name;
         }
     }
 

@@ -208,10 +208,15 @@ function PivotPanel(props){
 
     function handleMetadataLoaded(data){
         let fieldIdToNameMapping = new Map();
+        let derivedFieldIdToNameMapping = new Map();
         for(let v of data.fields){
             fieldIdToNameMapping.set(v.id, v.name);
         }
+        for(let v of data.derivedFields){
+            derivedFieldIdToNameMapping.set(v.id, v.name);
+        }        
         dataProviderRef.current.setFieldIdToNameMapping(fieldIdToNameMapping);
+        dataProviderRef.current.setDerivedFieldIdToNameMapping(derivedFieldIdToNameMapping);
 
         let newConfiguration = new PivotConfiguration(pivotConfiguration);
         newConfiguration.create({}, data);
@@ -661,8 +666,6 @@ function PivotPanel(props){
                 || destination.index !== source.index 
                 || destination.droppableId === "metricFields"
                 || destination.droppableId === "filterFields")
-            && 
-            destination.droppableId !== "derivedFields"
             )
         {
             
@@ -1091,6 +1094,12 @@ function PivotPanel(props){
         ***************************************************
     */
 
+    function updateDerivedFieldsList(magrepResponse){
+        let newPivotConfiguration = new PivotConfiguration(pivotConfiguration);
+        newPivotConfiguration.createDerivedFields(magrepResponse.data.derivedFields);
+        setPivotConfiguration(newPivotConfiguration);
+    }
+
     function handleDerivedFieldSave(derivedFieldObject){
         if(derivedFieldObject.id === undefined){
             dataHub.derivedFieldController.add(
@@ -1098,11 +1107,10 @@ function PivotPanel(props){
                 derivedFieldObject.fieldName, 
                 derivedFieldObject.fieldDesc, 
                 derivedFieldObject.expression,
-                ()=>{});
-            //console.log(derivedFieldObject.expression);
+                ()=>{dataHub.olapController.getJobMetadataExtended(props.jobId, props.reportId, updateDerivedFieldsList)});
         }
         else{
-
+            // Здесь должно быть редактирование поля
         }
         setCreateFieldDialogOpen(false);
     }
