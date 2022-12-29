@@ -16,19 +16,23 @@ public class MultiplyExpression extends ParameterizedExpression {
     @Override
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
         var calcResult = 1D;
+        var isNull = false;
         var resultType = DataTypeEnum.INTEGER;
-        for (var parameter: parameters) {
+        for (var parameter : parameters) {
             final var parameterValue = parameter.calculate(rowNumber);
 
-            checkParameterNotNull(parameter, parameterValue);
             checkParameterHasAnyType(parameter, parameterValue, DataTypeEnum.INTEGER, DataTypeEnum.DOUBLE);
 
             resultType = resultType.widerNumeric(parameterValue.getR());
 
-            calcResult *= Double.parseDouble(parameter.calculate(rowNumber).getL());
+            if (parameterValue.getL() != null) {
+                calcResult *= Double.parseDouble(parameterValue.getL());
+            } else {
+                isNull = true;
+            }
         }
         return result
-            .setL(resultType.toTypedString(calcResult))
+            .setL(isNull ? null : resultType.toTypedString(calcResult))
             .setR(resultType);
     }
 }

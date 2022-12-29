@@ -15,6 +15,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import java.io.Serial;
@@ -37,6 +38,10 @@ public class DerivedField extends EntityWithName {
 
     @SuppressWarnings("unused")
     public DerivedField(Long id) { this.id = id; }
+
+    @Lob
+    @Column(name = "EXPRESSION_TEXT")
+    private String expressionText;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "derivedField")
     private List<DerivedFieldExpression> derivedFieldExpressions = Collections.emptyList();
