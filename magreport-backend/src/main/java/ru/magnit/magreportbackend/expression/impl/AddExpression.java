@@ -16,21 +16,23 @@ public class AddExpression extends ParameterizedExpression {
     @Override
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
         var calcResult = 0D;
+        var isNull = false;
         var resultType = DataTypeEnum.INTEGER;
         for (var parameter: parameters) {
             final var parameterValue = parameter.calculate(rowNumber);
 
-            checkParameterNotNull(parameter, parameterValue);
             checkParameterHasAnyType(parameter, parameterValue, DataTypeEnum.INTEGER, DataTypeEnum.DOUBLE);
 
             resultType = resultType.widerNumeric(parameterValue.getR());
             final var paramResult = parameter.calculate(rowNumber).getL();
             if (paramResult != null) {
                 calcResult += Double.parseDouble(paramResult);
+            } else {
+                isNull = true;
             }
         }
         return result
-            .setL(resultType.toTypedString(calcResult))
+            .setL(isNull ? null : resultType.toTypedString(calcResult))
             .setR(resultType);
     }
 }
