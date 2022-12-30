@@ -19,4 +19,9 @@ public class CurrentDateExpression extends BaseExpression {
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
         return result;
     }
+
+    @Override
+    public DataTypeEnum inferType() {
+        return result.getR();
+    }
 }

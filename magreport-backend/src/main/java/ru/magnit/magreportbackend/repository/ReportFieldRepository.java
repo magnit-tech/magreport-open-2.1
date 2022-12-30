@@ -11,4 +11,5 @@ public interface ReportFieldRepository extends JpaRepository<ReportField, Long> 
     void deleteAllByReportId(Long reportId);
     void deleteAllByIdIn(List<Long> idList);
     ReportField getFirstByReportIdOrderByOrdinalDesc(Long reportId);
+    List<ReportField> getAllByReportId(Long reportId);
 }

@@ -2,6 +2,7 @@ package ru.magnit.magreportbackend.dto.request.derivedfield;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,6 +19,7 @@ import java.util.List;
 @Accessors(chain = true)
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class DerivedFieldExpressionAddRequest {
     @JsonIgnore
     private Long ordinal;

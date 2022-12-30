@@ -23,4 +23,12 @@ public class StrLenExpression extends ParameterizedExpression {
         return result
             .setL(String.valueOf(sourceString.getL().length()));
     }
+
+    @Override
+    public DataTypeEnum inferType() {
+        final var srcParam = parameters.get(0);
+        final var srcParamType = srcParam.inferType();
+        checkParameterHasAnyType(srcParam, srcParamType, DataTypeEnum.STRING);
+        return result.getR();
+    }
 }

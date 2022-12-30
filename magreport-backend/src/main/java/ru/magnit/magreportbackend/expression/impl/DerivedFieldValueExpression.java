@@ -37,4 +37,9 @@ public class DerivedFieldValueExpression extends BaseExpression {
             .setL(resultCube[fieldIndexes.get(fieldDefinition).getL()][rowNumber])
             .setR(fieldIndexes.get(fieldDefinition).getR());
     }
+
+    @Override
+    public DataTypeEnum inferType() {
+        return fieldIndexes.get(fieldDefinition).getR();
+    }
 }
