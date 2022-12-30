@@ -28,4 +28,17 @@ public class RightSubstrExpression extends ParameterizedExpression {
         return result
             .setL(sourceString.getL().substring(sourceString.getL().length() - Integer.parseInt(length.getL())));
     }
+
+    @Override
+    public DataTypeEnum inferType() {
+        final var sourceParam = parameters.get(0);
+        final var lengthParam = parameters.get(1);
+        final var sourceParamType = sourceParam.inferType();
+        final var lengthParamType = lengthParam.inferType();
+
+        checkParameterHasAnyType(sourceParam, sourceParamType, DataTypeEnum.STRING);
+        checkParameterHasAnyType(lengthParam, lengthParamType, DataTypeEnum.INTEGER);
+
+        return sourceParamType;
+    }
 }

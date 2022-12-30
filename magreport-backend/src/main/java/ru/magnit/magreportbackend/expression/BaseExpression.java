@@ -18,6 +18,8 @@ public abstract class BaseExpression {
 
     public abstract Pair<String, DataTypeEnum> calculate(int rowNumber);
 
+    public abstract DataTypeEnum inferType();
+
     public BaseExpression getRootExpression() {
         if (parentExpression == null) return this;
         return parentExpression.getRootExpression();
@@ -45,6 +47,12 @@ public abstract class BaseExpression {
     protected void checkParameterHasAnyType(BaseExpression parameter, Pair<String, DataTypeEnum> parameterValue, DataTypeEnum... types){
         if (parameterValue.getR().notIn(types)){
             throw new InvalidExpression(ExpressionExceptionUtils.getWrongParameterTypeMessage(getRootExpression().getErrorPath(parameter), derivedField, expressionName, parameterValue.getR().name()));
+        }
+    }
+
+    protected void checkParameterHasAnyType(BaseExpression parameter, DataTypeEnum parameterType, DataTypeEnum... types){
+        if (parameterType.notIn(types)){
+            throw new InvalidExpression(ExpressionExceptionUtils.getWrongParameterTypeMessage(getRootExpression().getErrorPath(parameter), derivedField, expressionName, parameterType.name()));
         }
     }
 }

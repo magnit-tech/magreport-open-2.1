@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import ru.magnit.magreportbackend.domain.EntityWithName;
+import ru.magnit.magreportbackend.domain.dataset.DataType;
 import ru.magnit.magreportbackend.domain.report.Report;
 import ru.magnit.magreportbackend.domain.user.User;
 
@@ -13,7 +14,6 @@ import javax.persistence.AttributeOverride;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
@@ -46,7 +46,11 @@ public class DerivedField extends EntityWithName {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "derivedField")
     private List<DerivedFieldExpression> derivedFieldExpressions = Collections.emptyList();
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "DATA_TYPE_ID")
+    private DataType dataType;
+
+    @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "REPORT_ID")
     private Report report;
 
