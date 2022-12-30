@@ -17,4 +17,11 @@ public interface ExpressionExceptionUtils {
             expressionStack +
             "\nФункция <" + functionName + "> не может принимать значения типа '" + parameterType + "';";
     }
+
+    static String getWrongParameterTypesMessage(String expressionStack, DerivedFieldResponse derivedField, String functionName, String parameterType1, String parameterType2) {
+        return "Ошибка при вычислении выражения производного поля \"" +
+            derivedField.getName() + "\"(Id: " + derivedField.getId() + "):\n" +
+            expressionStack +
+            "\nФункция <" + functionName + "> не может принимать значения разных типов: '" + parameterType1 + "' и '" + parameterType1 + "';";
+    }
 }

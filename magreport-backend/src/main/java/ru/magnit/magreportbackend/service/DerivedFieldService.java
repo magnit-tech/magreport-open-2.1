@@ -22,11 +22,15 @@ import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequestNew;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldTypes;
 import ru.magnit.magreportbackend.dto.request.report.ReportRequest;
 import ru.magnit.magreportbackend.dto.response.derivedfield.DerivedFieldResponse;
+import ru.magnit.magreportbackend.dto.response.derivedfield.DerivedFieldTypeResponse;
 import ru.magnit.magreportbackend.dto.response.derivedfield.ExpressionResponse;
+import ru.magnit.magreportbackend.dto.response.report.ReportFieldTypeResponse;
 import ru.magnit.magreportbackend.exception.InvalidExpression;
 import ru.magnit.magreportbackend.expression.BaseExpression;
 import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
+import ru.magnit.magreportbackend.mapper.derivedfield.FieldExpressionResponseRequestMapper;
 import ru.magnit.magreportbackend.service.domain.DerivedFieldDomainService;
+import ru.magnit.magreportbackend.service.domain.ReportDomainService;
 import ru.magnit.magreportbackend.service.domain.UserDomainService;
 import ru.magnit.magreportbackend.util.Pair;
 
@@ -47,7 +51,8 @@ import java.util.stream.Collectors;
 public class DerivedFieldService {
     private final DerivedFieldDomainService domainService;
     private final UserDomainService userDomainService;
-
+    private final ReportDomainService reportDomainService;
+    private final FieldExpressionResponseRequestMapper fieldExpressionResponseRequestMapper;
     @Value("${magreport.derived-fields.expression-max-call-depth}")
     private Long maxCallDepth;
 
@@ -270,5 +275,22 @@ public class DerivedFieldService {
 
     public List<DerivedFieldResponse> getDerivedFieldsByReport(ReportRequest request) {
         return domainService.getDerivedFieldsForReport(request.getId());
+    }
+
+    public DerivedFieldTypeResponse inferFieldType(DerivedFieldAddRequest request) {
+        final var reportFields = reportDomainService.getReportFields(request.getReportId());
+        final var derivedFields = domainService.getDerivedFieldsForReport(request.getReportId());
+
+        final var fieldIndexes = reportFields.stream()
+            .filter(ReportFieldTypeResponse::getVisible)
+            .map(entry -> new Pair<>(new FieldDefinition(entry.getId(), OlapFieldTypes.REPORT_FIELD), entry.getType()))
+            .collect(Collectors.toMap(Pair::getL, entry -> new Pair<>(0, entry.getR())));
+        derivedFields.forEach(field-> fieldIndexes.put(new FieldDefinition(field.getId(), OlapFieldTypes.DERIVED_FIELD), new Pair<>(0, field.getDataType())));
+
+        final var expressionContext = new ExpressionCreationContext(fieldIndexes, null, null);
+        final var fieldExpression = fieldExpressionResponseRequestMapper.from(request.getExpression());
+        final var expression = fieldExpression.getType().init(fieldExpression, expressionContext);
+
+        return new DerivedFieldTypeResponse(expression.inferType());
     }
 }

@@ -34,6 +34,7 @@ import ru.magnit.magreportbackend.dto.response.folder.FolderNodeResponse;
 import ru.magnit.magreportbackend.dto.response.folderreport.FolderResponse;
 import ru.magnit.magreportbackend.dto.response.report.PivotFieldTypeResponse;
 import ru.magnit.magreportbackend.dto.response.report.PublishedReportResponse;
+import ru.magnit.magreportbackend.dto.response.report.ReportFieldTypeResponse;
 import ru.magnit.magreportbackend.dto.response.report.ReportFolderResponse;
 import ru.magnit.magreportbackend.dto.response.report.ReportResponse;
 import ru.magnit.magreportbackend.dto.response.report.ReportShortResponse;
@@ -45,6 +46,7 @@ import ru.magnit.magreportbackend.mapper.report.PivotFieldTypeResponseMapper;
 import ru.magnit.magreportbackend.mapper.report.PublishedReportResponseMapper;
 import ru.magnit.magreportbackend.mapper.report.ReportCloner;
 import ru.magnit.magreportbackend.mapper.report.ReportFieldMapperDataSet;
+import ru.magnit.magreportbackend.mapper.report.ReportFieldTypeResponseMapper;
 import ru.magnit.magreportbackend.mapper.report.ReportFolderCloner;
 import ru.magnit.magreportbackend.mapper.report.ReportFolderMapper;
 import ru.magnit.magreportbackend.mapper.report.ReportFolderResponseMapper;
@@ -96,6 +98,7 @@ public class ReportDomainService {
     private final FolderNodeResponseFolderMapper folderNodeResponseFolderMapper;
     private final ReportFolderRolePermissionMapper reportFolderRolePermissionMapper;
     private final FolderNodeResponseReportFolderMapper folderNodeResponseReportFolderMapper;
+    private final ReportFieldTypeResponseMapper reportFieldTypeResponseMapper;
     private final ReportCloner reportCloner;
     private final ReportFolderCloner reportFolderCloner;
     private final ReportFolderRoleCloner reportFolderRoleCloner;
@@ -220,7 +223,7 @@ public class ReportDomainService {
     }
 
     @Transactional
-    public void deleteFavReportsByReportId(Long reportId){
+    public void deleteFavReportsByReportId(Long reportId) {
         favReportRepository.deleteByReportId(reportId);
     }
 
@@ -256,7 +259,7 @@ public class ReportDomainService {
 
     @Transactional
     public ReportResponse getReport(Long id) {
-        var response =  reportResponseMapper.from(reportRepository.getReferenceById(id));
+        var response = reportResponseMapper.from(reportRepository.getReferenceById(id));
         response.setPath(getPathReport(response.getId()));
         return response;
     }
@@ -444,13 +447,18 @@ public class ReportDomainService {
     }
 
     @Transactional
-    public void setReportEncrypt(ReportEncryptRequest request){
-
+    public void setReportEncrypt(ReportEncryptRequest request) {
         var report = reportRepository.getReferenceById(request.reportId());
         report.setEncryptFile(request.encrypt());
         report.setModifiedDateTime(LocalDateTime.now());
         reportRepository.save(report);
 
+    }
+
+    @Transactional
+    public List<ReportFieldTypeResponse> getReportFields(Long reportId) {
+        return reportFieldTypeResponseMapper
+            .from(reportFieldRepository.getAllByReportId(reportId));
     }
 
     private ReportFolder copyFolder(ReportFolder originalFolder, ReportFolder parentFolder, User currentUser, List<ReportFolderRole> destParentFolderRoles) {
@@ -573,7 +581,7 @@ public class ReportDomainService {
 
     private boolean isActiveJobs(Long id) {
         return reportRepository.getReferenceById(id).getReportJobs()
-                .stream()
-                .allMatch(job -> Objects.equals(ReportJobStatusEnum.COMPLETE.getId(), job.getStatus().getId()) || Objects.equals(ReportJobStatusEnum.FAILED.getId(), job.getStatus().getId()) );
+            .stream()
+            .allMatch(job -> Objects.equals(ReportJobStatusEnum.COMPLETE.getId(), job.getStatus().getId()) || Objects.equals(ReportJobStatusEnum.FAILED.getId(), job.getStatus().getId()));
     }
 }
