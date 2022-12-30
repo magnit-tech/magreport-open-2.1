@@ -277,11 +277,18 @@ public class ReportJobService {
     }
 
     public ReportJobResponse getJob(ReportJobRequest request) {
-        var response = jobDomainService.getJob(request.getJobId());
-        checkAccessForJob(response.getId(), response.getReport().id(), response.getReport().name());
-        response.setCanExecute(checkReportPermission(response.getReport().id()));
-        response.setExcelRowLimit(excelRowLimit);
-        return response;
+        if (request.getJobId() != null) {
+            var response = jobDomainService.getJob(request.getJobId());
+            checkAccessForJob(response.getId(), response.getReport().id(), response.getReport().name());
+            response.setCanExecute(checkReportPermission(response.getReport().id()));
+            response.setExcelRowLimit(excelRowLimit);
+            return response;
+        }
+        else {
+            var user = userDomainService.getCurrentUser();
+            log.warn(String.format("JobId is null! User: %s/%s", user.getDomain().name(), user.getName()));
+            return null;
+        }
     }
 
     public ReportJobResponse getJob(Long jobId) {
