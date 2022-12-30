@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.domain.enums.Expressions;
 
 import java.time.LocalDateTime;
@@ -22,6 +23,7 @@ import java.util.List;
 public class DerivedFieldResponse {
     private Long id;
     private Long reportId;
+    private DataTypeEnum dataType;
     private String name;
     private String description;
     private Long userId;

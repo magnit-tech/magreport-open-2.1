@@ -24,4 +24,13 @@ public class SquareRootExpression extends ParameterizedExpression {
 
         return result;
     }
+
+    @Override
+    public DataTypeEnum inferType() {
+        final var parameter = parameters.get(0);
+        final var parameterType = parameter.inferType();
+        checkParameterHasAnyType(parameter, parameterType, DataTypeEnum.INTEGER, DataTypeEnum.DOUBLE);
+
+        return result.getR();
+    }
 }
