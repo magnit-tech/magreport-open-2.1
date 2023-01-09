@@ -39,6 +39,9 @@ public class DerivedField extends EntityWithName {
     @SuppressWarnings("unused")
     public DerivedField(Long id) { this.id = id; }
 
+    @Column(name = "IS_PUBLIC")
+    private Boolean isPublic;
+
     @Lob
     @Column(name = "EXPRESSION_TEXT")
     private String expressionText;

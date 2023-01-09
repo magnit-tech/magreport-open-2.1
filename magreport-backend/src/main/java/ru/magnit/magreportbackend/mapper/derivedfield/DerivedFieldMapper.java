@@ -26,6 +26,7 @@ public class DerivedFieldMapper implements Mapper<DerivedField, Pair<DerivedFiel
     @Override
     public DerivedField from(Pair<DerivedFieldAddRequest, UserView> source) {
         final var derivedField = new DerivedField()
+            .setIsPublic(source.getL().getIsPublic())
             .setReport(new Report(source.getL().getReportId()))
             .setExpressionText(source.getL().getExpressionText())
             .setUser(new User(source.getR().getId()))
