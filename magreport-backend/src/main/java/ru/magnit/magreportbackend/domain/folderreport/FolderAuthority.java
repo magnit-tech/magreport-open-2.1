@@ -40,6 +40,10 @@ public class FolderAuthority extends EntityWithName {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "authority")
     private List<FolderRolePermission> permissions = Collections.emptyList();
 
+    public FolderAuthorityEnum getEnum() {
+        return FolderAuthorityEnum.getById(this.id);
+    }
+
     @Override
     public FolderAuthority setId(Long id) {
         this.id = id;

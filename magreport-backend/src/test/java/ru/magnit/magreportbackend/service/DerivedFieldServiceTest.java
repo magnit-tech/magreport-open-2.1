@@ -204,6 +204,7 @@ class DerivedFieldServiceTest {
             new DerivedFieldResponse(
                 1L,
                 1L,
+                false,
                 DataTypeEnum.DOUBLE,
                 "Объем продаж",
                 "Объем продаж",
@@ -268,6 +269,7 @@ class DerivedFieldServiceTest {
             new DerivedFieldResponse(
                 2L,
                 1L,
+                false,
                 DataTypeEnum.DOUBLE,
                 "Поле 2",
                 "Поле 2",
@@ -302,6 +304,7 @@ class DerivedFieldServiceTest {
             new DerivedFieldResponse(
                 3L,
                 1L,
+                false,
                 DataTypeEnum.INTEGER,
                 "Номер года",
                 "Расчет года",
