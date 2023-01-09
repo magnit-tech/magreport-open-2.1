@@ -23,6 +23,7 @@ import java.util.List;
 public class DerivedFieldResponse {
     private Long id;
     private Long reportId;
+    private Boolean isPublic;
     private DataTypeEnum dataType;
     private String name;
     private String description;

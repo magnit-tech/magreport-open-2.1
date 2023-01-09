@@ -16,6 +16,7 @@ import ru.magnit.magreportbackend.domain.report.ReportFolderRole;
 import ru.magnit.magreportbackend.domain.report.ReportFolderRolePermission;
 import ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum;
 import ru.magnit.magreportbackend.domain.user.Role;
+import ru.magnit.magreportbackend.domain.user.SystemRoles;
 import ru.magnit.magreportbackend.domain.user.User;
 import ru.magnit.magreportbackend.dto.inner.UserView;
 import ru.magnit.magreportbackend.dto.request.ChangeParentFolderRequest;
@@ -66,6 +67,7 @@ import ru.magnit.magreportbackend.repository.ReportRepository;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -459,6 +461,17 @@ public class ReportDomainService {
     public List<ReportFieldTypeResponse> getReportFields(Long reportId) {
         return reportFieldTypeResponseMapper
             .from(reportFieldRepository.getAllByReportId(reportId));
+    }
+
+    @Transactional
+    public boolean isReportAccessible(Long reportId, FolderAuthorityEnum targetAuthority, List<Long> roleIds) {
+        if (roleIds.contains(SystemRoles.ADMIN.getId())) return true;
+        final var report = reportRepository.getReferenceById(reportId);
+        final var folderRoles = reportFolderRoleRepository.getAllByFolderIdInAndRoleIdIn(Collections.singletonList(report.getFolder().getId()), roleIds);
+        return folderRoles
+            .stream()
+            .flatMap(fr -> fr.getPermissions().stream())
+            .anyMatch(frp -> frp.getAuthority().getEnum() == targetAuthority);
     }
 
     private ReportFolder copyFolder(ReportFolder originalFolder, ReportFolder parentFolder, User currentUser, List<ReportFolderRole> destParentFolderRoles) {

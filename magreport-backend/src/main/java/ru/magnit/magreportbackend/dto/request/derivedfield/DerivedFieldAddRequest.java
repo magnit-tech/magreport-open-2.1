@@ -14,6 +14,7 @@ import lombok.experimental.Accessors;
 public class DerivedFieldAddRequest {
     private Long id;
     private Long reportId;
+    private Boolean isPublic = false;
     private String name;
     private String description;
     private DerivedFieldExpressionAddRequest expression;
