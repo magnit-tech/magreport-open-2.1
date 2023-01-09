@@ -6,6 +6,9 @@ import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
+import ru.magnit.magreportbackend.domain.folderreport.FolderAuthorityEnum;
+import ru.magnit.magreportbackend.domain.user.SystemRoles;
+import ru.magnit.magreportbackend.dto.inner.RoleView;
 import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportFieldData;
@@ -26,6 +29,7 @@ import ru.magnit.magreportbackend.dto.response.derivedfield.DerivedFieldTypeResp
 import ru.magnit.magreportbackend.dto.response.derivedfield.ExpressionResponse;
 import ru.magnit.magreportbackend.dto.response.report.ReportFieldTypeResponse;
 import ru.magnit.magreportbackend.exception.InvalidExpression;
+import ru.magnit.magreportbackend.exception.InvalidParametersException;
 import ru.magnit.magreportbackend.expression.BaseExpression;
 import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.mapper.derivedfield.FieldExpressionResponseRequestMapper;
@@ -61,6 +65,7 @@ public class DerivedFieldService {
     }
 
     public void addDerivedField(DerivedFieldAddRequest request) {
+        checkPermission(request);
         domainService.addDerivedField(request, userDomainService.getCurrentUser());
     }
 
@@ -69,6 +74,7 @@ public class DerivedFieldService {
     }
 
     public void updateDerivedField(DerivedFieldAddRequest request) {
+        checkPermission(request);
         domainService.updateDerivedField(request, userDomainService.getCurrentUser());
     }
 
@@ -292,5 +298,19 @@ public class DerivedFieldService {
         final var expression = fieldExpression.getType().init(fieldExpression, expressionContext);
 
         return new DerivedFieldTypeResponse(expression.inferType());
+    }
+
+    private void checkPermission(DerivedFieldAddRequest request) {
+        if (Boolean.TRUE.equals(request.getIsPublic())) {
+            final var userRoes = userDomainService.getCurrentUserRoles(null);
+            final var isDeveloper = userRoes.stream().anyMatch(role -> role.getId().equals(SystemRoles.DEVELOPER.getId()));
+            final var hasWriteAccess = reportDomainService.isReportAccessible(request.getReportId(), FolderAuthorityEnum.WRITE, userRoes.stream().map(RoleView::getId).toList());
+            if (!isDeveloper) {
+                throw new InvalidParametersException("Для создания общедоступных производных полей необходимо обладать ролью DEVELOPER.");
+            }
+            if (!hasWriteAccess) {
+                throw new InvalidParametersException("Для создания общедоступных производных полей необходимо иметь доступ на запись в каталог отчета.");
+            }
+        }
     }
 }
