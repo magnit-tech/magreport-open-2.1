@@ -50,6 +50,11 @@ import { ReportFieldItemCSS } from '../Designer/DesignerCSS';
 function ReportFieldItem(props){
     const classes = ReportFieldItemCSS();
 
+    const handleValueInput = (e) => {
+        const onlySimbols = e.target.value.match(/[\p{L}\p{N}/%*+()--,. ]/gu) || [];
+        e.target.value = onlySimbols.join('');
+    }
+
     return (
         <Paper className={classes.repFieldAccordion} elevation={3}>
             <div className={classes.repFieldDesc}>
@@ -61,13 +66,16 @@ function ReportFieldItem(props){
                     </div>
                 </Tooltip>
                 <div className={classes.repField}>
-                    <DesignerTextField   
-                        label = "Название"
-                        value = {props.name}
-                        fullWidth
-                        onChange = {value => props.onFieldChange(props.index, 'name', value)}
-                        error={props.name.length === 0}
-                    />
+
+                <DesignerTextField
+                    label = "Название"
+                    value = {props.name}
+                    fullWidth
+                    onInput  = {e => handleValueInput(e)}
+                    onChange = {value => props.onFieldChange(props.index, 'name', value)}
+                    error={!!props.error || props.name.length === 0}
+                />
+                 
                 </div>
                 <div className={classes.repFieldSel}>
                     <DesignerSelectField
