@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldAddRequest;
+import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldGetAvailableRequest;
 import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldRequest;
-import ru.magnit.magreportbackend.dto.request.report.ReportRequest;
 import ru.magnit.magreportbackend.dto.response.ResponseBody;
 import ru.magnit.magreportbackend.dto.response.ResponseList;
 import ru.magnit.magreportbackend.dto.response.derivedfield.DerivedFieldResponse;
@@ -64,7 +64,7 @@ public class DerivedFieldController {
         produces = APPLICATION_JSON_VALUE)
     public ResponseList<DerivedFieldResponse> getDerivedFieldsByReport(
         @RequestBody
-        ReportRequest request) {
+        DerivedFieldGetAvailableRequest request) {
         LogHelper.logInfoUserMethodStart();
 
         var response = ResponseList.<DerivedFieldResponse>builder()
