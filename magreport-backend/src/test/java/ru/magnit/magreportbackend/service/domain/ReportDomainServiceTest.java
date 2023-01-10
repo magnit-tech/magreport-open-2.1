@@ -290,6 +290,8 @@ class ReportDomainServiceTest {
     @Test
     void addReportToFavorites() {
 
+        when(favReportRepository.existsByUserIdAndReportIdAndFolderId(anyLong(),anyLong(),anyLong())).thenReturn(false);
+
         domainService.addReportToFavorites(
                 new ReportAddFavoritesRequest()
                         .setReportId(ID)
@@ -298,6 +300,7 @@ class ReportDomainServiceTest {
                         .setId(ID));
 
         verify(favReportRepository).save(any());
+        verify(favReportRepository).existsByUserIdAndReportIdAndFolderId(anyLong(),anyLong(),anyLong());
         verifyNoMoreInteractions(favReportRepository, reportRepository);
     }
 

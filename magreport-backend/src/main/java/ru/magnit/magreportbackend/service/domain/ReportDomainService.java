@@ -214,7 +214,7 @@ public class ReportDomainService {
     public void deleteReport(Long id) {
 
         checkReportExists(id);
-        checkActiveJobforReport(id);
+        checkActiveJobForReport(id);
         reportRepository.deleteById(id);
     }
 
@@ -249,14 +249,18 @@ public class ReportDomainService {
 
     @Transactional
     public void addReportToFavorites(ReportAddFavoritesRequest request, UserView currentUser) {
-        var favReport = new FavReport();
 
-        favReport
-            .setReport(new Report(request.getReportId()))
-            .setFolder(new Folder(request.getFolderId()))
-            .setUser(new User(currentUser.getId()));
+        if (!isExistsFavReport(currentUser.getId(),request.getReportId(), request.getFolderId())) {
 
-        favReportRepository.save(favReport);
+            var favReport = new FavReport();
+
+            favReport
+                    .setReport(new Report(request.getReportId()))
+                    .setFolder(new Folder(request.getFolderId()))
+                    .setUser(new User(currentUser.getId()));
+
+            favReportRepository.save(favReport);
+        }
     }
 
     @Transactional
@@ -587,7 +591,7 @@ public class ReportDomainService {
         return reportRepository.existsById(id);
     }
 
-    private void checkActiveJobforReport(Long id) {
+    private void checkActiveJobForReport(Long id) {
         if (!isActiveJobs(id))
             throw new InvalidParametersException("Report with id:" + id + " has active report jobs.");
     }
@@ -596,5 +600,9 @@ public class ReportDomainService {
         return reportRepository.getReferenceById(id).getReportJobs()
             .stream()
             .allMatch(job -> Objects.equals(ReportJobStatusEnum.COMPLETE.getId(), job.getStatus().getId()) || Objects.equals(ReportJobStatusEnum.FAILED.getId(), job.getStatus().getId()));
+    }
+
+    private boolean isExistsFavReport( Long userId, Long reportId, Long folderId){
+        return favReportRepository.existsByUserIdAndReportIdAndFolderId(userId, reportId, folderId);
     }
 }
