@@ -66,16 +66,14 @@ function ReportFieldItem(props){
                     </div>
                 </Tooltip>
                 <div className={classes.repField}>
-
-                <DesignerTextField
-                    label = "Название"
-                    value = {props.name}
-                    fullWidth
-                    onInput  = {e => handleValueInput(e)}
-                    onChange = {value => props.onFieldChange(props.index, 'name', value)}
-                    error={!!props.error || props.name.length === 0}
-                />
-                 
+                    <DesignerTextField
+                        label = "Название"
+                        value = {props.name}
+                        fullWidth
+                        onInput  = {e => handleValueInput(e)}
+                        onChange = {value => props.onFieldChange(props.index, 'name', value)}
+                        error={!!props.error || props.name.length === 0}
+                    /> 
                 </div>
                 <div className={classes.repFieldSel}>
                     <DesignerSelectField
