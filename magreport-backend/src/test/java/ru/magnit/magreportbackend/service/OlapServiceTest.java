@@ -551,7 +551,8 @@ class OlapServiceTest {
     private ReportOlapConfigResponse getReportOlapConfigResponse() {
         return new ReportOlapConfigResponse()
                 .setOlapConfig(
-                        new OlapConfigResponse());
+                        new OlapConfigResponse()
+                                .setData("!"));
     }
 
     private OlapCubeRequestNew getOlapCubeRequestNew(OlapFieldTypes type) {

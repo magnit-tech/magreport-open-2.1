@@ -265,7 +265,12 @@ public class OlapService {
         var encrypt = jobDomainService.getJobData(request.getCubeRequest().getJobId()).reportData().encryptFile();
 
         var code = (long) (Math.random() * 1000000);
-        excelReportDomainService.getExcelPivotTable(resultCube, metadata, objectMapper.readValue(config.getOlapConfig().getData(), HashMap.class), request, code, encrypt);
+
+        excelReportDomainService.getExcelPivotTable(
+                resultCube,
+                metadata,
+                config.getOlapConfig().getData().isEmpty() ? new HashMap<>(): objectMapper.readValue(config.getOlapConfig().getData(), HashMap.class),
+                request, code, encrypt);
 
         return new TokenResponse(tokenService.getToken(request.getCubeRequest().getJobId(), code));
     }
