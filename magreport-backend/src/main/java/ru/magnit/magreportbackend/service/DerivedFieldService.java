@@ -13,6 +13,7 @@ import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportFieldData;
 import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldAddRequest;
+import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldGetAvailableRequest;
 import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldRequest;
 import ru.magnit.magreportbackend.dto.request.olap.FieldDefinition;
 import ru.magnit.magreportbackend.dto.request.olap.FilterDefinition;
@@ -23,7 +24,6 @@ import ru.magnit.magreportbackend.dto.request.olap.MetricDefinitionNew;
 import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequestNew;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldTypes;
-import ru.magnit.magreportbackend.dto.request.report.ReportRequest;
 import ru.magnit.magreportbackend.dto.response.derivedfield.DerivedFieldResponse;
 import ru.magnit.magreportbackend.dto.response.derivedfield.DerivedFieldTypeResponse;
 import ru.magnit.magreportbackend.dto.response.derivedfield.ExpressionResponse;
@@ -279,8 +279,12 @@ public class DerivedFieldService {
             .collect(Collectors.toMap(DerivedFieldResponse::getId, Function.identity()));
     }
 
-    public List<DerivedFieldResponse> getDerivedFieldsByReport(ReportRequest request) {
-        return domainService.getDerivedFieldsForReport(request.getId());
+    public List<DerivedFieldResponse> getDerivedFieldsByReport(DerivedFieldGetAvailableRequest request) {
+        final var fields = domainService.getDerivedFieldsForReport(request.getReportId());
+        final var currentUser = userDomainService.getCurrentUser();
+        return fields.stream()
+            .filter(field -> field.getIsPublic() || field.getUserId().equals(currentUser.getId()))
+            .toList();
     }
 
     public DerivedFieldTypeResponse inferFieldType(DerivedFieldAddRequest request) {
