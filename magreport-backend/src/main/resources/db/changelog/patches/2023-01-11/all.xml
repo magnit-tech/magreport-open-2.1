@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="ADD-UNIQUE_NAME" author="artemenko_pa">
+        <addColumn tableName="DERIVED_FIELD">
+            <column name="UNIQUE_NAME" type="VARCHAR(255)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="DERIVED_FIELD-UNIQUE_NAME_UIX" author="artemenko_pa">
+        <createIndex tableName="DERIVED_FIELD" indexName="UNIQUE_NAME-UIX" unique="true">
+            <column name="UNIQUE_NAME"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>
