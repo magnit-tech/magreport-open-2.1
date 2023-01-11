@@ -31,6 +31,7 @@ import java.util.stream.IntStream;
 import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.DB2;
 import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.H2;
 import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.IMPALA;
+import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.MSSQL;
 import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.ORACLE;
 import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.POSTGRESQL;
 import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.SAP_HANA;
@@ -47,13 +48,14 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
     private final List<FilterQueryBuilder> queryBuilders;
 
     private static final Map<DataSourceTypeEnum, Class<?>> builderTypes = Map.ofEntries(
-            Map.entry(H2, H2FilterQueryBuilder.class),
-            Map.entry(IMPALA, ImpalaFilterQueryBuilder.class),
-            Map.entry(TERADATA, TeradataFilterQueryBuilder.class),
-            Map.entry(ORACLE, OracleFilterQueryBuilder.class),
-            Map.entry(POSTGRESQL, PostgreSqlFilterQueryBuilder.class),
-            Map.entry(DB2, PostgreSqlFilterQueryBuilder.class),
-            Map.entry(SAP_HANA, SapHanaFilterQueryBuilder.class)
+        Map.entry(H2, H2FilterQueryBuilder.class),
+        Map.entry(IMPALA, ImpalaFilterQueryBuilder.class),
+        Map.entry(TERADATA, TeradataFilterQueryBuilder.class),
+        Map.entry(ORACLE, OracleFilterQueryBuilder.class),
+        Map.entry(MSSQL, MsSqlFilterQueryBuilder.class),
+        Map.entry(POSTGRESQL, PostgreSqlFilterQueryBuilder.class),
+        Map.entry(DB2, PostgreSqlFilterQueryBuilder.class),
+        Map.entry(SAP_HANA, SapHanaFilterQueryBuilder.class)
     );
 
     @Override
@@ -65,9 +67,9 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
         List<Tuple> tuples = new LinkedList<>();
 
         try (
-                var connection = poolManager.getConnection(requestData.dataSource());
-                var statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-                var resultSet = statement.executeQuery(filterInstanceValuesQuery)
+            var connection = poolManager.getConnection(requestData.dataSource());
+            var statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            var resultSet = statement.executeQuery(filterInstanceValuesQuery)
         ) {
             while (resultSet.next()) {
                 var tuple = new Tuple();
@@ -79,7 +81,7 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
             return tuples;
         } catch (Exception ex) {
             throw new QueryExecutionException(
-                    QUERY_FAILED + filterInstanceValuesQuery, ex);
+                QUERY_FAILED + filterInstanceValuesQuery, ex);
         }
     }
 
@@ -92,17 +94,17 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
         log.debug(QUERY + childNodesQuery);
 
         try (
-                var connection = poolManager.getConnection(requestData.dataSource());
-                var statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-                var resultSet = statement.executeQuery(childNodesQuery)
+            var connection = poolManager.getConnection(requestData.dataSource());
+            var statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            var resultSet = statement.executeQuery(childNodesQuery)
         ) {
             while (resultSet.next()) {
                 result.add(new FilterNodeResponse(
-                        requestData.responseFieldId(),
-                        requestData.level() + 1,
-                        resultSet.getString(1),
-                        resultSet.getString(2),
-                        null));
+                    requestData.responseFieldId(),
+                    requestData.level() + 1,
+                    resultSet.getString(1),
+                    resultSet.getString(2),
+                    null));
             }
 
             return result;
@@ -120,9 +122,9 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
         List<Tuple> tuples = new LinkedList<>();
 
         try (
-                var connection = poolManager.getConnection(requestData.filter().dataSource());
-                var statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-                var resultSet = statement.executeQuery(fieldsValuesQuery)
+            var connection = poolManager.getConnection(requestData.filter().dataSource());
+            var statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            var resultSet = statement.executeQuery(fieldsValuesQuery)
         ) {
             while (resultSet.next()) {
                 var tuple = new Tuple();
@@ -146,9 +148,9 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
     public List<Map<String, String>> getQueryResult(DataSourceData dataSource, String query) {
         List<Map<String, String>> result = new LinkedList<>();
         try (
-                var connection = poolManager.getConnection(dataSource);
-                var statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-                var resultSet = statement.executeQuery(query)
+            var connection = poolManager.getConnection(dataSource);
+            var statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            var resultSet = statement.executeQuery(query)
         ) {
             List<String> columnNames = getColumnNames(resultSet.getMetaData());
             while (resultSet.next()) {
@@ -172,8 +174,8 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
         log.debug("Trying to execute pre or post sql query:\n" + query);
 
         try (
-                var connection = poolManager.getConnection(dataSource);
-                var statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
+            var connection = poolManager.getConnection(dataSource);
+            var statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
         ) {
             statement.execute(query);
         } catch (SQLException ex) {
@@ -186,9 +188,9 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
 
     private static List<String> getColumnNames(ResultSetMetaData metaData) throws SQLException {
         return IntStream
-                .rangeClosed(1, metaData.getColumnCount())
-                .mapToObj(i -> getColumnName(metaData, i))
-                .collect(Collectors.toList());
+            .rangeClosed(1, metaData.getColumnCount())
+            .mapToObj(i -> getColumnName(metaData, i))
+            .collect(Collectors.toList());
     }
 
     private static String getColumnName(ResultSetMetaData metaData, int columnNumber) {
@@ -204,9 +206,9 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
     private FilterQueryBuilder getQueryBuilder(DataSourceTypeEnum dataSourceType) {
 
         return queryBuilders
-                .stream()
-                .filter(o -> o.getClass().equals(builderTypes.get(dataSourceType)))
-                .findFirst()
-                .orElseThrow(() -> new InvalidParametersException("QueryBuilder not found for database type '" + dataSourceType + "'"));
+            .stream()
+            .filter(o -> o.getClass().equals(builderTypes.get(dataSourceType)))
+            .findFirst()
+            .orElseThrow(() -> new InvalidParametersException("QueryBuilder not found for database type '" + dataSourceType + "'"));
     }
 }

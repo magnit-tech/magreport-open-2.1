@@ -24,4 +24,9 @@ public class ConstantValueExpression extends BaseExpression {
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
         return value;
     }
+
+    @Override
+    public DataTypeEnum inferType() {
+        return value.getR();
+    }
 }

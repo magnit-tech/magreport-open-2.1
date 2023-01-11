@@ -18,4 +18,9 @@ public class RowNumberExpression extends BaseExpression {
         result.setL("" + (rowNumber + 1));
         return result;
     }
+
+    @Override
+    public DataTypeEnum inferType() {
+        return result.getR();
+    }
 }
