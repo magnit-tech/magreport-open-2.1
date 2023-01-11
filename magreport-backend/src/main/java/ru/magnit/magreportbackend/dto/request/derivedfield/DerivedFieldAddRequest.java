@@ -19,4 +19,12 @@ public class DerivedFieldAddRequest {
     private String description;
     private DerivedFieldExpressionAddRequest expression;
     private String expressionText;
+
+    public String getUniqueName(Long userId){
+        if (Boolean.TRUE.equals(isPublic)) {
+            return reportId + "_" + name;
+        } else {
+            return reportId + "_" + userId + "_" + name;
+        }
+    }
 }

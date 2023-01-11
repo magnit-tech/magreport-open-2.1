@@ -42,6 +42,9 @@ public class DerivedField extends EntityWithName {
     @Column(name = "IS_PUBLIC")
     private Boolean isPublic;
 
+    @Column(name = "UNIQUE_NAME")
+    private String uniqueName;
+
     @Lob
     @Column(name = "EXPRESSION_TEXT")
     private String expressionText;
