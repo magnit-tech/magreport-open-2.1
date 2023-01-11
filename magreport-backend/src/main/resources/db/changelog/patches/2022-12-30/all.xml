@@ -7,8 +7,16 @@
 
     <changeSet id="DERIVED_FIELD-DATA_TYPE-001" author="artemenko_pa">
         <addColumn tableName="DERIVED_FIELD">
-            <column name="DATA_TYPE_ID" type="INT" defaultValueComputed="SELECT DATA_TYPE_ID FROM ${default-schema}.DATA_TYPE WHERE NAME='STRING'">
+            <column name="DATA_TYPE_ID" type="INT" defaultValue="1">
                 <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="DERIVED_FIELD">
+            <column name="IS_PUBLIC" type="BOOLEAN" defaultValueBoolean="false"/>
+        </addColumn>
+        <addColumn tableName="DERIVED_FIELD">
+            <column name="UNIQUE_NAME" type="VARCHAR(255)">
+                <constraints unique="true"/>
             </column>
         </addColumn>
     </changeSet>
