@@ -265,7 +265,12 @@ public class OlapService {
         var encrypt = jobDomainService.getJobData(request.getCubeRequest().getJobId()).reportData().encryptFile();
 
         var code = (long) (Math.random() * 1000000);
-        excelReportDomainService.getExcelPivotTable(resultCube, metadata, objectMapper.readValue(config.getOlapConfig().getData(), HashMap.class), request, code, encrypt);
+
+        excelReportDomainService.getExcelPivotTable(
+                resultCube,
+                metadata,
+                config.getOlapConfig().getData().isEmpty() ? new HashMap<>(): objectMapper.readValue(config.getOlapConfig().getData(), HashMap.class),
+                request, code, encrypt);
 
         return new TokenResponse(tokenService.getToken(request.getCubeRequest().getJobId(), code));
     }
@@ -614,28 +619,31 @@ public class OlapService {
                     int col = rowIndex[sortings.indexOf(sorting)][sorting.getTupleIndex()];
                     int row = sorting.getMetricId();
 
-                    var value1 = row1[col][row];
-                    var value2 = row2[col][row];
+                    var val1 = row1[col][row];
+                    var val2 = row2[col][row];
+
+                    var value1 = val1.getValue() == null ? "" : val1.getValue();
+                    var value2 = val2.getValue() == null ? "" : val2.getValue();
 
                     var type = dataTypes.get(sorting.getMetricId());
                     var compare = switch (type) {
                         case INTEGER -> {
-                            var v1 = value1.getValue().isEmpty() ? Integer.MIN_VALUE : Integer.parseInt(value1.getValue());
-                            var v2 = value2.getValue().isEmpty() ? Integer.MIN_VALUE : Integer.parseInt(value2.getValue());
+                            var v1 = value1.isEmpty() ? Integer.MIN_VALUE : Integer.parseInt(value1);
+                            var v2 = value2.isEmpty() ? Integer.MIN_VALUE : Integer.parseInt(value2);
                             yield Integer.compare(v1, v2);
                         }
-                        case STRING, DATE, TIMESTAMP, BOOLEAN -> value1.getValue().compareTo(value2.getValue());
+                        case STRING, DATE, TIMESTAMP, BOOLEAN -> value1.compareTo(value2);
                         case DOUBLE -> {
-                            var v1 = value1.getValue().isEmpty() ? Double.MIN_VALUE : Double.parseDouble(value1.getValue());
-                            var v2 = value2.getValue().isEmpty() ? Double.MIN_VALUE : Double.parseDouble(value2.getValue());
+                            var v1 = value1.isEmpty() ? Double.MIN_VALUE : Double.parseDouble(value1);
+                            var v2 = value2.isEmpty() ? Double.MIN_VALUE : Double.parseDouble(value2);
                             yield Double.compare(v1, v2);
                         }
                     };
 
                     if (compare == 0)
                         compare = switch (sortDirection) {
-                            case Column -> Integer.compare(value1.getRow(), value2.getRow());
-                            case Row -> Integer.compare(value1.getColumn(), value2.getColumn());
+                            case Column -> Integer.compare(val1.getRow(), val2.getRow());
+                            case Row -> Integer.compare(val1.getColumn(), val2.getColumn());
                         };
 
                     return sorting.getOrder().equals(SortingOrder.Ascending) ? compare : compare * -1;

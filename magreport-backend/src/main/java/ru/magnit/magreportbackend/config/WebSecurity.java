@@ -83,8 +83,6 @@ public class WebSecurity {
                 .antMatchers(DOMAIN_LIST_SERVICE).permitAll()
                 .antMatchers(EVENT_REGISTER).permitAll()
                 .antMatchers(SCHEDULE_TASK_PROLONGATION, SCHEDULE_TASK_GET_EXCEL_REPORT, SCHEDULE_TASK_MANUAL_START).permitAll()
-                .antMatchers(FOLDER_PERMISSION_CHECK).hasAnyAuthority(USER.name())
-                .antMatchers(FOLDER_PATH_SERVICE).hasAnyAuthority(USER.name())
                 .antMatchers(USERS_GET).authenticated()
                 .antMatchers(REPORT_JOB_GET_ALL_JOBS).hasAnyAuthority(ADMIN.name())
                 .antMatchers("/api/v1/report-job/**").hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())

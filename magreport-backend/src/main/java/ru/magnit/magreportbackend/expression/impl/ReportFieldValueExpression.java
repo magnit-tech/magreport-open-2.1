@@ -33,4 +33,9 @@ public class ReportFieldValueExpression extends BaseExpression {
         result.setL(resultCube[columnIndex][rowNumber]);
         return result;
     }
+
+    @Override
+    public DataTypeEnum inferType() {
+        return result.getR();
+    }
 }

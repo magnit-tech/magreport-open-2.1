@@ -29,4 +29,15 @@ public class LeftSubstrExpression extends ParameterizedExpression {
 
         return result.setL(sourceString.getL().substring(0, Integer.parseInt(length.getL())));
     }
+
+    @Override
+    public DataTypeEnum inferType() {
+        final var stringParameter = parameters.get(0);
+        final var lengthParameter = parameters.get(1);
+        final var stringParameterType = stringParameter.inferType();
+        final var lengthParameterType = stringParameter.inferType();
+        checkParameterHasAnyType(stringParameter, stringParameterType, DataTypeEnum.STRING, DataTypeEnum.DATE, DataTypeEnum.TIMESTAMP);
+        checkParameterHasAnyType(lengthParameter, lengthParameterType, DataTypeEnum.INTEGER);
+        return DataTypeEnum.STRING;
+    }
 }

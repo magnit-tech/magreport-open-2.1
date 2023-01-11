@@ -72,6 +72,7 @@ public class DerivedFieldDomainService {
             .toList();
     }
 
+    @Transactional
     public List<DerivedFieldResponse> getDerivedFieldsForReport(long reportId) {
         return derivedFieldRepository
             .getAllByReportId(reportId)

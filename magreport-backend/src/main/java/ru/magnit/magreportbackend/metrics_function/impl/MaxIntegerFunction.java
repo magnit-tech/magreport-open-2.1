@@ -14,6 +14,6 @@ public class MaxIntegerFunction implements MetricsFunction {
 
     @Override
     public String calculate(int col, int row) {
-        return String.valueOf(maxValue == null ? null : maxValue.intValue());
+        return maxValue == null ? "" : String.valueOf(maxValue.intValue());
     }
 }

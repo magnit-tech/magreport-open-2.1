@@ -62,4 +62,30 @@ class DivideExpressionTest {
         assertEquals("0", expressionResult.getL());
         assertEquals(DataTypeEnum.INTEGER, expressionResult.getR());
     }
+
+    @Test
+    void divisionNullTest() {
+        final var sourceExpression = new FieldExpressionResponse()
+            .setType(Expressions.DIVIDE)
+            .setParameters(List.of(
+                new FieldExpressionResponse()
+                    .setType(Expressions.CONSTANT_VALUE)
+                    .setConstantType(DataTypeEnum.INTEGER)
+                    .setConstantValue("2"),
+                new FieldExpressionResponse()
+                    .setType(Expressions.CONSTANT_VALUE)
+                    .setConstantType(DataTypeEnum.INTEGER)
+                    .setConstantValue(null),
+                new FieldExpressionResponse()
+                    .setType(Expressions.CONSTANT_VALUE)
+                    .setConstantType(DataTypeEnum.INTEGER)
+                    .setConstantValue("-1")
+            ));
+
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expressionResult = expression.calculate(0);
+
+        assertNull(expressionResult.getL());
+        assertEquals(DataTypeEnum.INTEGER, expressionResult.getR());
+    }
 }
