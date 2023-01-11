@@ -31,6 +31,7 @@ public class DerivedFieldMapper implements Mapper<DerivedField, Pair<DerivedFiel
             .setExpressionText(source.getL().getExpressionText())
             .setUser(new User(source.getR().getId()))
             .setName(source.getL().getName())
+            .setUniqueName(source.getL().getUniqueName(source.getR().getId()))
             .setDescription(source.getL().getDescription());
 
         if (source.getL().getExpression() != null) {
