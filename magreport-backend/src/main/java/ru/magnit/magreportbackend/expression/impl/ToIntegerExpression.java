@@ -19,4 +19,9 @@ public class ToIntegerExpression extends ParameterizedExpression {
 
         return result.setL(parameter.getL());
     }
+
+    @Override
+    public DataTypeEnum inferType() {
+        return result.getR();
+    }
 }
