@@ -33,7 +33,7 @@ public class MetricLesserOrEqualsFilter implements MetricFilterNode {
 
     @Override
     public boolean filter(int column, int row) {
-        var currentVal = data[column][row][metric].getValue();
+        var currentVal = data[column][row][metric].getValue() == null ? "" : data[column][row][metric].getValue();
 
         var result = switch (type) {
             case INTEGER, DOUBLE -> {
