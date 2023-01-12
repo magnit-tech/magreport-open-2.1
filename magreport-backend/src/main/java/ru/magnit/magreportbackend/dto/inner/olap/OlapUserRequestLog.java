@@ -24,4 +24,6 @@ public class OlapUserRequestLog {
         this.user = username.name();
         this.domain = username.domain();
     }
+
+    public OlapUserRequestLog() {}
 }

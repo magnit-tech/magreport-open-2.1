@@ -111,7 +111,7 @@ public class LogReaderService {
                     if (startDateTime.get() == null) startDateTime.set(requestLog.getDateTime());
                     endDateTime.set(requestLog.getDateTime());
                 } catch (JsonProcessingException e) {
-                    log.error(ERROR_PARSE_LOG + fileName, e);
+                    log.warn(ERROR_PARSE_LOG + fileName, e);
                 }
             });
         } catch (Exception ex) {
@@ -127,7 +127,7 @@ public class LogReaderService {
                     if (startDateTime.get() == null) startDateTime.set(requestLog.getDateTime());
                     endDateTime.set(requestLog.getDateTime());
                 } catch (JsonProcessingException e) {
-                    log.error(ERROR_PARSE_LOG + fileName, e);
+                    log.warn(ERROR_PARSE_LOG + fileName, e);
                 }
             });
         } catch (Exception ex) {
@@ -144,7 +144,7 @@ public class LogReaderService {
                     final var logEntry = objectMapper.readValue(line, OlapUserRequestLog.class);
                     if (isInPeriod(logEntry.getDateTime(), period)) result.add(logEntry);
                 } catch (JsonProcessingException e) {
-                    log.error(ERROR_PARSE_LOG + filePath, e);
+                    log.warn(ERROR_PARSE_LOG + filePath, e);
                 }
             });
         } catch (Exception ex) {
@@ -161,7 +161,7 @@ public class LogReaderService {
                     final var logEntry = objectMapper.readValue(line, OlapUserRequestLog.class);
                     if (isInPeriod(logEntry.getDateTime(), period)) result.add(logEntry);
                 } catch (JsonProcessingException e) {
-                    log.error(ERROR_PARSE_LOG + filePath, e);
+                    log.warn(ERROR_PARSE_LOG + filePath, e);
                 }
             });
         } catch (Exception ex) {

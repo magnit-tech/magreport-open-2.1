@@ -16,6 +16,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import java.io.Serial;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true)
 @AttributeOverride(name = "id", column = @Column(name = "REPORT_FOLDER_ROLE_ID"))
 public class ReportFolderRole extends BaseEntity {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public ReportFolderRole(Long id) {

@@ -13,6 +13,7 @@ public class SubstrExpression extends ParameterizedExpression {
         super(fieldExpression, context);
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
         final var sourceString = parameters.get(0).calculate(rowNumber);
@@ -33,5 +34,22 @@ public class SubstrExpression extends ParameterizedExpression {
                 Integer.parseInt(startPosition.getL()),
                 Integer.parseInt(startPosition.getL()) + Integer.parseInt(length.getL())
             ));
+    }
+
+    @SuppressWarnings("DuplicatedCode")
+    @Override
+    public DataTypeEnum inferType() {
+        final var srcParam = parameters.get(0);
+        final var startParam = parameters.get(1);
+        final var lenParam = parameters.get(2);
+        final var srcParamType = srcParam.inferType();
+        final var startParamType = startParam.inferType();
+        final var lenParamType = lenParam.inferType();
+
+        checkParameterHasAnyType(srcParam, srcParamType, DataTypeEnum.STRING);
+        checkParameterHasAnyType(startParam, startParamType, DataTypeEnum.INTEGER);
+        checkParameterHasAnyType(lenParam, lenParamType, DataTypeEnum.INTEGER);
+
+        return result.getR();
     }
 }

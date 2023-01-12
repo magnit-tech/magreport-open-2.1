@@ -37,7 +37,6 @@ export default function DesignerTextField(props){
             label = {props.label}
             value = {props.value === 0 || props.value ? props.value : ''}
             placeholder = {props.placeholder}
-            onChange = {event => {props.type === "file" ? props.onChange(event) : props.onChange(event.target.value)}}
             variant = {props.variant ? props.variant : "outlined"}
             type = {props.type ? props.type : "text"}
             fullWidth = {props.fullWidth}
@@ -50,6 +49,8 @@ export default function DesignerTextField(props){
             InputProps = {props.inputProps}
             InputLabelProps = {props.InputLabelProps}
             helperText = {props.helperText}
+            onInput  = {props.onInput ? (event) => props.onInput(event):()=>{} }
+            onChange = {event => {props.type === "file" ? props.onChange(event) : props.onChange(event.target.value)}}
         />
     )
 }
