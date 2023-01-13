@@ -1116,6 +1116,7 @@ function PivotPanel(props){
                 derivedFieldObject.fieldName, 
                 derivedFieldObject.fieldDesc, 
                 derivedFieldObject.expression,
+                derivedFieldObject.expressionText,
                 ()=>{dataHub.olapController.getJobMetadataExtended(props.jobId, props.reportId, updateDerivedFieldsList)});
         }
         else{

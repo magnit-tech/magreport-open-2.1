@@ -46,7 +46,7 @@ export default function OlapController(dataHub){
             serviceUrl: GET_DERIVED_FIELDS,
             method: METHOD,
             body: {
-                id: reportId
+                reportId: reportId
             }
         }
 
@@ -60,6 +60,7 @@ export default function OlapController(dataHub){
                 data.derivedFields = responses[1].data.map((f) => ({id: f.id, name: f.name, description: f.description, userName: f.userName, type: "DOUBLE"}));
             }
             else{
+                console.log(responses);
                 data = responses.filter((r) => !r.ok).join("; ");
             }
 
