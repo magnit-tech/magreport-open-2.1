@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="TAGS-001" author="artemenko_pa">
+        <preConditions>
+            <not>
+                <sequenceExists schemaName="REPOSITORY" sequenceName="TAGS_SEQ"/>
+            </not>
+        </preConditions>
+        <createSequence schemaName="REPOSITORY" sequenceName="TAGS_SEQ"/>
+        <modifySql>
+            <append value=" NOCACHE"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="TAGS-002" author="artemenko_pa">
+        <preConditions>
+            <not>
+                <tableExists schemaName="REPOSITORY" tableName="TAGS"/>
+            </not>
+        </preConditions>
+        <createTable schemaName="REPOSITORY" tableName="TAGS">
+            <column name="TAG_ID" type="INT" defaultValueSequenceNext="TAGS_SEQ">
+                <constraints primaryKey="true" primaryKeyName="TAGS_PK"/>
+            </column>
+            <column name="PARENT_ID" type="INT"/>
+            <column name="CODE" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DESCRIPTION" type="VARCHAR(255)"/>
+            <column name="USER_ID" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CREATED" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="MODIFIED" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="EXPRESSION_TAG-001" author="artemenko_pa">
+        <preConditions>
+            <not>
+                <sequenceExists schemaName="REPOSITORY" sequenceName="EXPRESSION_TAG_SEQ"/>
+            </not>
+        </preConditions>
+        <createSequence schemaName="REPOSITORY" sequenceName="EXPRESSION_TAG_SEQ"/>
+        <modifySql>
+            <append value=" NOCACHE"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="EXPRESSION_TAG-002" author="artemenko_pa">
+        <preConditions>
+            <not>
+                <tableExists schemaName="REPOSITORY" tableName="EXPRESSION_TAG"/>
+            </not>
+        </preConditions>
+        <createTable schemaName="REPOSITORY" tableName="EXPRESSION_TAG">
+            <column name="EXPRESSION_TAG_ID" type="INT" defaultValueSequenceNext="EXPRESSION_TAG_SEQ">
+                <constraints primaryKey="true" primaryKeyName="EXPRESSION_TAG_PK"/>
+            </column>
+            <column name="EXPRESSION_ID" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TAG_ID" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CREATED" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="MODIFIED" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="EXPRESSION_TAG-003" author="artemenko_pa">
+        <addForeignKeyConstraint baseColumnNames="PARENT_ID" baseTableName="TAGS"
+                                 constraintName="FK-TAGS-PARENT"
+                                 deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="TAG_ID" referencedTableName="TAGS"/>
+        <addForeignKeyConstraint baseColumnNames="EXPRESSION_ID" baseTableName="EXPRESSION_TAG"
+                                 constraintName="FK-EXPRESSION_TAG-EXPRESSIONS"
+                                 deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="EXPRESSION_ID" referencedTableName="EXPRESSIONS"/>
+        <addForeignKeyConstraint baseColumnNames="TAG_ID" baseTableName="EXPRESSION_TAG"
+                                 constraintName="FK-EXPRESSION_TAG-TAGS"
+                                 deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="TAG_ID" referencedTableName="TAGS"/>
+    </changeSet>
+
+</databaseChangeLog>
