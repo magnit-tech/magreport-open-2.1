@@ -14,5 +14,6 @@ import lombok.experimental.Accessors;
 public class DestinationUserAddRequest {
     String userName;
     String domainName;
+    Long userId;
     Long typeId;
 }
