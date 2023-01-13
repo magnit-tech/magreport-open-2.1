@@ -15,6 +15,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import java.io.Serial;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.List;
 @AttributeOverride(name = "id", column = @Column(name = "FOLDER_ID"))
 public class Folder extends EntityWithName {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @ManyToOne(fetch = FetchType.LAZY)
