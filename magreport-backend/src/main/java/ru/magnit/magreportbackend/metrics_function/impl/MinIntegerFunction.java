@@ -15,6 +15,6 @@ public class MinIntegerFunction implements MetricsFunction {
 
     @Override
     public String calculate(int col, int row) {
-        return String.valueOf(minValue == null ? null : minValue.intValue());
+        return minValue == null ? "" : String.valueOf(minValue.intValue());
     }
 }

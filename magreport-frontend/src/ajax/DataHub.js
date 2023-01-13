@@ -45,8 +45,9 @@ function DataHub(){
         unautorizedHandler
     */
     
-    this.setUnautorizedHandler = (unautorizedHandler) => {
-        this.unautorizedHandler = unautorizedHandler;
+    this.setUnautorizedHandler = () => {
+        localStorage.removeItem('userData')
+        window.location.reload();
     }
     /*
         Логин
@@ -131,11 +132,7 @@ function DataHub(){
                 }
                 else{
                     if(response.status === 401){
-                        localStorage.removeItem('userData')
-                        window.location.reload();
-                        // if (this.unautorizedHandler){
-                        //     this.unautorizedHandler(); 
-                        // }
+                        this.setUnautorizedHandler();
                     }
                     else {
                         callback(new MagrepResponse(false, "Request failed. Response status: " + response.status, requestId));
@@ -209,9 +206,7 @@ function DataHub(){
                 }
                 else{
                     if(response.status === 401){
-                        if (this.unautorizedHandler){
-                            this.unautorizedHandler();
-                        }
+                        this.setUnautorizedHandler();
                     }
                     else {
                         response.json().then(json => {

@@ -57,6 +57,9 @@ public class Expression extends EntityWithName {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "expression")
     private List<DerivedFieldExpression> derivedFieldExpressions = Collections.emptyList();
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "expression")
+    private List<ExpressionTag> tags = Collections.emptyList();
+
     @Override
     public Expression setId(Long id) {
         this.id = id;

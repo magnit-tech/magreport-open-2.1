@@ -426,16 +426,25 @@ function PivotPanel(props){
                     setAvaibleConfigs(data)
                     return setShowConfigDialog(true)
                 } else if (type === 'ConfigSaveDialog') {
-                    for (var key in data) {
-                        if (key !== 'sharedJobConfig') {
-                            data[key].map(item => configsArr.push(item))
+
+                    if(isReportDeveloper.current === true) {
+                        for (let itemKey in data) {
+                            data[itemKey].map(item => configsArr.push(item))
                         }
+                        setAvaibleConfigs(configsArr)
+                    } else {
+                        for (var key in data) {
+                            if (key !== 'sharedJobConfig') {
+                                data[key].map(item => configsArr.push(item))
+                            }
+                        }
+                        setAvaibleConfigs(configsArr)
                     }
-                    setAvaibleConfigs(configsArr)
+
                     return setShowConfigSaveDialog(true)
                 } 
 
-                for (var itemKey in data) {
+                for (let itemKey in data) {
                     data[itemKey].map(item => configsArr.push(item))
                 }
 

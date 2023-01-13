@@ -16,6 +16,7 @@ import ru.magnit.magreportbackend.domain.report.ReportFolderRole;
 import ru.magnit.magreportbackend.domain.report.ReportFolderRolePermission;
 import ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum;
 import ru.magnit.magreportbackend.domain.user.Role;
+import ru.magnit.magreportbackend.domain.user.SystemRoles;
 import ru.magnit.magreportbackend.domain.user.User;
 import ru.magnit.magreportbackend.dto.inner.UserView;
 import ru.magnit.magreportbackend.dto.request.ChangeParentFolderRequest;
@@ -34,6 +35,7 @@ import ru.magnit.magreportbackend.dto.response.folder.FolderNodeResponse;
 import ru.magnit.magreportbackend.dto.response.folderreport.FolderResponse;
 import ru.magnit.magreportbackend.dto.response.report.PivotFieldTypeResponse;
 import ru.magnit.magreportbackend.dto.response.report.PublishedReportResponse;
+import ru.magnit.magreportbackend.dto.response.report.ReportFieldTypeResponse;
 import ru.magnit.magreportbackend.dto.response.report.ReportFolderResponse;
 import ru.magnit.magreportbackend.dto.response.report.ReportResponse;
 import ru.magnit.magreportbackend.dto.response.report.ReportShortResponse;
@@ -45,6 +47,7 @@ import ru.magnit.magreportbackend.mapper.report.PivotFieldTypeResponseMapper;
 import ru.magnit.magreportbackend.mapper.report.PublishedReportResponseMapper;
 import ru.magnit.magreportbackend.mapper.report.ReportCloner;
 import ru.magnit.magreportbackend.mapper.report.ReportFieldMapperDataSet;
+import ru.magnit.magreportbackend.mapper.report.ReportFieldTypeResponseMapper;
 import ru.magnit.magreportbackend.mapper.report.ReportFolderCloner;
 import ru.magnit.magreportbackend.mapper.report.ReportFolderMapper;
 import ru.magnit.magreportbackend.mapper.report.ReportFolderResponseMapper;
@@ -64,6 +67,7 @@ import ru.magnit.magreportbackend.repository.ReportRepository;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -96,6 +100,7 @@ public class ReportDomainService {
     private final FolderNodeResponseFolderMapper folderNodeResponseFolderMapper;
     private final ReportFolderRolePermissionMapper reportFolderRolePermissionMapper;
     private final FolderNodeResponseReportFolderMapper folderNodeResponseReportFolderMapper;
+    private final ReportFieldTypeResponseMapper reportFieldTypeResponseMapper;
     private final ReportCloner reportCloner;
     private final ReportFolderCloner reportFolderCloner;
     private final ReportFolderRoleCloner reportFolderRoleCloner;
@@ -209,7 +214,7 @@ public class ReportDomainService {
     public void deleteReport(Long id) {
 
         checkReportExists(id);
-        checkActiveJobforReport(id);
+        checkActiveJobForReport(id);
         reportRepository.deleteById(id);
     }
 
@@ -220,7 +225,7 @@ public class ReportDomainService {
     }
 
     @Transactional
-    public void deleteFavReportsByReportId(Long reportId){
+    public void deleteFavReportsByReportId(Long reportId) {
         favReportRepository.deleteByReportId(reportId);
     }
 
@@ -244,19 +249,23 @@ public class ReportDomainService {
 
     @Transactional
     public void addReportToFavorites(ReportAddFavoritesRequest request, UserView currentUser) {
-        var favReport = new FavReport();
 
-        favReport
-            .setReport(new Report(request.getReportId()))
-            .setFolder(new Folder(request.getFolderId()))
-            .setUser(new User(currentUser.getId()));
+        if (!isExistsFavReport(currentUser.getId(),request.getReportId(), request.getFolderId())) {
 
-        favReportRepository.save(favReport);
+            var favReport = new FavReport();
+
+            favReport
+                    .setReport(new Report(request.getReportId()))
+                    .setFolder(new Folder(request.getFolderId()))
+                    .setUser(new User(currentUser.getId()));
+
+            favReportRepository.save(favReport);
+        }
     }
 
     @Transactional
     public ReportResponse getReport(Long id) {
-        var response =  reportResponseMapper.from(reportRepository.getReferenceById(id));
+        var response = reportResponseMapper.from(reportRepository.getReferenceById(id));
         response.setPath(getPathReport(response.getId()));
         return response;
     }
@@ -444,13 +453,29 @@ public class ReportDomainService {
     }
 
     @Transactional
-    public void setReportEncrypt(ReportEncryptRequest request){
-
+    public void setReportEncrypt(ReportEncryptRequest request) {
         var report = reportRepository.getReferenceById(request.reportId());
         report.setEncryptFile(request.encrypt());
         report.setModifiedDateTime(LocalDateTime.now());
         reportRepository.save(report);
 
+    }
+
+    @Transactional
+    public List<ReportFieldTypeResponse> getReportFields(Long reportId) {
+        return reportFieldTypeResponseMapper
+            .from(reportFieldRepository.getAllByReportId(reportId));
+    }
+
+    @Transactional
+    public boolean isReportAccessible(Long reportId, FolderAuthorityEnum targetAuthority, List<Long> roleIds) {
+        if (roleIds.contains(SystemRoles.ADMIN.getId())) return true;
+        final var report = reportRepository.getReferenceById(reportId);
+        final var folderRoles = reportFolderRoleRepository.getAllByFolderIdInAndRoleIdIn(Collections.singletonList(report.getFolder().getId()), roleIds);
+        return folderRoles
+            .stream()
+            .flatMap(fr -> fr.getPermissions().stream())
+            .anyMatch(frp -> frp.getAuthority().getEnum() == targetAuthority);
     }
 
     private ReportFolder copyFolder(ReportFolder originalFolder, ReportFolder parentFolder, User currentUser, List<ReportFolderRole> destParentFolderRoles) {
@@ -566,14 +591,18 @@ public class ReportDomainService {
         return reportRepository.existsById(id);
     }
 
-    private void checkActiveJobforReport(Long id) {
+    private void checkActiveJobForReport(Long id) {
         if (!isActiveJobs(id))
             throw new InvalidParametersException("Report with id:" + id + " has active report jobs.");
     }
 
     private boolean isActiveJobs(Long id) {
         return reportRepository.getReferenceById(id).getReportJobs()
-                .stream()
-                .allMatch(job -> Objects.equals(ReportJobStatusEnum.COMPLETE.getId(), job.getStatus().getId()) || Objects.equals(ReportJobStatusEnum.FAILED.getId(), job.getStatus().getId()) );
+            .stream()
+            .allMatch(job -> Objects.equals(ReportJobStatusEnum.COMPLETE.getId(), job.getStatus().getId()) || Objects.equals(ReportJobStatusEnum.FAILED.getId(), job.getStatus().getId()));
+    }
+
+    private boolean isExistsFavReport( Long userId, Long reportId, Long folderId){
+        return favReportRepository.existsByUserIdAndReportIdAndFolderId(userId, reportId, folderId);
     }
 }
