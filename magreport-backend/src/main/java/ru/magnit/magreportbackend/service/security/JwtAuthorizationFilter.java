@@ -48,7 +48,13 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
         UsernamePasswordAuthenticationToken authenticationToken = getAuthentication(token);
 
+        if (authenticationToken == null) {
+            form401Message(response);
+            return;
+        }
+
         if (isLoggedOff(response, authenticationToken)) return;
+
 
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
@@ -73,16 +79,21 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         try {
-            response.getOutputStream().println("{\"success\": false,\"message\": \"Forced logoff\",\"data\":{\"status\":401}}");
+            response.getOutputStream().println("{\"success\": false,\"message\": \"Authorization required\",\"data\":{\"status\":401}}");
         } catch (IOException ex) {
             log.error("Error while trying to write response body:\n" + ex.getMessage(), ex);
         }
     }
 
     private UsernamePasswordAuthenticationToken getAuthentication(String token) {
-        DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC512(jwtPropertiesConfig.getSecretKey()))
-            .build()
-            .verify(token.replace(jwtPropertiesConfig.getTokenPrefix(), "").trim());
+        DecodedJWT decodedJWT = null;
+        try {
+            decodedJWT = JWT.require(Algorithm.HMAC512(jwtPropertiesConfig.getSecretKey()))
+                    .build()
+                    .verify(token.replace(jwtPropertiesConfig.getTokenPrefix(), "").trim());
+        } catch (Exception ex){
+            log.warn(ex.getMessage());
+        }
 
         if (decodedJWT == null) return null;
 

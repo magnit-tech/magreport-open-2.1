@@ -2,7 +2,9 @@ package ru.magnit.magreportbackend.expression.impl;
 
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
+import ru.magnit.magreportbackend.exception.InvalidExpression;
 import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
+import ru.magnit.magreportbackend.expression.ExpressionExceptionUtils;
 import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
@@ -24,5 +26,17 @@ public class NvlExpression extends ParameterizedExpression {
         return result
             .setL(sourceValue.getL() == null ? targetValue.getL() : sourceValue.getL())
             .setR(sourceValue.getR());
+    }
+
+    @Override
+    public DataTypeEnum inferType() {
+        final var sourceParameter = parameters.get(0);
+        final var targetParameter = parameters.get(1);
+        final var sourceType = sourceParameter.inferType();
+        final var targetType = targetParameter.inferType();
+        if (sourceType != targetType) {
+            throw new InvalidExpression(ExpressionExceptionUtils.getWrongParameterTypesMessage(getRootExpression().getErrorPath(this), derivedField, expressionName, sourceType.name(), targetType.name()));
+        }
+        return super.inferType();
     }
 }

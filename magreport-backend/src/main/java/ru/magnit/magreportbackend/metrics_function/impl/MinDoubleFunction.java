@@ -14,6 +14,6 @@ public class MinDoubleFunction implements MetricsFunction {
 
     @Override
     public String calculate(int col, int row) {
-        return String.valueOf(minValue);
+        return minValue == null ? "" : String.valueOf(minValue);
     }
 }

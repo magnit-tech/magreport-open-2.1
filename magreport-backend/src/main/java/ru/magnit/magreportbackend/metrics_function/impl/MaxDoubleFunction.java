@@ -14,6 +14,6 @@ public class MaxDoubleFunction implements MetricsFunction {
 
     @Override
     public String calculate(int col, int row) {
-        return String.valueOf(maxValue);
+        return maxValue == null ? "" : String.valueOf(maxValue);
     }
 }

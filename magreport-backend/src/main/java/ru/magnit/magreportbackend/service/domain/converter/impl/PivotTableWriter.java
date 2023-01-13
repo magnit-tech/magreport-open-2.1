@@ -77,7 +77,7 @@ public class PivotTableWriter implements Writer {
 
         try (
                 final var inputStream = Files.newInputStream(Paths.get(templatePath));
-                final var workbook = new SXSSFWorkbook(new XSSFWorkbook(inputStream), SXSSFWorkbook.DEFAULT_WINDOW_SIZE);
+                final var workbook = new SXSSFWorkbook(new XSSFWorkbook(inputStream), 150000);
                 final var outputStream = new BufferedOutputStream(new FileOutputStream(exportPath.toFile()))
         ) {
             initConfig(workbook);

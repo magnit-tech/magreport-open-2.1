@@ -324,7 +324,10 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
 
         case FAVORITES_ADD_START:
         case FAVORITES_DELETE_START:
-            return state
+            return{
+                ...state,
+                needReload : true
+            }
         
         case FAVORITES_ADDED:
         case FAVORITES_DELETED:

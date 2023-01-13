@@ -58,7 +58,7 @@ class BaseExpressionTest {
                 new Pair<>(0, DataTypeEnum.INTEGER)
             ),
             new String[][]{{"123"}},
-            new DerivedFieldResponse(1L, 1L, "Derived field", "Description", 1L, "Test user", LocalDateTime.now(), LocalDateTime.now(), null, "")
+            new DerivedFieldResponse(1L, 1L, false, DataTypeEnum.INTEGER, "Derived field", "Description", 1L, "Test user", LocalDateTime.now(), LocalDateTime.now(), null, "")
         ));
         try {
             expression.calculate(0);

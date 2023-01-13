@@ -18,6 +18,8 @@ public class DerivedFieldResponseMapper implements Mapper<DerivedFieldResponse, 
 
         return new DerivedFieldResponse()
             .setId(source.getL().getId())
+            .setIsPublic(source.getL().getIsPublic())
+            .setDataType(source.getL().getDataType().getEnum())
             .setName(source.getL().getName())
             .setDescription(source.getL().getDescription())
             .setReportId(source.getL().getReport().getId())
