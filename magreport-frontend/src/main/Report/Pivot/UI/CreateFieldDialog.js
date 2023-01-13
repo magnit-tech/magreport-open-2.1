@@ -42,6 +42,8 @@ export default function CreateFieldDialog(props){
     // Семантическое дерево формулы
     const formulaTreeRoot = useRef(null);
 
+    const textToSave = useRef(null);
+
     /*
         Загрузка полей
     */
@@ -67,6 +69,7 @@ export default function CreateFieldDialog(props){
 
     let handleFormulaChange = useCallback( (compilationResult) => {
             formulaTreeRoot.current = compilationResult.treeRoot;
+            textToSave.current = compilationResult.textToSave;
             setIsFormulaCorrect(compilationResult.success);
         },
         []);
@@ -226,7 +229,8 @@ export default function CreateFieldDialog(props){
                         onClick={() => props.onSave({
                             fieldName : fieldName.trim(),
                             fieldDesc : fieldDesc.trim(),
-                            expression : buildServerExression(formulaTreeRoot.current)
+                            expression : buildServerExression(formulaTreeRoot.current),
+                            expressionText : textToSave.current
                         })}
                     >
                         Сохранить
