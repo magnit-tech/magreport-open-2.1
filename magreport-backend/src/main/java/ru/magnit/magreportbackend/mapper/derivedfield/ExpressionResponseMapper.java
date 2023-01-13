@@ -19,6 +19,7 @@ public class ExpressionResponseMapper implements Mapper<ExpressionResponse, Expr
             .setDescription(source.getDescription())
             .setNumParams(source.getNumParams())
             .setNumParamType(typeResponseMapper.from(source.getNumParamType()))
+            .setTags(source.getTags().stream().map(tag -> tag.getTag().getCode()).toList())
             .setUserId(source.getUser().getId())
             .setUserName(source.getUser().getName())
             .setCreated(source.getCreatedDateTime())
