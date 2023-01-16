@@ -23,10 +23,11 @@ public class ReportCloner implements Cloner<Report> {
     @Override
     public Report clone(Report source) {
         final var report = new Report()
-            .setName(source.getName())
-            .setDescription(source.getDescription())
-            .setDataSet(source.getDataSet())
-            .setRequirementsLink(source.getRequirementsLink());
+                .setName(source.getName())
+                .setDescription(source.getDescription())
+                .setDataSet(source.getDataSet())
+                .setRequirementsLink(source.getRequirementsLink())
+                .setEncryptFile(true);
 
         final var fields = fieldCloner.clone(source.getFields());
         fields.forEach(field -> field.setReport(report));
