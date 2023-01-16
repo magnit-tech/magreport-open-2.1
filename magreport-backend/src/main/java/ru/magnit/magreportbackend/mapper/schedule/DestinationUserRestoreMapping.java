@@ -13,6 +13,7 @@ public class DestinationUserRestoreMapping implements Mapper<DestinationUser, De
     @Override
     public DestinationUser from(DestinationUserBackupTuple source) {
         return new DestinationUser(source.val(), source.domain())
-                .setType(new DestinationType(source.destinationTypeId()));
+                .setType(new DestinationType(source.destinationTypeId()))
+                .setUserId(source.userId());
     }
 }

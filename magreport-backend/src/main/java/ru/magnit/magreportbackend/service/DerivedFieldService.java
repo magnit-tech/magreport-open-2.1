@@ -66,7 +66,8 @@ public class DerivedFieldService {
 
     public void addDerivedField(DerivedFieldAddRequest request) {
         checkPermission(request);
-        domainService.addDerivedField(request, userDomainService.getCurrentUser());
+        final var fieldType = inferFieldType(request);
+        domainService.addDerivedField(request, fieldType.getFieldType(), userDomainService.getCurrentUser());
     }
 
     public void deleteDerivedField(DerivedFieldRequest request) {
@@ -75,7 +76,8 @@ public class DerivedFieldService {
 
     public void updateDerivedField(DerivedFieldAddRequest request) {
         checkPermission(request);
-        domainService.updateDerivedField(request, userDomainService.getCurrentUser());
+        final var fieldType = inferFieldType(request);
+        domainService.updateDerivedField(request, fieldType.getFieldType(), userDomainService.getCurrentUser());
     }
 
     public List<ExpressionResponse> getAllExpressions() {
