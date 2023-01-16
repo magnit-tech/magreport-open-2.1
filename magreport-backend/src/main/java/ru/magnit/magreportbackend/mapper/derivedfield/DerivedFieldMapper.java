@@ -29,6 +29,7 @@ public class DerivedFieldMapper implements Mapper<DerivedField, Pair<DerivedFiel
             .setIsPublic(source.getL().getIsPublic())
             .setReport(new Report(source.getL().getReportId()))
             .setExpressionText(source.getL().getExpressionText())
+            .setDataType(new DataType(1L))
             .setUser(new User(source.getR().getId()))
             .setName(source.getL().getName())
             .setUniqueName(source.getL().getUniqueName(source.getR().getId()))
