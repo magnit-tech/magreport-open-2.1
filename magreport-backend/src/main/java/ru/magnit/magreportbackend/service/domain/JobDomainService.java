@@ -419,17 +419,22 @@ public class JobDomainService {
     }
 
     private void saveStats(ReportJob job) {
-        var jobStats = new ReportJobStatistics()
-                .setReportJob(new ReportJob(job.getId()))
-                .setReport(new Report(job.getReport().getId()))
-                .setUser(new User(job.getUser().getId()))
-                .setRowCount(job.getRowCount())
-                .setStatus(job.getStatus())
-                .setState(job.getState())
-                .setExportExcelCount(0L)
-                .setOlapRequestCount(0L)
-                .setIsShare(false);
 
-        statisticsRepository.save(jobStats);
+        var lastRecord = statisticsRepository.getLastRecord(job.getId());
+
+        if (lastRecord != null && lastRecord.getStatus().equals(job.getStatus())) return;
+
+            var jobStats = new ReportJobStatistics()
+                    .setReportJob(new ReportJob(job.getId()))
+                    .setReport(new Report(job.getReport().getId()))
+                    .setUser(new User(job.getUser().getId()))
+                    .setRowCount(job.getRowCount())
+                    .setStatus(job.getStatus())
+                    .setState(job.getState())
+                    .setExportExcelCount(0L)
+                    .setOlapRequestCount(0L)
+                    .setIsShare(false);
+
+            statisticsRepository.save(jobStats);
     }
 }
