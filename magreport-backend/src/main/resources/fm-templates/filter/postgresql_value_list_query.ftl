@@ -7,4 +7,6 @@ WHERE ${filterFieldName()} <#if isCaseSensitive()>LIKE<#else>ILIKE</#if>
 <#elseif likenessType() == "CONTAINS">'%${searchValue()}%'
 <#elseif likenessType() == "ENDS">'%${searchValue()}'
 </#if><#--
--->LIMIT ${maxCount()};
+-->GROUP BY
+${idFieldName()}, ${codeFieldName()}, ${nameFieldName()}
+LIMIT ${maxCount()};
