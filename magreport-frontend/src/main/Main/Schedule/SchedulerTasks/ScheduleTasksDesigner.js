@@ -352,13 +352,13 @@ export default function ScheduleTasksDesigner(props) {
 
     function handleSave() { 
         let destEmails =  taskTypeId === '0' ? data.destinationEmails.map(item=>({emailValue: item, typeId: 0})): [];
-        let destUsers = usersList.filter(item => data.destinationUsers.indexOf(item.id)>=0).map(i=>({userName: i.name, domainName: i.domainName, typeId: 0}));
+        let destUsers = usersList.filter(item => data.destinationUsers.indexOf(item.id)>=0).map(i=>({userId: i.id, userName: i.name, domainName: i.domainName, typeId: 0}));
         let destRoles = data.destinationRoles.map(item=>({roleId: item.id, name: item.name, typeId: 0}));
         let dataToSave = {
             code: data.schedules.find(item  => schedulesList.filter(item=>item.type === 'MANUAL').map(item=>item.id).find(item1=>item1===item)) ? data.code : null,
             description: data.description,
             destinationEmails:  destEmails.concat( data.errEmails.map(item=>({emailValue: item, typeId: 1}))),
-            destinationUsers:  destUsers.concat( usersList.filter(item => data.errUsers.indexOf(item.id)>=0).map(i=>({userName: i.name, domainName: i.domainName, typeId: 1}))),
+            destinationUsers:  destUsers.concat( usersList.filter(item => data.errUsers.indexOf(item.id)>=0).map(i=>({userId: i.id, userName: i.name, domainName: i.domainName, typeId: 1}))),
             destinationRoles : destRoles.concat( data.errRoles.map(item=>({roleId: item.id, name: item.name, typeId: 1}))),
             expirationDate: data.expirationDate,
             reportTitleMail:   data.reportTitleMail?.trim() === "" ? null : data.reportTitleMail,
@@ -420,10 +420,10 @@ export default function ScheduleTasksDesigner(props) {
             code: loadedData.code,
             description: loadedData.description,
             destinationEmails: loadedData.destinationEmails.filter(item =>item.type === 'REPORT').map(item=>item.value),
-            destinationUsers: loadedData.destinationUsers.filter(item=>item.type === 'REPORT').map(item=>item.id),
+            destinationUsers: loadedData.destinationUsers.filter(item=>item.type === 'REPORT').map(item=>item.userId),
             destinationRoles: loadedData.destinationRoles.filter(item=>item.type === 'REPORT').map( item=>({id: item.roleId, name: item.name})),
             errEmails: loadedData.destinationEmails.filter(item=>item.type === 'ERROR').map(item=>item.value),
-            errUsers: loadedData.destinationUsers.filter(item=>item.type === 'ERROR').map(item=>item.id),
+            errUsers: loadedData.destinationUsers.filter(item=>item.type === 'ERROR').map(item=>item.userId),
             errRoles: loadedData.destinationRoles.filter(item=>item.type === 'ERROR').map( item=>({id: item.roleId, name: item.name})),
             expirationDate: loadedData.expirationDate,
             reportTitleMail: loadedData.reportTitleMail,
