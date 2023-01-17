@@ -8,8 +8,7 @@ export default function validateSaveConfig(responseConfigData, allFields) {
 	let configsIdsArr = []
 	
 	for (var key in responseConfigData) {
-
-		if(responseConfigData[key].length !== 0 && Array.isArray(responseConfigData[key])) {
+		if(key !== 'derivedFields' && responseConfigData[key].length !== 0 && Array.isArray(responseConfigData[key])) {
 			responseConfigData[key].map( item => configsIdsArr.push(item.id) )
 		}
 	}
