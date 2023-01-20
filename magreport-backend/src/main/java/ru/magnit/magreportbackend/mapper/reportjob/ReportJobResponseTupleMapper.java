@@ -50,7 +50,8 @@ public class ReportJobResponseTupleMapper implements Mapper<ReportJobResponse, T
                 )),
                 false,
                 0L,
-                source.get("COMMENT", String.class)
+                source.get("COMMENT", String.class),
+                true
 
         );
     }
