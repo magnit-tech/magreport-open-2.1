@@ -21,6 +21,7 @@ const defaultDarkTheme = createTheme({
             dimentionValue: '#757575'
         },
         type: 'dark',
+        derivedField: '#949d6d'
     },
     typography: {
         htmlFontSize: 16,

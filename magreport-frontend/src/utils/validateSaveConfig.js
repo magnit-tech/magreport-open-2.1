@@ -4,9 +4,10 @@
  * @param {array} allFields - объект c полями, загруженных из Metadata
  */
 
-export default function validateSaveConfig(responseConfigData, allFields) {
+export default function validateSaveConfig(responseConfigData, allFields, derivedFields) {
+	const allFieldsWithDerived = [...derivedFields, ...allFields]
 	let configsIdsArr = []
-	
+
 	for (var key in responseConfigData) {
 		if(key !== 'derivedFields' && responseConfigData[key].length !== 0 && Array.isArray(responseConfigData[key])) {
 			responseConfigData[key].map( item => configsIdsArr.push(item.id) )
@@ -14,10 +15,10 @@ export default function validateSaveConfig(responseConfigData, allFields) {
 	}
 
 	const resultArray = configsIdsArr.map( (id) => {
-		return allFields.some( (fieldData) => {
+		return allFieldsWithDerived.some( (fieldData) => {
 			return fieldData.id === id
 		})
 	})
 
-	return resultArray.includes(false) // если ответ false значит в responseConfigData нет отличающих значений с allFields
+	return resultArray.includes(false) // если ответ false значит в responseConfigData нет отличающих значений с allFieldsWithDerived
 }

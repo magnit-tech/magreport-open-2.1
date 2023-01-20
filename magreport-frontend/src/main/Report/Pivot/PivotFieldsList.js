@@ -106,24 +106,25 @@ export default function PivotFieldsList(props){
                                 >
                                     {props.fields.length > 0 ?
                                         props.fields.map((v, ind) => {
-                                            if(props.name === "derivedFields") {console.log(v)}
                                             return ( 
-                                            <PivotField
-                                                key = {v.fieldId + "-" + ind}
-                                                listName = {props.droppableId}
-                                                index = {ind}
-                                                fieldId = {v.fieldId}
-                                                fieldName = {v.fieldName}
-                                                aggFuncName = {v.aggFuncName}
-                                                filter = {v.filter}
-                                                filtered = {v.filtered}
-                                                isOff = {v.isOff}
-                                                onButtonClick = {props.onButtonClick}
-                                                onButtonOffClick = {props.onButtonOffClick}
-                                                onChooseAggForMetric = {(funcName, index) => props.onChooseAggForMetric(funcName, index)}
-                                                onCloseAggModal = {props.onCloseAggModal}
-                                            />
-                                        )}) :
+                                                <PivotField
+                                                    key = {v.fieldId + "-" + ind}
+                                                    listName = {props.droppableId}
+                                                    index = {ind}
+                                                    fieldId = {v.fieldId}
+                                                    fieldName = {v.fieldName}
+                                                    aggFuncName = {v.aggFuncName}
+                                                    filter = {v.filter}
+                                                    filtered = {v.filtered}
+                                                    isOff = {v.isOff}
+                                                    original = {v.original}
+                                                    onButtonClick = {props.onButtonClick}
+                                                    onButtonOffClick = {props.onButtonOffClick}
+                                                    onChooseAggForMetric = {(funcName, index) => props.onChooseAggForMetric(funcName, index)}
+                                                    onCloseAggModal = {props.onCloseAggModal}
+                                                />
+                                            )
+                                        }) :
                                           
                                         <Box 
                                             fontSize={12} 

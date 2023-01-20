@@ -296,7 +296,7 @@ function PivotPanel(props){
             const { columnFrom, columnCount, rowFrom, rowCount } = configData
 
             // Проверка на валидацию сохраненных полей конфигурации olapConfig с полями из Metadata
-            const isSaveConfigValide = !validateSaveConfig(configData.fieldsLists, newConfiguration.fieldsLists.allFields)
+            const isSaveConfigValide = !validateSaveConfig(configData.fieldsLists, newConfiguration.fieldsLists.allFields, newConfiguration.fieldsLists.derivedFields)
 
             if (isSaveConfigValide) {
                 newConfiguration.restore(configData);
@@ -339,7 +339,7 @@ function PivotPanel(props){
                     { columnFrom, columnCount, rowFrom, rowCount } = configData
 
             // Проверка на валидацию сохраненных полей конфигурации olapConfig с полями из Metadata
-            const isSaveConfigValide = !validateSaveConfig(configData.fieldsLists, newConfiguration.fieldsLists.allFields)
+            const isSaveConfigValide = !validateSaveConfig(configData.fieldsLists,  newConfiguration.fieldsLists.allFields, newConfiguration.fieldsLists.derivedFields)
 
             if (isSaveConfigValide) {
                 newConfiguration.restore(configData);
@@ -476,7 +476,7 @@ function PivotPanel(props){
     // При выборе определенной конфигураций и записываем olapConfigData в текущую конфигурацию => обновляем DataLoader
     function handleLoadCertainConfig({data, name, reportOlapConfigId}) {
 
-        const isCertainConfigValide = !validateSaveConfig(JSON.parse(data).fieldsLists, pivotConfiguration.fieldsLists.allFields)
+        const isCertainConfigValide = !validateSaveConfig(JSON.parse(data).fieldsLists, pivotConfiguration.fieldsLists.allFields, pivotConfiguration.fieldsLists.derivedFields)
 
         if (isCertainConfigValide) {
             setTableDataLoadStatus(1);
@@ -1174,14 +1174,14 @@ function PivotPanel(props){
                                 />
                             }
 
-                            {fieldsVisibility &&
+                            {/* {fieldsVisibility &&
                                 <PivotFieldsList
                                     name = "Производные поля"
                                     droppableId = {"derivedFields"}
                                     fields = {pivotConfiguration.fieldsLists.derivedFields}
                                     direction = "horizontal"
                                 />
-                            }
+                            } */}
 
                             {fieldsVisibility &&
                                 <PivotFieldsList
