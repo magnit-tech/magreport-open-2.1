@@ -177,7 +177,7 @@ public class ScheduleService {
 
         var status = scheduleTaskDomainService.getScheduleTask(request.getId()).getStatus();
 
-        if (status.equals(ScheduleTaskStatusEnum.INACTIVE)) {
+        if (status.equals(ScheduleTaskStatusEnum.INACTIVE) || status.equals(ScheduleTaskStatusEnum.EXPIRED)) {
             scheduleTaskDomainService.setStatusScheduleTask(request.getId(), ScheduleTaskStatusEnum.SCHEDULED);
             return ScheduleTaskStatusEnum.SCHEDULED;
         } else {

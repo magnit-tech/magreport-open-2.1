@@ -139,6 +139,7 @@ function PivotField(props){
                     className={clsx({
                         [styles.offField] : props.isOff,
                         [styles.field] : !props.isOff,
+                        [styles.derivedField] : !props.original,
                         [styles.draggingField] : snapshot.isDragging
                     })}
                     {...provided.draggableProps}
