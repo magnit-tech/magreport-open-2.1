@@ -32,6 +32,11 @@ export function FieldsLists(fieldsLists){
     // Создаёт списки полей по метаданным отчёта
     this.createByFields = (reportFields, derivedFields) => {
         this.createLists();
+        for(let f of derivedFields){
+            let fd = new FieldData(f);
+            fd.original = false;
+            this.unusedFields.push(fd);  
+        }
         for(let f of reportFields){
             if(f.visible){
                 let fd = new FieldData(f);
@@ -88,6 +93,7 @@ export function FieldsLists(fieldsLists){
 
         delete saveCopy.allFields;
         delete saveCopy.unusedFields;
+        delete saveCopy.derivedFields;
 
         return saveCopy
     }

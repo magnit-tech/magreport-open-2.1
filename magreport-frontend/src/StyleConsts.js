@@ -2,6 +2,7 @@ const StyleConsts = {
 //РАЗМЕРЫ:
     drawerWidth: 280, //Ширина для Sidebar
     headerHeight: '48px', //Высота для Header
+    headerHeightHollyday: '120px', //Высота для Header на праздниках
     reportPaginationHeight: '50px', //Высота Pagination для таблицы отчета
     breadHeight: '40px', //Высота для хлебных крошек
     filterMaxWidth: 'calc(100vw - 240px)', //800px', //Ширина компонентов для фильтров отчетов
