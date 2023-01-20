@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import clsx from 'clsx';
 
 // material-ui
 import FilterListIcon from '@material-ui/icons/FilterList';
@@ -25,6 +26,7 @@ import Slide from '@material-ui/core/Slide';
 import dataHub from 'ajax/DataHub';
 // styles
 import { TimeSlider, FolderContentCSS } from './FolderContentCSS';
+import isHollyday from 'HollydayFunctions';
 
 class RuLocalizedUtils extends DateFnsUtils {
     getCalendarHeaderText(date) {
@@ -135,10 +137,10 @@ export default function FilterPanel(props){
         { 
             !panelOpen 
             ?
-            <div className={classes.filterButton}>
+            <div className={clsx(classes.filterButton, {[classes.filterBtnTop]: isHollyday() === -1, [classes.filterBtnTopHollyday]: isHollyday() >= 0})}>
                 <Badge classes={{badge: classes.badge}} color="secondary" overlap="circular" badgeContent={countFilters}>
                     <Tooltip title = "Фильтры" placement="top"> 
-                        <Paper elevation={3} className={classes.openSearchBtn}>
+                        <Paper elevation={3} className={clsx(classes.openSearchBtn, {[classes.openSearchBtnHeight]: isHollyday() === -1, [classes.openSearchBtnHeightHollyday]: isHollyday() >= 0})}>
                             <IconButton
                                 size="small"
                                 aria-label="searchBtn"
