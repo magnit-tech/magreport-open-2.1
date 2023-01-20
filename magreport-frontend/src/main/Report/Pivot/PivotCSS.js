@@ -101,6 +101,9 @@ export const PivotCSS = makeStyles(theme => ({
         width : 'fit-content',
         maxWidth: '200px',
     },
+    derivedField: {
+        backgroundColor : theme.palette.derivedField,
+    },
     fieldText: {
         maxHeight: '40px',
         overflow: 'hidden',
