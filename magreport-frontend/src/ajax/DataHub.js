@@ -130,10 +130,12 @@ function DataHub(){
                     );
                 }
                 else{
-                    if(response.status === 401){
+                    if(response.status === 401 ){
                         this.setUnautorizedHandler();
                     }
-                    else {
+                    else if(response.status === 403) {
+                        callback(new MagrepResponse(false, "Запрос не выполнен. Просьба авторизоваться повторно."));
+                    } else {
                         callback(new MagrepResponse(false, "Request failed. Response status: " + response.status, requestId));
                     }
                 }

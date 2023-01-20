@@ -16,6 +16,7 @@ public class DestinationUserResponseMapper implements Mapper<DestinationUserResp
                 .setId(source.getId())
                 .setType(source.getType() == null ? DestinationTypeEnum.REPORT : DestinationTypeEnum.getById(source.getType().getId()))
                 .setScheduleTaskId(source.getScheduleTask().getId())
+                .setUserId(source.getUserId())
                 .setUserName(source.getValue())
                 .setDomainName(source.getDomainName())
                 .setCreated(source.getCreatedDateTime())
