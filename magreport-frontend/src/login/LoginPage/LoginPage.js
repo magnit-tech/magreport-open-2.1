@@ -13,6 +13,7 @@ import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import { LoginPageCSS } from './LoginPageCSS';
 import ErrorIcon from '@material-ui/icons/Error';
+import isHollyday from  '../../HollydayFunctions';
 import './snow.css'
 
 
@@ -21,7 +22,7 @@ function LoginPage(props){
     const classes = LoginPageCSS();
 
     return (
-        <div className={clsx('sneg', {[classes.snow]: true})}>
+        <div className={clsx({'sneg': isHollyday() >= 0 && isHollyday() <= 2, [classes.snow]: isHollyday() >= 0 && isHollyday() <= 2})}>
             <Header version={props.version}/>
             <Grid container component="main" className={classes.main} >
                 <CssBaseline/>

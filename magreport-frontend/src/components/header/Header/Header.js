@@ -1,9 +1,7 @@
 import React from 'react';
-
+import clsx from 'clsx';
 import { useAuth } from 'router/useAuth';
-
 import Draggable from 'react-draggable';
-
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -28,6 +26,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Paper from '@material-ui/core/Paper';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import isHollyday from  '../../../HollydayFunctions';
 
 import { setLightTheme, setDarkTheme } from '../../../redux/actions/admin/actionThemeDesign';
 import NewYearPanel from './newyearpanel';
@@ -82,7 +81,7 @@ function Header(props){
     }
 
     return(
-        <AppBar position="static" className={classes.appBar}>
+        <AppBar position="static" className={clsx(classes.appBar, {[classes.appBarHeight]: isHollyday() === -1, [classes.appBarHeightHollyday]: isHollyday() >= 0})}>
             <NewYearPanel/>
             <Menu
                 id="simple-menu"
