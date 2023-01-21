@@ -40,6 +40,7 @@ public class ReportJobResponseMapper implements Mapper<ReportJobResponse, Report
             new ArrayList<>(),
                 false,
             0L,
-                source.getComment());
+                source.getComment(),
+                null);
     }
 }
