@@ -40,6 +40,7 @@ import ru.magnit.magreportbackend.service.domain.FolderDomainService;
 import ru.magnit.magreportbackend.service.domain.FolderPermissionsDomainService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
 import ru.magnit.magreportbackend.service.domain.OlapConfigurationDomainService;
+import ru.magnit.magreportbackend.service.domain.OlapUserChoiceDomainService;
 import ru.magnit.magreportbackend.service.domain.ReportDomainService;
 import ru.magnit.magreportbackend.service.domain.ReportJobUserDomainService;
 import ru.magnit.magreportbackend.service.domain.TokenService;
@@ -84,6 +85,7 @@ public class ReportJobService {
     private final TokenService tokenService;
     private final ReportJobUserDomainService reportJobUserDomainService;
     private final OlapConfigurationDomainService olapConfigurationDomainService;
+    private final OlapUserChoiceDomainService olapUserChoiceDomainService;
 
     public TokenResponse createExcelReport(ExcelReportRequest request) {
 
@@ -279,8 +281,10 @@ public class ReportJobService {
     public ReportJobResponse getJob(ReportJobRequest request) {
         if (request.getJobId() != null) {
             var response = jobDomainService.getJob(request.getJobId());
+            var currentUser = userDomainService.getCurrentUser();
             checkAccessForJob(response.getId(), response.getReport().id(), response.getReport().name());
             response.setCanExecute(checkReportPermission(response.getReport().id()));
+            response.setOlapLastUserChoice(olapUserChoiceDomainService.getOlapUserChoice(response.getReport().id(), currentUser.getId()));
             response.setExcelRowLimit(excelRowLimit);
             return response;
         }
@@ -292,26 +296,37 @@ public class ReportJobService {
     }
 
     public ReportJobResponse getJob(Long jobId) {
-        return jobDomainService.getJob(jobId);
+        var currentUser = userDomainService.getCurrentUser();
+        var response = jobDomainService.getJob(jobId);
+        response.setOlapLastUserChoice(olapUserChoiceDomainService.getOlapUserChoice(response.getReport().id(), currentUser.getId()));
+        return response;
     }
 
     public List<ReportJobResponse> getMyJobs(ReportJobHistoryRequestFilter filter) {
+        var currentUser = userDomainService.getCurrentUser();
         var responses = jobDomainService.getMyJobs();
-        responses.forEach(response -> response.setCanExecute(checkReportPermission(response.getReport().id())));
+        responses.forEach(response -> {
+            response.setCanExecute(checkReportPermission(response.getReport().id()));
+            response.setOlapLastUserChoice(olapUserChoiceDomainService.getOlapUserChoice(response.getReport().id(), currentUser.getId()));
+        });
         return applyFilter(responses, filter);
     }
 
     public List<ReportJobResponse> getAllJobs(ReportJobHistoryRequestFilter filter) {
-
+        var currentUser = userDomainService.getCurrentUser();
         var responses = jobDomainService.getAllJobs();
-        responses.forEach(response -> response.setCanExecute(checkReportPermission(response.getReport().id())));
+        responses.forEach(response -> {
+            response.setCanExecute(checkReportPermission(response.getReport().id()));
+            response.setOlapLastUserChoice(olapUserChoiceDomainService.getOlapUserChoice(response.getReport().id(), currentUser.getId()));
+        });
         return applyFilter(responses, filter);
     }
 
     public ReportPageResponse getReportPage(ReportPageRequest request) {
-
+        var currentUser = userDomainService.getCurrentUser();
         var jobData = jobDomainService.getJobData(request.getJobId());
         if (jobData.isReportReadyToDisplay()) {
+            olapUserChoiceDomainService.setOlapUserChoice(jobData.reportId(), currentUser.getId(), false);
             return avroReportDomainService.getPage(jobData, request.getPageNumber(), request.getRowsPerPage());
         }
 

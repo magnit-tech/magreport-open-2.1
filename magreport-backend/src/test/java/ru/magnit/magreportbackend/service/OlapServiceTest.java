@@ -14,6 +14,7 @@ import ru.magnit.magreportbackend.domain.olap.AggregationType;
 import ru.magnit.magreportbackend.domain.olap.FilterType;
 import ru.magnit.magreportbackend.domain.olap.MetricFilterType;
 import ru.magnit.magreportbackend.domain.olap.SortingOrder;
+import ru.magnit.magreportbackend.dto.inner.UserView;
 import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportFieldData;
@@ -40,7 +41,9 @@ import ru.magnit.magreportbackend.service.domain.ExcelReportDomainService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
 import ru.magnit.magreportbackend.service.domain.OlapConfigurationDomainService;
 import ru.magnit.magreportbackend.service.domain.OlapDomainService;
+import ru.magnit.magreportbackend.service.domain.OlapUserChoiceDomainService;
 import ru.magnit.magreportbackend.service.domain.TokenService;
+import ru.magnit.magreportbackend.service.domain.UserDomainService;
 import ru.magnit.magreportbackend.util.Pair;
 import ru.magnit.magreportbackend.util.Triple;
 
@@ -91,12 +94,19 @@ class OlapServiceTest {
     @Mock
     private DerivedFieldService derivedFieldService;
 
+    @Mock
+    private UserDomainService userDomainService;
+
+    @Mock
+    private OlapUserChoiceDomainService olapUserChoiceDomainService;
+
     @Test
     void getCubeTest1() {
         when(jobDomainService.getJobData(anyLong())).thenReturn(getTestJobData());
         when(domainService.getCubeData(any())).thenReturn(getTestCubeData());
         when(domainService.filterCubeData(any(), any())).thenReturn(getTrueStatusRows());
         when(domainService.filterMetricResult(any(),any(),any())).thenReturn(getTrueStatusMetricValue());
+        when(userDomainService.getCurrentUser()).thenReturn(new UserView());
 
         final var result1 = service.getCube(getOlapRequest());
         assertNotNull(result1);
@@ -125,6 +135,7 @@ class OlapServiceTest {
         when(jobDomainService.getJobData(anyLong())).thenReturn(getTestJobData());
         when(domainService.getCubeData(any())).thenReturn(getTestCubeData());
         when(domainService.filterCubeData(any(), any())).thenReturn(getTrueStatusRows());
+        when(userDomainService.getCurrentUser()).thenReturn(new UserView());
 
         final var result1 = service.getCube(getOlapRequest().setMetricFilterGroup(new MetricFilterGroup()));
         assertNotNull(result1);
@@ -221,6 +232,7 @@ class OlapServiceTest {
         when(jobDomainService.getJobData(anyLong())).thenReturn(getReportJobData());
         when(tokenService.getToken(anyLong(), anyLong())).thenReturn("123456");
         when(domainService.filterMetricResult(any(),any(),any())).thenReturn(getTrueStatusMetricValue());
+        when(userDomainService.getCurrentUser()).thenReturn(new UserView());
 
 
         var result = service.exportPivotTableExcel(getOlapExportPivotTableRequest());
@@ -263,6 +275,7 @@ class OlapServiceTest {
         when(domainService.filterCubeData(any(), any())).thenReturn(getTrueStatusRows());
         when(domainService.filterMetricResult(any(),any(),any())).thenReturn(getTrueStatusMetricValue());
         when(derivedFieldService.preProcessCube(any(),any())).thenReturn(new Pair<>(getTestCubeData(),getOlapRequest()));
+        when(userDomainService.getCurrentUser()).thenReturn(new UserView());
 
 
         var result = service.getCubeNew(getOlapCubeRequestNew(DERIVED_FIELD));
@@ -296,6 +309,7 @@ class OlapServiceTest {
         when(domainService.getCubeData(any())).thenReturn(getTestCubeData());
         when(domainService.filterCubeData(any(), any())).thenReturn(getTrueStatusRows());
         when(domainService.filterMetricResult(any(),any(),any())).thenReturn(getTrueStatusMetricValue());
+        when(userDomainService.getCurrentUser()).thenReturn(new UserView());
 
         var result = service.getCubeNew(getOlapCubeRequestNew(REPORT_FIELD));
 
@@ -326,6 +340,7 @@ class OlapServiceTest {
         when(jobDomainService.getJobData(anyLong())).thenReturn(getTestJobData());
         when(domainService.getCubeData(any())).thenReturn(getTestCubeData());
         when(domainService.filterCubeData(any(), any())).thenReturn(getTrueStatusRows());
+        when(userDomainService.getCurrentUser()).thenReturn(new UserView());
 
         var result = service.getCubeNew(getOlapCubeRequestNew(REPORT_FIELD).setMetricFilterGroup(new MetricFilterGroup()));
 
