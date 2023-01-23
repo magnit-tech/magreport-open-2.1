@@ -232,7 +232,8 @@ class ReportJobServiceTest {
                 Collections.emptyList(),
                 "user",
                 LocalDateTime.now(),
-                LocalDateTime.now());
+                LocalDateTime.now(),
+                true);
     }
 
     @Test
@@ -521,6 +522,7 @@ class ReportJobServiceTest {
                                         2L,
                                         null,
                                         FilterTypeEnum.DATE_RANGE,
+                                        null,
                                         null,
                                         null,
                                         null,
