@@ -17,7 +17,7 @@ function ASMAdministrationMenuView(){
     const navigate = useNavigate()
 
     function handleAddItemClick() {
-        navigate(`/asm/add`)
+        navigate(`/ui/asm/add`)
     }
 
     const [data, setData] = useState()

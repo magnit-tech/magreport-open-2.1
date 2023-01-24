@@ -256,7 +256,7 @@ function ReportDevDesigner(props){
     function handleAddEditAnswer(magrepResponse){
         setUploading(false);
         if(magrepResponse.ok){
-            location.state ? navigate(location.state) : navigate(`/reportsDev/${folderId}`)
+            location.state ? navigate(location.state) : navigate(`/ui/reportsDev/${folderId}`)
             enqueueSnackbar("Отчет успешно сохранен", {variant : "success"});
         }
         else{
@@ -291,16 +291,30 @@ function ReportDevDesigner(props){
     }
 
     function handleFieldChange(index, field, value){
+        let isSimilar = false;
+        if(field === 'name' && fieldValues.find((item, idx)=>item[field] === value && idx !== index)){
+            isSimilar = true;
+            setFieldValues(fieldValues.map((f,i) => {if (i === index){f["error"] = true} return f}))
+            enqueueSnackbar('Введены одинаковые названия полей', {variant : "error"});
+        };
+
         const errorText = checkChanges(field, value)
         if (!errorText) {
             setFieldValues(fieldValues.map((f, i) => {
                 if (i === index){
-                    f[field] = value
+                    f[field] = value;
+                    f.error = isSimilar || false
                 }
                 return f
             }))
         }
         else {
+            setFieldValues(fieldValues.map((f, i) => {
+                if (i === index){
+                    f.error = true
+                }
+                return f
+            }))
             enqueueSnackbar(errorText, {variant : "error"});
         }
     }
@@ -312,7 +326,7 @@ function ReportDevDesigner(props){
         tabcontent:  uploading ? <CircularProgress /> :
             <DesignerPage 
                 onSaveClick={()=>{handleSave(handleAddEditAnswer)}}
-                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/reportsDev/${folderId}`)}
+                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/reportsDev/${folderId}`)}
             >
                 <DesignerTextField
                     label = {fieldLabels.reportName}
@@ -364,7 +378,7 @@ function ReportDevDesigner(props){
         tabcontent:  uploading ? <CircularProgress /> :
             <DesignerPage 
                 onSaveClick={()=>{handleSave(handleAddEditAnswer)}}
-                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/reportsDev/${folderId}`)}
+                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/reportsDev/${folderId}`)}
                 twoColumn = {true}
             >
                 <ReportFields 
@@ -383,7 +397,7 @@ function ReportDevDesigner(props){
         tabcontent:  uploading ? <CircularProgress /> :
             <DesignerPage 
                 onSaveClick={()=>{handleSave(handleAddEditAnswer)}}
-                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/reportsDev/${folderId}`)}
+                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/reportsDev/${folderId}`)}
             >
                 <ReportFiltersTab 
                     childGroupsMap={props.reportFiltersGroup}
@@ -408,7 +422,7 @@ function ReportDevDesigner(props){
         tabcontent:  uploading ? <CircularProgress /> :
             <DesignerPage 
                 onSaveClick={()=>{handleSave(handleAddEditAnswer)}}
-                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/reportsDev/${folderId}`)}
+                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/reportsDev/${folderId}`)}
             >
                 <ReportTemplates 
                     reportId={id}

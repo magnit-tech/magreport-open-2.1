@@ -33,19 +33,19 @@ function RolesMenuView(props){
 
 
     function handleFolderClick(folderId) {
-        navigate(`/roles/${folderId}`)
+        navigate(`/ui/roles/${folderId}`)
     }
 
     function handleItemClick(roleId) {
-        navigate(`/roles/${id}/view/${roleId}`, {state: location.pathname})
+        navigate(`/ui/roles/${id}/view/${roleId}`, {state: location.pathname})
     }
 
     function handleEditItemClick(roleId) {
-        navigate(`/roles/${id}/edit/${roleId}`, {state: location.pathname})
+        navigate(`/ui/roles/${id}/edit/${roleId}`, {state: location.pathname})
     }
 
     function handleAddItemClick() {
-        navigate(`/roles/${id}/add`, {state: location.pathname})
+        navigate(`/ui/roles/${id}/add`, {state: location.pathname})
     }
 
     

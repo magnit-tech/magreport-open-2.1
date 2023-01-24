@@ -17,7 +17,9 @@ import {
     FAVORITES_ADD_START, 
     FAVORITES_ADDED, 
     FAVORITES_DELETE_START, 
-    FAVORITES_DELETED
+    FAVORITES_DELETED,
+    JOBS_FILTER,
+    TASK_SWITCHED
 } from 'redux/reduxTypes';
 import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
 // import {FLOW_STATE_BROWSE_FOLDER} from './menuViews/flowStates';    
@@ -112,15 +114,10 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
 				}
 
         case FOLDER_CONTENT_LOAD_FAILED:
-            if(action.itemsType === folderItemsType){
-                return{
-                    ...state,
-                    needReload : false,
-                    folderContentLoadErrorMessage : action.errorMessage
-                }                  
-            }
-            else{
-                return state;
+            return{
+                ...state,
+                needReload : false,
+                folderContentLoadErrorMessage : action.errorMessage
             }
 
         case FOLDER_CONTENT_FOLDER_ADDED:
@@ -225,91 +222,80 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
             }
 
         case FOLDER_CONTENT_SORT_CLICK:
-            if(action.itemsType === folderItemsType){
+            localStorage.setItem("sortParams", JSON.stringify(action.sortParams));
 
-                localStorage.setItem("sortParams", JSON.stringify(action.sortParams));
+            let itemsNameForSort = getItemName(action.itemsType),
+                key = action.sortParams.key,
+                direction = action.sortParams.direction,
+                childFoldersForSort = null,
+                itemsForSort = null;
 
-                let itemsName = getItemName(action.itemsType),
-                    key = action.sortParams.key,
-                    direction = action.sortParams.direction,
-                    childFolders = null,
-                    items = null;
-
-                if (state.searchParams) {
-                    childFolders = [...state.filteredFolderData.childFolders];
-                    items = [...state.filteredFolderData[itemsName]]
-                } else {
-                    childFolders = [...state.currentFolderData.childFolders];
-                    items = [...state.currentFolderData[itemsName]]
-                }
-                
-
-                if (childFolders.length > 0) {
-                    childFolders.sort((a, b) => {
-                        if (a[key] < b[key]) {
-                            return direction === 'ascending' ? -1 : 1;
-                        }
-                        if (a[key] > b[key]) {
-                            return direction === 'ascending' ? 1 : -1;
-                        }
-                            return 0;
-                    });
-                }
-
-                if (items.length > 0) {
-                    items.sort((a, b) => {
-                        if (a[key] < b[key]) {
-                            return direction === 'ascending' ? -1 : 1;
-                        }
-                        if (a[key] > b[key]) {
-                            return direction === 'ascending' ? 1 : -1;
-                        }
-                            return 0;
-                    });
-                }
-
-                const filteredFolderData = {
-                    ...state.currentFolderData,
-                    childFolders,
-                    [itemsName]: items
-                }
-
-                return {...state, filteredFolderData, sortParams: action.sortParams}
+            if (state.searchParams) {
+                childFoldersForSort = [...state.filteredFolderData.childFolders];
+                itemsForSort = [...state.filteredFolderData[itemsNameForSort]]
+            } else {
+                childFoldersForSort = [...state.currentFolderData.childFolders];
+                itemsForSort = [...state.currentFolderData[itemsNameForSort]]
             }
-            else{
-                return state;
+            
+
+            if (childFoldersForSort.length > 0) {
+                childFoldersForSort.sort((a, b) => {
+                    if (a[key] < b[key]) {
+                        return direction === 'ascending' ? -1 : 1;
+                    }
+                    if (a[key] > b[key]) {
+                        return direction === 'ascending' ? 1 : -1;
+                    }
+                        return 0;
+                });
             }
+
+            if (itemsForSort.length > 0) {
+                itemsForSort.sort((a, b) => {
+                    if (a[key] < b[key]) {
+                        return direction === 'ascending' ? -1 : 1;
+                    }
+                    if (a[key] > b[key]) {
+                        return direction === 'ascending' ? 1 : -1;
+                    }
+                        return 0;
+                });
+            }
+
+            const filteredFolderData = {
+                ...state.currentFolderData,
+                childFolders: childFoldersForSort,
+                [itemsNameForSort]: itemsForSort
+            }
+
+            return {...state, filteredFolderData, sortParams: action.sortParams}
 
         case FOLDER_CONTENT_SEARCH_RESULTS_LOADED:
-            if(action.itemsType === folderItemsType){
-                const findStr = action.searchParams.searchString.toLowerCase().trim()
-                if (findStr.length > 0){
-                    let itemsName = getItemName(action.itemsType)
-                    const childFolders = action.data.folders.map(f => {
-                        return {
-                            id: f.folder.id,
-                            name: f.folder.name,
-                            description: f.folder.name,
-                            created: f.folder.created,
-                            modified: f.folder.modified,
-                            path: f.path
-                        }
-                    })
-                    const objects = action.data.objects.map(o => {return {...o['element'], path: o['path'] }} );
-                    const filteredFolderData = {
-                        childFolders,
-                        [itemsName]: objects
+            const findStrResultsLoaded = action.searchParams.searchString.toLowerCase().trim()
+            if (findStrResultsLoaded.length > 0){
+                let itemsName = getItemName(action.itemsType)
+                const childFolders = action.data.folders.map(f => {
+                    return {
+                        id: f.folder.id,
+                        name: f.folder.name,
+                        description: f.folder.name,
+                        created: f.folder.created,
+                        modified: f.folder.modified,
+                        path: f.path
                     }
-                    return {...state, filteredFolderData, searchParams: action.searchParams}
+                })
+                const objects = action.data.objects.map(o => {return {...o['element'], path: o['path'] }} );
+                const filteredFolderData = {
+                    childFolders,
+                    [itemsName]: objects
                 }
-                else {
-                    delete state.filteredFolderData
-                    delete state.searchParams
-                    return {...state}
-                }
+                return {...state, filteredFolderData, searchParams: action.searchParams}
             }
             else {
-                return state;
+                delete state.filteredFolderData
+                delete state.searchParams
+                return {...state}
             }
 
         case FOLDER_CONTENT_PARENT_FOLDER_CHANGED:
@@ -338,36 +324,68 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
 
         case FAVORITES_ADD_START:
         case FAVORITES_DELETE_START:
-            return state
+            return{
+                ...state,
+                needReload : true
+            }
         
         case FAVORITES_ADDED:
         case FAVORITES_DELETED:
-            if(action.itemsType === folderItemsType){
-                let folderData = {...state.currentFolderData}
-                if (state.searchParams){
-                    folderData = {...state.filteredFolderData}
-                }
-                
-                // const reportIndex = folderData.reports.findIndex(r => r.id === action.reportId)
-                const reportIndex = action.index
-                let report = {...folderData.reports[reportIndex]}
-                report.favorite = !report.favorite
-                
-                if (action.favorite && action.itemsType === FolderItemTypes.favorites){
-                    folderData.reports.splice(reportIndex, 1)
-                }
-                else {
-                    folderData.reports.splice(reportIndex, 1, report)
-                }
-                if (state.searchParams){
-                    return {...state, filteredFolderData: folderData}
-                }
-                return {...state, currentFolderData: folderData}
+            let folderData = {...state.currentFolderData}
+            if (state.searchParams){
+                folderData = {...state.filteredFolderData}
+            }
+            
+            // const reportIndex = folderData.reports.findIndex(r => r.id === action.reportId)
+            const reportIndex = action.index
+            let report = {...folderData.reports[reportIndex]}
+            report.favorite = !report.favorite
+            
+            if (action.favorite && action.itemsType === FolderItemTypes.favorites){
+                folderData.reports.splice(reportIndex, 1)
             }
             else {
-                return state
+                folderData.reports.splice(reportIndex, 1, report)
             }
+            if (state.searchParams){
+                return {...state, filteredFolderData: folderData}
+            }
+            return {...state, currentFolderData: folderData}
+
+        case JOBS_FILTER:
+            let newStateJF = {}
+                if (action.filters.isCleared){
+                    newStateJF = {...state}
+                    delete newStateJF.filters
+                }
+                else {
+                    newStateJF = {
+                        ...state, filters: action.filters
+                    }
+                }
+                return newStateJF
+        case TASK_SWITCHED:
+                        let newStateTS = {...state}
+                        const fullArr = [...state.currentFolderData.scheduleTasks]
+                        const filteredArr = [...state.filteredFolderData.scheduleTasks]
         
+                        let newTask = {};
+        
+                        if (state.searchParams){
+                            newTask = {...filteredArr[action.taskIndex], status: action.status}
+                            let indexFullArr = fullArr.findIndex(item => item.id === action.taskId)
+                            filteredArr.splice(action.taskIndex, 1, newTask)
+                            fullArr.splice(indexFullArr, 1, newTask)
+                            
+                        }
+                        else {
+                            newTask = {...fullArr[action.taskIndex], status: action.status}
+                            fullArr.splice(action.taskIndex, 1, newTask)
+                            filteredArr.splice(action.taskIndex, 1, newTask)
+                        }
+                        newStateTS.filteredFolderData.scheduleTasks = filteredArr;
+                        newStateTS.currentFolderData.scheduleTasks = fullArr;
+                        return newStateTS
         default:
             return state;
     }    

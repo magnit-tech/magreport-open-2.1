@@ -50,9 +50,9 @@ function ReportsMenuView(props){
                     searchParams = {state.searchParams || {}}
                     sortParams = {state.sortParams || {}}
                     
-                    onFolderClick = {(folderId) => navigate(`/reports/${folderId}`)}
-                    onItemClick = {(reportId) => navigate(`/report/starter/${reportId}`, {state: location.pathname})}
-                    onAddItemClick={() => navigate(`/reports/${id}/add`)}
+                    onFolderClick = {(folderId) => navigate(`/ui/reports/${folderId}`)}
+                    onItemClick = {(reportId) => navigate(`/ui/report/starter/${reportId}`, {state: location.pathname})}
+                    onAddItemClick={() => navigate(`/ui/reports/${id}/add`)}
 
                     onAddFolder = {(name, description) => {props.actionAddFolder(folderItemsType, state.currentFolderData.id, name, description)}}
                     onEditFolderClick = {(folderId, name, description) => {props.actionEditFolder(folderItemsType, state.currentFolderData.id, folderId, name, description)}}

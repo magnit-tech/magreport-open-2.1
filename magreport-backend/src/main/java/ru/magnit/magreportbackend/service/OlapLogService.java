@@ -28,6 +28,7 @@ public class OlapLogService {
 
     public List<OlapRequestGeneralInfo> getGeneralLogInfo(DatePeriodRequest request) {
         final var logEntries = olapLogDomainService.getLogEntriesForPeriod(request);
+        final var jobStats = getJobStats();
 
         var result =  logEntries
             .stream()
@@ -42,7 +43,7 @@ public class OlapLogService {
                 logEntry.getDateTime(),
                 logEntry.getDateTime()
                 ))
-            .map(this::extractInfo)
+            .map(logEntry -> extractInfo(logEntry, jobStats))
             .toList();
 
         var distinctResult = result.stream().distinct().collect(Collectors.toMap(Function.identity(), OlapRequestGeneralInfo::requestCount));
@@ -86,8 +87,7 @@ public class OlapLogService {
             .collect(Collectors.toMap(ReportJobBaseStats::reportJobId, Function.identity()));
     }
 
-    private OlapRequestGeneralInfo extractInfo(OlapRequestGeneralInfo source) {
-        final var jobStats = getJobStats();
+    private OlapRequestGeneralInfo extractInfo(OlapRequestGeneralInfo source, Map<Long, ReportJobBaseStats> jobStats) {
 
         if (source.reportJobId() == null && source.reportId() == null) return source;
         if (source.reportJobId() != null && !jobStats.containsKey(source.reportJobId())) return source;

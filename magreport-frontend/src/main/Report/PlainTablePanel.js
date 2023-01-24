@@ -126,11 +126,11 @@ export default function PlainTablePanel(props){
     }
 
     function handleRestartReport(){
-        navigate(`/report/starter/${props.reportId}?jobId=${props.jobId}`, {state: location.pathname})
+        navigate(`/ui/report/starter/${props.reportId}?jobId=${props.jobId}`, {state: location.pathname})
     }
 
     function handleViewTypeChange(){
-        props.onViewTypeChange('PivotTable');
+        props.onViewTypeChange('pivot');
     }
     
     function TablePaginationActions(props) {

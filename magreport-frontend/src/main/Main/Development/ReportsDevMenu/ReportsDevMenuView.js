@@ -56,19 +56,19 @@ function ReportsDevMenuView(props){
 
 
     function handleFolderClick(folderId) {
-        navigate(`/reportsDev/${folderId}`)
+        navigate(`/ui/reportsDev/${folderId}`)
     }
     function handleItemClick(reportId) {
-        navigate(`/report/starter/${reportId}`, {state: location.pathname})
+        navigate(`/ui/report/starter/${reportId}`, {state: location.pathname})
     }
     function handleViewItemClick(reportId) {
-        navigate(`/reportsDev/${id}/view/${reportId}`, {state: location.pathname})
+        navigate(`/ui/reportsDev/${id}/view/${reportId}`, {state: location.pathname})
     }
     function handleEditItemClick(reportId) {
-        navigate(`/reportsDev/${id}/edit/${reportId}`, {state: location.pathname})
+        navigate(`/ui/reportsDev/${id}/edit/${reportId}`, {state: location.pathname})
     }
     function handleAddItemClick() {
-        navigate(`/reportsDev/${id}/add`, {state: location.pathname})
+        navigate(`/ui/reportsDev/${id}/add`, {state: location.pathname})
     }
 
     // Dependency

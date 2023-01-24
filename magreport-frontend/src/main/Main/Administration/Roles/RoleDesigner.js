@@ -223,7 +223,7 @@ function RoleDesigner(props){
     function handleAddEditAnswer(magrepResponse){
         setUploading(false);
         if(magrepResponse.ok){
-            location.state ? navigate(location.state) : navigate(`/roles/${folderId}`)
+            location.state ? navigate(location.state) : navigate(`/ui/roles/${folderId}`)
         }
         else{
             let actionWord = id ? "обновлении" : "создании";
@@ -289,7 +289,7 @@ function RoleDesigner(props){
         tabcontent:
         <DesignerPage 
             onSaveClick={handleSave}
-            onCancelClick={() => location.state ? navigate(location.state) : navigate(`/roles/${folderId}`)}
+            onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/roles/${folderId}`)}
         >
             <DesignerTextField
                 label = {fieldLabels.roleName}

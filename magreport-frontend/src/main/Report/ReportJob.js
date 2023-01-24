@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSnackbar } from 'notistack';
 
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 
 import { useDispatch } from 'react-redux';
 import { addReportNavbar } from "redux/actions/navbar/actionNavbar";
@@ -41,7 +41,9 @@ const REQUEST_TIMEOUT_INTERVAL_MS = 1000;
  * @param {*} props.onRestartReportClick - function(reportId) - callback перезапуска отчёта
  */
 export default function ReportJob(props){
+
     const { id } = useParams()
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const dispatch = useDispatch()
 
@@ -56,6 +58,7 @@ export default function ReportJob(props){
     const jobOwnerName = useRef(null);
     const excelRowLimit = useRef(1000000);
     const { enqueueSnackbar } = useSnackbar();
+    const [viewType, setViewType] = useState('plain');
 
     // убираем таймер при переключении на другой пункт меню, чтобы не было утечек памяти
     useEffect(() => {
@@ -65,6 +68,15 @@ export default function ReportJob(props){
             }
         }
     }, [timer])
+
+    useEffect(() => {
+        const view = searchParams.get('view');
+        if (view) {
+            setViewType(view)
+        } else {
+            setSearchParams({...searchParams, view: 'plain' })
+        }
+    }, [searchParams]) // eslint-disable-line
 
     function handleJobInfoLoaded(data){
         jobData.current = data;
@@ -114,6 +126,11 @@ export default function ReportJob(props){
         return message
     }
 
+    function handleChangeViewType(value) {
+        setViewType(value)
+        setSearchParams({view: value})
+    }
+
     return (
         <div className={classes.flexDiv}>
             <DataLoader
@@ -141,6 +158,7 @@ export default function ReportJob(props){
 
                 :jobStatus === JobStatus.COMPLETE || jobStatus === JobStatus.EXPORT ?
                     <ReportJobData
+                        viewType = {viewType}
                         jobStatus = {jobStatus}
                         canExecute = {jobData.current.canExecute}
                         reportId = {reportId.current}
@@ -149,6 +167,7 @@ export default function ReportJob(props){
                         jobOwnerName = {jobOwnerName.current}
                         excelRowLimit = {excelRowLimit.current}
                         excelTemplates = {jobData.current.excelTemplates}
+                        changeViewType = {handleChangeViewType}
                         // onRestartReportClick = {handleRestartReportClick}
                     />
 

@@ -10,4 +10,6 @@ WHERE ${filterFieldName()} <#if isCaseSensitive()>(CS)<#else>(NOT CS)</#if> LIKE
 <#elseif likenessType() == "ENDS">
 '%${searchValue()}'
 </#if>
-<#if isCaseSensitive()>(CS)<#else>(NOT CS)</#if>
+<#if isCaseSensitive()>(CS)<#else>(NOT CS)</#if><#--
+-->GROUP BY
+${idFieldName()}, ${codeFieldName()}, ${nameFieldName()};

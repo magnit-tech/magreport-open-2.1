@@ -80,10 +80,10 @@ export default function AppRoutes(props) {
 	return (
 		<AuthProvider>
 			<Routes>
-				<Route path="/login" element={ <LoginPage version={props.version}/> }/>
+				<Route path="/ui/login" element={ <LoginPage version={props.version}/> }/>
 				<Route
 					path="*"
-					element={<Navigate to="/reports" replace />}
+					element={<Navigate to="/ui/reports" replace />}
 				/>
 
 				<Route element = { 
@@ -91,89 +91,89 @@ export default function AppRoutes(props) {
 						<Main version={props.version}/>
 					</RequireAuth> 
 				}>
-					<Route path="/reports" element={<ReportsMenuView/>} />
-					<Route path="/reports/:id" element={<ReportsMenuView/>} />
-					<Route path="/reports/:folderId/add" element={<PublishReportDesigner/>} />
-					<Route path="/favorites" element={<FavoritesMenuView/>} />
-					<Route path="/job" element={<JobsMenuView/>} />
+					<Route path="/ui/reports" element={<ReportsMenuView/>} />
+					<Route path="/ui/reports/:id" element={<ReportsMenuView/>} />
+					<Route path="/ui/reports/:folderId/add" element={<PublishReportDesigner/>} />
+					<Route path="/ui/favorites" element={<FavoritesMenuView/>} />
+					<Route path="/ui/job" element={<JobsMenuView/>} />
 
 					{/********** Администрирование **********/}
-					<Route path="/roles" element={<RolesMenuView/>} />
-					<Route path="/roles/:id" element={<RolesMenuView/>} />
-					<Route path="/roles/:folderId/view/:id" element={<RoleViewer/>} />
-					<Route path="/roles/:folderId/edit/:id" element={<RoleDesigner/>} />
-					<Route path="/roles/:folderId/add" element={<RoleDesigner/>} />
+					<Route path="/ui/roles" element={<RolesMenuView/>} />
+					<Route path="/ui/roles/:id" element={<RolesMenuView/>} />
+					<Route path="/ui/roles/:folderId/view/:id" element={<RoleViewer/>} />
+					<Route path="/ui/roles/:folderId/edit/:id" element={<RoleDesigner/>} />
+					<Route path="/ui/roles/:folderId/add" element={<RoleDesigner/>} />
 
-					<Route path="/users" element={<UserDesigner/>} />
+					<Route path="/ui/users" element={<UserDesigner/>} />
 
-					<Route path="/securityFilters" element={<SecurityFiltersMenuView/>} />
-					<Route path="/securityFilters/:id" element={<SecurityFiltersMenuView/>} />
-					<Route path="/securityFilters/:folderId/view/:id" element={<SecurityFilterViewer/>} />
-					<Route path="/securityFilters/:folderId/edit/:id" element={<SecurityFilterDesigner/>} />
-					<Route path="/securityFilters/:folderId/add" element={<SecurityFilterDesigner/>} />
+					<Route path="/ui/securityFilters" element={<SecurityFiltersMenuView/>} />
+					<Route path="/ui/securityFilters/:id" element={<SecurityFiltersMenuView/>} />
+					<Route path="/ui/securityFilters/:folderId/view/:id" element={<SecurityFilterViewer/>} />
+					<Route path="/ui/securityFilters/:folderId/edit/:id" element={<SecurityFilterDesigner/>} />
+					<Route path="/ui/securityFilters/:folderId/add" element={<SecurityFilterDesigner/>} />
 
-					<Route path="/userJobs" element={<UserJobsMenuView/>} />
+					<Route path="/ui/userJobs" element={<UserJobsMenuView/>} />
 
-					<Route path="/asm" element={<ASMAdministrationMenuView/>} />
-					<Route path="/asm/view/:id" element={<ASMViewer/>} />
-					<Route path="/asm/edit/:id" element={<ASMDesigner/>} />
-					<Route path="/asm/add" element={<ASMDesigner/>} />
+					<Route path="/ui/asm" element={<ASMAdministrationMenuView/>} />
+					<Route path="/ui/asm/view/:id" element={<ASMViewer/>} />
+					<Route path="/ui/asm/edit/:id" element={<ASMDesigner/>} />
+					<Route path="/ui/asm/add" element={<ASMDesigner/>} />
 
-					<Route path="/logs" element={<LogsMenuView/>} />
-					<Route path="/settings" element={<SettingsMenuView/>} /> {/* !!!!!!!! */}
+					<Route path="/ui/logs" element={<LogsMenuView/>} />
+					<Route path="/ui/settings" element={<SettingsMenuView/>} /> {/* !!!!!!!! */}
 
-					<Route path="/systemMailTemplates" element={<ServerMailTemplateMenuView/>} />
-					<Route path="/systemMailTemplates/:id" element={<ServerMailTemplateMenuView/>} />
-					<Route path="/systemMailTemplates/:folderId/view/:id" element={<ServerMailTemplateView/>} />
-					<Route path="/systemMailTemplates/:folderId/edit/:id" element={<ServerMailTemplateDesigner/>} />
+					<Route path="/ui/systemMailTemplates" element={<ServerMailTemplateMenuView/>} />
+					<Route path="/ui/systemMailTemplates/:id" element={<ServerMailTemplateMenuView/>} />
+					<Route path="/ui/systemMailTemplates/:folderId/view/:id" element={<ServerMailTemplateView/>} />
+					<Route path="/ui/systemMailTemplates/:folderId/edit/:id" element={<ServerMailTemplateDesigner/>} />
 
-					<Route path="/mailSender" element={<EmailMenuView/>} />
-					<Route path="/cubes" element={<CubesMenuView/>} />
-					<Route path="/theme" element={<ThemesMenuView/>} />  {/* !!!!!!!! */}
+					<Route path="/ui/mailSender" element={<EmailMenuView/>} />
+					<Route path="/ui/cubes" element={<CubesMenuView/>} />
+					<Route path="/ui/theme" element={<ThemesMenuView/>} />  {/* !!!!!!!! */}
 
 					{/********** Разработка **********/}
-					<Route path="/datasource" element={<DatasourcesMenuView />} />
-					<Route path="/datasource/:id" element={<DatasourcesMenuView/>} />
-					<Route path="/datasource/:folderId/view/:id" element={<DatasourceViewer/>} />
-					<Route path="/datasource/:folderId/edit/:id" element={<DatasourceDesigner/>} />
-					<Route path="/datasource/:folderId/add" element={<DatasourceDesigner/>} />
+					<Route path="/ui/datasource" element={<DatasourcesMenuView />} />
+					<Route path="/ui/datasource/:id" element={<DatasourcesMenuView/>} />
+					<Route path="/ui/datasource/:folderId/view/:id" element={<DatasourceViewer/>} />
+					<Route path="/ui/datasource/:folderId/edit/:id" element={<DatasourceDesigner/>} />
+					<Route path="/ui/datasource/:folderId/add" element={<DatasourceDesigner/>} />
 
-					<Route path="/dataset" element={<DatasetsMenuView/>} />
-					<Route path="/dataset/:id" element={<DatasetsMenuView/>} />
-					<Route path="/dataset/:folderId/view/:id" element={<DatasetViewer/>} />
-					<Route path="/dataset/:folderId/edit/:id" element={<DatasetDesigner/>} />
-					<Route path="/dataset/:folderId/add" element={<DatasetDesigner/>} />
+					<Route path="/ui/dataset" element={<DatasetsMenuView/>} />
+					<Route path="/ui/dataset/:id" element={<DatasetsMenuView/>} />
+					<Route path="/ui/dataset/:folderId/view/:id" element={<DatasetViewer/>} />
+					<Route path="/ui/dataset/:folderId/edit/:id" element={<DatasetDesigner/>} />
+					<Route path="/ui/dataset/:folderId/add" element={<DatasetDesigner/>} />
 
-					<Route path="/filterTemplate" element={<FilterTemplatesMenuView/>} />
-					<Route path="/filterTemplate/:id" element={<FilterTemplatesMenuView/>} />
-					<Route path="/filterTemplate/:folderId/view/:id" element={<FilterTemplatesViewer/>} />
+					<Route path="/ui/filterTemplate" element={<FilterTemplatesMenuView/>} />
+					<Route path="/ui/filterTemplate/:id" element={<FilterTemplatesMenuView/>} />
+					<Route path="/ui/filterTemplate/:folderId/view/:id" element={<FilterTemplatesViewer/>} />
 
-					<Route path="/filterInstance" element={<FilterInstancesMenuView/>} />
-					<Route path="/filterInstance/:id" element={<FilterInstancesMenuView/>} />
-					<Route path="/filterInstance/:folderId/view/:id" element={<FilterInstanceViewer/>} />
-					<Route path="/filterInstance/:folderId/edit/:id" element={<FilterInstanceDesigner/>} />
-					<Route path="/filterInstance/:folderId/add" element={<FilterInstanceDesigner/>} />
+					<Route path="/ui/filterInstance" element={<FilterInstancesMenuView/>} />
+					<Route path="/ui/filterInstance/:id" element={<FilterInstancesMenuView/>} />
+					<Route path="/ui/filterInstance/:folderId/view/:id" element={<FilterInstanceViewer/>} />
+					<Route path="/ui/filterInstance/:folderId/edit/:id" element={<FilterInstanceDesigner/>} />
+					<Route path="/ui/filterInstance/:folderId/add" element={<FilterInstanceDesigner/>} />
 
-					<Route path="/reportsDev" element={<ReportsDevMenuView/>} />
-					<Route path="/reportsDev/:id" element={<ReportsDevMenuView/>} />
-					<Route path="/reportsDev/:folderId/view/:id" element={<ReportDevViewer/>} />
-					<Route path="/reportsDev/:folderId/edit/:id" element={<ReportDevDesigner/>} />
-					<Route path="/reportsDev/:folderId/add" element={<ReportDevDesigner/>} />
+					<Route path="/ui/reportsDev" element={<ReportsDevMenuView/>} />
+					<Route path="/ui/reportsDev/:id" element={<ReportsDevMenuView/>} />
+					<Route path="/ui/reportsDev/:folderId/view/:id" element={<ReportDevViewer/>} />
+					<Route path="/ui/reportsDev/:folderId/edit/:id" element={<ReportDevDesigner/>} />
+					<Route path="/ui/reportsDev/:folderId/add" element={<ReportDevDesigner/>} />
 
 					{/********** Расписание **********/}
-					<Route path="/schedules" element={<SchedulesMenuView/>} />
-					<Route path="/schedules/view/:id" element={<ScheduleViewer/>} />
-					<Route path="/schedules/edit/:id" element={<ScheduleDesigner/>} />
-					<Route path="/schedules/add" element={<ScheduleDesigner/>} />
+					<Route path="/ui/schedules" element={<SchedulesMenuView/>} />
+					<Route path="/ui/schedules/view/:id" element={<ScheduleViewer/>} />
+					<Route path="/ui/schedules/edit/:id" element={<ScheduleDesigner/>} />
+					<Route path="/ui/schedules/add" element={<ScheduleDesigner/>} />
 
-					<Route path="/scheduleTasks" element={<ScheduleTasksMenuView/>} />
-					<Route path="/scheduleTasks/view/:id" element={<ScheduleTasksViewer/>} />
-					<Route path="/scheduleTasks/edit/:id" element={<ScheduleTasksDesigner/>} />
-					<Route path="/scheduleTasks/add" element={<ScheduleTasksDesigner/>} />
+					<Route path="/ui/scheduleTasks" element={<ScheduleTasksMenuView/>} />
+					<Route path="/ui/scheduleTasks/view/:id" element={<ScheduleTasksViewer/>} />
+					<Route path="/ui/scheduleTasks/edit/:id" element={<ScheduleTasksDesigner/>} />
+					<Route path="/ui/scheduleTasks/add" element={<ScheduleTasksDesigner/>} />
 
 					{/********** Отчёт **********/}
-					<Route path="/report/:id" element={<ReportJob/>} />
-					<Route path="/report/starter/:id" element={<ReportStarter/>} />
+					<Route path="/ui/report/:id" element={<ReportJob/>} />
+					<Route path="/ui/report/starter/:id" element={<ReportStarter/>} />
 					
 				</Route>
 

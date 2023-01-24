@@ -28,4 +28,22 @@ class SquareRootExpressionTest {
         assertEquals("2.0", expressionResult.getL());
         assertEquals(DataTypeEnum.DOUBLE, expressionResult.getR());
     }
+
+    @Test
+    void squareRootNullTest() {
+        final var sourceExpression = new FieldExpressionResponse()
+            .setType(Expressions.SQUARE_ROOT)
+            .setParameters(List.of(
+                new FieldExpressionResponse()
+                    .setType(Expressions.CONSTANT_VALUE)
+                    .setConstantType(DataTypeEnum.INTEGER)
+                    .setConstantValue(null)
+            ));
+
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expressionResult = expression.calculate(0);
+
+        assertNull(expressionResult.getL());
+        assertEquals(DataTypeEnum.DOUBLE, expressionResult.getR());
+    }
 }

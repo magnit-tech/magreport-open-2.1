@@ -74,7 +74,7 @@ export default function ServerMailTemplateView() {
                 folderId = {folderId}
                 itemType={FolderItemTypes.systemMailTemplates}
                 disabledPadding={true}
-                onOkClick={() => location.state ? navigate(location.state) : navigate(`/systemMailTemplates/${folderId}`)}
+                onOkClick={() => location.state ? navigate(location.state) : navigate(`/ui/systemMailTemplates/${folderId}`)}
                 pageName={`Просмотр шаблона письма: ${data.name}`}
                 readOnly={!hasRWRight}
             >

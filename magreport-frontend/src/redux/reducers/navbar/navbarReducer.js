@@ -176,7 +176,15 @@ function buildNavigationPathToReportStarter(items, itemsType, name, id) {
         isLast: true,
     }
 
-    const newItems = [...items, newItem];
+    let actualItems = items
+
+    actualItems.forEach((item, index) => {
+        if(item.itemsType === "report/starter") {
+            actualItems = items.slice(0, index)
+        }
+    })
+
+    const newItems = [...actualItems, newItem];
     newItems.slice(0, newItems.length - 1).forEach(i => i.isLast = false);
     return newItems;
 }
