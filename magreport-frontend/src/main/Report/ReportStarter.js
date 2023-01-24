@@ -34,7 +34,7 @@ import {ReportStarterCSS} from "./ReportCSS";
 export default function ReportStarter(props){
     const classes = ReportStarterCSS();
 
-    const {id} = useParams()
+    const {id} = useParams() || props.reportId;
     const navigate = useNavigate();
     const location = useLocation();
     const [searchParams, setSearchParams] = useSearchParams(); // eslint-disable-line
