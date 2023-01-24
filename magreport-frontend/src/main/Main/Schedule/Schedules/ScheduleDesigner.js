@@ -124,7 +124,7 @@ export default function ScheduleDesigner() {
     function handleAddedEdited(magRepResponse) {
         
         if (magRepResponse.ok) {
-            location.state ? navigate(location.state) : navigate(`/schedules`)
+            location.state ? navigate(location.state) : navigate(`/ui/schedules`)
             enqueueSnackbar("Расписание успешно сохранено", {variant : "success"});
         } else {
             setUploading(false);
@@ -143,7 +143,7 @@ export default function ScheduleDesigner() {
         tabcontent: uploading ? <CircularProgress/> :
             <DesignerPage
                 onSaveClick={handleSave}
-                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/schedules`)}
+                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/schedules`)}
             >
                 <DesignerTextField
                     label="Название"

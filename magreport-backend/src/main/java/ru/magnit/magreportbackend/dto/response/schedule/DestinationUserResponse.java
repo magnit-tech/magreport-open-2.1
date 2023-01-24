@@ -30,6 +30,9 @@ public class DestinationUserResponse {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     DestinationTypeEnum type;
 
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER_INT)
+    Long userId;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     String userName;
 

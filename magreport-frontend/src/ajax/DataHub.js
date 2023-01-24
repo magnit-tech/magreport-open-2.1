@@ -44,8 +44,9 @@ function DataHub(){
         unautorizedHandler
     */
     
-    this.setUnautorizedHandler = (unautorizedHandler) => {
-        this.unautorizedHandler = unautorizedHandler;
+    this.setUnautorizedHandler = () => {
+        localStorage.removeItem('userData')
+        window.location.reload();
     }
     /*
         Логин
@@ -129,12 +130,12 @@ function DataHub(){
                     );
                 }
                 else{
-                    if(response.status === 401){
-                        if (this.unautorizedHandler){
-                            this.unautorizedHandler(); //!!!!!
-                        }
+                    if(response.status === 401 ){
+                        this.setUnautorizedHandler();
                     }
-                    else {
+                    else if(response.status === 403) {
+                        callback(new MagrepResponse(false, "Запрос не выполнен. Просьба авторизоваться повторно."));
+                    } else {
                         callback(new MagrepResponse(false, "Request failed. Response status: " + response.status, requestId));
                     }
                 }
@@ -206,9 +207,7 @@ function DataHub(){
                 }
                 else{
                     if(response.status === 401){
-                        if (this.unautorizedHandler){
-                            this.unautorizedHandler();
-                        }
+                        this.setUnautorizedHandler();
                     }
                     else {
                         response.json().then(json => {

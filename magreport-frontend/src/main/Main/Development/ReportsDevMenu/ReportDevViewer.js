@@ -15,6 +15,7 @@ import PageTabs from 'components/PageTabs/PageTabs';
 import DataLoader from 'main/DataLoader/DataLoader';
 import {ViewerCSS} from "main/Main/Development/Viewer/ViewerCSS";
 import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
+import {sortByOrdinal } from "./reportFunctions";
 
 // dataHub
 import dataHub from 'ajax/DataHub';
@@ -56,12 +57,14 @@ function ReportDevViewer({actionLoaded = f=>f, actionLoadedFailed = f=>f, viewIt
 
     const [data, setData] = useState({});
     const [dataSet, setDataSet] = useState({});
+    const [fieldValues, setFieldValues] = useState(null);
 
     function handleDataLoaded(loadedData) {
         setData({
             ...data,
             ...loadedData,
         });
+        setFieldValues(sortByOrdinal(loadedData.fields));
         viewItemNavbar('reportsDev', loadedData.name, id, folderId, loadedData.path)
     }
 
@@ -116,7 +119,7 @@ function ReportDevViewer({actionLoaded = f=>f, actionLoadedFailed = f=>f, viewIt
         tabcontent:
             <div className={classes.viewerTabPage}>
                 <ReportFieldsViewer
-                    fields={data.fields || []}
+                    fields={fieldValues}
                     dataSet={dataSet}
                 />
             </div>
@@ -169,7 +172,7 @@ function ReportDevViewer({actionLoaded = f=>f, actionLoadedFailed = f=>f, viewIt
                     id={data.id}
                     folderId = {folderId}
                     itemType={FolderItemTypes.reportsDev}
-                    onOkClick={() => location.state ? navigate(location.state) : navigate(`/reportsDev/${folderId}`)}
+                    onOkClick={() => location.state ? navigate(location.state) : navigate(`/ui/reportsDev/${folderId}`)}
                     disabledPadding={true}
                 >
                     <PageTabs

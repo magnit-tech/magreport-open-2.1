@@ -4,7 +4,6 @@ import { ViewerCSS } from './ViewerCSS';
 
 import { Link } from "react-router-dom";
 
-
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import CardHeader from "@material-ui/core/CardHeader";
@@ -61,7 +60,7 @@ export default function ViewerChildCard(props) {
             subheader={itemTypeName}
             action={
                 <Link 
-                    to={`/${props.itemType}${props.parentFolderId ? `/${props.parentFolderId}/view/${props.id}` : `/${props.id}`}`} 
+                    to={`/ui/${props.itemType}${props.parentFolderId ? `/${props.parentFolderId}/view/${props.id}` : `/${props.id}`}`} 
                     target="_blank" 
                     rel="noopener noreferrer"
                 >

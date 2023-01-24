@@ -138,7 +138,7 @@ export default function DatasetViewer() {
                     folderId = {folderId}
                     itemType={FolderItemTypes.dataset}
                     disabledPadding={true}
-                    onOkClick={() => location.state ? navigate(location.state) : navigate(`/dataset/${folderId}`)}
+                    onOkClick={() => location.state ? navigate(location.state) : navigate(`/ui/dataset/${folderId}`)}
                     readOnly={!hasRWRight}
                 >
                     <PageTabs

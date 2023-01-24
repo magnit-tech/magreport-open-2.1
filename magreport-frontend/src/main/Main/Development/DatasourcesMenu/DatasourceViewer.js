@@ -106,7 +106,7 @@ function DatasourceViewer(props) {
                 folderId = {folderId}
                 itemType={FolderItemTypes.datasource}
                 disabledPadding={true}
-                onOkClick={() => location.state ? navigate(location.state) : navigate(`/datasource/${folderId}`)}
+                onOkClick={() => location.state ? navigate(location.state) : navigate(`/ui/datasource/${folderId}`)}
                 pageName = {`Просмотр источника данных: ${data.name}`}
                 readOnly={!hasRWRight}
             >

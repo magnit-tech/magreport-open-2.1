@@ -14,6 +14,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import java.io.Serial;
 import java.time.LocalDateTime;
 
 @Entity(name = "REPORT_FOLDER_ROLE_PERMISSION")
@@ -25,6 +26,7 @@ import java.time.LocalDateTime;
 @AttributeOverride(name = "id", column = @Column(name = "REPORT_FOLDER_ROLE_PERMISSION_ID"))
 public class ReportFolderRolePermission extends BaseEntity {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public ReportFolderRolePermission(Long id) {

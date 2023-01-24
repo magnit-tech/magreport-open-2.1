@@ -97,6 +97,9 @@ public class JobDomainService {
     @Value("${magreport.reports.rms-out-folder}")
     private String rmsOutFolder;
 
+    @Value("${magreport.reports.decrypt-out-folder}")
+    private String decryptOutFolder;
+
     @Value("${magreport.jobengine.clean-rms-out-folder}")
     private Boolean clearRmsOutFolder;
 
@@ -285,20 +288,27 @@ public class JobDomainService {
             }
         });
 
+        List<Path> removeFiles = new ArrayList<>();
+
         if (Boolean.TRUE.equals(clearRmsOutFolder)) {
-            var removeFiles = Arrays.stream(Objects.requireNonNull(new File(FileUtils.replaceHomeShortcut(rmsOutFolder))
+             removeFiles.addAll(Arrays.stream(Objects.requireNonNull(new File(FileUtils.replaceHomeShortcut(rmsOutFolder))
                             .listFiles()))
                     .filter(file -> new Date(file.lastModified()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().isBefore(LocalDateTime.now().minusHours(jobRetentionTime)))
-                    .map(file -> Path.of(file.getAbsolutePath())).toList();
-
-            removeFiles.forEach(file -> {
-                try {
-                    Files.deleteIfExists(file);
-                } catch (IOException ex) {
-                    throw new FileSystemException("Error trying to delete report file for name:" + file.getFileName(), ex);
-                }
-            });
+                    .map(file -> Path.of(file.getAbsolutePath())).toList());
         }
+
+        removeFiles.addAll(Arrays.stream(Objects.requireNonNull(new File(FileUtils.replaceHomeShortcut(decryptOutFolder)).listFiles()))
+                .filter(file -> new Date(file.lastModified()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().isBefore(LocalDateTime.now().minusHours(24)))
+                .map(file -> Path.of(file.getAbsolutePath())).toList());
+
+        removeFiles.forEach(file -> {
+            try {
+                Files.deleteIfExists(file);
+            } catch (IOException ex) {
+                throw new FileSystemException("Error trying to delete report file for name:" + file.getFileName(), ex);
+            }
+        });
+
         repository.deleteAll(oldJobs);
         log.debug("Clearing of the old job data complete");
     }
@@ -409,17 +419,22 @@ public class JobDomainService {
     }
 
     private void saveStats(ReportJob job) {
-        var jobStats = new ReportJobStatistics()
-                .setReportJob(new ReportJob(job.getId()))
-                .setReport(new Report(job.getReport().getId()))
-                .setUser(new User(job.getUser().getId()))
-                .setRowCount(job.getRowCount())
-                .setStatus(job.getStatus())
-                .setState(job.getState())
-                .setExportExcelCount(0L)
-                .setOlapRequestCount(0L)
-                .setIsShare(false);
 
-        statisticsRepository.save(jobStats);
+        var lastRecord = statisticsRepository.getLastRecord(job.getId());
+
+        if (lastRecord != null && lastRecord.getStatus().equals(job.getStatus())) return;
+
+            var jobStats = new ReportJobStatistics()
+                    .setReportJob(new ReportJob(job.getId()))
+                    .setReport(new Report(job.getReport().getId()))
+                    .setUser(new User(job.getUser().getId()))
+                    .setRowCount(job.getRowCount())
+                    .setStatus(job.getStatus())
+                    .setState(job.getState())
+                    .setExportExcelCount(0L)
+                    .setOlapRequestCount(0L)
+                    .setIsShare(false);
+
+            statisticsRepository.save(jobStats);
     }
 }

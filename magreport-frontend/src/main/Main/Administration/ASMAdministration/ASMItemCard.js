@@ -86,11 +86,11 @@ function ASMItemCard(props) {
 
     //event handlers
     function handleViewButtonClick() {
-        navigate(`/asm/view/${id}`)
+        navigate(`/ui/asm/view/${id}`)
     }
 
     function handleEditButtonClick() {
-        navigate(`/asm/edit/${id}`)
+        navigate(`/ui/asm/edit/${id}`)
     }
 
     function handleDeleteButtonClick() {
