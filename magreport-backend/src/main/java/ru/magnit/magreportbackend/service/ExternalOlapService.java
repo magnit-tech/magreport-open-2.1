@@ -17,6 +17,8 @@ import ru.magnit.magreportbackend.dto.response.olap.OlapCubeResponse;
 import ru.magnit.magreportbackend.dto.response.olap.OlapFieldItemsResponse;
 import ru.magnit.magreportbackend.exception.OlapExternalServiceException;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
+import ru.magnit.magreportbackend.service.domain.OlapUserChoiceDomainService;
+import ru.magnit.magreportbackend.service.domain.UserDomainService;
 
 import java.util.Comparator;
 import java.util.List;
@@ -28,13 +30,18 @@ public class ExternalOlapService {
     private final JobDomainService jobDomainService;
     private final RestTemplate restTemplate;
     private final ExternalOlapManager externalOlapManager;
+    private final OlapUserChoiceDomainService olapUserChoiceDomainService;
+    private final UserDomainService userDomainService;
 
     public OlapCubeResponse getCube(OlapCubeRequest request) {
+        var currentUser = userDomainService.getCurrentUser();
         jobDomainService.checkAccessForJob(request.getJobId());
 
         jobDomainService.updateJobStats(request.getJobId(), false, true, false);
 
         var jobData = jobDomainService.getJobData(request.getJobId());
+        olapUserChoiceDomainService.setOlapUserChoice(jobData.reportId(), currentUser.getId(), true);
+
         var outRequest = new OlapCubeOutRequest()
             .setJobId(request.getJobId())
             .setCubeSize(jobData.rowCount())

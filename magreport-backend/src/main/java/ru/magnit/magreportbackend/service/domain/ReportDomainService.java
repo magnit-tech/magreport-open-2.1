@@ -478,6 +478,12 @@ public class ReportDomainService {
             .anyMatch(frp -> frp.getAuthority().getEnum() == targetAuthority);
     }
 
+    @Transactional
+    public boolean checkValidField(Long reportId){
+        var reportField = reportFieldRepository.findById(reportId).orElseThrow();
+        return reportField.getDataSetField().getIsSync();
+    }
+
     private ReportFolder copyFolder(ReportFolder originalFolder, ReportFolder parentFolder, User currentUser, List<ReportFolderRole> destParentFolderRoles) {
 
         var folderCopy = reportFolderCloner.clone(originalFolder);

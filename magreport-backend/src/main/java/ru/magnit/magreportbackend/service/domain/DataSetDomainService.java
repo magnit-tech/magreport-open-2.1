@@ -433,6 +433,12 @@ public class DataSetDomainService {
         return folderCopyIds;
     }
 
+    @Transactional
+    public Boolean checkSyncDatasetField(Long datasetFieldId){
+        var datasetField = dataSetFieldRepository.findById(datasetFieldId).orElseThrow();
+        return datasetField.getIsSync();
+    }
+
     private DataSetFolder copyFolder(DataSetFolder originalFolder, DataSetFolder parentFolder, User currentUser, List<DataSetFolderRole> destParentFolderRoles) {
 
         var folderCopy = dataSetFolderCloner.clone(originalFolder);
