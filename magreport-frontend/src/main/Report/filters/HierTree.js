@@ -319,8 +319,9 @@ function Tree(classes, filterData, onUpdateData, onCheckedChange, strict, checkS
                         // ситуация, что этот узел уже был добавлен ранее невозможна. Но на всякий случай проверяем.
                         let childNode = this.getNode(treeNodeId);
                         if(childNode === undefined){
-                            this.addNode(new TreeNode(this.classes, path[cnt - 1], cnt - 1, "?", this.CODEfields[cnt - 2].id, parent, 
-                                                        (this.maxLevel === cnt - 1), 1, this.IDfields[cnt - 2].expand, this.onCheckedChange, this.onUpdateData, this.loadNodeChildren, null, readOnly ));
+                            childNode = new TreeNode(this.classes, path[cnt - 1], cnt - 1, "?", this.CODEfields[cnt - 2].id, parent, 
+                                (this.maxLevel === cnt - 1), 1, this.IDfields[cnt - 2].expand, this.onCheckedChange, this.onUpdateData, this.loadNodeChildren, null, readOnly );
+                            this.addNode(childNode)
                         }
                         else{
                             childNode.setChecked(1);
