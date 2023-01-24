@@ -61,4 +61,7 @@ public class ReportJobResponse {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     String comment;
+
+    @JsonFormat(shape = JsonFormat.Shape.BOOLEAN)
+    Boolean olapLastUserChoice;
 }

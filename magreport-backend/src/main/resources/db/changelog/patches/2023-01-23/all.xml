@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="ADD-OLAP-USER-CHOICE-001" author="vyushin_aa">
+
+        <preConditions>
+            <not>
+                <sequenceExists schemaName="REPOSITORY" sequenceName="OLAP_USER_CHOICE_SEQ"/>
+            </not>
+        </preConditions>
+        <createSequence schemaName="REPOSITORY" sequenceName="OLAP_USER_CHOICE_SEQ"/>
+
+    </changeSet>
+
+
+    <changeSet id="ADD-OLAP-USER-CHOICE-002" author="vyushin_aa">
+
+        <preConditions>
+            <not>
+                <tableExists schemaName="REPOSITORY" tableName="OLAP_USER_CHOICE"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="OLAP_USER_CHOICE">
+            <column name="OLAP_USER_CHOICE_ID" type="INT" defaultValueSequenceNext="OLAP_USER_CHOICE_SEQ">
+                <constraints primaryKey="true" primaryKeyName="OLAP_USER_CHOICE_PK"/>
+            </column>
+
+            <column name="REPORT_ID" type="INT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="USER_ID" type="INT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="IS_LAST_USER_CHOICE" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="CREATED" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="MODIFIED" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="ADD-OLAP-USER-CHOICE-003" author="vyushin_aa">
+        <preConditions>
+            <not>
+                <indexExists indexName="OLAP_USER_CHOICE_USER_ID_REPORT_ID_INDEX"/>
+            </not>
+        </preConditions>
+
+        <createIndex schemaName="REPOSITORY" tableName="OLAP_USER_CHOICE"
+                     indexName="OLAP_USER_CHOICE_USER_ID_REPORT_ID_INDEX">
+            <column name="REPORT_ID"/>
+            <column name="USER_ID"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="ADD-OLAP-USER-CHOICE-004" author="vyushin_aa">
+
+        <preConditions>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK-OLAP_USER_CHOICE-REPORT"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="REPORT_ID" baseTableName="OLAP_USER_CHOICE"
+                                 constraintName="FK-OLAP_USER_CHOICE-REPORT"
+                                 deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="REPORT_ID" referencedTableName="REPORT"/>
+    </changeSet>
+
+    <changeSet id="ADD-OLAP-USER-CHOICE-005" author="vyushin_aa">
+
+    <preConditions>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK-OLAP_USER_CHOICE-USERS"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="USER_ID" baseTableName="OLAP_USER_CHOICE"
+                                 constraintName="FK-OLAP_USER_CHOICE-USERS"
+                                 deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="USER_ID" referencedTableName="USERS"/>
+    </changeSet>
+
+</databaseChangeLog>
