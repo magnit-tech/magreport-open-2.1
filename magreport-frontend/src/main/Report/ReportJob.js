@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSnackbar } from 'notistack';
 
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useParams, useSearchParams, useLocation, useNavigate } from 'react-router-dom'
 
 import { useDispatch } from 'react-redux';
 import { addReportNavbar } from "redux/actions/navbar/actionNavbar";
@@ -44,6 +44,9 @@ export default function ReportJob(props){
 
     const { id } = useParams()
     const [searchParams, setSearchParams] = useSearchParams();
+
+    const navigate = useNavigate()
+    const location = useLocation()
 
     const dispatch = useDispatch()
 
@@ -109,9 +112,9 @@ export default function ReportJob(props){
         }
     }
 
-    // function handleRestartReportClick(){
-    //     props.onRestartReportClick(jobData.current.report.id, jobData.current.id);
-    // }
+    function handleRestartReportClick(){
+        navigate(`/ui/report/starter/${jobData.current.report.id}?jobId=${jobData.current.id}`, {state: location.pathname})
+    }
 
     function setCustomErrorMessage(){
 
@@ -168,7 +171,7 @@ export default function ReportJob(props){
                         excelRowLimit = {excelRowLimit.current}
                         excelTemplates = {jobData.current.excelTemplates}
                         changeViewType = {handleChangeViewType}
-                        // onRestartReportClick = {handleRestartReportClick}
+                        onRestartReportClick = {handleRestartReportClick}
                     />
 
                 :jobStatus === JobStatus.CANCELING ?
