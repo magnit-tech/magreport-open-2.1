@@ -23,6 +23,7 @@ public class FilterReportRestoreMapper implements Mapper<FilterReport, FilterRep
                 .setMandatory(source.isMandatory())
                 .setRootSelectable(source.isRootMandatory())
                 .setGroup(new FilterReportGroup(source.filterReportGroupId()))
-                .setFilterInstance(new FilterInstance(source.filterInstanceId()));
+                .setFilterInstance(new FilterInstance(source.filterInstanceId()))
+                .setMaxCountItems(source.maxCountItems());
     }
 }

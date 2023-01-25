@@ -8,12 +8,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
+import ru.magnit.magreportbackend.domain.filtertemplate.FilterTypeEnum;
 import ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum;
 import ru.magnit.magreportbackend.dto.inner.RoleView;
 import ru.magnit.magreportbackend.dto.inner.jobengine.CacheRow;
 import ru.magnit.magreportbackend.dto.inner.jobengine.ReportRunnerData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportJobData;
+import ru.magnit.magreportbackend.dto.inner.reportjob.ReportJobTupleData;
 import ru.magnit.magreportbackend.dto.request.reportjob.ExcelReportRequest;
+import ru.magnit.magreportbackend.exception.InvalidParametersException;
 import ru.magnit.magreportbackend.mapper.reportjob.ReportReaderDataMerger;
 import ru.magnit.magreportbackend.mapper.reportjob.ReportWriterDataMerger;
 import ru.magnit.magreportbackend.service.ReportJobService;
@@ -28,6 +31,7 @@ import ru.magnit.magreportbackend.service.jobengine.JobEngine;
 import ru.magnit.magreportbackend.service.jobengine.ReportReaderFactory;
 import ru.magnit.magreportbackend.service.jobengine.ReportWriterFactory;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -131,6 +135,8 @@ public class JobEngineImpl implements JobEngine, InitializingBean {
             filterReportDomainService.decodeFieldsValues(scheduledJob);
 
             getSecurityFilterSettings(scheduledJob);
+
+            checkCountItemFilters(scheduledJob);
 
             if (PROCEDURE.equalsIsLong(scheduledJob.dataSetTypeId()))
                 exportDataInExternalTableDomainService.exportData(scheduledJob);
@@ -271,6 +277,42 @@ public class JobEngineImpl implements JobEngine, InitializingBean {
     private void sendMessageToUser(Long idJob) {
         var job = jobDomainService.getJob(idJob);
         stompMessageService.sendReportStatus(job.getUser().name(), job);
+    }
+
+    private void checkCountItemFilters(ReportJobData reportJobData) {
+
+        reportJobData.parameters().stream()
+                .filter(f ->
+                        f.filterType().equals(FilterTypeEnum.TOKEN_INPUT) || f.filterType().equals(FilterTypeEnum.VALUE_LIST) ||
+                                f.filterType().equals(FilterTypeEnum.VALUE_LIST_UNBOUNDED) || f.filterType().equals(FilterTypeEnum.DATE_RANGE))
+                .forEach(f -> {
+
+                    if (f.maxCountItems() == null) return;
+
+                    var currentCountItems = 0L;
+                    for (ReportJobTupleData reportJobTupleData : f.fieldValues()) {
+                        long size = reportJobTupleData.fieldValues().size();
+                        currentCountItems += size;
+                    }
+
+                    if (f.maxCountItems() >= currentCountItems && !f.filterType().equals(FilterTypeEnum.DATE_RANGE)) {
+                        throw new InvalidParametersException(String.format("Превышен лимит количества элементов в фильтре '%s': %s", f.filterName(), f.maxCountItems()));
+                    }
+
+                    if (f.filterType().equals(FilterTypeEnum.DATE_RANGE)) {
+
+                        f.fieldValues().forEach(field -> {
+                            var date1 = LocalDate.parse(field.fieldValues().get(0).value()).plusDays(f.maxCountItems());
+                            var date2 = LocalDate.parse(field.fieldValues().get(1).value());
+
+                            if (date1.isBefore(date2)) {
+                                throw new InvalidParametersException(String.format("Превышен лимит диапазона дат в фильтре '%s': %s", f.filterName(), f.maxCountItems()));
+                            }
+
+                        });
+                    }
+                });
+
     }
 
 }

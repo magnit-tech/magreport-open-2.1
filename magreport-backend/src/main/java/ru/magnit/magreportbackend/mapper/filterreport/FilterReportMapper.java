@@ -24,7 +24,8 @@ public class FilterReportMapper implements Mapper<FilterReport, FilterAddRequest
                 .setHidden(source.getHidden())
                 .setRootSelectable(source.getRootSelectable())
                 .setFilterInstance(new FilterInstance(source.getFilterInstanceId()))
-                .setFields(fieldMapper.from(source.getFields()));
+                .setFields(fieldMapper.from(source.getFields()))
+                .setMaxCountItems(source.getMaxCountItems());
         filterReport.getFields().forEach(field -> field.setFilterReport(filterReport));
 
         return filterReport;
