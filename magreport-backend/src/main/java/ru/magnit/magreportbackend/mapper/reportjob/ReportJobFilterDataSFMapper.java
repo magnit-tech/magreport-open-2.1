@@ -25,6 +25,8 @@ public class ReportJobFilterDataSFMapper implements Mapper<ReportJobFilterData, 
             FilterTypeEnum.getByOrdinal(source.getSecurityFilter().getFilterInstance().getFilterTemplate().getType().getId()),
             FilterOperationTypeEnum.IS_IN_LIST,
             source.getSecurityFilter().getFilterInstance().getCode(),
+            null,
+            source.getSecurityFilter().getName(),
             tupleDataSFMapper.from(source.getFilterRoleTuples())
         );
     }
