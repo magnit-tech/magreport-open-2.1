@@ -89,7 +89,7 @@ export default function FieldData(fieldData){
                                 generatedData = Number(generatedData) * 100
                             }
 
-                            if (item.rounding) {
+                            if (item.rounding || item.rounding === 0) {
                                 generatedData = Number(generatedData).toFixed(item.rounding)
                             }
 
