@@ -61,7 +61,7 @@ export default function ReportJob(props){
     const jobOwnerName = useRef(null);
     const excelRowLimit = useRef(1000000);
     const { enqueueSnackbar } = useSnackbar();
-    const [viewType, setViewType] = useState('plain');
+    const [viewType, setViewType] = useState(null);
 
     // убираем таймер при переключении на другой пункт меню, чтобы не было утечек памяти
     useEffect(() => {
@@ -82,6 +82,10 @@ export default function ReportJob(props){
     }, [searchParams]) // eslint-disable-line
 
     function handleJobInfoLoaded(data){
+        let v = data.olapLastUserChoice ? 'pivot' : 'plain';
+        setViewType(v);
+        setSearchParams({...searchParams, view: v });
+
         jobData.current = data;
         reportId.current = data.report.id;
         folderId.current = data.report.folderId;
@@ -150,7 +154,7 @@ export default function ReportJob(props){
             {
                 jobStatus === JobStatus.UNDEFINED ?
                     
-                        <CircularProgress/>
+                    <CircularProgress/>
 
                 :jobStatus === JobStatus.SCHEDULED || jobStatus === JobStatus.RUNNING || jobStatus === JobStatus.PENDING_DB_CONNECTION ?
                     <div className={classes.repExec}>
