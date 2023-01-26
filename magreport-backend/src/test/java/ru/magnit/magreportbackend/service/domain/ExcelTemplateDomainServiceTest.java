@@ -35,6 +35,7 @@ import ru.magnit.magreportbackend.repository.ReportExcelTemplateRepository;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -278,7 +279,7 @@ class ExcelTemplateDomainServiceTest {
     void getTemplatePathForReport() {
 
         ReflectionTestUtils.setField(domainService, "templatesPath", "");
-        when(reportExcelTemplateRepository.getTopByReportIdAndIsDefaultIsTrue(anyLong())).thenReturn(new ReportExcelTemplate().setExcelTemplate(new ExcelTemplate().setId(ID)));
+        when(reportExcelTemplateRepository.getTopByReportIdAndIsDefaultIsTrue(anyLong())).thenReturn(Optional.ofNullable(new ReportExcelTemplate().setExcelTemplate(new ExcelTemplate().setId(ID))));
 
         assertNotNull(domainService.getTemplatePathForReport(ID, null));
 
