@@ -58,10 +58,10 @@ function ReportsMenuView(props){
                     onEditFolderClick = {(folderId, name, description) => {props.actionEditFolder(folderItemsType, state.currentFolderData.id, folderId, name, description)}}
                     // onEditItemClick = {(reportId) => {props.actionEditItemClick(folderItemsType, reportId)}}
                     onDeleteFolderClick = {(folderId) => {props.actionDeleteFolderClick(folderItemsType, state.currentFolderData.id, folderId)}}
-                    onDeleteItemClick = {(reportId) => {props.actionDeleteItemClick(folderItemsType, state.currentFolderId, reportId)}}
-                    onSearchClick ={searchParams => {props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)}}
+                    onDeleteItemClick = {(reportId) => {props.actionDeleteItemClick(folderItemsType, state.currentFolderData.id, reportId)}}
+                    onSearchClick ={searchParams => {props.actionSearchClick(folderItemsType, state.currentFolderData.id, searchParams)}}
                     onAddDeleteFavorites = {(index, folderId, reportId, isFavorite) => props.actionAddDeleteFavorites(folderItemsType, index, folderId, reportId, isFavorite, enqueueSnackbar)}
-                    onSortClick ={sortParams => {props.actionSortClick(folderItemsType, state.currentFolderId, sortParams)}}
+                    onSortClick ={sortParams => {props.actionSortClick(folderItemsType, state.currentFolderData.id, sortParams)}}
                     contextAllowed
                     copyAndMoveAllowed
                     copyAndMoveAllowedForReport

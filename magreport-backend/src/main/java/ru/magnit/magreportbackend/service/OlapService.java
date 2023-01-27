@@ -39,6 +39,7 @@ import ru.magnit.magreportbackend.service.domain.ExcelReportDomainService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
 import ru.magnit.magreportbackend.service.domain.OlapConfigurationDomainService;
 import ru.magnit.magreportbackend.service.domain.OlapDomainService;
+import ru.magnit.magreportbackend.service.domain.OlapUserChoiceDomainService;
 import ru.magnit.magreportbackend.service.domain.TokenService;
 import ru.magnit.magreportbackend.service.domain.UserDomainService;
 import ru.magnit.magreportbackend.util.Extensions;
@@ -82,8 +83,9 @@ public class OlapService {
     private final DerivedFieldService derivedFieldService;
     private final ObjectMapper objectMapper;
     private final TokenService tokenService;
-
+    private final OlapUserChoiceDomainService olapUserChoiceDomainService;
     public OlapCubeResponse getCube(OlapCubeRequest request) {
+        var currentUser = userDomainService.getCurrentUser();
         jobDomainService.checkAccessForJob(request.getJobId());
 
         jobDomainService.updateJobStats(request.getJobId(), false, true, false);
@@ -93,6 +95,8 @@ public class OlapService {
         final var jobData = jobDomainService.getJobData(request.getJobId());
         var endTime = System.currentTimeMillis() - startTime;
         log.debug("Job data acquired: " + endTime);
+
+        olapUserChoiceDomainService.setOlapUserChoice(jobData.reportId(), currentUser.getId(), true);
 
         startTime = System.currentTimeMillis();
         final var sourceCube = olapDomainService.getCubeData(jobData);
@@ -747,6 +751,7 @@ public class OlapService {
     }
 
     public OlapCubeResponse getCubeNew(OlapCubeRequestNew request) {
+        var currentUser = userDomainService.getCurrentUser();
         jobDomainService.checkAccessForJob(request.getJobId());
 
         jobDomainService.updateJobStats(request.getJobId(), false, true, false);
@@ -756,6 +761,8 @@ public class OlapService {
         final var jobData = jobDomainService.getJobData(request.getJobId());
         var endTime = System.currentTimeMillis() - startTime;
         log.debug("Job data acquired: " + endTime);
+
+        olapUserChoiceDomainService.setOlapUserChoice(jobData.reportId(), currentUser.getId(), true);
 
         startTime = System.currentTimeMillis();
         var sourceCube = olapDomainService.getCubeData(jobData);

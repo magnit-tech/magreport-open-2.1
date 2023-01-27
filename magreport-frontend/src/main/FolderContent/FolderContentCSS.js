@@ -1,6 +1,6 @@
 import { withStyles, makeStyles, alpha } from '@material-ui/core/styles';
 import Slider from '@material-ui/core/Slider';
-//import StyleConsts from '../../StyleConsts';
+import StyleConsts from '../../StyleConsts';
 
 export const FolderContentCSS = makeStyles(theme => ({
     relative: {
@@ -49,6 +49,12 @@ export const FolderContentCSS = makeStyles(theme => ({
         margin: '20px',
         zIndex: 2,
         paddingTop: '25px'
+    },
+    filterBtnTop: {
+        top: '36px'
+    },
+    filterBtnTopHollyday: {
+        top: '110px'
     },
     badge: {
         zIndex: 100,
@@ -104,10 +110,14 @@ export const FolderContentCSS = makeStyles(theme => ({
         padding: '3px',
         position: 'fixed',
         right: '30px',
-        top: '120px', //StyleConsts.headerHeight ,
         zIndex: 100
-  },
-  
+    }, 
+    openSearchBtnHeight: {
+        top: StyleConsts.headerHeight
+    },
+    openSearchBtnHeightHollyday: {
+        top: StyleConsts.headerHeightHollyday
+    }  
 }));
 
 
