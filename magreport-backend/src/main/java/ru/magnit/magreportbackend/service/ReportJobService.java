@@ -163,15 +163,15 @@ public class ReportJobService {
         final var currentParameters = request.getParameters();
         final var currentUser = userDomainService.getCurrentUser();
         final var activeJobs = jobDomainService.getActiveJobs(
-            request.getReportId(),
-            currentUser.getId(),
-            List.of(
-                ReportJobStatusEnum.RUNNING.getId(),
-                ReportJobStatusEnum.EXPORT.getId(),
-                ReportJobStatusEnum.CANCELING.getId(),
-                ReportJobStatusEnum.PENDING_DB_CONNECTION.getId(),
-                ReportJobStatusEnum.SCHEDULED.getId()
-            )
+                request.getReportId(),
+                currentUser.getId(),
+                List.of(
+                        ReportJobStatusEnum.RUNNING.getId(),
+                        ReportJobStatusEnum.EXPORT.getId(),
+                        ReportJobStatusEnum.CANCELING.getId(),
+                        ReportJobStatusEnum.PENDING_DB_CONNECTION.getId(),
+                        ReportJobStatusEnum.SCHEDULED.getId()
+                )
         );
         activeJobs.forEach(job -> {
             final var jobParameters = jobDomainService.getJobParameters(job.getId());
@@ -229,33 +229,33 @@ public class ReportJobService {
     private void checkDateParameters(ReportJobAddRequest request, ReportResponse report) {
         final var datePattern = "\\d{4}-\\d{2}-\\d{2}";
         final var checkResult = report
-            .getAllFilters()
-            .stream()
-            .filter(filter -> filter.type() == FilterTypeEnum.DATE_RANGE || filter.type() == FilterTypeEnum.DATE_VALUE)
-            .allMatch(filter -> request
-                .getParameters()
+                .getAllFilters()
                 .stream()
-                .filter(param -> param.getFilterId().equals(filter.id()))
-                .flatMap(param -> param.getParameters().stream())
-                .flatMap(tuple -> tuple.getValues().stream())
-                .allMatch(value -> value.getValue().matches(datePattern))
-            );
+                .filter(filter -> filter.type() == FilterTypeEnum.DATE_RANGE || filter.type() == FilterTypeEnum.DATE_VALUE)
+                .allMatch(filter -> request
+                        .getParameters()
+                        .stream()
+                        .filter(param -> param.getFilterId().equals(filter.id()))
+                        .flatMap(param -> param.getParameters().stream())
+                        .flatMap(tuple -> tuple.getValues().stream())
+                        .allMatch(value -> value.getValue().matches(datePattern))
+                );
         if (!checkResult) throw new InvalidParametersException("Неправильный формат даты в параметрах");
     }
 
     private void stripEmptyFilters(ReportJobAddRequest request) {
 
         request
-            .getParameters()
-            .removeIf(parameter -> Objects.isNull(parameter.getParameters()));
+                .getParameters()
+                .removeIf(parameter -> Objects.isNull(parameter.getParameters()));
 
         request
-            .getParameters()
-            .removeIf(parameter -> parameter.getParameters().isEmpty());
+                .getParameters()
+                .removeIf(parameter -> parameter.getParameters().isEmpty());
 
         request
-            .getParameters()
-            .removeIf(parameter -> parameter.getParameters().stream().mapToLong(tuple -> tuple.getValues().size()).sum() == 0);
+                .getParameters()
+                .removeIf(parameter -> parameter.getParameters().stream().mapToLong(tuple -> tuple.getValues().size()).sum() == 0);
 
 
     }
@@ -264,18 +264,18 @@ public class ReportJobService {
         final var allFilters = report.getAllFilters();
 
         allFilters
-            .stream()
-            .filter(FilterReportResponse::mandatory)
-            .forEach(filter -> {
-                if (request.getParameters().stream().noneMatch(o -> o.getFilterId().equals(filter.id())))
-                    throw new InvalidParametersException(ERROR_TEXT_HEADER + filter.id() + " '" + filter.name() + ERROR_TEXT_FOOTER);
-                if (filter.type() == FilterTypeEnum.VALUE_LIST) {
-                    final var paramValues = request.getParameters().stream().filter(params -> params.getFilterId().equals(filter.id())).findFirst().orElseThrow(() -> new InvalidParametersException(ERROR_TEXT_HEADER + filter.id() + " '" + filter.name() + ERROR_TEXT_FOOTER));
-                    final var values = filterReportDomainService.getCleanedValueListValues(paramValues);
-                    if (values.isEmpty())
+                .stream()
+                .filter(FilterReportResponse::mandatory)
+                .forEach(filter -> {
+                    if (request.getParameters().stream().noneMatch(o -> o.getFilterId().equals(filter.id())))
                         throw new InvalidParametersException(ERROR_TEXT_HEADER + filter.id() + " '" + filter.name() + ERROR_TEXT_FOOTER);
-                }
-            });
+                    if (filter.type() == FilterTypeEnum.VALUE_LIST) {
+                        final var paramValues = request.getParameters().stream().filter(params -> params.getFilterId().equals(filter.id())).findFirst().orElseThrow(() -> new InvalidParametersException(ERROR_TEXT_HEADER + filter.id() + " '" + filter.name() + ERROR_TEXT_FOOTER));
+                        final var values = filterReportDomainService.getCleanedValueListValues(paramValues);
+                        if (values.isEmpty())
+                            throw new InvalidParametersException(ERROR_TEXT_HEADER + filter.id() + " '" + filter.name() + ERROR_TEXT_FOOTER);
+                    }
+                });
     }
 
     public ReportJobResponse getJob(ReportJobRequest request) {
@@ -287,8 +287,7 @@ public class ReportJobService {
             response.setOlapLastUserChoice(olapUserChoiceDomainService.getOlapUserChoice(response.getReport().id(), currentUser.getId()));
             response.setExcelRowLimit(excelRowLimit);
             return response;
-        }
-        else {
+        } else {
             var user = userDomainService.getCurrentUser();
             log.warn(String.format("JobId is null! User: %s/%s", user.getDomain().name(), user.getName()));
             return null;
@@ -298,7 +297,8 @@ public class ReportJobService {
     public ReportJobResponse getJob(Long jobId) {
         var currentUser = userDomainService.getCurrentUser();
         var response = jobDomainService.getJob(jobId);
-        response.setOlapLastUserChoice(olapUserChoiceDomainService.getOlapUserChoice(response.getReport().id(), currentUser.getId()));
+        if (currentUser != null)
+            response.setOlapLastUserChoice(olapUserChoiceDomainService.getOlapUserChoice(response.getReport().id(), currentUser.getId()));
         return response;
     }
 
