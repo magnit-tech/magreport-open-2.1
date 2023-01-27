@@ -1,16 +1,21 @@
 import { makeStyles } from '@material-ui/core/styles';
-//import StyleConsts from '../../StyleConsts'; 
+import StyleConsts from '../../../StyleConsts'; 
 import CatFingerPng from '../../../images/catFinger.png'
 
 export const HeaderCSS = makeStyles(theme => ({
     appBar: {
         backgroundColor: theme.palette.primary.dark,
-        height: '120px', //StyleConsts.headerHeight,
+        height: StyleConsts.headerHeight,
         overflowX: 'hidden',
         transform: 'translateZ(0)',
         whiteSpace: 'nowrap',
         justifyContent: 'end'
-
+    },
+    appBarHeight: {
+        height: StyleConsts.headerHeight
+    },
+    appBarHeightHollyday: {
+        height: StyleConsts.headerHeightHollyday
     },
     iconIndent: {
         paddingLeft: '12px'

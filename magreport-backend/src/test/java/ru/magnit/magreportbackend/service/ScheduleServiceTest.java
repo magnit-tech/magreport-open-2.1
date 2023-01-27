@@ -628,6 +628,7 @@ class ScheduleServiceTest {
                 Collections.singletonList(getFilterReportFieldResponse()),
                 null,
                 null,
+                null,
                 null
         );
     }

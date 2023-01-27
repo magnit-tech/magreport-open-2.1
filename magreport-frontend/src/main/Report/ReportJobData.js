@@ -24,7 +24,7 @@ export default function ReportJobData(props){
                         reportId = {props.reportId}
                         folderId = {props.folderId}
                         jobOwnerName = {props.jobOwnerName}
-                        onRestartReportClick = {props.onRestartReportClick}
+                        onRestartReportClick = {() => props.onRestartReportClick()}
                         onViewTypeChange = {handleChangeViewType}
                     />
 

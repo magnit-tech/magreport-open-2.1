@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import clsx from 'clsx';
 // dataHub
 import dataHub from 'ajax/DataHub';
 
@@ -27,6 +27,7 @@ import SearchIcon from '@material-ui/icons/Search';
 //import CopyMoveFolderBrowser from './CopyMoveFolderBrowser';
 import DesignerFolderBrowser from 'main/Main/Development/Designer/DesignerFolderBrowser';
 import {JobStatuses} from './JobFilters/JobStatuses';
+import isHollyday from 'HollydayFunctions';
 
 // styles
 import { FolderContentCSS } from './FolderContentCSS';
@@ -552,7 +553,7 @@ export default function FolderContent(props){
 
             {props.searchParams && !searchOpen &&
 
-                <Paper elevation={3} className={classes.openSearchBtn}>
+                <Paper elevation={3} className={clsx(classes.openSearchBtn, {[classes.openSearchBtnHeight]: isHollyday() === -1, [classes.openSearchBtnHeightHollyday]: isHollyday() >= 0})}>
                     <IconButton
                         size="small"
                         aria-label="searchBtn"

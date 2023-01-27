@@ -49,6 +49,7 @@ import validateSaveConfig from 'utils/validateSaveConfig';
  * @param {Number} props.folderId - id разработческой папки в которой находится отчет
  * @param {String} props.jobOwnerName - login владельца отчета
  * @param {*} props.fullScreen - признак, является ли режим отображения сводной полноэкранным\
+ * @param {*} props.onRestartReportClick - function() - callback перезапуска отчёта на панели сводной
  * @param {*} props.onViewTypeChange - function() - callback смена вида с сводной на простую таблицу
  * @param {*} props.onFullScreen - function - callback полноэкранный режим
 */
@@ -418,16 +419,25 @@ function PivotPanel(props){
                     setAvaibleConfigs(data)
                     return setShowConfigDialog(true)
                 } else if (type === 'ConfigSaveDialog') {
-                    for (var key in data) {
-                        if (key !== 'sharedJobConfig') {
-                            data[key].map(item => configsArr.push(item))
+
+                    if(isReportDeveloper.current === true) {
+                        for (let itemKey in data) {
+                            data[itemKey].map(item => configsArr.push(item))
                         }
+                        setAvaibleConfigs(configsArr)
+                    } else {
+                        for (var key in data) {
+                            if (key !== 'sharedJobConfig') {
+                                data[key].map(item => configsArr.push(item))
+                            }
+                        }
+                        setAvaibleConfigs(configsArr)
                     }
-                    setAvaibleConfigs(configsArr)
+
                     return setShowConfigSaveDialog(true)
                 } 
 
-                for (var itemKey in data) {
+                for (let itemKey in data) {
                     data[itemKey].map(item => configsArr.push(item))
                 }
 
@@ -1106,6 +1116,7 @@ function PivotPanel(props){
                                 mergeMode = {pivotConfiguration.mergeMode}
                                 fullScreen = {pivotFullScreen}
                                 onMergeModeChange = {handleSetMergeMode}
+                                onRestartReportClick = {() => props.onRestartReportClick()}
                                 onViewTypeChange = {props.onViewTypeChange}
                                 onFullScreen = {handleFullScreen}
                                 fieldsVisibility = {fieldsVisibility}

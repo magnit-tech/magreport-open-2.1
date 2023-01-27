@@ -5,7 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
@@ -58,15 +60,34 @@ public class PivotTableWriter implements Writer {
     private boolean mergeMode = false;
     private boolean columnsMetricPlacement = false;
 
-    private boolean stylePivotTable = false;
     private Map<Long, String> mappingFields;
-    private CellStyle cellStyle;
+    private Map<Long, String> typeFields;
 
-    private OlapCubeRequest cubeRequest;
+    private static final short META_COLOR = IndexedColors.LIGHT_CORNFLOWER_BLUE.index;
+    private static final short MEASURE_COLOR = IndexedColors.LEMON_CHIFFON.index;
+    private static final short METRIC_COLOR = IndexedColors.WHITE.index;
+
+    private CellStyle dateCellMetaStyle;
+    private CellStyle dateCellMeasureStyle;
+    private CellStyle dateCellMetricStyle;
+
+    private CellStyle numericCellMetaStyle;
+    private CellStyle numericCellMeasureStyle;
+    private CellStyle numericCellMetricStyle;
+
+    private CellStyle integerCellMetaStyle;
+    private CellStyle integerCellMeasureStyle;
+    private CellStyle integerCellMetricStyle;
+
+    private CellStyle textCellMetaStyle;
+    private CellStyle textCellMeasureStyle;
+    private CellStyle textCellMetricStyle;
 
     private int totalColumn;
     private List<String> rowMetaNames = Collections.emptyList();
     private List<String> columnMetaNames = Collections.emptyList();
+
+    private static final String ERROR_COLOR_TEXT = "Unknown color excel pivot table:";
 
 
     @Override
@@ -100,7 +121,7 @@ public class PivotTableWriter implements Writer {
             }
 
             telemetryService.setState(telemetryId, ExcelExportTelemetry.APPLY_STYLES);
-            if (mergeMode) mergeCells(sheet);
+            mergeCells(sheet);
 
             updateSizeColumns(sheet);
 
@@ -126,15 +147,13 @@ public class PivotTableWriter implements Writer {
             var row = getRow(sheet, i);
 
             var metaCell = row.createCell(shiftColCount);
-            metaCell.setCellStyle(cellStyle);
-            metaCell.setCellValue(columnMetaNames.get(i));
+            writeCellValue(metaCell, columnMetaNames.get(i), DataTypeEnum.STRING, 1);
 
+            var type = DataTypeEnum.valueOf(typeFields.get(new ArrayList<>(request.getCubeRequest().getColumnFields()).get(i)));
 
             for (int j = 0; j < data.getColumnValues().size(); j++) {
                 var cell = row.createCell(j + shiftColCount + 1);
-                cell.setCellStyle(cellStyle);
-                cell.setCellValue(data.getColumnValues().get(j).get(i));
-
+                writeCellValue(cell, data.getColumnValues().get(j).get(i), type, 2);
             }
         }
 
@@ -145,18 +164,18 @@ public class PivotTableWriter implements Writer {
 
         for (int i = 0; i < rowMetaNames.size(); i++) {
             var cell = metaRow.createCell(i);
-            cell.setCellStyle(cellStyle);
-            cell.setCellValue(rowMetaNames.get(i));
+            writeCellValue(cell, rowMetaNames.get(i), DataTypeEnum.STRING, 1);
         }
 
         startIndex = shiftRowCount == 0 ? 1 : 0;
+        var types = request.getCubeRequest().getRowFields().stream().map(f -> typeFields.get(f)).map(DataTypeEnum::valueOf).toList();
         for (int i = 0; i < data.getRowValues().size(); i++) {
             var row = getRow(sheet, startIndex + shiftRowCount);
 
             for (int j = 0; j < shiftColCount; j++) {
+
                 var cell = row.createCell(j);
-                cell.setCellStyle(cellStyle);
-                cell.setCellValue(data.getRowValues().get(i).get(j));
+                writeCellValue(cell, data.getRowValues().get(i).get(j), types.get(j), 2);
             }
 
             if (!data.getMetricValues().isEmpty())
@@ -187,14 +206,13 @@ public class PivotTableWriter implements Writer {
 
             var row = getRow(sheet, i + startIndex);
             var metaCell = row.createCell(shiftColCount);
-            metaCell.setCellValue(getMetadataValue(aggregationType, fieldId));
-            metaCell.setCellStyle(cellStyle);
+            writeCellValue(metaCell, getMetadataValue(aggregationType, fieldId), DataTypeEnum.STRING, 1);
 
 
             for (int j = 0; j < metricsValue.get(i).getR().size(); j++) {
                 var cell = row.createCell(j + shiftColCount + 1);
-                cell.setCellStyle(cellStyle);
-                writeCellValue(cell, metricsValue.get(i).getR().get(j), type);
+                writeCellValue(cell, metricsValue.get(i).getR().get(j), type, 3);
+
             }
         }
     }
@@ -207,14 +225,14 @@ public class PivotTableWriter implements Writer {
             var row = getRow(sheet, i);
 
             var metaCell = row.createCell(startIndexMetaParam);
-            metaCell.setCellStyle(cellStyle);
-            metaCell.setCellValue(columnMetaNames.get(i));
+            writeCellValue(metaCell, columnMetaNames.get(i), DataTypeEnum.STRING, 1);
+
 
             int incrementMetricSize = 0;
+            var type = DataTypeEnum.valueOf(typeFields.get(new ArrayList<>(request.getCubeRequest().getColumnFields()).get(i)));
             for (int j = 0; j < data.getColumnValues().size(); j++) {
                 var cell = row.createCell(j + startIndex + incrementMetricSize);
-                cell.setCellStyle(cellStyle);
-                cell.setCellValue(data.getColumnValues().get(j).get(i));
+                writeCellValue(cell, data.getColumnValues().get(j).get(i), type, 2);
                 if (!data.getMetricValues().isEmpty())
                     incrementMetricSize += data.getMetricValues().size() - 1;
             }
@@ -225,17 +243,16 @@ public class PivotTableWriter implements Writer {
 
         for (int i = 0; i < rowMetaNames.size(); i++) {
             var cell = metaRow.createCell(i);
-            cell.setCellStyle(cellStyle);
-            cell.setCellValue(rowMetaNames.get(i));
+            writeCellValue(cell, rowMetaNames.get(i), DataTypeEnum.STRING, 1);
         }
 
+        var types = request.getCubeRequest().getRowFields().stream().map(f -> typeFields.get(f)).map(DataTypeEnum::valueOf).toList();
         for (int i = 0; i < data.getRowValues().size(); i++) {
             var row = getRow(sheet, i + shiftRowCount + 1);
 
             for (int j = 0; j < shiftColCount; j++) {
                 var cell = row.createCell(j);
-                cell.setCellStyle(cellStyle);
-                cell.setCellValue(data.getRowValues().get(i).get(j));
+                writeCellValue(cell, data.getRowValues().get(i).get(j), types.get(j), 2);
             }
         }
     }
@@ -261,13 +278,11 @@ public class PivotTableWriter implements Writer {
             for (int v = 0; v < rowValues.size(); v++) {
                 if (i == 0) {
                     var metaCell = metaRow.createCell(shiftColCount + v);
-                    metaCell.setCellValue(getMetadataValue(rowValues.get(v).getL().getAggregationType(), rowValues.get(v).getL().getFieldId()));
-                    metaCell.setCellStyle(cellStyle);
+                    writeCellValue(metaCell, getMetadataValue(rowValues.get(v).getL().getAggregationType(), rowValues.get(v).getL().getFieldId()), DataTypeEnum.STRING, 1);
                 }
 
                 var cell = row.createCell(v + shiftColCount);
-                cell.setCellStyle(cellStyle);
-                writeCellValue(cell, rowValues.get(v).getR(), rowValues.get(v).getL().getDataType());
+                writeCellValue(cell, rowValues.get(v).getR(), rowValues.get(v).getL().getDataType(), 3);
             }
         }
     }
@@ -289,27 +304,51 @@ public class PivotTableWriter implements Writer {
 
     }
 
-    private void createCellStyles(Workbook wb) {
+    private CellStyle initCellStyle(Workbook wb, short dataType, short color) {
 
-        cellStyle = wb.createCellStyle();
-
+        var cellStyle = wb.createCellStyle();
+        cellStyle.setDataFormat(dataType);
+        cellStyle.setFillForegroundColor(color);
+        cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         cellStyle.setBorderBottom(BorderStyle.THIN);
         cellStyle.setBorderRight(BorderStyle.THIN);
         cellStyle.setBorderTop(BorderStyle.THIN);
         cellStyle.setBorderLeft(BorderStyle.THIN);
         cellStyle.setAlignment(HorizontalAlignment.CENTER);
         cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        return cellStyle;
     }
+
+    private void initCellStyles(Workbook wb) {
+        dateCellMetaStyle = initCellStyle(wb, (short) 14, META_COLOR);
+        dateCellMeasureStyle = initCellStyle(wb, (short) 14, MEASURE_COLOR);
+        dateCellMetricStyle = initCellStyle(wb, (short) 14, METRIC_COLOR);
+
+        numericCellMetaStyle = initCellStyle(wb, (short) 4, META_COLOR);
+        numericCellMeasureStyle = initCellStyle(wb, (short) 4, MEASURE_COLOR);
+        numericCellMetricStyle = initCellStyle(wb, (short) 4, METRIC_COLOR);
+
+        integerCellMetaStyle = initCellStyle(wb, (short) 1, META_COLOR);
+        integerCellMeasureStyle = initCellStyle(wb, (short) 1, MEASURE_COLOR);
+        integerCellMetricStyle = initCellStyle(wb, (short) 1, METRIC_COLOR);
+
+        textCellMetaStyle = initCellStyle(wb, (short) 0x31, META_COLOR);
+        textCellMeasureStyle = initCellStyle(wb, (short) 0x31, MEASURE_COLOR);
+        textCellMetricStyle = initCellStyle(wb, (short) 0x31, METRIC_COLOR);
+    }
+
 
     private void initConfig(Workbook wb) {
 
         shiftRowCount = data.getColumnValues().isEmpty() ? 0 : data.getColumnValues().get(0).size();
         shiftColCount = data.getRowValues().isEmpty() ? 0 : data.getRowValues().get(0).size();
 
-        createCellStyles(wb);
+        initCellStyles(wb);
 
         mappingFields = metadata.fields().stream().collect(Collectors.toMap(ReportFieldMetadataResponse::id, ReportFieldMetadataResponse::name));
-        cubeRequest = request.getCubeRequest();
+        typeFields = metadata.fields().stream().collect(Collectors.toMap(ReportFieldMetadataResponse::id, ReportFieldMetadataResponse::type));
+
+        OlapCubeRequest cubeRequest = request.getCubeRequest();
 
         rowMetaNames = cubeRequest.getRowFields().stream().filter(mappingFields::containsKey).map(mappingFields::get).toList();
         columnMetaNames = cubeRequest.getColumnFields().stream().filter(mappingFields::containsKey).map(mappingFields::get).toList();
@@ -317,25 +356,64 @@ public class PivotTableWriter implements Writer {
         if (config.containsKey("mergeMode")) mergeMode = (boolean) config.get("mergeMode");
         if (config.containsKey("columnsMetricPlacement"))
             columnsMetricPlacement = (boolean) config.get("columnsMetricPlacement");
-        stylePivotTable = request.isStylePivotTable();
 
         if (columnsMetricPlacement && !data.getMetricValues().isEmpty())
             totalColumn = data.getTotalColumns() * data.getMetricValues().size() + shiftColCount;
         else totalColumn = data.getTotalColumns() + shiftColCount;
     }
 
-    private void writeCellValue(Cell cell, String value, DataTypeEnum type) {
+    private void writeCellValue(Cell cell, String value, DataTypeEnum type, int colorType) {
 
         value = value == null ? "" : value;
 
         if (!value.isEmpty()) {
             switch (type) {
-                case INTEGER -> cell.setCellValue(Integer.parseInt(value));
-                case STRING -> cell.setCellValue(value);
-                case DOUBLE -> cell.setCellValue(Double.parseDouble(value));
-                case DATE -> cell.setCellValue(LocalDate.parse(value));
-                case TIMESTAMP -> cell.setCellValue(LocalDateTime.parse(value.replace(" ", "T")));
-                case BOOLEAN -> cell.setCellValue(Boolean.parseBoolean(value));
+                case INTEGER -> {
+                    switch (colorType) {
+                        case 1 -> cell.setCellStyle(integerCellMetaStyle);
+                        case 2 -> cell.setCellStyle(integerCellMeasureStyle);
+                        case 3 -> cell.setCellStyle(integerCellMetricStyle);
+                        default -> throw new IllegalStateException(String.format("%s%s", ERROR_COLOR_TEXT, colorType));
+                    }
+                    cell.setCellValue(Integer.parseInt(value));
+                }
+                case STRING, BOOLEAN -> {
+                    switch (colorType) {
+                        case 1 -> cell.setCellStyle(textCellMetaStyle);
+                        case 2 -> cell.setCellStyle(textCellMeasureStyle);
+                        case 3 -> cell.setCellStyle(textCellMetricStyle);
+                        default -> throw new IllegalStateException(String.format("%s%s", ERROR_COLOR_TEXT, colorType));
+                    }
+                    cell.setCellValue(value);
+                }
+                case DOUBLE -> {
+                    switch (colorType) {
+                        case 1 -> cell.setCellStyle(numericCellMetaStyle);
+                        case 2 -> cell.setCellStyle(numericCellMeasureStyle);
+                        case 3 -> cell.setCellStyle(numericCellMetricStyle);
+                        default -> throw new IllegalStateException(String.format("%s%s", ERROR_COLOR_TEXT, colorType));
+                    }
+                    cell.setCellValue(Double.parseDouble(value));
+                }
+                case DATE -> {
+                    switch (colorType) {
+                        case 1 -> cell.setCellStyle(dateCellMetaStyle);
+                        case 2 -> cell.setCellStyle(dateCellMeasureStyle);
+                        case 3 -> cell.setCellStyle(dateCellMetricStyle);
+                        default -> throw new IllegalStateException(String.format("%s%s", ERROR_COLOR_TEXT, colorType));
+                    }
+                    cell.setCellValue(LocalDate.parse(value));
+                }
+                case TIMESTAMP -> {
+                    switch (colorType) {
+                        case 1 -> cell.setCellStyle(dateCellMetaStyle);
+                        case 2 -> cell.setCellStyle(dateCellMeasureStyle);
+                        case 3 -> cell.setCellStyle(dateCellMetricStyle);
+                        default ->  throw new IllegalStateException(String.format("%s%s", ERROR_COLOR_TEXT, colorType));
+                    }
+                    cell.setCellValue(LocalDateTime.parse(value.replace(" ", "T")));
+                }
+                default -> throw new IllegalStateException("Unexpected value: " + type);
             }
         } else {
             cell.setCellValue(value);
@@ -373,7 +451,7 @@ public class PivotTableWriter implements Writer {
                         continue;
                     }
 
-                    if ((currentValue.equals(newValue) || currentValue.equals("")) && cellIndex != totalColumn)
+                    if (((currentValue.equals(newValue) && mergeMode) || currentValue.equals("")) && cellIndex != totalColumn)
                         continue;
 
                     if (startIndex != cellIndex - 1)
@@ -409,7 +487,7 @@ public class PivotTableWriter implements Writer {
                         continue;
                     }
 
-                    if ((currentValue.equals(newValue) || currentValue.equals("")) && rowIndex != sheet.getLastRowNum())
+                    if (((currentValue.equals(newValue) && mergeMode)  || currentValue.equals("")) && rowIndex != sheet.getLastRowNum())
                         continue;
 
                     if (startIndex != rowIndex - 1)
