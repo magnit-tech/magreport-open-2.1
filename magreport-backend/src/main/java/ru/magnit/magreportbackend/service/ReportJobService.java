@@ -295,11 +295,7 @@ public class ReportJobService {
     }
 
     public ReportJobResponse getJob(Long jobId) {
-        var currentUser = userDomainService.getCurrentUser();
-        var response = jobDomainService.getJob(jobId);
-        if (currentUser != null)
-            response.setOlapLastUserChoice(olapUserChoiceDomainService.getOlapUserChoice(response.getReport().id(), currentUser.getId()));
-        return response;
+      return jobDomainService.getJob(jobId);
     }
 
     public List<ReportJobResponse> getMyJobs(ReportJobHistoryRequestFilter filter) {
