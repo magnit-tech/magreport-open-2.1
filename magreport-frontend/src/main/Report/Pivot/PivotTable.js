@@ -1,7 +1,6 @@
 import React, { useRef} from 'react';
 import clsx from 'clsx';
 import Measure from 'react-measure';
-import Box from '@material-ui/core/Box';
 import { Scrollbars } from 'react-custom-scrollbars';
 // magreport
 import {AggFunc} from '../../FolderContent/JobFilters/JobStatuses';
@@ -516,7 +515,7 @@ export default function(props){
             if (cell.conditionalFormatting && cell.conditionalFormatting.length > 0 && !cell.data.includes('%')) {
                 if (cell.conditionalFormatting.length === 1) {
                     return (
-                        <Box
+                        <div
                             key={`${cell.columnName[0]} ${cell.rowName[0]}`}
                             style = {
                                 {   
@@ -532,7 +531,7 @@ export default function(props){
                             }
                         >
                             {cell.data}
-                        </Box>
+                        </div>
                     )
                 } 
                 
@@ -541,7 +540,7 @@ export default function(props){
                 for (let i = 0; i < cell.conditionalFormatting.length; i++) {
                     if (cellData < Number(cell.conditionalFormatting[i].valueTo)) {
                         return (
-                            <Box
+                            <div
                                 key={`${cell.columnName[0]} ${cell.rowName[0]}`}
                                 style = {
                                     {   
@@ -557,14 +556,14 @@ export default function(props){
                                 }
                             >
                                 {cell.data}
-                            </Box>
+                            </div>
                         )
                     }
                 }
             } else if(cell.hasOwnProperty('style') && cell.style) {
                 return cell.style.filter((styleObj) => (styleObj.aggFuncName === cell.aggFuncName)).map((formatting) => {
                     return (
-                        <Box
+                        <div
                             key={`${cell.columnName[0]} ${cell.rowName[0]}`}
                             style = {
                                 {   
@@ -580,7 +579,7 @@ export default function(props){
                             }
                         >
                             {cell.data}
-                        </Box>
+                        </div>
                     )
                 })
             }
@@ -588,7 +587,7 @@ export default function(props){
         }
 
         return (
-            <Box 
+            <div 
                 fontSize = { 14 } 
                 fontFamily = {"Arial"}
                 fontWeight = {
@@ -600,7 +599,7 @@ export default function(props){
                 style = {{margin: '2px'}}
             >
                 {cell.data}
-            </Box>
+            </div>
         )
     }
 
@@ -683,9 +682,9 @@ export default function(props){
 						</tbody>
 						)}
 					}
-				</Measure>
+				    </Measure>
       
-            </table>
+                </table>
             </Scrollbars>
         </div>
         
