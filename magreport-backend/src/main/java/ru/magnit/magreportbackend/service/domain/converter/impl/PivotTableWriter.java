@@ -442,8 +442,7 @@ public class PivotTableWriter implements Writer {
                 var cell = row.getCell(cellIndex);
                 if (cell != null) {
 
-                    var newValue = cell.getStringCellValue();
-
+                    var newValue = getStringValueCell(cell);
 
                     if (currentValue == null) {
                         currentValue = newValue;
@@ -479,7 +478,7 @@ public class PivotTableWriter implements Writer {
                 var cell = row.getCell(cellIndex);
                 if (cell != null) {
 
-                    var newValue = cell.getStringCellValue();
+                    var newValue = getStringValueCell(cell);
 
                     if (currentValue == null) {
                         currentValue = newValue;
@@ -523,6 +522,16 @@ public class PivotTableWriter implements Writer {
         return workbook.createSheet(nameDataList);
     }
 
+    private String getStringValueCell (Cell cell) {
+        return switch (cell.getCellType()){
+            case _NONE, BLANK-> "";
+            case NUMERIC -> cell.getNumericCellValue() + "";
+            case STRING -> cell.getStringCellValue() + "";
+            case FORMULA -> cell.getCellFormula();
+            case BOOLEAN -> cell.getBooleanCellValue() + "";
+            case ERROR -> cell.getErrorCellValue() + "";
+        };
+    }
 }
 
 
