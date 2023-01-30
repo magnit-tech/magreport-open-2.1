@@ -191,7 +191,7 @@ export default function PivotTools(props){
                         }
                     />
                 </Tooltip>
-                <Tooltip title="Добавить поле"  placement='top'>
+                <Tooltip title="Производные поля"  placement='top'>
                     <FormControlLabel
                         control={
                             <IconButton
