@@ -178,12 +178,16 @@ export default function CreateFieldDialog(props){
 
             <DialogTitle style={{ cursor: 'move' }} id="drag-title"> Производное поле </DialogTitle>
 
-            <DataLoader
+            <div>
+                <div>
+
+                </div>
+                <DataLoader
                 loadFunc = {dataHub.derivedFieldController.getFieldsAndExpressions}
                 loadParams = {[props.jobId, props.reportId]}
                 onDataLoaded = {handleFieldsAndExpressionsLoaded}
             >
-
+                <h2>Создать новое</h2>
                 <TextField
                             required
                             error={ fieldName.replace(/\s/g,"") === "" ? true : false }
@@ -242,7 +246,9 @@ export default function CreateFieldDialog(props){
                         Отменить
                     </Button>
                 </DialogActions>
-            </DataLoader>
+                </DataLoader>
+            </div>
+
         </Dialog>
     )
 }
