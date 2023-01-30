@@ -70,6 +70,7 @@ export default function(props){
             tableRow.push({
                 data : props.tableData.columnDimensionsValues[j][dimNum],
                 fieldId : props.tableData.columnDimensionsFields[dimNum].fieldId,
+                original: props.tableData.columnDimensionsFields[dimNum].original,
                 type : "dimensionValue",
                 colSpan : colsMetricFactor,
                 rowSpan : 1
@@ -95,6 +96,7 @@ export default function(props){
             tableRow.push({
                 data : props.tableData.rowDimensionsValues[rowNum][j],
                 fieldId : props.tableData.rowDimensionsFields[j].fieldId,
+                original: props.tableData.rowDimensionsFields[j].original,
                 type : "dimensionValue",
                 colSpan : 1,
                 rowSpan : rowsMetricFactor
@@ -365,8 +367,8 @@ export default function(props){
         Обработчики
     ******************
     */
-    function handleDimensionValueCellClick(fieldId, fieldValue) {
-        props.onDimensionValueFilter(fieldId, fieldValue);
+    function handleDimensionValueCellClick(fieldId, original, fieldValue) {
+        props.onDimensionValueFilter(fieldId, original ? 'REPORT_FIELD' : 'DERIVED_FIELD', fieldValue);
     }
 
     function handleMetricValueCellClick(fieldId, index, fieldValue) {
@@ -622,7 +624,6 @@ export default function(props){
         
         return {}
     }
-
     return(
         <div className={clsx(styles.pivotTable)}>
              <Scrollbars 
@@ -670,7 +671,7 @@ export default function(props){
                                                 </div>
                                             }
                                             <div 
-                                                onClick = {cell.type === "dimensionValue" ? () => {handleDimensionValueCellClick(cell.fieldId, cell.data)}
+                                                onClick = {cell.type === "dimensionValue" ? () => {handleDimensionValueCellClick(cell.fieldId, cell.original, cell.data)}
                                                 : cell.type === "metricValues"  ? () => {handleMetricValueCellClick(cell.fieldId, cell.index, cell.data)}
                                                 : () => {}}
                                             >
