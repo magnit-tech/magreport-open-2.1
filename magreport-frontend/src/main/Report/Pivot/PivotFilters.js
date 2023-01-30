@@ -42,7 +42,7 @@ function PivotFilters(props){
     ];
 
     const [filterObject, setFilterObject] = useState(new FilterObject({
-        fieldId: props.field?.fieldId,
+        field: props.field ? {fieldId: props.field.fieldId, fieldType: props.field.original ? 'REPORT_FIELD' : 'DERIVED_FIELD'} : {},
         filterType: props.field?.filter?.filterType,
         invertResult: props.field?.filter?.invertResult,
         values: props.field?.filter?.values,
