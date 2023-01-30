@@ -282,6 +282,10 @@ export function FieldsLists(fieldsLists){
 
       //  if(findResult === undefined){
             findResult = this.findFieldByFieldId("allFields", fieldId);
+            console.log('setFieldFilterByFieldId');
+            console.log(findResult);
+
+
             let newField = new FieldData(findResult.field);
             newField.setFilter(filterObject);
             this.filterFields.push(newField);

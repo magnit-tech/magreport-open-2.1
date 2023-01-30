@@ -832,11 +832,11 @@ function PivotPanel(props){
     */
 
     // Вызывается по нажатию на значение измерения в таблице
-    function handleDimensionValueFilter(fieldId, fieldValue) {
+    function handleDimensionValueFilter(fieldId, fieldType, fieldValue) {
         if (!(pivotConfiguration.fieldsLists.findFilterFieldIdByFieldIdValueFunc(fieldId, fieldValue))){
             let val = fieldValue === '' ? [] : [fieldValue];
 			let newConfiguration = new PivotConfiguration(pivotConfiguration);
-			let filterObject = new FilterObject({fieldId: fieldId, values: val});
+			let filterObject = new FilterObject({field: {fieldId: fieldId, fieldType: fieldType}, values: val});
 			newConfiguration.setFieldFilterByFieldId(fieldId, filterObject);
 			newConfiguration.replaceFilter();
 			newConfiguration.changeSortOrder({});
@@ -846,8 +846,12 @@ function PivotPanel(props){
 			setTableDataLoadStatus(1);
 			dataProviderRef.current.loadDataForNewFieldsLists(newConfiguration.fieldsLists, newConfiguration.filterGroup, newConfiguration.metricFilterGroup, {}, 0, columnCount, 0, rowCount);
 			handleSaveCurrentConfig(newConfiguration.stringify())
-			setSortingValues({})
+            setSortingValues({});
+            
+            console.log(newConfiguration)
         }
+
+        
     }
     // Вызывается по нажатию на значение метрики в таблице
     function handleMetricValueFilter(fieldId, metricIndex, fieldValue){
