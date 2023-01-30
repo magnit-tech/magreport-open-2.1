@@ -847,8 +847,6 @@ function PivotPanel(props){
 			dataProviderRef.current.loadDataForNewFieldsLists(newConfiguration.fieldsLists, newConfiguration.filterGroup, newConfiguration.metricFilterGroup, {}, 0, columnCount, 0, rowCount);
 			handleSaveCurrentConfig(newConfiguration.stringify())
             setSortingValues({});
-            
-            console.log(newConfiguration)
         }
 
         

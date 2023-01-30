@@ -278,17 +278,14 @@ export function FieldsLists(fieldsLists){
     // Задание фильтра на поле
     this.setFieldFilterByFieldId = (fieldId, filterObject) => {
         this.removeFieldByFieldId("unusedFields", fieldId);
-        let findResult = this.findFieldByFieldId("filterFields", fieldId);
+        let findResult = this.findFieldByFieldId("allFields", fieldId);
 
-      //  if(findResult === undefined){
-            findResult = this.findFieldByFieldId("allFields", fieldId);
-            console.log('setFieldFilterByFieldId');
-            console.log(findResult);
-
-
-            let newField = new FieldData(findResult.field);
-            newField.setFilter(filterObject);
-            this.filterFields.push(newField);
+        if (findResult === undefined){
+            findResult = this.findFieldByFieldId("derivedFields", fieldId);
+        }
+        let newField = new FieldData(findResult.field);
+        newField.setFilter(filterObject);
+        this.filterFields.push(newField);
       /*  }
         else{
             this.filterFields[findResult.index] = new FieldData(this.filterFields[findResult.index]);
