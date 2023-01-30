@@ -624,8 +624,6 @@ export default function(props){
         
         return {}
     }
-
-    console.log(tableRows)
     return(
         <div className={clsx(styles.pivotTable)}>
              <Scrollbars 
