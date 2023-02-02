@@ -47,7 +47,7 @@ public class OlapCubeRequestNew {
         result.addAll(columnFields);
         result.addAll(rowFields);
         result.addAll(metrics.stream().map(MetricDefinitionNew::getField).toList());
-
+        result.addAll(filterGroup.getAllFields());
         return result;
     }
 
