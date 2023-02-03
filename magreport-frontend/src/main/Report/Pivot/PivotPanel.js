@@ -52,6 +52,7 @@ import CreateFieldDialog from './UI/DerivedFieldDialog/DerivedFieldDialog';
  * @param {Number} props.folderId - id разработческой папки в которой находится отчет
  * @param {String} props.jobOwnerName - login владельца отчета
  * @param {*} props.fullScreen - признак, является ли режим отображения сводной полноэкранным\
+ * @param {*} props.onRestartReportClick - function() - callback перезапуска отчёта на панели сводной
  * @param {*} props.onViewTypeChange - function() - callback смена вида с сводной на простую таблицу
  * @param {*} props.onFullScreen - function - callback полноэкранный режим
 */
@@ -1153,6 +1154,7 @@ function PivotPanel(props){
                                 mergeMode = {pivotConfiguration.mergeMode}
                                 fullScreen = {pivotFullScreen}
                                 onMergeModeChange = {handleSetMergeMode}
+                                onRestartReportClick = {() => props.onRestartReportClick()}
                                 onViewTypeChange = {props.onViewTypeChange}
                                 onFullScreen = {handleFullScreen}
                                 fieldsVisibility = {fieldsVisibility}

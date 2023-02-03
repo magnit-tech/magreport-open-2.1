@@ -12,7 +12,6 @@ import clsx from 'clsx';
 
 import Popover from '@material-ui/core/Popover';
 import ListItem from '@material-ui/core/ListItem';
-import Box from '@material-ui/core/Box';
 import ListItemText from '@material-ui/core/ListItemText';
 import IconButton from '@material-ui/core/IconButton';
 
@@ -106,12 +105,11 @@ function PivotField(props){
                     button 
                     onClick = {() => handleChooseAggForMetric(f.id, props.index)}
                 >
-                    <Box 
-                        fontSize={12} 
-                        fontWeight={"fontWeightMedium"}
+                    <div 
+                        style={{fontSize: '12px', fontWeight: '500'}}
                     >
                         {f.name}
-                    </Box>
+                    </div>
                 </ListItem>
             )
         }
@@ -171,12 +169,12 @@ function PivotField(props){
                         disableRestoreFocus
                     >
                         <div className={styles.popoverDiv}>
-                            <Box fontSize={10} fontWeight={"fontWeightMedium"} className={styles.fieldTextHover}>
+                            <div className={styles.fieldTextHover}>
                                 {props.filtered &&
                                     <Icon path={mdiFilter} size={0.5}/> 
                                 }
                                 {(props.aggFuncName ? AggFunc.get(props.aggFuncName) + ' ' : '') + props.fieldName} 
-                            </Box>
+                            </div>
                         </div>
                     </Popover>
                     {(props.listName === 'metricFields') &&
@@ -214,12 +212,12 @@ function PivotField(props){
                         onMouseLeave={handlePopoverClose}
                         ref={parentRef}
                     >                      
-                        <Box fontSize={9} fontWeight={"fontWeightMedium"} className={styles.fieldText}>
+                        <div className={styles.fieldText}>
                             {props.filtered && props.listName !== 'filterFields' &&
                                 <Icon path={mdiFilter} size={0.8}/>
                             }
                             {(props.aggFuncName ? AggFunc.get(props.aggFuncName) + ' ' : '') + props.fieldName}
-                        </Box>
+                        </div>
                             
                     </ListItemText>
                     {

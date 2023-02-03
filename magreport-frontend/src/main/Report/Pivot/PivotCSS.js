@@ -53,11 +53,15 @@ export const PivotCSS = makeStyles(theme => ({
         pointerEvents: 'none'
     },
     fieldTextHover: {
+        fontSize: '10px', 
+        fontWeight: '500',
         height: 'fit-content',
         minHeight: '56px',
         textAlign: 'center',
-        display: 'table-cell',
-        verticalAlign: 'middle'
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+
     },
     paper: {
         minWidth: '48px',
@@ -105,6 +109,8 @@ export const PivotCSS = makeStyles(theme => ({
         backgroundColor : theme.palette.derivedField,
     },
     fieldText: {
+        fontSize: '9px', 
+        fontWeight: '500',
         maxHeight: '40px',
         overflow: 'hidden',
         display: 'block',
@@ -113,7 +119,9 @@ export const PivotCSS = makeStyles(theme => ({
     popoverDiv: {
         textAlign: 'center', 
         minHeight: '56px', 
-        display: 'table'
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     listItemText: {
         minWidth: '40px', 

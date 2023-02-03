@@ -45,6 +45,7 @@ import ru.magnit.magreportbackend.service.domain.FilterReportDomainService;
 import ru.magnit.magreportbackend.service.domain.FolderDomainService;
 import ru.magnit.magreportbackend.service.domain.FolderPermissionsDomainService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
+import ru.magnit.magreportbackend.service.domain.OlapUserChoiceDomainService;
 import ru.magnit.magreportbackend.service.domain.ReportDomainService;
 import ru.magnit.magreportbackend.service.domain.TokenService;
 import ru.magnit.magreportbackend.service.domain.UserDomainService;
@@ -108,6 +109,9 @@ class ReportJobServiceTest {
 
     @Mock
     private TokenService tokenService;
+
+    @Mock
+    private OlapUserChoiceDomainService olapUserChoiceDomainService;
 
 
     @Test
@@ -228,13 +232,15 @@ class ReportJobServiceTest {
                 Collections.emptyList(),
                 "user",
                 LocalDateTime.now(),
-                LocalDateTime.now());
+                LocalDateTime.now(),
+                true);
     }
 
     @Test
     void getJob() {
 
         when(jobDomainService.getJob(anyLong())).thenReturn(getReportJobResponse());
+        when(userDomainService.getCurrentUser()).thenReturn(new UserView());
 
         var response = service.getJob(ID);
         assertNotNull(response);
@@ -310,6 +316,7 @@ class ReportJobServiceTest {
         //job complete
         jobData = getReportJobData(true);
 
+        when(userDomainService.getCurrentUser()).thenReturn(new UserView());
         when(jobDomainService.getJobData(anyLong())).thenReturn(jobData);
         when(avroReportDomainService.getPage(any(), anyLong(), anyLong())).thenReturn(getReportPageResponse());
 
@@ -469,7 +476,8 @@ class ReportJobServiceTest {
                 Collections.emptyList(),
                 true,
             0L,
-                "comment");
+                "comment",
+                true);
     }
 
     private ReportJobAddRequest getReportJobAddRequest() {
@@ -514,6 +522,7 @@ class ReportJobServiceTest {
                                         2L,
                                         null,
                                         FilterTypeEnum.DATE_RANGE,
+                                        null,
                                         null,
                                         null,
                                         null,
