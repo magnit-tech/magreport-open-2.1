@@ -1,5 +1,6 @@
 import React, {useState, useRef, useEffect} from 'react';
 import { connect } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 
 // components
 import TreeView from '@material-ui/lab/TreeView';
@@ -687,17 +688,20 @@ function TreeNode(classes, nodeId, level, nodeName, fieldId, parent, isLeaf, che
  * @param {Object} props.lastFilterValue - объект со значениями фильтра из последнего запуска (как приходит от сервиса)
  * @param {boolean} props.toggleClearFilter - при изменении значения данного свойства требуется очистить выбор в фильтре
  * @param {boolean} props.readOnly - если true, то отображает компонент для изменения
- * @param {String} props.currentSidebarItemKey - текущий пункт меню
+ * @param {String} props.currentSidebarItemKey
  * @param {onChangeFilterValue} props.onChangeFilterValue - function(filterValue) - callback для передачи значения изменившегося параметра фильтра
  *                                                  filterValue - объект для передачи в сервис в массиве parameters
  * @param {boolean} props.strict - true - если дерево со строгой иерархией, false - иначе (отличается форматом запрос дочерних узлов)
  */
-function HierTree(props){
+export default function HierTree(props){
+    const location = useLocation()
 
     const classes = HierTreeCSS();
-    const getChildNodes = props.currentSidebarItemKey === SidebarItems.admin.subItems.securityFilters.key 
-        ? dataHub.filterInstanceController.getChildNodes 
-        : dataHub.filterReportController.getChildNodes;
+
+    const path = new RegExp(SidebarItems.admin.subItems.securityFilters.folderItemType, "g");
+    const getChildNodes = location.pathname.match(path) === null
+        ? dataHub.filterReportController.getChildNodes
+        : dataHub.filterInstanceController.getChildNodes;
 
     function handleTreeUpdated(){
         setTreeItems(tree.current.buildTreeItem());
@@ -770,11 +774,3 @@ function HierTree(props){
         </div>
     );
 }
-
-const mapStateToProps = state => {
-    return {
-        currentSidebarItemKey: state.sidebar.currentSidebarItemKey
-    }
-}
-
-export default connect(mapStateToProps, null)(HierTree);

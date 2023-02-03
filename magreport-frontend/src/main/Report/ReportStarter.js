@@ -5,6 +5,7 @@ import { useParams, useNavigate, useLocation, useSearchParams } from 'react-rout
 
 import { useDispatch } from 'react-redux';
 import { addReportStarterNavbar } from "redux/actions/navbar/actionNavbar";
+import SidebarItems from '../Main/Sidebar/SidebarItems';   //'../../   /Main/Sidebar/SidebarItems' ;
 
 // mui
 import {Button} from '@material-ui/core';
@@ -34,7 +35,7 @@ import {ReportStarterCSS} from "./ReportCSS";
 export default function ReportStarter(props){
     const classes = ReportStarterCSS();
 
-    const {id} = useParams() || props.reportId;
+    const id = useParams()?.id || props.reportId;
     const navigate = useNavigate();
     const location = useLocation();
     const [searchParams, setSearchParams] = useSearchParams(); // eslint-disable-line
@@ -105,7 +106,10 @@ export default function ReportStarter(props){
             props.checkFilters(checkMandatoryFiltersResult && checkInvalidValues && isValidMandatorygroups)
         }
 
-        dispatch(addReportStarterNavbar('report/starter', data.name, id))
+        const path = new RegExp(SidebarItems.schedule.subItems.scheduleTasks.folderItemType, "g");
+        if (location.pathname.match(path) === null){
+            dispatch(addReportStarterNavbar('report/starter', data.name, id))
+        }
     }
 
     function mandatoryFilters(data, filtersSet, groupsMap, filterToGrpMap){
