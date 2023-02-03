@@ -84,4 +84,9 @@ public class DerivedFieldDomainService {
             .map(derivedFieldResponseMapper::from)
             .toList();
     }
+
+    @Transactional
+    public boolean isFieldExists(Long reportId, String fieldName) {
+        return derivedFieldRepository.existsByReportIdAndUniqueName(reportId, fieldName);
+    }
 }
