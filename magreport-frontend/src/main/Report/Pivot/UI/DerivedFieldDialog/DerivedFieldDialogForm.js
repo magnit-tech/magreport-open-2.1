@@ -1,48 +1,53 @@
-import React, {useState, useRef, useCallback} from "react";
+import React, {useState, useRef, useCallback, useEffect} from "react";
 
-import { PivotCSS } from '../PivotCSS';
+import { PivotCSS } from '../../PivotCSS';
 
-import { Paper, Dialog, DialogTitle, DialogActions, Button, TextField} from '@material-ui/core';
-
-import Draggable from 'react-draggable';
-
-import clsx from "clsx";
+import { TextField } from '@material-ui/core';
 
 import dataHub from "ajax/DataHub";
-import FormulaEditor, {nodeType} from "../maglangFormulaEditor/FormulaEditor/FormulaEditor";
+import FormulaEditor, {nodeType} from "../../maglangFormulaEditor/FormulaEditor/FormulaEditor";
 import DataLoader from "main/DataLoader/DataLoader";
 
-
-/**
-	* @param {Boolean} props.open - boolean-значение отображения модального окна
-    * @param {*} props.jobId - id задания
-    * @param {*} props.reportId - id отчёта
-	* @param {*} props.onCancel - function - callback отмены/закрытия модального окна
-	* @param {*} props.onSave - function - callback сохранения поля
-**/
-
-//Перетаскивание модального окна
-function PaperComponent(props) {
-    return (
-		/*<Draggable handle="#drag-title" cancel={'[class*="MuiDialogContent-root"]'}>
-			<Paper {...props} />
-		</Draggable>*/
-        <Paper {...props} />
-    );
-}
-
-export default function CreateFieldDialog(props){
+export default function DerivedFieldDialogForm(props){
 
     const classes = PivotCSS();
 
-    const [isFormulaCorrect, setIsFormulaCorrect] = useState(false);
     const [fieldName, setFieldName] = useState("");
     const [fieldDesc, setFieldDesc] = useState("");
+
+	useEffect(() => {
+		setFieldName(props.activeDerivedField ? props.activeDerivedField.fieldName : "")
+		setFieldDesc(props.activeDerivedField ? props.activeDerivedField.fieldDesc : "")
+	}, [props.activeDerivedField])
+
+
 
     // Семантическое дерево формулы
     const formulaTreeRoot = useRef(null);
 
-    const textToSave = useRef(null);
+	const objToSave = useRef({
+		fieldName: '',
+		fieldDesc: '',
+		expression: '',
+		expressionText: '',
+		isFormulaCorrect: false
+	})
+
+	function handleChangeName(name) {
+		objToSave.current = {...objToSave.current, fieldName: name}
+		setFieldName(name)
+		handlePostObjToSave()
+	}
+
+	function handleChangeDesc(desc) {
+		objToSave.current = {...objToSave.current, fieldDesc: desc}
+		setFieldDesc(desc)
+		handlePostObjToSave()
+	}
+	
+	function handlePostObjToSave() {
+		props.onEdit(objToSave.current)
+	}
 
     /*
         Загрузка полей
@@ -51,6 +56,7 @@ export default function CreateFieldDialog(props){
     const [functionsList, setFunctionsList] = useState([]);
     const [originalFieldsList, setOriginalFieldsList] = useState([]);
     const [derivedFieldsList, setDerivedFieldsList] = useState([]);
+
     let handleFieldsAndExpressionsLoaded = (data) => {
         let newFunctionsList = data.expressions.map(
             (f) => ({functionId: f.id, functionName: f.name, functionDesc: f.description, functionSignature: ""}));
@@ -67,12 +73,13 @@ export default function CreateFieldDialog(props){
         Изменения формулы
     */
 
-    let handleFormulaChange = useCallback( (compilationResult) => {
-            formulaTreeRoot.current = compilationResult.treeRoot;
-            textToSave.current = compilationResult.textToSave;
-            setIsFormulaCorrect(compilationResult.success);
-        },
-        []);
+    let handleFormulaChange = useCallback((compilationResult) => {
+		// formulaTreeRoot.current = compilationResult.treeRoot;
+		// textToSave.current = compilationResult.textToSave;
+		// setIsFormulaCorrect(compilationResult.success);
+		objToSave.current = {...objToSave.current, isFormulaCorrect: compilationResult.success, expression : buildServerExression(compilationResult.treeRoot), expressionText: compilationResult.textToSave}
+		handlePostObjToSave()
+	}, []);
 
     /*
         Построение семнатического дерева формулы в серверной форме
@@ -169,86 +176,53 @@ export default function CreateFieldDialog(props){
         
     }
 
-    return (
-        <Dialog
-            open={props.open}
-            PaperComponent={PaperComponent}
-            aria-labelledby="drag-title"
-        >
 
-            <DialogTitle style={{ cursor: 'move' }} id="drag-title"> Производное поле </DialogTitle>
 
-            <div>
-                <div>
-
-                </div>
-                <DataLoader
+	return (
+		<div style={{ padding: '20px', background: 'white', margin: '20px', borderRadius: '8px'}}>
+			<DataLoader
                 loadFunc = {dataHub.derivedFieldController.getFieldsAndExpressions}
                 loadParams = {[props.jobId, props.reportId]}
                 onDataLoaded = {handleFieldsAndExpressionsLoaded}
             >
-                <h2>Создать новое</h2>
-                <TextField
-                            required
-                            error={ fieldName.replace(/\s/g,"") === "" ? true : false }
-                            id="newFieldName"
-                            label="Название"
-                            placeholder="Введите название производного поля"
-                            className={classes.CSD_nameField}
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                            variant="outlined"
-                            value={fieldName}
-                            onChange={(event) => setFieldName(event.target.value)}
-                />
-                <TextField
-                            id="newConfigDescription"
-                            label="Описание"
-                            placeholder="Введите описание производного поля"
-                            multiline
-                            rows={5}
-                            className={classes.CSD_descriptionField}
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                            variant="outlined"
-                            value={fieldDesc}
-                            onChange={(event) => setFieldDesc(event.target.value)}
-                />
+				<TextField
+					required
+					label="Название"
+					id="newFieldName"
+					placeholder="Введите название производного поля"
+					className={classes.CSD_nameField}
+					InputLabelProps={{
+						shrink: true,
+					}}
+					variant="outlined"
+					value={fieldName}
+					onChange={(event) => handleChangeName(event.target.value)}
+					error={ fieldName.replace(/\s/g,"") === "" ? true : false }
+				/>
+				<TextField
+					label="Описание"
+					id="newConfigDescription"
+					placeholder="Введите описание производного поля"
+					multiline
+					rows={5}
+					className={classes.CSD_descriptionField}
+					InputLabelProps={{
+						shrink: true,
+					}}
+					variant="outlined"
+					value={fieldDesc}
+					onChange={(event) => handleChangeDesc(event.target.value)}
+				/>
 
-                <FormulaEditor
-                    height = "200px"
-                    initialCode={""}
-                    functions = {functionsList}
-                    originalFields = {originalFieldsList}
-                    derivedFields = {derivedFieldsList}
-                    onChange = {handleFormulaChange}
-                />
-
-                <DialogActions>
-                    <Button 
-                        color="primary" 
-                        disabled = { (isFormulaCorrect && fieldName.trim().length > 0) ? false : true }
-                        onClick={() => props.onSave({
-                            fieldName : fieldName.trim(),
-                            fieldDesc : fieldDesc.trim(),
-                            expression : buildServerExression(formulaTreeRoot.current),
-                            expressionText : textToSave.current
-                        })}
-                    >
-                        Сохранить
-                    </Button>
-                    <Button 
-                        color="primary" 
-                        onClick={() => props.onCancel()}
-                    >
-                        Отменить
-                    </Button>
-                </DialogActions>
-                </DataLoader>
-            </div>
-
-        </Dialog>
-    )
+				<FormulaEditor
+					height = "200px"
+					initialCode={""}
+					functions = {functionsList}
+					originalFields = {originalFieldsList}
+					derivedFields = {derivedFieldsList}
+					onChange = {handleFormulaChange}
+				/>
+			</DataLoader>
+		</div>
+	)
 }

@@ -12,6 +12,14 @@ const EXPRESSIONS_GET_ALL =  CONTROLLER_URL + '/expressions/get-all';
 
 export default function DerivedFieldController(dataHub){
 
+    this.getAllDerivedFields = (reportId, callback) => {
+        const body = { 
+            reportId
+        }
+
+        return dataHub.requestService(GET_DERIVED_FIELDS, METHOD, body, callback); 
+    }
+
     this.add = (reportId, fieldName, fieldDesc, expression, expressionText, callback) => {
         let body = {
             reportId: reportId,
