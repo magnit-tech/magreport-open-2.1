@@ -7,6 +7,7 @@ import { MagreportLanguage } from "../maglang/maglang.js";
 import {tags as t } from '@lezer/highlight';
 
 import "./FormulaEditor.css"
+import { TextField } from "@material-ui/core";
 
 // Примеры highlight смотреть здесь:
 // https://github.com/codemirror/highlight/blob/main/src/highlight.ts 
@@ -55,6 +56,7 @@ const tempNodeType = {
 }
 
 export default function FormulaEditor(props){
+  console.log(props);
 
     const editor = useRef();
     const [errorMessages, setErrorMessages] = useState("");
@@ -134,6 +136,7 @@ export default function FormulaEditor(props){
     */
 
       function replaceIdWithNames(codeWithId){
+        // console.log(codeWithId);
         let pattern = /(\[\d+\])|(\[\[\d+\]\])/g;
   
         function replacer(match, ...arg){
@@ -163,6 +166,9 @@ export default function FormulaEditor(props){
       }
   
       const initialCode = useMemo(() => replaceIdWithNames(props.initialCode), [props.initialCode]);
+
+// console.log(initialCode);
+// console.log(props.initialCode);
 
       function replaceNamesWithId(code){
         return code;
@@ -369,8 +375,21 @@ export default function FormulaEditor(props){
               extensions={[new LanguageSupport(MagreportLanguage, [completion])]}
               onChange={handleChange}
             />
-            <textarea className="errorViewer" readOnly rows="10" value={errorMessages}>
-            </textarea>
+
+            <TextField
+              label="Поле ошибок"
+              className="errorViewer"
+              multiline
+              InputProps={{
+                readOnly: true,
+              }}
+              InputLabelProps={{
+                shrink: true,
+              }}
+              rows={5}
+              variant="outlined"
+              value={errorMessages}
+            />
 
         </div>
       );

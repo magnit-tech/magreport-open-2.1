@@ -43,7 +43,7 @@ import FormulaEditor, {nodeType} from "./maglangFormulaEditor/FormulaEditor/Form
 
 //utils
 import validateSaveConfig from 'utils/validateSaveConfig';
-import CreateFieldDialog from './UI/CreateFieldDialog';
+import CreateFieldDialog from './UI/DerivedFieldDialog/DerivedFieldDialog';
 
 
 /**
