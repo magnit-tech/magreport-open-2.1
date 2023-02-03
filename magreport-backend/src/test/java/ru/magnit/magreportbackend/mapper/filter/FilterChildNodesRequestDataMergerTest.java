@@ -61,6 +61,8 @@ class FilterChildNodesRequestDataMergerTest {
                 FilterTypeEnum.HIERARCHY,
                 FilterOperationTypeEnum.IS_IN_LIST,
                 "",
+                null,
+                null,
                 Collections.emptyList()
         ));
     }

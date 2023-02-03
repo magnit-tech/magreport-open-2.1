@@ -12,3 +12,8 @@ ${filter().getFieldNameByFieldId(getFieldId())} IN (<#--
 --></#list><#sep>, </#sep><#--
 --></#list>)<#--
 -->
+GROUP BY
+<#list filter().fields() as field><#--
+-->    ${field.fieldName()}<#sep>,</#sep>
+</#list><#--
+-->

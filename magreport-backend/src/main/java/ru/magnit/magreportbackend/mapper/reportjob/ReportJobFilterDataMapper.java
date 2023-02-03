@@ -19,13 +19,15 @@ public class ReportJobFilterDataMapper implements Mapper<ReportJobFilterData, Re
         final var dataset = source.getFilterReport().getFilterInstance().getDataSet();
         final var datasetId = dataset == null ? null : dataset.getId();
         return new ReportJobFilterData(
-            source.getFilterReport().getId(),
-            datasetId,
-            -1L,
-            "NONE",
-            FilterTypeEnum.getByOrdinal(source.getFilterReport().getFilterInstance().getFilterTemplate().getType().getId()),
-            FilterOperationTypeEnum.getById(source.getFilterOperationType().getId()),
-            source.getFilterReport().getCode(),
-            tupleDataMapper.from(source.getTuples()));
+                source.getFilterReport().getId(),
+                datasetId,
+                -1L,
+                "NONE",
+                FilterTypeEnum.getByOrdinal(source.getFilterReport().getFilterInstance().getFilterTemplate().getType().getId()),
+                FilterOperationTypeEnum.getById(source.getFilterOperationType().getId()),
+                source.getFilterReport().getCode(),
+                source.getFilterReport().getMaxCountItems(),
+                source.getFilterReport().getName(),
+                tupleDataMapper.from(source.getTuples()));
     }
 }
