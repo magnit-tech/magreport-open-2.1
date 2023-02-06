@@ -14,6 +14,7 @@ import ru.magnit.magreportbackend.service.jobengine.ReportReaderFactory;
 import java.util.List;
 import java.util.Map;
 
+import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.CLICK_HOUSE;
 import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.DB2;
 import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.H2;
 import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.IMPALA;
@@ -41,7 +42,9 @@ public class ReportReaderFactoryImpl implements ReportReaderFactory {
             Map.entry(MSSQL, MsSqlQueryBuilder.class),
             Map.entry(POSTGRESQL, PostgreSqlQueryBuilder.class),
             Map.entry(DB2, PostgreSqlQueryBuilder.class),
-            Map.entry(SAP_HANA, SapHanaQueryBuilder.class)
+            Map.entry(SAP_HANA, SapHanaQueryBuilder.class),
+            Map.entry(CLICK_HOUSE, ClickHouseQueryBuilder.class)
+
     );
 
     @Override
