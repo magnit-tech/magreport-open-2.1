@@ -22,6 +22,8 @@ import JobStatusSelect from './JobFilters/JobStatusSelect'
 import JobUsernameSelect from './JobFilters/JobUsernameSelect'
 import {FolderItemTypes} from './FolderItemTypes';
 import Slide from '@material-ui/core/Slide';
+import {dateCorrection} from '../../../src/utils/dateFunctions'
+
 // dataHub
 import dataHub from 'ajax/DataHub';
 // styles
@@ -170,8 +172,8 @@ export default function FilterPanel(props){
 										format="dd.MM.yyyy HH:mm"
 										margin="normal"
 										inputVariant="filled"
-										value={props.filters.periodStart}
-										onChange={date => props.onFilterChange('periodStart', date)}
+										value={dateCorrection(props.filters.periodStart, true)}
+										onChange={date => props.onFilterChange('periodStart', dateCorrection(date, false))}
                                         label="Начало периода"
                                         cancelLabel="ОТМЕНИТЬ"
                                         okLabel="СОХРАНИТЬ"
@@ -187,8 +189,8 @@ export default function FilterPanel(props){
 										format="dd.MM.yyyy HH:mm"
 										margin="normal"
 										inputVariant="filled"
-										value={props.filters.periodEnd}
-										onChange={date => props.onFilterChange('periodEnd', date)}
+										value={dateCorrection(props.filters.periodEnd, true)}
+										onChange={date => props.onFilterChange('periodEnd', dateCorrection(date, false))}
                                         label="Конец периода"
                                         cancelLabel="ОТМЕНИТЬ"
                                         okLabel="СОХРАНИТЬ"
