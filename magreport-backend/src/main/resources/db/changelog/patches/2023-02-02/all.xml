@@ -1,0 +1,13 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="ADD-DATASOURCE-CLICK-HOUSE-001" author="vyushin_aa">
+        <insert tableName="DATASOURCE_TYPE">
+            <column name="NAME" value="CLICK_HOUSE"/>
+            <column name="DESCRIPTION" value="CLICK HOUSE DATABASE"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
