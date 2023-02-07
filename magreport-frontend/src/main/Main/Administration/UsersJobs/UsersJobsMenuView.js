@@ -1,4 +1,4 @@
-import React, {useState } from 'react';
+import React, {useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -14,6 +14,7 @@ import {actionFilterJobs, actionJobCancel, showSqlDialog, actionShowStatusHistor
 import DataLoader from 'main/DataLoader/DataLoader';
 import FolderContent from 'main/FolderContent/FolderContent';
 import SidebarItems from '../../Sidebar/SidebarItems';
+import {dateCorrection} from '../../../../../src/utils/dateFunctions'
 
 
 function UsersJobsMenuView(props){
@@ -30,6 +31,17 @@ function UsersJobsMenuView(props){
     const [reload, setReload] = useState({needReload : false});
 
     let folderItemsType = SidebarItems.admin.subItems.userJobs.folderItemType;
+
+    let now  =  new Date();
+    let midNight = new Date();
+
+    midNight.setHours(0);
+    midNight.setMinutes(0);
+    midNight.setSeconds(0);
+
+    useEffect(()=>{
+        props.actionFilterJobs(folderItemsType, {periodStart: dateCorrection(midNight, false), periodEnd:  dateCorrection(now, false) })
+    }, []); // eslint-disable-line
 
     function handleRefreshFolder(){
         setReload({needReload : true})
