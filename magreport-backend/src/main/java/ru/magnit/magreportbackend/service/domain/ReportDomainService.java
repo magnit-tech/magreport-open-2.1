@@ -220,13 +220,22 @@ public class ReportDomainService {
 
     @Transactional
     public void deleteReportToFavorites(UserView currentUser, ReportIdRequest request) {
-
         favReportRepository.deleteByUserIdAndReportId(currentUser.getId(), request.getId());
     }
 
     @Transactional
     public void deleteFavReportsByReportId(Long reportId) {
         favReportRepository.deleteByReportId(reportId);
+    }
+
+    @Transactional
+    public void deleteFavReportsByFoldertId(Long folderId) {
+        favReportRepository.deleteByFolderId(folderId);
+    }
+
+    @Transactional
+    public void deleteFavReport(Long userId, Long reportId, Long folderId) {
+        favReportRepository.deleteByUserIdAndReportIdAndFolderId(userId, reportId, folderId);
     }
 
     @Transactional
