@@ -104,7 +104,7 @@ public class FolderService {
     }
 
     public void deleteFolder(FolderRequest request) {
-
+        reportDomainService.deleteFavReportsByFoldertId(request.getId());
         domainService.deleteFolder(request.getId());
     }
 
@@ -114,7 +114,8 @@ public class FolderService {
     }
 
     public void deleteReport(FolderAddReportRequest request) {
-
+        var userId = userDomainService.getCurrentUser().getId();
+        reportDomainService.deleteFavReport(userId, request.getReportId(), request.getFolderId());
         domainService.deleteReport(request);
     }
 
