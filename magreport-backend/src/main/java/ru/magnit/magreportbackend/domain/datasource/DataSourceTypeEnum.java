@@ -8,7 +8,8 @@ public enum DataSourceTypeEnum {
     MSSQL,
     POSTGRESQL,
     DB2,
-    SAP_HANA;
+    SAP_HANA,
+    CLICK_HOUSE;
 
     public static DataSourceTypeEnum getByOrdinal(long id) {
         return DataSourceTypeEnum.values()[(int) id];
