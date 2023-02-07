@@ -11,3 +11,8 @@ export function dateToStringFormat(dt){
     
     return yy + '-' + mm + '-' + dd;
 };
+export function dateCorrection(dt, p){
+    const corr = dt.getTimezoneOffset() * 60 * 1000;
+    if (p) { return new Date(dt.getTime() + corr)}
+    else {   return new Date(dt.getTime() - corr)};
+}
