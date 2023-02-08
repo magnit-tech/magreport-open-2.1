@@ -85,6 +85,7 @@ class AsmSecuritySourceResponseMapperTest {
         verify(source).getDataSet();
         verify(source).getPreSql();
         verify(source).getPostSql();
+        verify(source).getRoleDescription();
         verify(source).getFields();
         verify(source).getSecurityFilters();
         verify(source).getCreatedDateTime();

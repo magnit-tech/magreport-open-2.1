@@ -4,7 +4,7 @@ import React from 'react';
 import ListItem from "@material-ui/core/ListItem";
 
 // local
-import ReportFieldItem from './ReportFieldItemViewer';
+import ReportFieldItemViewer from './ReportFieldItemViewer';
 
 /**
  * Компонент просмотра полей отчета
@@ -16,25 +16,11 @@ import ReportFieldItem from './ReportFieldItemViewer';
  */
 
 export default function ReportFieldsViewer(props) {
-    const sortedArr = () => {
-        let arr = []
-
-        props.fields.forEach((_, index) => {             
-            for (let item of props.fields) {
-                if (item.ordinal === index) {
-                    arr.push(item)
-                }
-            }
-        })
-
-        return arr
-    }
-
     return (
         <div>
-            {sortedArr().map((item, index) =>
+            {props.fields.map((item, index) =>
                 <ListItem key={item.id}>
-                    <ReportFieldItem
+                    <ReportFieldItemViewer
                         key={item.id}
                         name={item.name}
                         visible={item.visible}
@@ -46,8 +32,7 @@ export default function ReportFieldsViewer(props) {
                         dataSetFields={props.dataSet.fields}
                     />
                 </ListItem>
-            )
-            }
+            )}
         </div>
     )
 }

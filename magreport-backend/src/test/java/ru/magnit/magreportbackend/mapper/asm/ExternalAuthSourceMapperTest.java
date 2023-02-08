@@ -76,6 +76,7 @@ class ExternalAuthSourceMapperTest {
         verify(request).getDescription();
         verify(request).getPreSql();
         verify(request).getPostSql();
+        verify(request).getRoleDescription();
         verify(request).getDataSetId();
         verify(request, times(2)).getFields();
         verify(request, times(2)).getSecurityFilters();

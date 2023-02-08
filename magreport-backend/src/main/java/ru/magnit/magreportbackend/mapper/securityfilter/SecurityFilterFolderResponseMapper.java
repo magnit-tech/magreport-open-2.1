@@ -30,6 +30,7 @@ public class SecurityFilterFolderResponseMapper implements Mapper<SecurityFilter
             shallowMap(source.getChildFolders()),
             securityFilterResponseMapper.from(source.getFilters()),
             FolderAuthorityEnum.NONE,
+            Collections.emptyList(),
             source.getCreatedDateTime(),
             source.getModifiedDateTime());
     }
@@ -46,6 +47,7 @@ public class SecurityFilterFolderResponseMapper implements Mapper<SecurityFilter
             Collections.emptyList(),
             Collections.emptyList(),
             FolderAuthorityEnum.NONE,
+            Collections.emptyList(),
             source.getCreatedDateTime(),
             source.getModifiedDateTime());
     }

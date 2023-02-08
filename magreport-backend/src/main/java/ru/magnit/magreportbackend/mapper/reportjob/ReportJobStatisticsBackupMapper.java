@@ -20,7 +20,10 @@ public class ReportJobStatisticsBackupMapper implements Mapper<ReportJobStatisti
                 source.getState().getId(),
                 source.getRowCount(),
                 source.getCreatedDateTime(),
-                source.getModifiedDateTime()
+                source.getModifiedDateTime(),
+                source.getExportExcelCount(),
+                source.getOlapRequestCount(),
+                source.getIsShare()
         );
     }
 }

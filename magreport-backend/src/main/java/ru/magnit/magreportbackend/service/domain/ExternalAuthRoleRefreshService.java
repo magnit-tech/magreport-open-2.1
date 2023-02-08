@@ -46,7 +46,7 @@ public class ExternalAuthRoleRefreshService {
             if (currentRecord.get(CHANGE_TYPE).equalsIgnoreCase(DELETE)) {
                 roleService.deleteRole(currentRecord.get(ROLE_NAME));
             } else {
-                roleService.addRole(new RoleAddRequest(null, (long) securityView.getRoleType().ordinal(), currentRecord.get(ROLE_NAME), ROLE_DESCRIPTION));
+                roleService.addRole(new RoleAddRequest(null, (long) securityView.getRoleType().ordinal(), currentRecord.get(ROLE_NAME), securityView.getSources().get(GROUP_SOURCE).getRoleDescription() ));
             }
         });
     }

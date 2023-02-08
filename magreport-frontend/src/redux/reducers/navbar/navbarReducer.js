@@ -1,67 +1,28 @@
 import React from "react";
-import {Edit, NoteAdd, Pageview} from "@material-ui/icons"
+import { Edit, NoteAdd, Pageview, ListAlt, LibraryBooks } from "@material-ui/icons"
 
-import dataHub from 'ajax/DataHub';
 import {
-    ASM_EDIT_ITEM_CLICK,
-    ASM_VIEW_ITEM_CLICK,
-    FOLDER_CONTENT_ADD_ITEM_CLICK,
-    FOLDER_CONTENT_EDIT_ITEM_CLICK,
-    FOLDER_CONTENT_EDIT_ROLE_USER_CLICK,
-    FOLDER_CONTENT_FOLDER_CLICK,
-    FOLDER_CONTENT_ITEM_CLICK,
     FOLDER_CONTENT_LOADED,
-    REPORT_START,
-    SIDEBAR_ITEM_CHANGED,
-    VIEWER_EDIT_ITEM,
-    VIEWER_VIEW_ITEM,
+    ADD_NAVBAR,
+    VIEW_ITEM_NAVBAR,
+    EDIT_ITEM_NAVBAR,
+    ADD_ITEM_NAVBAR,
+    ADD_REPORT_NAVBAR,
+    ADD_REPORT_STARTER_NAVBAR,
+    ASM_DATA_LOADED
 } from 'redux/reduxTypes';
+
 import SidebarItems from '../../../main/Main/Sidebar/SidebarItems';
 import {folderItemTypeName, FolderItemTypes} from 'main/FolderContent/FolderItemTypes.js';
-import actionSetSidebarItem from '../../actions/sidebar/actionSetSidebarItem';
-import {actionFolderClick, actionItemClick} from 'redux/actions/menuViews/folderActions';
-
-import {initialSidebarItem} from '../sidebar/initialSidebarItem';
-import {actionViewerEditItem, actionViewerViewItem} from "redux/actions/actionViewer";
 
 const initialState = {
-    items: [{
-        text: initialSidebarItem.text,
-        icon: initialSidebarItem.icon,
-        isLast: true,
-        callbackFunc: actionSetSidebarItem(initialSidebarItem),
-    }]
+    items: []
 }
 
-function buildNavigationPathToFolder(itemsType, folderId, isLastPosition){
-    let path = [];
-    let id = folderId;
-    let localCache = dataHub.getLocalCache();
-    let isLast = isLastPosition;
-    while((id !== null)&&(id !== undefined)){
-        if (itemsType !== FolderItemTypes.userJobs && itemsType !== FolderItemTypes.job){
-            
-            let data = localCache.getFolderData(itemsType, id);
-            path.push({
-                text : data.name,
-                callbackFunc: actionFolderClick(itemsType, id),
-                isLast
-            });
-            isLast = false;
-            id = data.parentId;
-        }
-        else {
-            let data = localCache.getJobInfo(id)
-            path.push({
-                text : data.name,
-                callbackFunc: actionFolderClick(itemsType, id),
-                isLast,
-            })
-            break
-        }
-    }
 
-    let sidebarItem = itemsType === FolderItemTypes.report ? SidebarItems.reports
+function buildNavigationPathToFolder(itemsType, path){
+
+    let sidebarItem = itemsType === FolderItemTypes.reports ? SidebarItems.reports
                      :itemsType === FolderItemTypes.favorites ? SidebarItems.favorites
                      :itemsType === FolderItemTypes.datasource ? SidebarItems.development.subItems.datasources
                      :itemsType === FolderItemTypes.dataset ? SidebarItems.development.subItems.datasets
@@ -79,285 +40,212 @@ function buildNavigationPathToFolder(itemsType, folderId, isLastPosition){
                      :itemsType === FolderItemTypes.theme ? SidebarItems.admin.subItems.theme
                      :itemsType === FolderItemTypes.cubes ? SidebarItems.admin.subItems.cubes
                      :  SidebarItems.reports;
-    path.push({
+
+    let navbarArray = []
+
+    const firstLink = {
         text : sidebarItem.text,
         icon : sidebarItem.icon,
-        callbackFunc : actionSetSidebarItem(sidebarItem),
-        isLast
-    });
-
-    return path.reverse();
-}
-
-function buildNavigationPathToItem(itemType, itemId){
-    let path = [];
-    let localCache = dataHub.getLocalCache();
-    let data
-
-    if (itemType === FolderItemTypes.job || itemType === FolderItemTypes.userJobs || itemType === SidebarItems.jobs.key){
-
-        data = localCache.getJobInfo(itemId)
-
-        path.push({
-            text : data.report.name,
-            isLast: true,
-            callbackFunc: actionItemClick(itemType, itemId)
-        });
-
-        let sidebarItem = itemType === FolderItemTypes.job ? SidebarItems.jobs
-                        : itemType === SidebarItems.jobs.key ? SidebarItems.jobs
-                        : itemType === FolderItemTypes.userJobs ? SidebarItems.admin.subItems.userJobs
-                        : null;
-        path.push({
-            text : sidebarItem.text,
-            icon : sidebarItem.icon,
-            isLast: false,
-            callbackFunc : actionSetSidebarItem(sidebarItem)
-        });
-        path.reverse()
+        action: null,
+        itemsType,
+        id: null,
+        parentId: null,
+        isLast: (path && path.length > 0) ? false : true
     }
-    else {
-       // debugger
-        let icon = <Edit/>;
-        if (itemType === FolderItemTypes.report) {
-            icon = null;
-        }
-        let service = itemType === FolderItemTypes.report ? localCache.getReportInfo
-                    : itemType === FolderItemTypes.favorites ? localCache.getReportInfo
-                    : itemType === FolderItemTypes.dataset ? localCache.getDatasetInfo
-                    : itemType === FolderItemTypes.reportsDev ? localCache.getReportInfo
-                    : itemType === FolderItemTypes.roles ? localCache.getUserRolesInfo 
-                    : itemType === FolderItemTypes.datasource ? localCache.getDatasourceInfo
-                    : itemType === FolderItemTypes.securityFilters ? localCache.getSecurityFilterInfo
-                    : itemType === FolderItemTypes.filterInstance ? localCache.getFilterInstanceInfo
-                    : itemType === FolderItemTypes.filterTemplate ? localCache.getFilterTemplateInfo
-                    : itemType === FolderItemTypes.asm ? localCache.getASMInfo
-                    : itemType === FolderItemTypes.schedules ? localCache.getScheduleInfo
-                    : itemType === FolderItemTypes.scheduleTasks ? localCache.getScheduleTasksInfo
-                    : itemType === FolderItemTypes.systemMailTemplates ? localCache.getSystemMailTemplateIdInfo
-                    : itemType === FolderItemTypes.theme ? localCache.getThemeInfo
-                    : null;
-        
-        data = service(itemId) 
-        if (!data){
-            data = localCache.getItemData(itemType, itemId)
-        }
-        path = buildNavigationPathToFolder(itemType, data.folderId, false) 
-        path.push({
-            icon,
-            text : data.name,
-            isLast : true,
-            callbackFunc: () => {}
+
+    navbarArray.push(firstLink)
+
+    if (path && path.length > 0) {
+        path.forEach((item, index) => {
+            navbarArray.push({
+                text : item.name,
+                icon : null,
+                itemsType,
+                id: item.id,
+                parentId: item.parentId,
+                isLast: path.length - 1 === index ? true : false
+            })
         })
     }
     
-    return path
+    return navbarArray
 }
 
-function buildNavigationPathToItemViewerEditor(items, itemType, itemId, itemName, isViewer) {
-    const viewerIcon = <Pageview/>; //TODO: move icon constants to a separate script?
-    const editorIcon = <Edit/>;
-
-    let localCache = dataHub.getLocalCache();
-    let service = itemType === FolderItemTypes.securityFilters ? localCache.getSecurityFilterInfo
-                : itemType === FolderItemTypes.filterInstance ? localCache.getFilterInstanceInfo
-                : itemType === FolderItemTypes.filterTemplate ? localCache.getFilterTemplateInfo
-                : itemType === FolderItemTypes.dataset ? localCache.getDatasetInfo
-                : itemType === FolderItemTypes.datasource ? localCache.getDatasourceInfo
-                : itemType === FolderItemTypes.roles ? localCache.getRoleInfo
-                : itemType === FolderItemTypes.reportsDev ? localCache.getReportInfo
-                : itemType === FolderItemTypes.asm ? localCache.getASMInfo
-                : itemType === FolderItemTypes.schedules ? localCache.getScheduleInfo
-                : itemType === FolderItemTypes.scheduleTasks ? localCache.getScheduleTasksInfo
-                : itemType === FolderItemTypes.theme ? localCache.getthemeInfo 
-                : null;
-    let data;
-    try {
-        data = service(itemId);
-        
-        if (!data) {
-            data = localCache.getItemData(itemType, itemId);
-
-            if(!data) {
-                data = {name: itemName || folderItemTypeName(itemType)}; //stub for cases when item data is not in cache
-            }
-            
-        }
-    } catch (e) {
-        data = {name: itemName || folderItemTypeName(itemType)}; //stub for cases when item data is not in cache
-    }
-
-    let newCallbackFunc;
-    if (isViewer) {
-        newCallbackFunc = actionViewerViewItem(itemType, itemId, itemName);
-    } else {
-        newCallbackFunc = actionViewerEditItem(itemType, itemId, itemName);
-    }
+function buildNavigationPathToViewItem(itemsType, name, id, parentId, path) {
+    const icon = <Pageview/>;
+    let newNavbar = buildNavigationPathToFolder(itemsType, path)
 
     const newItem = {
-        icon: isViewer ? viewerIcon : editorIcon,
-        text: data.hasOwnProperty('name') ? data.name : itemName,
+        icon,
+        text: name,
+        action: 'view',
+        itemsType,
+        id,
+        parentId,
         isLast: true,
-        callbackFunc: newCallbackFunc
-    };
-
-    const existItemIndex = items.findIndex(i =>
-        i.callbackFunc.type === newCallbackFunc.type
-        && i.callbackFunc.itemType === newCallbackFunc.itemType
-        && i.callbackFunc.itemId === newCallbackFunc.itemId
-    );
-
-    const newItems = [
-        ...items.slice(0, existItemIndex !== -1 ? existItemIndex : items.length),
-        newItem
-    ];
-
+    }
+    
+    const newItems = [...newNavbar, newItem];
+    
     newItems.slice(0, newItems.length - 1).forEach(i => i.isLast = false);
-
     return newItems;
 }
 
-function buildNavigationPathToNewItem(items, itemsType, folderId) {
+function buildNavigationPathToEditItem(items, itemsType, name, id, parentId, path) {
+    const icon = <Edit/>;
+
+    const newItem = {
+        icon,
+        text: name,
+        action: 'edit',
+        itemsType,
+        id,
+        parentId,
+        isLast: true,
+    }
+
+    if (items.length > 0) {
+        const newItems = [...items, newItem];
+        newItems.slice(0, newItems.length - 1).forEach(i => i.isLast = false);
+        return newItems;
+    } else {
+        let newNavbar = buildNavigationPathToFolder(itemsType, path)
+        const newItems = [...newNavbar, newItem];
+        newItems.slice(0, newItems.length - 1).forEach(i => i.isLast = false);
+        return newItems;
+    }
+}
+
+function buildNavigationPathToNewItem(itemsType, parentId, path) {
     const icon = <NoteAdd />;
     const itemName = folderItemTypeName(itemsType);
     const name = `Создание: ${itemName}`;
 
     const newItem = {
         icon,
-        text : name,
-        callbackFunc: () => {},
+        text: name,
+        action: 'add',
+        itemsType,
+        id: null,
+        parentId,
         isLast: true,
     }
 
-    const newItems = [...items, newItem];
+    let newNavbar = buildNavigationPathToFolder(itemsType, path)
+    const newItems = [...newNavbar, newItem];
     newItems.slice(0, newItems.length - 1).forEach(i => i.isLast = false);
     return newItems;
 }
 
+function buildNavigationPathToReport(items, itemsType, name, id) {
+    const icon = <ListAlt/>;
+
+    const newItem = {
+        icon,
+        text: name,
+        action: null,
+        itemsType,
+        id,
+        parentId: null,
+        isLast: true,
+    }
+
+    if (items.length > 0) { 
+        if(items[items.length - 1].itemsType !== itemsType) {
+            const newItems = [...items, newItem];
+            newItems.slice(0, newItems.length - 1).forEach(i => i.isLast = false);
+            return newItems;
+        } else {
+            return items
+        }
+    } else {
+        return [newItem]
+    }
+}
+
+function buildNavigationPathToReportStarter(items, itemsType, name, id) {
+    const icon = <LibraryBooks/>;
+
+    const newItem = {
+        icon,
+        text: name,
+        action: null,
+        itemsType,
+        id,
+        parentId: null,
+        isLast: true,
+    }
+
+    let actualItems = items
+
+    actualItems.forEach((item, index) => {
+        if(item.itemsType === "report/starter") {
+            actualItems = items.slice(0, index)
+        }
+    })
+
+    const newItems = [...actualItems, newItem];
+    newItems.slice(0, newItems.length - 1).forEach(i => i.isLast = false);
+    return newItems;
+}
+
+
+
 export const navbarReducer = (state = initialState, action) => {
     switch (action.type){
-        case FOLDER_CONTENT_ADD_ITEM_CLICK:
-            return {
-                items: buildNavigationPathToNewItem(state.items, action.itemsType, action.folderId)
-            };
-        case SIDEBAR_ITEM_CHANGED: 
-
-            const item = {
-                text: action.newSidebarItem.text,
-                icon: action.newSidebarItem.icon,
-                isLast: true,
-                callbackFunc: actionSetSidebarItem(action.newSidebarItem),
-            }
-
-            return {
-                items: [item]
-            }
-        case FOLDER_CONTENT_FOLDER_CLICK:
-            if(action.isFolderItemPicker) {
-                return state;
-            }
-            return {
-                items : buildNavigationPathToFolder(action.itemsType, action.folderId, true)
-            }
+        
         case FOLDER_CONTENT_LOADED:
             if(action.isFolderItemPicker) {
                 return state;
             }
             return {
-                items : buildNavigationPathToFolder(action.itemsType, action.folderData.id, true)
+                items : buildNavigationPathToFolder(action.itemsType, action.folderData.path, true)
             }
-        case FOLDER_CONTENT_ITEM_CLICK:
-            // if (action.isBreadcrumb) {
-            //     return state;
-            // }
-            if (action.itemType === FolderItemTypes.job || 
-                action.itemType === FolderItemTypes.userJobs || 
-                action.itemType === FolderItemTypes.favorites ||
-                action.itemType === FolderItemTypes.report ||
-                action.itemType === FolderItemTypes.reportsDev){
-                return {
-                    items : buildNavigationPathToItem(action.itemType, action.itemId)
-                }
-            } else if (action.itemType === FolderItemTypes.securityFilters ||
-                       action.itemType === FolderItemTypes.filterInstance ||
-                       action.itemType === FolderItemTypes.filterTemplate ||
-                       action.itemType === FolderItemTypes.dataset ||
-                       action.itemType === FolderItemTypes.datasource ||
-                       action.itemType === FolderItemTypes.roles ||
-                       action.itemType === FolderItemTypes.schedules ||
-                       action.itemType === FolderItemTypes.scheduleTasks ||
-                       action.itemType === FolderItemTypes.schedules ||
-                       action.itemType === FolderItemTypes.systemMailTemplates ||
-                       action.itemType === FolderItemTypes.theme
-            ) {
-                return {
-                    items: buildNavigationPathToItemViewerEditor(state.items, action.itemType, action.itemId, action.itemName, true)
-                };
-            }
-            else {
-                return state
-            }
-        case FOLDER_CONTENT_EDIT_ITEM_CLICK:
-            if (action.itemType === FolderItemTypes.dataset ||
-                action.itemType === FolderItemTypes.datasource ||
-                action.itemType === FolderItemTypes.securityFilters ||
-                action.itemType === FolderItemTypes.filterInstance ||
-                action.itemType === FolderItemTypes.filterTemplate ||
-                action.itemType === FolderItemTypes.roles ||
-                action.itemType === FolderItemTypes.reportsDev ||
-                action.itemType === FolderItemTypes.schedules ||
-                action.itemType === FolderItemTypes.scheduleTasks ||
-                action.itemType === FolderItemTypes.systemMailTemplates ||
-                action.itemType === FolderItemTypes.theme
-                ) {
-                return {
-                    items : buildNavigationPathToItem(action.itemType, action.itemId)
-                }
-            }
-            else {
-                return state
-            }
-        case VIEWER_EDIT_ITEM:
-        case VIEWER_VIEW_ITEM:
-        case FOLDER_CONTENT_EDIT_ROLE_USER_CLICK:
-            if (action.itemType === FolderItemTypes.securityFilters ||
-                action.itemType === FolderItemTypes.filterInstance ||
-                action.itemType === FolderItemTypes.filterTemplate ||
-                action.itemType === FolderItemTypes.dataset ||
-                action.itemType === FolderItemTypes.datasource ||
-                action.itemType === FolderItemTypes.roles ||
-                action.itemType === FolderItemTypes.reportsDev ||
-                action.itemType === FolderItemTypes.asm ||
-                action.itemType === FolderItemTypes.schedules ||
-                action.itemType === FolderItemTypes.scheduleTasks ||
-                action.itemType === FolderItemTypes.systemMailTemplates ||
-                action.itemType === FolderItemTypes.theme
-                ) {
 
-                return {
-                    items: buildNavigationPathToItemViewerEditor(state.items, action.itemType, action.itemId, action.itemName,
-                        action.type === VIEWER_VIEW_ITEM)
-                };
-            } else {
-                return state;
-            }
-        case ASM_VIEW_ITEM_CLICK:
+        case ADD_NAVBAR:
+            return { items: [{
+                text : action.text,
+                icon : null,
+                itemsType: action.itemsType,
+                id: null,
+                isLast: true,
+            }]}
+
+        case VIEW_ITEM_NAVBAR:
             return {
-                items: buildNavigationPathToItemViewerEditor(state.items, action.itemType, action.itemId, action.itemName, true)
+                items: buildNavigationPathToViewItem(action.itemsType, action.name, action.id, action.parentId, action.path)
             };
-        case ASM_EDIT_ITEM_CLICK:
+
+        case EDIT_ITEM_NAVBAR:
             return {
-                items: buildNavigationPathToItem(action.itemType, action.itemId)
+                items: buildNavigationPathToEditItem(state.items, action.itemsType, action.name, action.id, action.parentId, action.path)
             };
-        case REPORT_START:
-            if (action.itemType === FolderItemTypes.job || action.itemType === FolderItemTypes.userJobs ){
+
+        case ADD_ITEM_NAVBAR:
+            return {
+                items: buildNavigationPathToNewItem(action.itemsType, action.parentId, action.path)
+            };
+
+        case ADD_REPORT_NAVBAR:
+            return {
+                items: buildNavigationPathToReport(state.items, action.itemsType, action.name, action.id)
+            };
+
+        case ADD_REPORT_STARTER_NAVBAR:
+            return {
+                items: buildNavigationPathToReportStarter(state.items, action.itemsType, action.name, action.id)
+            };
+
+        case ASM_DATA_LOADED:
+            if (action.actionFor === 'view') {
                 return {
-                    items : buildNavigationPathToItem(action.itemType, action.jobId)
+                    items: buildNavigationPathToViewItem('asm', action.data.name, action.data.id, null, null)
                 }
             }
-            else {
-                return state
+            return {
+                items: buildNavigationPathToEditItem(state.items, 'asm', action.data.name, action.data.id, null, null)
             }
+            
         default:
             return state
     }

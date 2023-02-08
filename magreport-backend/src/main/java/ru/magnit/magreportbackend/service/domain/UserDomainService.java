@@ -141,7 +141,6 @@ public class UserDomainService {
 
     @Transactional
     public List<RoleView> getUserRoles(String userName, String domainName, UserRoleTypeEnum userRoleType) {
-
         final var domain = getDomain(domainName);
         List<RoleView> result = Collections.emptyList();
         var user = userRepository.getUserByNameAndDomainId(userName, domain.getId());

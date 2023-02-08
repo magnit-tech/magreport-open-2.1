@@ -300,17 +300,17 @@ class FilterReportDomainServiceTest {
                 false,
                 new DataSourceData(null, null, null, null, null, null),
                 new ReportData(ID, "", "", "", "", Collections.emptyList(), new ReportFilterGroupData(
-                        ID, ID, "", "", null, Collections.emptyList(), Collections.emptyList())),
+                        ID, ID, "", "", null, Collections.emptyList(), Collections.emptyList()), true),
                 new ArrayList<>(Arrays.asList(
-                        new ReportJobFilterData(ID, -1L, ID,"", FilterTypeEnum.VALUE_LIST, FilterOperationTypeEnum.IS_BETWEEN, "*", Collections.singletonList(
+                        new ReportJobFilterData(ID, -1L, ID,"", FilterTypeEnum.VALUE_LIST, FilterOperationTypeEnum.IS_BETWEEN, "*", null, null,Collections.singletonList(
                                 new ReportJobTupleData(
                                         Collections.singletonList(
                                                 new ReportJobTupleFieldData(ID, ID, ID, ID,"", DataTypeEnum.DATE, ""))))),
-                        new ReportJobFilterData(ID, -1L, ID,"", FilterTypeEnum.VALUE_LIST, FilterOperationTypeEnum.IS_LOWER, "*", new ArrayList<>(Collections.singletonList(
+                        new ReportJobFilterData(ID, -1L, ID,"", FilterTypeEnum.VALUE_LIST, FilterOperationTypeEnum.IS_LOWER, "*", null, null, new ArrayList<>(Collections.singletonList(
                                 new ReportJobTupleData(
                                         Collections.singletonList(
                                                 new ReportJobTupleFieldData(ID, ID, ID, ID,"", DataTypeEnum.INTEGER, "")))))),
-                        new ReportJobFilterData(ID, -1L, ID,"", FilterTypeEnum.DATE_RANGE, FilterOperationTypeEnum.IS_EQUAL, "*", new ArrayList<>(Collections.singletonList(
+                        new ReportJobFilterData(ID, -1L, ID,"", FilterTypeEnum.DATE_RANGE, FilterOperationTypeEnum.IS_EQUAL, "*", null, null,new ArrayList<>(Collections.singletonList(
                                 new ReportJobTupleData(
                                         Collections.singletonList(
                                                 new ReportJobTupleFieldData(ID, ID, ID, ID, "", DataTypeEnum.DATE, "")))))))),

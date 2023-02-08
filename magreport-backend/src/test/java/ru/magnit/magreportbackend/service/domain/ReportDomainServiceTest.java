@@ -45,6 +45,7 @@ import ru.magnit.magreportbackend.repository.ReportFolderRepository;
 import ru.magnit.magreportbackend.repository.ReportRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -136,8 +137,8 @@ class ReportDomainServiceTest {
         assertEquals(CREATED_TIME, response.getCreated());
         assertEquals(MODIFIED_TIME, response.getModified());
 
-        verify(folderRepository).existsById(anyLong());
-        verify(folderRepository).getReferenceById(anyLong());
+        verify(folderRepository, times(2)).existsById(anyLong());
+        verify(folderRepository, times(2)).getReferenceById(anyLong());
         verify(reportFolderResponseMapper).from((ReportFolder) any());
         verifyNoMoreInteractions(favReportRepository, folderRepository, reportFolderResponseMapper);
 
@@ -289,6 +290,8 @@ class ReportDomainServiceTest {
     @Test
     void addReportToFavorites() {
 
+        when(favReportRepository.existsByUserIdAndReportIdAndFolderId(anyLong(),anyLong(),anyLong())).thenReturn(false);
+
         domainService.addReportToFavorites(
                 new ReportAddFavoritesRequest()
                         .setReportId(ID)
@@ -297,6 +300,7 @@ class ReportDomainServiceTest {
                         .setId(ID));
 
         verify(favReportRepository).save(any());
+        verify(favReportRepository).existsByUserIdAndReportIdAndFolderId(anyLong(),anyLong(),anyLong());
         verifyNoMoreInteractions(favReportRepository, reportRepository);
     }
 
@@ -304,11 +308,11 @@ class ReportDomainServiceTest {
     void getReport() {
 
         when(reportRepository.getReferenceById(anyLong())).thenReturn(get_Report());
-        when(reportResponseMapper.from(any(Report.class))).thenReturn(new ReportResponse());
+        when(reportResponseMapper.from(any(Report.class))).thenReturn(new ReportResponse().setId(ID));
 
         assertNotNull(domainService.getReport(ID));
 
-        verify(reportRepository).getReferenceById(anyLong());
+        verify(reportRepository,times(2)).getReferenceById(anyLong());
         verify(reportResponseMapper).from(any(Report.class));
         verifyNoMoreInteractions(reportRepository, reportResponseMapper);
     }
@@ -480,6 +484,16 @@ class ReportDomainServiceTest {
 
         verify(reportRepository).existsById(anyLong());
         verifyNoMoreInteractions(reportRepository);
+
+    }
+
+    @Test
+    void deleteFavReportsByReportId(){
+
+        domainService.deleteFavReportsByReportId(ID);
+
+        verify(favReportRepository).deleteByReportId(anyLong());
+        verifyNoMoreInteractions(favReportRepository);
 
     }
 

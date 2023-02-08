@@ -1,6 +1,5 @@
 package ru.magnit.magreportbackend.service;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,6 +16,7 @@ import ru.magnit.magreportbackend.domain.folderreport.FolderAuthorityEnum;
 import ru.magnit.magreportbackend.domain.reportjob.ReportJobStateEnum;
 import ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum;
 import ru.magnit.magreportbackend.dto.inner.RoleView;
+import ru.magnit.magreportbackend.dto.inner.UserView;
 import ru.magnit.magreportbackend.dto.inner.datasource.DataSourceData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportFilterGroupData;
@@ -45,6 +45,7 @@ import ru.magnit.magreportbackend.service.domain.FilterReportDomainService;
 import ru.magnit.magreportbackend.service.domain.FolderDomainService;
 import ru.magnit.magreportbackend.service.domain.FolderPermissionsDomainService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
+import ru.magnit.magreportbackend.service.domain.OlapUserChoiceDomainService;
 import ru.magnit.magreportbackend.service.domain.ReportDomainService;
 import ru.magnit.magreportbackend.service.domain.TokenService;
 import ru.magnit.magreportbackend.service.domain.UserDomainService;
@@ -58,7 +59,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
@@ -110,6 +110,9 @@ class ReportJobServiceTest {
     @Mock
     private TokenService tokenService;
 
+    @Mock
+    private OlapUserChoiceDomainService olapUserChoiceDomainService;
+
 
     @Test
     void getExcelReport() {
@@ -159,6 +162,7 @@ class ReportJobServiceTest {
         final var permissionsResponse = new FolderRoleResponse(1L, FolderAuthorityEnum.WRITE);
 
         when(reportResponse.getAllFilters()).thenReturn(Collections.emptyList());
+        when(userDomainService.getCurrentUser()).thenReturn(new UserView().setId(1L));
         when(reportDomainService.getReport(anyLong())).thenReturn(reportResponse);
         when(jobDomainService.addJob(any())).thenReturn(ID);
         when(jobDomainService.getJob(anyLong())).thenReturn(getReportJobResponse());
@@ -228,13 +232,15 @@ class ReportJobServiceTest {
                 Collections.emptyList(),
                 "user",
                 LocalDateTime.now(),
-                LocalDateTime.now());
+                LocalDateTime.now(),
+                true);
     }
 
     @Test
     void getJob() {
 
         when(jobDomainService.getJob(anyLong())).thenReturn(getReportJobResponse());
+        when(userDomainService.getCurrentUser()).thenReturn(new UserView());
 
         var response = service.getJob(ID);
         assertNotNull(response);
@@ -310,6 +316,7 @@ class ReportJobServiceTest {
         //job complete
         jobData = getReportJobData(true);
 
+        when(userDomainService.getCurrentUser()).thenReturn(new UserView());
         when(jobDomainService.getJobData(anyLong())).thenReturn(jobData);
         when(avroReportDomainService.getPage(any(), anyLong(), anyLong())).thenReturn(getReportPageResponse());
 
@@ -388,7 +395,7 @@ class ReportJobServiceTest {
         verify(jobDomainService).getJobData(any());
         verify(excelTemplateDomainService).getTemplatePathForReport(anyLong(), anyLong());
         verify(excelReportDomainService).saveReportToExcel(any(), any(), anyLong());
-        verify(excelReportDomainService).moveReportToRms(anyLong(), anyLong());
+        verify(excelReportDomainService).moveReportToRms(anyLong(), anyLong(),any(Boolean.class));
         verifyNoMoreInteractions(jobDomainService, excelTemplateDomainService, excelReportDomainService);
     }
 
@@ -436,12 +443,12 @@ class ReportJobServiceTest {
                 5L,
                 4L,
                 "User",
-                1L,
+                isComplete ? ReportJobStatusEnum.COMPLETE.getId() : ReportJobStatusEnum.RUNNING.getId(),
                 2L,
                 3L,
                 isComplete,
                 new DataSourceData(1L, DataSourceTypeEnum.TERADATA, "url", "user", "pwd", Short.valueOf("1")),
-                new ReportData(1L, "name", "desc", "schema", "table", Collections.emptyList(), new ReportFilterGroupData(1L, 1L, "test code", "test code", BinaryBooleanOperations.AND, Collections.emptyList(), Collections.emptyList())),
+                new ReportData(1L, "name", "desc", "schema", "table", Collections.emptyList(), new ReportFilterGroupData(1L, 1L, "test code", "test code", BinaryBooleanOperations.AND, Collections.emptyList(), Collections.emptyList()), true),
                 Collections.emptyList(),
                 Collections.emptyList());
     }
@@ -469,7 +476,8 @@ class ReportJobServiceTest {
                 Collections.emptyList(),
                 true,
             0L,
-                "comment");
+                "comment",
+                true);
     }
 
     private ReportJobAddRequest getReportJobAddRequest() {
@@ -514,6 +522,7 @@ class ReportJobServiceTest {
                                         2L,
                                         null,
                                         FilterTypeEnum.DATE_RANGE,
+                                        null,
                                         null,
                                         null,
                                         null,

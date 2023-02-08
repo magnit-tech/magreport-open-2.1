@@ -32,7 +32,7 @@ import DesignerTextField from './../Designer/DesignerTextField'
 
 // actions 
 import {actionAdd, actionDelete, actionLoaded, actionLoadedFailed, actionSetDefault} from 'redux/actions/developer/actionReportTemplates'
-import {showAlertDialog, hideAlertDialog} from 'redux/actions/actionsAlertDialog';
+import {showAlertDialog, hideAlertDialog} from 'redux/actions/UI/actionsAlertDialog';
 // import dataHub from 'ajax/DataHub';
 
 const EXCEL_XLSM_FILE = 'application/vnd.ms-excel.sheet.macroEnabled.12'

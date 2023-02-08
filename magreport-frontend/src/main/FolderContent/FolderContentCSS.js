@@ -45,10 +45,21 @@ export const FolderContentCSS = makeStyles(theme => ({
     filterButton: {
         position: 'fixed',
         right: '20px',
-        top: '36px',
+        top: '110px',//!!!'36px',
         margin: '20px',
         zIndex: 2,
         paddingTop: '25px'
+    },
+    filterBtnTop: {
+        top: '36px'
+    },
+    filterBtnTopHollyday: {
+        top: '110px'
+    },
+    badge: {
+        zIndex: 100,
+        transform: 'scale(1) translate(90%, -100%)'
+
     },
     refreshButton: {
         position: 'fixed',
@@ -99,10 +110,14 @@ export const FolderContentCSS = makeStyles(theme => ({
         padding: '3px',
         position: 'fixed',
         right: '30px',
-        top: StyleConsts.headerHeight ,
         zIndex: 100
-  },
-  
+    }, 
+    openSearchBtnHeight: {
+        top: StyleConsts.headerHeight
+    },
+    openSearchBtnHeightHollyday: {
+        top: StyleConsts.headerHeightHollyday
+    }  
 }));
 
 
@@ -165,6 +180,26 @@ export const ItemCardCSS = makeStyles(theme => ({
     }, 
     favoriteItem: {
         color: "orange",
+    },
+    btn: {
+        margin: '4px 0px 4px 8px'
+    },
+    commentBtn: {
+        margin: '-4px 0px 0px 8px'
+    },
+    flx: {
+        display: 'flex',
+        justifyContent: 'space-between'
+    },
+    comment: {
+        padding: '0px 4px',
+        "&:focus-within": {
+            boxShadow: '0px 0px 2px 2px',
+            borderRadius: '4px',
+            color: theme.palette.primary.light
+          //  border: "1px solid",
+           // borderColor: "blue"
+        }
     }
 }));
 

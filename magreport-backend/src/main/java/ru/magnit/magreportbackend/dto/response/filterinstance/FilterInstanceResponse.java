@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import ru.magnit.magreportbackend.dto.response.filtertemplate.FilterTypeResponse;
+import ru.magnit.magreportbackend.dto.response.folder.FolderNodeResponse;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -30,6 +31,7 @@ public class FilterInstanceResponse {
     private String description;
     private String code;
     private List<FilterInstanceFieldResponse> fields = Collections.emptyList();
+    private List<FolderNodeResponse> path = Collections.emptyList();
 
     private String userName;
 

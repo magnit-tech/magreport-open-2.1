@@ -6,7 +6,7 @@ import ru.magnit.magreportbackend.domain.dataset.DataType;
 import ru.magnit.magreportbackend.domain.derivedfield.DerivedField;
 import ru.magnit.magreportbackend.domain.derivedfield.DerivedFieldExpression;
 import ru.magnit.magreportbackend.domain.derivedfield.Expression;
-import ru.magnit.magreportbackend.domain.derivedfield.Expressions;
+import ru.magnit.magreportbackend.domain.enums.Expressions;
 import ru.magnit.magreportbackend.domain.report.Report;
 import ru.magnit.magreportbackend.domain.report.ReportField;
 import ru.magnit.magreportbackend.domain.user.User;
@@ -26,9 +26,12 @@ public class DerivedFieldMapper implements Mapper<DerivedField, Pair<DerivedFiel
     @Override
     public DerivedField from(Pair<DerivedFieldAddRequest, UserView> source) {
         final var derivedField = new DerivedField()
+            .setIsPublic(source.getL().getIsPublic())
             .setReport(new Report(source.getL().getReportId()))
+            .setExpressionText(source.getL().getExpressionText())
             .setUser(new User(source.getR().getId()))
             .setName(source.getL().getName())
+            .setUniqueName(source.getL().getUniqueName(source.getR().getId()))
             .setDescription(source.getL().getDescription());
 
         if (source.getL().getExpression() != null) {

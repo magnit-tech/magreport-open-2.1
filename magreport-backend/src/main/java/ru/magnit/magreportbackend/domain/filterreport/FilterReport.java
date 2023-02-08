@@ -68,6 +68,9 @@ public class FilterReport extends EntityWithName {
     @Column(name = "CODE")
     private String code;
 
+    @Column(name = "MAX_COUNT_ITEMS")
+    private Long maxCountItems;
+
     public FilterReport(Long id) {
         this.id = id;
     }

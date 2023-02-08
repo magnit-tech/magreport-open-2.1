@@ -12,11 +12,8 @@ import format from "date-fns/format";
 import dataHub from 'ajax/DataHub';
 
 // redux
-//import {FLOW_STATE_BROWSE_FOLDER, usersJobsMenuViewFlowStates} from 'redux/reducers/menuViews/flowStates';
-import {actionFolderLoaded, actionFolderLoadFailed, actionItemClick} from 'redux/actions/menuViews/folderActions';
+import {actionFolderLoaded, actionFolderLoadFailed} from 'redux/actions/menuViews/folderActions';
 import {actionFilterJobs, actionJobCancel, showSqlDialog} from 'redux/actions/jobs/actionJobs';
-import actionSetSidebarItem from 'redux/actions/sidebar/actionSetSidebarItem';
-import {startReport} from 'redux/actions/menuViews/reportActions';
 
 // components
 import DataLoader from 'main/DataLoader/DataLoader';
@@ -78,7 +75,7 @@ function CubesMenuView(props){
 
     return (
         <div  style={{display: 'flex', flex: 1, flexDirection: 'column'}}>
-             <AppBar position="static" color="transparent" style={{marginTop: '4px'}}>       
+            <AppBar position="static" color="transparent" style={{marginTop: '4px'}}>       
                 <Toolbar variant="dense">
             <Tabs
                 variant="scrollable"
@@ -180,8 +177,8 @@ function CubesMenuView(props){
 
 const mapStateToProps = state => {
     return {
-        state : state.cubesMenuView,
-        currentFolderData : state.cubesMenuView.currentFolderData?.cubes.map(item => ({
+        state : state.folderData,
+        currentFolderData : (state.folderData.currentFolderData?.cubes && state.folderData.currentFolderData?.cubes.length > 0) && state.folderData.currentFolderData?.cubes.map(item => ({
             id: item.reportJobId,
             created: item.created,
             modified: item.modified,
@@ -193,19 +190,16 @@ const mapStateToProps = state => {
             reportId: item.reportId,
             reportJobOwner: item.reportJobOwner
         })),
-        filteredCubes : state.cubesMenuView.filteredCubes,
-        filters : state.cubesMenuView.filters
+        filteredCubes : state.folderData.filteredCubes,
+        filters : state.folderData.filters
     }
 }
 
 const mapDispatchToProps = {
     actionFolderLoaded,
     actionFolderLoadFailed,
-    actionItemClick,
-    startReport,
     actionFilterJobs,
     actionJobCancel,
-    actionSetSidebarItem,
     showSqlDialog
 }
 

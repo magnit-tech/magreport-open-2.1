@@ -43,6 +43,9 @@ public class ExternalAuthSource extends EntityWithName {
     @Column(name = "POST_SQL")
     private String postSql;
 
+    @Column(name = "ROLE_DESCRIPTION")
+    private String roleDescription;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "EXTERNAL_AUTH_ID")
     private ExternalAuth externalAuth;

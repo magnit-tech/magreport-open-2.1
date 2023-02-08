@@ -1,6 +1,7 @@
 package ru.magnit.magreportbackend.dto.backup.schedule;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 public record ScheduleBackupTuple(
                 Long scheduleId,
@@ -22,7 +23,9 @@ public record ScheduleBackupTuple(
                 LocalDateTime planStartDate,
                 LocalDateTime lastStartDate,
                 LocalDateTime created,
-                LocalDateTime modified
+                LocalDateTime modified,
+                Long intervalMinutes,
+                LocalTime finishTime
 
 ) {
 }

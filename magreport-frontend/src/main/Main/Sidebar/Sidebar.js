@@ -28,48 +28,50 @@ const maxDrawerWidth = 1000;
 function Sidebar(){
 
     const classes = SidebarCSS();
+
     const dispatch = useDispatch();
-    const drawerOpen = useSelector(state => state.drawer.open);
+    const { drawerOpen } = useSelector(state => state.sidebar);
+    
     const currentUser = dataHub.localCache.getUserInfo();
 
     const defaultDraggerColor = "#f4f7f9";
     const [drawerWidth, setDrawerWidth] = useState(defaultDrawerWidth);
     const [draggerColor, setDraggerColor] = useState(defaultDraggerColor);
 
+    let drawerOpenWidth = drawerOpen ? { maxWidth: '100vw', width: drawerWidth} : null;
+    let drawerOpenWidthStyle ={style: drawerOpenWidth};
+
     const handleMouseDown = e => {
         document.addEventListener("mouseup", handleMouseUp, true);
         document.addEventListener("mousemove", handleMouseMove, true);
       };
     
-      const handleMouseUp = () => {
-        document.removeEventListener("mouseup", handleMouseUp, true);
-        document.removeEventListener("mousemove", handleMouseMove, true);
+    const handleMouseUp = () => {
+    document.removeEventListener("mouseup", handleMouseUp, true);
+    document.removeEventListener("mousemove", handleMouseMove, true);
+    setDraggerColor(defaultDraggerColor);
+    };
+
+    const handleMouseMove = useCallback(e => {
+    const newWidth = e.clientX - document.body.offsetLeft;
+    if (newWidth > minDrawerWidth && newWidth < maxDrawerWidth) {
+        setDrawerWidth(newWidth);
+        localStorage.setItem('drawerWidth', newWidth);
+    }
+
+    if (newWidth < minDrawerWidth + 8)
+    {
+        setDraggerColor('red');
+    }
+    else {
         setDraggerColor(defaultDraggerColor);
-      };
-    
-      const handleMouseMove = useCallback(e => {
-        const newWidth = e.clientX - document.body.offsetLeft;
-        if (newWidth > minDrawerWidth && newWidth < maxDrawerWidth) {
-          setDrawerWidth(newWidth);
-          localStorage.setItem('drawerWidth', newWidth);
-        }
+    }
+    }, []);
 
-        if (newWidth < minDrawerWidth + 8)
-        {
-            setDraggerColor('red');
-        }
-        else {
-            setDraggerColor(defaultDraggerColor);
-        }
-      }, []);
-
-   
     function handleOpenClose(e){
         dispatch(drawerToogle());
     }
 
-   let drawerOpenWidth = drawerOpen ? { maxWidth: '100vw', width: drawerWidth} : null;
-   let drawerOpenWidthStyle ={style: drawerOpenWidth};
     return (
         <Drawer
             variant="permanent"

@@ -103,6 +103,7 @@ public class FolderDomainService {
             var folder = repository.getReferenceById(folderId);
 
             result = folderResponseMapper.from(folder);
+            result.setPath(getPathToFolder(folderId));
         }
 
         result.getReports().forEach(report -> report.setFavorite(favReportRepository.existsByUserIdAndReportId(userId, report.getId())));

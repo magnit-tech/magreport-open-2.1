@@ -1,9 +1,15 @@
 import React, {useState} from "react";
 import {useSnackbar} from "notistack";
+
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+
+import { useDispatch } from "react-redux";
+import { viewItemNavbar } from "redux/actions/navbar/actionNavbar";
+
 //local
 import dataHub from "ajax/DataHub";
 import DataLoader from "main/DataLoader/DataLoader";
-import PageTabs from "main/PageTabs/PageTabs";
+import PageTabs from "components/PageTabs/PageTabs";
 import {FolderItemTypes} from "main/FolderContent/FolderItemTypes";
 import ViewerPage from "main/Main/Development/Viewer/ViewerPage";
 import ViewerChildCard from "main/Main/Development/Viewer/ViewerChildCard";
@@ -11,32 +17,32 @@ import ViewerFieldMapping from "main/Main/Development/Viewer/ViewerFieldMapping"
 import SecurityFilterRoles from "./SecurityFilterRoles";
 import {ViewerCSS} from "main/Main/Development/Viewer/ViewerCSS";
 
-import {createViewerTextFields,
-    createViewerPageName} from "main/Main/Development/Viewer/viewerHelpers";
+import {createViewerTextFields, createViewerPageName} from "main/Main/Development/Viewer/viewerHelpers";
 
-/**
- * @callback onOkClick
- */
 /**
  * Компонент просмотра фильтра безопасности
  * @param {Object} props - параметры компонента
- * @param {Number} props.securityFilterId - ID набора данных
- * @param {onOkClick} props.onOkClick - callback вызываемый при нажатии кнопки ОК
  * @constructor
  */
+
 export default function SecurityFilterViewer(props) {
 
     const classes = ViewerCSS();
+
+    const { id, folderId } = useParams()
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const dispatch = useDispatch()
 
     const {enqueueSnackbar} = useSnackbar();
 
     const [data, setData] = useState({});
 
-    let loadFunc = dataHub.securityFilterController.get;
-    let loadParams = [props.securityFilterId];
 
     function handleDataLoaded(loadedData) {
         setData(loadedData);   
+        dispatch(viewItemNavbar('securityFilters', loadedData.name, id, folderId, loadedData.path))
     }
 
     function handleDataLoadFailed(message) {
@@ -63,6 +69,7 @@ export default function SecurityFilterViewer(props) {
     let filterInstanceCard = data.filterInstance ? (
         <ViewerChildCard
             id={data.filterInstance.id}
+            parentFolderId={data.filterInstance.folderId}
             itemType={FolderItemTypes.filterInstance}
             name={data.filterInstance.name}
         />
@@ -98,6 +105,7 @@ export default function SecurityFilterViewer(props) {
             <ViewerChildCard
                 key={dataSet.dataSet.id}
                 id={dataSet.dataSet.id}
+                parentFolderId={dataSet.dataSet.folderId}
                 itemType={FolderItemTypes.dataset}
                 name={dataSet.dataSet.name}
             >
@@ -152,7 +160,7 @@ export default function SecurityFilterViewer(props) {
         //tabdisabled: data.securityFilterName && data.securityFilterDescription && selectedFilterInstance ? false: true,
         tabcontent:
             <SecurityFilterRoles 
-                securityFilterId={props.securityFilterId}
+                securityFilterId={id}
                 filterInstance={{...data.filterInstance}}
                 onExit={props.onExit}
                 mode='view'
@@ -171,16 +179,17 @@ export default function SecurityFilterViewer(props) {
 
     return (
         <DataLoader
-            loadFunc={loadFunc}
-            loadParams={loadParams}
+            loadFunc={dataHub.securityFilterController.get}
+            loadParams={[id]}
             onDataLoaded={handleDataLoaded}
             onDataLoadFailed={handleDataLoadFailed}
         >
             <ViewerPage
                 id={data.id}
+                folderId = {folderId}
                 itemType={FolderItemTypes.securityFilters}
                 disabledPadding={true}
-                onOkClick={props.onOkClick}
+                onOkClick={() => location.state ? navigate(location.state) : navigate(`/ui/securityFilters/${folderId}`)}
                 readOnly={!hasRWRight}
             >
                 {children}

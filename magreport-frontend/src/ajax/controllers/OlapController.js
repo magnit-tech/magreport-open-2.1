@@ -6,10 +6,12 @@ const GET_CUBE = CONTROLLER_URL + '/get-cube';
 const GET_FIELD_VALUES = CONTROLLER_URL + '/get-field-values';
 const GET_INFO_CUBES = CONTROLLER_URL + '/get-info-cubes';
 const GET_LOG_INFO = CONTROLLER_URL + '/get-log-info';
+const CREATE_EXCEL_PIVOT_TABLE = CONTROLLER_URL + '/create-excel-pivot-table';
 
 //Configuration
 const GET_CURRENT_CONFIG = CONTROLLER_URL + '/configuration/get-current';
 const SAVE_CONFIG = CONTROLLER_URL + '/configuration/report-add';
+const REPORT_GET = CONTROLLER_URL + '/configuration/report-get';
 const DELETE_CONFIG = CONTROLLER_URL + '/configuration/delete';
 const GET_AVAILABLE_CONFIGS = CONTROLLER_URL + '/configuration/get-available';
 const SET_DEFAULT_CONFIG = CONTROLLER_URL + '/configuration/set-default';
@@ -48,6 +50,10 @@ export default function OlapController(dataHub){
         return dataHub.requestService(GET_LOG_INFO, METHOD, body, callback);
     }
 
+    this.createExcelPivotTable = (body, callback) => {
+        return dataHub.requestService(CREATE_EXCEL_PIVOT_TABLE, METHOD, body, callback);
+    }
+
     //Configuration
     this.getCurrentConfig = (jobId, callback) => {
 
@@ -65,6 +71,15 @@ export default function OlapController(dataHub){
         }
 
         return dataHub.requestService(SAVE_CONFIG, METHOD, body, callback); 
+    }
+
+    this.getChoosenConfig = (id, callback) => {
+
+        const body = { 
+            reportOlapConfigId: id
+        }
+
+        return dataHub.requestService(REPORT_GET, METHOD, body, callback); 
     }
 
     this.deleteConfig = (olapConfigId, callback) => {

@@ -7,11 +7,14 @@ public record ReportBackupTuple(
         Long reportId,
         Long reportFolderId,
         Long datasetId,
+
+        Long userId,
         String requirementsURL,
         String name,
         String description,
         LocalDateTime created,
-        LocalDateTime modified
+        LocalDateTime modified,
+        Boolean encrypt
 
 ) {
 }

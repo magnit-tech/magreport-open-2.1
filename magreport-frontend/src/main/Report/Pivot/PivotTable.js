@@ -1,8 +1,10 @@
-import React, { useRef} from 'react';
+import React, { useRef } from 'react';
+import ReactDOM from 'react-dom';
+
 import clsx from 'clsx';
 import Measure from 'react-measure';
-import Box from '@material-ui/core/Box';
 import { Scrollbars } from 'react-custom-scrollbars';
+
 // magreport
 import {AggFunc} from '../../FolderContent/JobFilters/JobStatuses';
 import {PivotCSS} from './PivotCSS';
@@ -22,6 +24,7 @@ export default function(props){
 
     const styles = PivotCSS();
     const ScrollbarsRef = useRef(null);
+
 
     /*
         Некоторые важные значения из объекта конфигурации для сокращения обозначений
@@ -457,11 +460,49 @@ export default function(props){
         }
     }
 
+    function handleShowArrows(id, cell) {
+
+        let rowSortValue = null
+        let columnSortValue = null
+
+        const {rowSort, columnSort} = props.sortingValues
+
+        if (rowSort && (JSON.stringify(rowSort.rowName) === JSON.stringify(cell.rowName)) && (rowSort.data[0].metricId === cell.index)) {
+            if (rowSort.data[0].order === 'Ascending') {
+                rowSortValue = 'rowAscending'
+            } else if (rowSort.data[0].order === 'Descending') {
+                rowSortValue = 'rowDescending'
+            }
+        } 
+
+        if (columnSort && (JSON.stringify(columnSort.columnName) === JSON.stringify(cell.columnName)) && (columnSort.data[0].metricId === cell.index)) {
+            if (columnSort.data[0].order === 'Ascending') {
+                columnSortValue = 'columnAscending'
+            } else if(columnSort.data[0].order === 'Descending'){
+                columnSortValue = 'columnDescending'
+            }
+        }
+
+        let layout =                                                   
+            <div className={`metricValueCellArrowsWrapp ${styles.metricValueCellArrowsWrapp}`}>
+            { rowSortValue !== 'rowAscending' && <Icon path={mdiArrowRightCircle} size={0.7} key='rowAscending' className={styles.metricValueCellArrow} onClick={() => handleClickOnAddSortingArrow('row', 'Ascending', {cell})}/>}
+            { rowSortValue !== 'rowDescending' && <Icon path={mdiArrowLeftCircle} size={0.7} key='rowDescending' className={styles.metricValueCellArrow} onClick={() => handleClickOnAddSortingArrow('row', 'Descending', {cell})}/>}
+            { columnSortValue !== 'columnAscending' && <Icon path={mdiArrowDownCircle} size={0.7} key='columnAscending' className={styles.metricValueCellArrow} onClick={() => handleClickOnAddSortingArrow('column', 'Ascending', {cell})}/>}
+            { columnSortValue !== 'columnDescending' && <Icon path={mdiArrowUpCircle} size={0.7} key='columnDescending' className={styles.metricValueCellArrow} onClick={() => handleClickOnAddSortingArrow('column', 'Descending', {cell})}/>}
+            </div>    
+
+        ReactDOM.render(layout, document.getElementById(`${id}`))
+    }
+
+    /*
+    ******************
+        Стили, компоненты
+    ******************
+    */
+
     const IconArrows = ({cell}) => {
 
         let arr = []
-        let rowSortValue = null
-        let columnSortValue = null
 
         const {rowSort, columnSort} = props.sortingValues
 
@@ -470,12 +511,10 @@ export default function(props){
                 arr.push(
                     <Icon path={mdiArrowRightCircle} size={0.7} color="green" key={Math.random()}  onClick={() => handleClickOnRemoveSortingArrow('row')}/>
                 )
-                rowSortValue = 'rowAscending'
             } else if (rowSort.data[0].order === 'Descending') {
                 arr.push(
                     <Icon path={mdiArrowLeftCircle} size={0.7} color="green" key={Math.random()} onClick={() => handleClickOnRemoveSortingArrow('row')}/>
                 )
-                rowSortValue = 'rowDescending'
             }
         } 
 
@@ -484,83 +523,27 @@ export default function(props){
                 arr.push(
                     <Icon path={mdiArrowDownCircle} size={0.7} color="green" key={Math.random()} onClick={() => handleClickOnRemoveSortingArrow('column')}/>
                 )
-                columnSortValue = 'columnAscending'
             } else if(columnSort.data[0].order === 'Descending'){
                 arr.push(
                     <Icon path={mdiArrowUpCircle} size={0.7} color="green" key={Math.random()} onClick={() => handleClickOnRemoveSortingArrow('column')}/>
                 )
-                columnSortValue = 'columnDescending'
             }
         }
 
-        let layout =                                                   
-        <>
-            <div className={`metricValueCellArrowsWrapp ${styles.metricValueCellArrowsWrapp}`}>
-                { rowSortValue !== 'rowAscending' && <Icon path={mdiArrowRightCircle} size={0.7} key='rowAscending' className={styles.metricValueCellArrow} onClick={() => handleClickOnAddSortingArrow('row', 'Ascending', {cell})}/>}
-                { rowSortValue !== 'rowDescending' && <Icon path={mdiArrowLeftCircle} size={0.7} key='rowDescending' className={styles.metricValueCellArrow} onClick={() => handleClickOnAddSortingArrow('row', 'Descending', {cell})}/>}
-                { columnSortValue !== 'columnAscending' && <Icon path={mdiArrowDownCircle} size={0.7} key='columnAscending' className={styles.metricValueCellArrow} onClick={() => handleClickOnAddSortingArrow('column', 'Ascending', {cell})}/>}
-                { columnSortValue !== 'columnDescending' && <Icon path={mdiArrowUpCircle} size={0.7} key='columnDescending' className={styles.metricValueCellArrow} onClick={() => handleClickOnAddSortingArrow('column', 'Descending', {cell})}/>}
-            </div>
-            { Object.keys(props.sortingValues).length !== 0 && 
-                arr
-            }
-        </>     
+        let layout = Object.keys(props.sortingValues).length !== 0 && arr  
 
         
         return layout 
     }
 
-    const CellData = ({cell}) => {
-        if (cell.type === "metricValues" && cell.fieldId && cell.hasOwnProperty('style') && cell.style) {
-            
-            return cell.style.filter((styleObj) => (styleObj.aggFuncName === cell.aggFuncName)).map((formatting) => {
-                return (
-                    <Box
-                        key={`${cell.columnName[0]} ${cell.rowName[0]}`}
-                        style = {
-                            {   
-                                margin: '2px',
-                                height: formatting.fontSize ? `${formatting.fontSize + 5}px` : 'auto',
-                                fontWeight: formatting.fontStyle === 'bold' ? 'bold' : '400',
-                                fontStyle: formatting.fontStyle === 'italic' ? 'italic' : 'inherit',
-                                textDecoration: formatting.fontStyle === 'underline' ? 'underline' : 'none',
-                                fontSize: formatting.fontSize + 'px',
-                                color: formatting.fontColor,
-                                whiteSpace: 'nowrap'
-                            }
-                        }
-                    >
-                        {cell.data}
-                    </Box>
-                )
-            })
-        }
-
-        return (
-            <Box 
-                fontSize = { 10 } 
-                fontFamily = {"Arial"}
-                fontWeight = {
-                    cell.type === "dimensionName" ||
-                    cell.type === "metricName" || (cell.style && cell.style.bold) ? 
-                    "fontWeightBold" : 
-                    "fontWeightMedium"
-                }
-                style = {{margin: '2px'}}
-            >
-                {cell.data}
-            </Box>
-        )
-    }
-
     const conditionalFormatting = (cell) => {
-        if (cell.type === "metricValues" && (cell.conditionalFormatting && cell.conditionalFormatting.length > 0)) {
 
+        if (cell.type === "metricValues" && (cell.conditionalFormatting && cell.conditionalFormatting.length > 0) && (!isNaN(cell.data) && cell.data.length !== 0) && cell.data.trim() !== '') {
             if (cell.conditionalFormatting.length === 1) {
                 return {backgroundColor: cell.conditionalFormatting[0].color}
             } 
             
-            const cellData = Number(cell.data)
+            const cellData = Number(cell.data.replace(/\s/g,'').replace('%', ''))
 
             for (let i = 0; i < cell.conditionalFormatting.length; i++) {
                 if (cellData < Number(cell.conditionalFormatting[i].valueTo)) {
@@ -571,6 +554,65 @@ export default function(props){
         
         return {}
     }
+
+    const cellDataStyle = (cell) => {
+        if (cell.type === "metricValues" && cell.fieldId) {
+
+            if (cell.conditionalFormatting && cell.conditionalFormatting.length > 0 && !cell.data.includes('%')) {
+                if (cell.conditionalFormatting.length === 1) {
+                    return  {   
+                            margin: '2px',
+                            height: cell.conditionalFormatting[0].fontSize ? `${cell.conditionalFormatting[0].fontSize + 5}px` : 'auto',
+                            fontWeight: cell.conditionalFormatting[0].fontStyle === 'bold' ? 'bold' : '400',
+                            fontStyle: cell.conditionalFormatting[0].fontStyle === 'italic' ? 'italic' : 'inherit',
+                            textDecoration: cell.conditionalFormatting[0].fontStyle === 'underline' ? 'underline' : 'none',
+                            fontSize: cell.conditionalFormatting[0].fontSize + 'px',
+                            color: cell.conditionalFormatting[0].fontColor,
+                            whiteSpace: 'nowrap'
+                        }
+                    
+                } 
+                
+                const cellData = Number(cell.data.replace(/\s/g,'').replace('%', ''))
+    
+                for (let i = 0; i < cell.conditionalFormatting.length; i++) {
+                    if (cellData < Number(cell.conditionalFormatting[i].valueTo)) {
+                        return  {   
+                                margin: '2px',
+                                height: cell.conditionalFormatting[i].fontSize ? `${cell.conditionalFormatting[i].fontSize + 5}px` : 'auto',
+                                fontWeight: cell.conditionalFormatting[i].fontStyle === 'bold' ? 'bold' : '400',
+                                fontStyle: cell.conditionalFormatting[i].fontStyle === 'italic' ? 'italic' : 'inherit',
+                                textDecoration: cell.conditionalFormatting[i].fontStyle === 'underline' ? 'underline' : 'none',
+                                fontSize: cell.conditionalFormatting[i].fontSize + 'px',
+                                color: cell.conditionalFormatting[i].fontColor,
+                                whiteSpace: 'nowrap'
+                            }
+                        
+                    }
+                }
+            } else if(cell.hasOwnProperty('style') && cell.style) {
+               cell.style.filter((styleObj) => (styleObj.aggFuncName === cell.aggFuncName)).map((formatting) => {
+                    return {   
+                            margin: '2px',
+                            height: formatting.fontSize ? `${formatting.fontSize + 5}px` : 'auto',
+                            fontWeight: formatting.fontStyle === 'bold' ? 'bold' : '400',
+                            fontStyle: formatting.fontStyle === 'italic' ? 'italic' : 'inherit',
+                            textDecoration: formatting.fontStyle === 'underline' ? 'underline' : 'none',
+                            fontSize: formatting.fontSize + 'px',
+                            color: formatting.fontColor,
+                            whiteSpace: 'nowrap'
+                        }
+                    
+                })
+            }
+
+        }
+
+        return {
+            margin: '2px', fontSize: '14px', fontFamily: 'Arial', fontWeight: cell.type === "dimensionName" || cell.type === "metricName" ? "bold" : "medium"
+        }
+    }
+
 
     return(
         <div className={clsx(styles.pivotTable)}>
@@ -596,45 +638,54 @@ export default function(props){
                                 return (
                                 <tr key = {ind}>
                                     {r.filter((cell) => (cell.colSpan > 0 && cell.rowSpan > 0)).map( (cell, i) => {
+
+                                        const id = Math.random()
                                         return (
-                                        <td key = {i} colSpan = {cell.colSpan} rowSpan = {cell.rowSpan}
-                                            onContextMenu={ (event) => { handleContextClick(event, cell.type, cell) } }
-											className = {clsx({
-                                                [styles.cell] : true,
-                                                [styles.tr1] : lastDimIndex  && (cell.type === "metricValues" /*|| (cell.type === "dimensionValue" && cell.rowSpan === 1)*/),
-                                                [styles.tr2] : !lastDimIndex  && (cell.type === "metricValues" /*|| (cell.type === "dimensionValue" && cell.rowSpan === 1)*/),
-                                                [styles.tr3] : cell.type === "dimensionValue",
-                                                [styles.leftTopCell] : cell.type === "leftTopCorner",
-												[styles.blanc] : cell.type === "blanc",
-												[styles.dimensionNameCell] : cell.type === "dimensionName",
-												[styles.dimensionValueCell] : cell.type === "dimensionValue",
-												[styles.metricNameCell] : cell.type === "metricName",
-												[styles.metricValueCell] : cell.type === "metricValues",
-											})}
-                                            style={conditionalFormatting(cell)}
-										>
-                                            { cell.type === 'metricValues' &&
-                                                <div style={{ display: 'flex', justifyContent: 'end'}}>
-                                                    <IconArrows cell={cell}/>
-                                                </div>
-                                            }
-                                            <div 
-                                                onClick = {cell.type === "dimensionValue" ? () => {handleDimensionValueCellClick(cell.fieldId, cell.data)}
-                                                : cell.type === "metricValues"  ? () => {handleMetricValueCellClick(cell.fieldId, cell.index, cell.data)}
-                                                : () => {}}
+                                            <td key = {i} colSpan = {cell.colSpan} rowSpan = {cell.rowSpan}
+                                                onContextMenu={ (event) => { handleContextClick(event, cell.type, cell) } }
+                                                className = {clsx({
+                                                    [styles.cell] : true,
+                                                    [styles.tr1] : lastDimIndex  && (cell.type === "metricValues" /*|| (cell.type === "dimensionValue" && cell.rowSpan === 1)*/),
+                                                    [styles.tr2] : !lastDimIndex  && (cell.type === "metricValues" /*|| (cell.type === "dimensionValue" && cell.rowSpan === 1)*/),
+                                                    [styles.tr3] : cell.type === "dimensionValue",
+                                                    [styles.leftTopCell] : cell.type === "leftTopCorner",
+                                                    [styles.blanc] : cell.type === "blanc",
+                                                    [styles.dimensionNameCell] : cell.type === "dimensionName",
+                                                    [styles.dimensionValueCell] : cell.type === "dimensionValue",
+                                                    [styles.metricNameCell] : cell.type === "metricName",
+                                                    [styles.metricValueCell] : cell.type === "metricValues",
+                                                })}
+                                                style={conditionalFormatting(cell)}
+                                                onMouseEnter={cell.type === "metricValues" ? () => handleShowArrows(id, cell) : () => {}}
                                             >
-                                                <CellData cell={cell} />
-                                            </div>
-										</td>
-									)})}
+                                                { cell.type === 'metricValues' &&
+                                                    <div style={{ display: 'flex', justifyContent: 'end'}}> 
+                                                        <div id={id}></div>
+                                                        <div>
+                                                            <IconArrows cell={cell}/>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                <div 
+                                                    onClick = {cell.type === "dimensionValue" ? () => {handleDimensionValueCellClick(cell.fieldId, cell.data)}
+                                                    : cell.type === "metricValues"  ? () => {handleMetricValueCellClick(cell.fieldId, cell.index, cell.data)}
+                                                    : () => {}}
+                                                >
+                                                    <div style = { cellDataStyle(cell) }>
+                                                        {cell.data}
+                                                    </div>
+                                                </div>
+                                            </td>
+									    )
+                                    })}
 								</tr> )
 							})}
 						</tbody>
 						)}
 					}
-				</Measure>
+				    </Measure>
       
-            </table>
+                </table>
             </Scrollbars>
         </div>
         

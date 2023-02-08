@@ -1,4 +1,5 @@
-import React from 'react';
+import React, {useState} from 'react';
+import clsx from 'clsx';
 // material-ui
 import {Table, TableBody, TableRow, TableCell } from '@material-ui/core';
 import Card from '@material-ui/core/Card';
@@ -19,6 +20,10 @@ import Link from '@material-ui/core/Link';
 import ViewComfyIcon from '@material-ui/icons/ViewComfy';
 import SettingsEthernetIcon from '@material-ui/icons/SettingsEthernet';
 import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizontalCircle';
+import InputBase from '@material-ui/core/InputBase';
+import Icon from '@mdi/react'
+import { mdiClipboardTextClockOutline } from '@mdi/js';
+import { mdiCommentEditOutline } from '@mdi/js';
 
 // local
 import { JobStatusMap, ScheduleStatusMap } from './JobFilters/JobStatuses';
@@ -46,7 +51,8 @@ import { FolderItemTypes } from './FolderItemTypes';
  * @param {eventHandler} props.onAddDeleteFavorites - действие при нажатии на кнопку добавления/ удаления в избранное
  * @param {eventHandler} props.onLinkPathClick - действие при нажатии на ссылку, содержащую путь к отчету
  * @param {eventHandler} props.onDependenciesClick - действие при нажатии кнопку получения зависимостей
- * @param {eventHandler} props.showDialog - действие при нажатии на кнопку получения SQL-запроса
+ * @param {eventHandler} props.onShowSqlDialogClick - действие при нажатии на кнопку получения SQL-запроса
+ * @param {eventHandler} props.onShowHistoryStatusClick - действие при нажатии на кнопку получения истории статусов задания
  * @param {eventHandler} props.onContextMenu - действие при вызове контекстного меню
  * @param {eventHandler} props.onScheduleTaskSwitchClick - действие при нажатии на кнопку "Изменить статус" для отчетов на расписании
  */
@@ -56,6 +62,8 @@ function ItemCard(props){
     //let [taskStatus, setTaskStatus] = useState(props.data.status);
 
     const classes = ItemCardCSS();
+    const [comment, setComment] = useState(props.data.comment||'');
+    const [isEditedComment, setIsEditedComment] = useState(false);
 
     let isInvalid = (props.data.isValid !==undefined && !props.data.isValid) ||
     (props.itemType === FolderItemTypes.scheduleTasks && 
@@ -69,11 +77,10 @@ function ItemCard(props){
     let invalidSuccessDefault = isSuccess ? classes.successIcon : 
     isInvalid ? classes.errorIcon : classes.primaryIcon;
 
-   // const [sqlViewerOpen, setSqlViewerOpen] = React.useState(false)
     const options = { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' };
     
     const data = props.data;
-    const userNameLabel = props.itemType === FolderItemTypes.report ? "Автор"
+    const userNameLabel = props.itemType === FolderItemTypes.reports ? "Автор"
                         : props.itemType === FolderItemTypes.reportsDev  ? "Разработчик"
                         : "Пользователь";
     let modifiedDateTime = props.data.modifiedDateTime;
@@ -89,7 +96,7 @@ function ItemCard(props){
         recipients = props.data.destinationEmails.map(item=>item.value).concat(props.data.destinationUsers.map(item=>item.userName)).concat(props.data.destinationRoles.map(item=>item.name)).join('; ');
     }
 
-    if ((props.itemType === FolderItemTypes.report || props.itemType === FolderItemTypes.reportsDev || props.itemType === FolderItemTypes.favorites) && props.data.userPublisher){
+    if ((props.itemType === FolderItemTypes.reports || props.itemType === FolderItemTypes.reportsDev || props.itemType === FolderItemTypes.favorites) && props.data.userPublisher){
         modifiedDateTime = props.data.modified;
         createdDateTime = props.data.created;
         username = props.data.userPublisher.name
@@ -100,7 +107,7 @@ function ItemCard(props){
         username = props.data.user.name
         subheader = 
             <span className={classes.subHead}>{JobStatusMap.get(props.data.status)}
-                { ["RUNNING", "SCHEDULED"].indexOf(props.data.status) > -1 ? 
+                { ["RUNNING", "SCHEDULED","PENDING_DB_CONNECTION"].indexOf(props.data.status) > -1 ? 
                     props.data.waitCancelResponse ? 
                     <CircularProgress /> :
                     <Typography className={classes.cancel} variant="subtitle1" onClick={handleJobCancelClick}> Отменить </Typography> : ""
@@ -198,9 +205,13 @@ function ItemCard(props){
 
     function handleShowSqlClick(event){
         event.stopPropagation()
-        //setSqlViewerOpen(true)
-        props.showDialog( props.itemType, `Просмотр SQL-запроса для задания  ${props.data.id}`, props.data.id)
+        props.onShowSqlDialogClick( props.itemType, `Просмотр SQL-запроса для задания  ${props.data.id}`, props.data.id)
 
+    }
+
+    function handleShowStatusHistoryClick(event){
+        event.stopPropagation()
+        props.onShowHistoryStatusClick( props.itemType, `История статусов задания  ${props.data.id}`, props.data.id)
     }
 
     function handleTruncate(str, wordsToCut) {
@@ -215,12 +226,38 @@ function ItemCard(props){
         return str.split(" ").splice(0, wordsToCut).join(" ");
     }
 
+    function handleChangeComment(event){
+        event.stopPropagation();
+        setComment(event.target.value);
+    }
+    
+    function handleSaveComment(event){
+        props.onJobAddComment(event.target.value);
+        setIsEditedComment(false);
+    }
+
+    React.useEffect(() => {
+        if (isEditedComment) {
+            const commentElement = document.getElementById(props.data.id.toString());
+            commentElement.focus();
+        }
+        }, [isEditedComment] // eslint-disable-line
+    );
+
+
+    function handleEditCommentClick(event){
+        event.stopPropagation();
+        setIsEditedComment(true);
+    }
+
     let actionBtns =[];
 
     if ( data.requirementsLink) {
         actionBtns.push(
             <Tooltip key={1} title="Реестр требований">
                 <IconButton
+                    className={classes.btn}
+                    size="small"
                     fontSize="small"
                     onClick={handleReqLinkClick}
                 >
@@ -230,10 +267,12 @@ function ItemCard(props){
         )
     };
 
-    if (props.itemType === FolderItemTypes.report || props.itemType === FolderItemTypes.favorites || props.itemType === FolderItemTypes.theme) {
+    if (props.itemType === FolderItemTypes.reports || props.itemType === FolderItemTypes.favorites || props.itemType === FolderItemTypes.theme) {
         actionBtns.push(
             <Tooltip key={2} title={props.data.favorite ? "Удалить из избранного" : "Добавить в избранное"}>
                 <IconButton
+                    className={classes.btn}
+                    size="small"
                     fontSize="small"
                     onClick={handleFavoritesClick}
                 >
@@ -250,6 +289,8 @@ function ItemCard(props){
         actionBtns.push(
             <Tooltip key={3} title="Показать зависимости">
                 <IconButton
+                    className={classes.btn}
+                    size="small"
                     fontSize="small"
                     onClick={handleDependenciesClick}
                 >
@@ -263,6 +304,8 @@ function ItemCard(props){
         actionBtns.push(
             <Tooltip key={4} title="Просмотр">
                 <IconButton
+                    className={classes.btn}
+                    size="small"
                     fontSize="small"
                     onClick={handleViewClick}
                 >
@@ -272,10 +315,12 @@ function ItemCard(props){
         );
     }
 
-    if (props.editButton && props.itemType !== FolderItemTypes.report) {
+    if (props.editButton && props.itemType !== FolderItemTypes.reports) {
         actionBtns.push(
             <Tooltip key={5} title="Редактировать">
                 <IconButton
+                    className={classes.btn}
+                    size="small"
                     fontSize="small"
                     onClick={handleEditClick}
                 >
@@ -288,8 +333,10 @@ function ItemCard(props){
     if ((props.itemType === FolderItemTypes.job || props.itemType === FolderItemTypes.userJobs) 
         && (props.roleType.isAdmin || props.roleType.isDeveloper)) {
         actionBtns.push(
-            <Tooltip key={7} title="Показать SQL запрос">
+            <Tooltip key={6} title="Показать SQL запрос">
                 <IconButton
+                    className={classes.btn}
+                    size="small"
                     fontSize="small"
                     onClick={handleShowSqlClick}
                 >
@@ -302,8 +349,10 @@ function ItemCard(props){
     if (props.itemType === FolderItemTypes.job || props.itemType === FolderItemTypes.userJobs) {
         if(props.data.canExecute) {
             actionBtns.push(
-                <Tooltip  key={8} title="Запустить отчёт заново">
+                <Tooltip  key={7} title="Запустить отчёт заново">
                     <IconButton
+                        className={classes.btn}
+                        size="small"
                         fontSize="small"
                         onClick={handleRestartClick}
                     >
@@ -316,6 +365,8 @@ function ItemCard(props){
                 <Tooltip  key={8} title="У Вас нет прав" disabled>
                     <span>
                         <IconButton
+                            className={classes.btn}
+                            size="small"
                             fontSize="small"
                             disabled 
                         >
@@ -327,10 +378,28 @@ function ItemCard(props){
         }
     };
 
+    if ((props.itemType === FolderItemTypes.job || props.itemType === FolderItemTypes.userJobs) 
+        && (props.roleType.isAdmin || props.roleType.isDeveloper)) {
+        actionBtns.push(
+            <Tooltip key={9} title="История статусов">
+                <IconButton
+                    className={classes.btn} 
+                    size="small"
+                    aria-label="status-history"  
+                    onClick={handleShowStatusHistoryClick}  
+                >  
+                    <Icon path={mdiClipboardTextClockOutline} size={0.9} className = {invalidSuccessDefault}/>  
+                </IconButton>
+            </Tooltip>
+        )
+    };
+
     if (props.itemType === FolderItemTypes.scheduleTasks) {
         actionBtns.push(
-            <Tooltip  key={9} title="Запустить отчёт">
+            <Tooltip  key={10} title="Запустить отчёт">
                 <IconButton
+                    className={classes.btn}
+                    size="small"
                     fontSize="small"
                     onClick={handleScheduleTaskRunClick}
                 >
@@ -342,8 +411,10 @@ function ItemCard(props){
 
     if (props.itemType === FolderItemTypes.scheduleTasks && props.data.status !== 'CHANGED') {
         actionBtns.push(
-            <Tooltip  key={10} title="Изменить статус">
+            <Tooltip  key={11} title="Изменить статус">
                 <IconButton
+                    className={classes.btn}
+                    size="small"
                     fontSize="small"
                     onClick=  {handleScheduleTaskSwitchClick}
                 >
@@ -356,8 +427,10 @@ function ItemCard(props){
 
     if (props.deleteButton) {
         actionBtns.push(
-            <Tooltip key={6} title="Удалить">
+            <Tooltip key={12} title="Удалить">
                 <IconButton
+                    className={classes.btn}
+                    size="small"
                     fontSize="small"
                     onClick={handleDeleteClick}
                 >
@@ -404,6 +477,48 @@ function ItemCard(props){
             <CardContent>
                 <Table>
                     <TableBody>
+                        {(props.itemType === FolderItemTypes.userJobs) &&
+                            <TableRow>
+                                <TableCell colSpan = {2} align="justify"  padding="none">
+                                    <Typography variant="caption">{comment}</Typography>
+                                </TableCell>
+                            </TableRow>
+                        }
+                        {(props.itemType === FolderItemTypes.job) &&
+                            <TableRow>
+                                <TableCell colSpan = {2} align="justify"  padding="none">
+                                    <div className={clsx(classes.flx, {[classes.comment]: isEditedComment})}>
+                                    <InputBase
+                                        style={{display: isEditedComment && username === props.currentUser ? 'flex' : 'none' }}
+                                        id = {props.data.id.toString()}
+                                        size = "small"
+                                        value = {comment}
+                                        placeholder = "Комментарий"
+                                        fullWidth
+                                        multiline
+                                        autoFocus
+                                        onBlur = {handleSaveComment}
+                                        onChange = {handleChangeComment}
+                                        onClick = {(e)=>e.stopPropagation()}
+                                    />
+                                    <Typography variant="caption" style={{display: !isEditedComment || username !== props.currentUser ? 'flex' : 'none' }}>{comment}</Typography>
+                                    <div>
+                                    <Tooltip key={9} title="Редактировать комментарий">
+                                        <IconButton
+                                            style={{display: !isEditedComment || username !== props.currentUser ? 'flex' : 'none' }}
+                                            className = {classes.commentBtn} 
+                                            size = "small"
+                                            aria-label = "comment edit"
+                                            onClick = {(e)=>handleEditCommentClick(e)} 
+                                        >  
+                                            <Icon path={mdiCommentEditOutline} size={0.8} className = {invalidSuccessDefault}/>  
+                                        </IconButton>
+                                    </Tooltip>
+                                    </div>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        }
                         {(props.itemType === FolderItemTypes.scheduleTasks) &&
                             <>
                                 <TableRow>
@@ -465,7 +580,7 @@ function ItemCard(props){
                             { modifiedDateTime && 
                                 <TableCell align="right"padding="none">
                                     <Typography variant="caption">
-                                        {(props.itemType === FolderItemTypes.job || props.itemType === FolderItemTypes.userJobs) ? 'Завершен:': 'Изменён:'} {new Date(modifiedDateTime).toLocaleString('ru', options)}
+                                        {(props.itemType === FolderItemTypes.job || props.itemType === FolderItemTypes.userJobs) ? 'В статусе с:': 'Изменён:'} {new Date(modifiedDateTime).toLocaleString('ru', options)}
                                     </Typography>
                                 </TableCell>
                             }

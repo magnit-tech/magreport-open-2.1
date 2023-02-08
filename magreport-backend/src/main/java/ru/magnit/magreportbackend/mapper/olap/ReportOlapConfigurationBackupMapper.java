@@ -14,7 +14,7 @@ public class ReportOlapConfigurationBackupMapper implements Mapper<ReportOlapCon
         return new ReportOlapConfigurationBackupTuple(
                 source.getId(),
                 source.getReport() == null ? null : source.getReport().getId(),
-                source.getUser().getId(),
+                source.getUser() == null ? null : source.getUser().getId(),
                 source.getReportJob() == null? null : source.getReportJob().getId(),
                 source.getOlapConfiguration().getId(),
                 source.getCreator().getId(),

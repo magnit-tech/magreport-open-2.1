@@ -225,6 +225,8 @@ class FolderServiceTest {
     @Test
     void deleteReport() {
 
+        when(userDomainService.getCurrentUser()).thenReturn(new UserView().setName("TestUser").setId(0L));
+
         service.deleteReport(getFolderAddReportRequest());
 
         verify(domainService).deleteReport(any());

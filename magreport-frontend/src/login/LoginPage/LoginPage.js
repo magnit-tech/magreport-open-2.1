@@ -1,17 +1,20 @@
 import React from 'react';
+import clsx from 'clsx';
 import { connect } from 'react-redux';
 import LoginForm from '../LoginForm/LoginForm.js';
 import LoginCat from './LoginCat.js';
-import Alerts from '../../main/Alerts/Alerts'
+import Alerts from '../../components/Alerts/Alerts'
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Paper from '@material-ui/core/Paper';
 import Hidden from '@material-ui/core/Hidden';
-import Header from '../../header/Header/Header'
+import Header from '../../components/header/Header/Header'
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import { LoginPageCSS } from './LoginPageCSS';
 import ErrorIcon from '@material-ui/icons/Error';
+import isHollyday from  '../../HollydayFunctions';
+import './snow.css'
 
 
 function LoginPage(props){
@@ -19,7 +22,7 @@ function LoginPage(props){
     const classes = LoginPageCSS();
 
     return (
-        <div>
+        <div className={clsx({'sneg': isHollyday() >= 0 && isHollyday() <= 2, [classes.snow]: isHollyday() >= 0 && isHollyday() <= 2})}>
             <Header version={props.version}/>
             <Grid container component="main" className={classes.main} >
                 <CssBaseline/>

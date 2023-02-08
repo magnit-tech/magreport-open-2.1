@@ -1,5 +1,4 @@
 import { makeStyles, alpha } from '@material-ui/core/styles';
-//import StyleConsts from 'StyleConsts';
 
 export const RoleWindowCSS = makeStyles(theme => ({
     root: {
@@ -141,5 +140,15 @@ export const ChooserDestinationWindowCSS = makeStyles(theme => ({
     flx: {
         display: 'flex', 
         flex: 1
+    }
+}));
+
+export const ItemCardDialogViewerCSS = makeStyles(theme => ({
+    closeBtn: {
+        margin: '16px'
+    },
+    flx: {
+      //  padding: 0, 
+        display: 'flex'
     }
 }));

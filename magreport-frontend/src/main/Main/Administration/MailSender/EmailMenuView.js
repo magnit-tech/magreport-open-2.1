@@ -1,20 +1,34 @@
-import React, {useState} from 'react';
-import TextField from "@material-ui/core/TextField";
+import React, { useState, useEffect } from 'react';
+
+import { useSnackbar } from "notistack";
+
+import { useDispatch } from 'react-redux';
+
+import { addNavbar } from 'redux/actions/navbar/actionNavbar';
+
+import { DesignerCSS } from "../../Development/Designer/DesignerCSS";
+
+import dataHub from "../../../../ajax/DataHub";
+
+import { TextField, IconButton, Tooltip, InputAdornment } from "@material-ui/core";
+
+import ClearIcon from '@material-ui/icons/Clear';
+
 import DesignerPage from "../../Development/Designer/DesignerPage";
 import StyleTextPanel from "../ServerMailTemplate/StyleTextPanel";
 import ChooserDestinationWindow from "../../../FolderContent/ModalWindows/ChooserDestinationWindow";
 import SenderEmailWindow from "../../../FolderContent/ModalWindows/SenderEmailWindow";
-import dataHub from "../../../../ajax/DataHub";
-import {useSnackbar} from "notistack";
-import {DesignerCSS} from "../../Development/Designer/DesignerCSS";
-import IconButton from '@material-ui/core/IconButton';
-import ClearIcon from '@material-ui/icons/Clear';
-import Tooltip from '@material-ui/core/Tooltip';
-import InputAdornment from '@material-ui/core/InputAdornment';
 
-function EmailMenuView(_props) {
+
+function EmailMenuView() {
 
     const classes = DesignerCSS();
+
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        dispatch(addNavbar('Рассылка писем', 'mailSender'))
+    }, [dispatch])
 
     const [chooserDestination, setChooserDestination] = useState(false);
     const [showResult, setShowResult] = useState(false)

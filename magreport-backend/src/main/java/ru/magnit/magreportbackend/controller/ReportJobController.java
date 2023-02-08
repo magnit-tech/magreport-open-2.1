@@ -20,10 +20,12 @@ import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobShareRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportPageRequest;
 import ru.magnit.magreportbackend.dto.response.ResponseBody;
 import ru.magnit.magreportbackend.dto.response.ResponseList;
+import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobHistoryResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobMetadataResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportPageResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportSqlQueryResponse;
+import ru.magnit.magreportbackend.dto.response.reportjob.ScheduledReportResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.TokenResponse;
 import ru.magnit.magreportbackend.dto.response.user.UserResponse;
 import ru.magnit.magreportbackend.service.ReportJobService;
@@ -59,7 +61,8 @@ public class ReportJobController {
     public static final String REPORT_JOB_SHARE = "/api/v1/report-job/share";
     public static final String REPORT_JOB_GET_USERS_JOB = "/api/v1/report-job/get-users-job";
     public static final String REPORT_JOB_COMMENT = "/api/v1/report-job/add-comment";
-
+    public static final String REPORT_JOB_GET_HISTORY = "/api/v1/report-job/get-history";
+    public static final String REPORT_JOB_GET_ALL_REPORTS = "/api/v1/report-job/get-all-reports";
 
     @Operation(summary = "Получение страницы отчета")
     @ResponseStatus(HttpStatus.OK)
@@ -222,6 +225,23 @@ public class ReportJobController {
         return response;
     }
 
+    @Operation(summary = "Получение информации об отчетах в заданиях пользователей")
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping(value = REPORT_JOB_GET_ALL_REPORTS,
+        produces = APPLICATION_JSON_VALUE)
+    public ResponseList<ScheduledReportResponse> getAllScheduledReports() {
+        LogHelper.logInfoUserMethodStart();
+
+        var response = ResponseList.<ScheduledReportResponse>builder()
+            .success(true)
+            .message("")
+            .data(service.getAllScheduledReports())
+            .build();
+
+        LogHelper.logInfoUserMethodEnd();
+        return response;
+    }
+
     @Operation(summary = "Получение информации о всех заданиях на выполнение отчетов")
     @ResponseStatus(HttpStatus.OK)
     @PostMapping(value = REPORT_JOB_GET_ALL_JOBS,
@@ -293,6 +313,26 @@ public class ReportJobController {
             .success(true)
             .message("")
             .data(service.getMetaData(request))
+            .build();
+
+        LogHelper.logInfoUserMethodEnd();
+        return response;
+    }
+
+    @Operation(summary = "Получение метаданных задания")
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping(value = REPORT_JOB_GET_HISTORY,
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE)
+    public ResponseBody<ReportJobHistoryResponse> getHistory(
+        @RequestBody
+        ReportJobRequest request) {
+        LogHelper.logInfoUserMethodStart();
+
+        var response = ResponseBody.<ReportJobHistoryResponse>builder()
+            .success(true)
+            .message("")
+            .data(service.getHistory(request))
             .build();
 
         LogHelper.logInfoUserMethodEnd();

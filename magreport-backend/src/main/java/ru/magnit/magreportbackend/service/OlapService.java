@@ -14,10 +14,16 @@ import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
 import ru.magnit.magreportbackend.dto.inner.olap.MeasureData;
 import ru.magnit.magreportbackend.dto.inner.olap.MetricResult;
 import ru.magnit.magreportbackend.dto.inner.olap.Sorting;
+import ru.magnit.magreportbackend.dto.request.olap.FieldDefinition;
+import ru.magnit.magreportbackend.dto.request.olap.FilterDefinition;
+import ru.magnit.magreportbackend.dto.request.olap.FilterGroup;
+import ru.magnit.magreportbackend.dto.request.olap.FilterGroupNew;
 import ru.magnit.magreportbackend.dto.request.olap.Interval;
 import ru.magnit.magreportbackend.dto.request.olap.MetricDefinition;
+import ru.magnit.magreportbackend.dto.request.olap.MetricDefinitionNew;
 import ru.magnit.magreportbackend.dto.request.olap.MetricFilterGroup;
 import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequest;
+import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequestNew;
 import ru.magnit.magreportbackend.dto.request.olap.OlapExportPivotTableRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldItemsRequest;
 import ru.magnit.magreportbackend.dto.request.olap.SortingParams;
@@ -26,12 +32,15 @@ import ru.magnit.magreportbackend.dto.response.olap.OlapFieldItemsResponse;
 import ru.magnit.magreportbackend.dto.response.olap.OlapInfoCubesResponse;
 import ru.magnit.magreportbackend.dto.response.olap.OlapMetricResponse;
 import ru.magnit.magreportbackend.dto.response.olap.OlapMetricResponse2;
+import ru.magnit.magreportbackend.dto.response.reportjob.TokenResponse;
 import ru.magnit.magreportbackend.exception.OlapMaxDataVolumeExceeded;
 import ru.magnit.magreportbackend.metrics_function.MetricsFunction;
 import ru.magnit.magreportbackend.service.domain.ExcelReportDomainService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
 import ru.magnit.magreportbackend.service.domain.OlapConfigurationDomainService;
 import ru.magnit.magreportbackend.service.domain.OlapDomainService;
+import ru.magnit.magreportbackend.service.domain.OlapUserChoiceDomainService;
+import ru.magnit.magreportbackend.service.domain.TokenService;
 import ru.magnit.magreportbackend.service.domain.UserDomainService;
 import ru.magnit.magreportbackend.util.Extensions;
 import ru.magnit.magreportbackend.util.Pair;
@@ -52,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -62,23 +72,20 @@ import java.util.stream.IntStream;
 @Service
 @RequiredArgsConstructor
 public class OlapService {
-
     @Value("${magreport.olap.max-data-volume}")
     private long maxDataVolume = 1000;
-
     private static final int DEFAULT_MEASURE_TUPLES_COUNT = 1000;
-
     private final OlapDomainService olapDomainService;
     private final JobDomainService jobDomainService;
     private final OlapConfigurationDomainService olapConfigurationDomainService;
     private final ExcelReportDomainService excelReportDomainService;
-
     private final UserDomainService userDomainService;
-
+    private final DerivedFieldService derivedFieldService;
     private final ObjectMapper objectMapper;
-
+    private final TokenService tokenService;
+    private final OlapUserChoiceDomainService olapUserChoiceDomainService;
     public OlapCubeResponse getCube(OlapCubeRequest request) {
-
+        var currentUser = userDomainService.getCurrentUser();
         jobDomainService.checkAccessForJob(request.getJobId());
 
         jobDomainService.updateJobStats(request.getJobId(), false, true, false);
@@ -88,6 +95,8 @@ public class OlapService {
         final var jobData = jobDomainService.getJobData(request.getJobId());
         var endTime = System.currentTimeMillis() - startTime;
         log.debug("Job data acquired: " + endTime);
+
+        olapUserChoiceDomainService.setOlapUserChoice(jobData.reportId(), currentUser.getId(), true);
 
         startTime = System.currentTimeMillis();
         final var sourceCube = olapDomainService.getCubeData(jobData);
@@ -162,9 +171,9 @@ public class OlapService {
                     "Превышен допустимый объем обрабатываемых данных:" +
                             "\nМаксимальный объем - " + maxDataVolume +
                             "\nЗапрашиваемый объем - " + numColumns * numRows * numMetrics +
-                            "\nКолво стобцов - " + numColumns +
-                            "\nКолво строк - " + numRows +
-                            "\nКолво метрик - " + numMetrics
+                            "\nКол-во столбцов - " + numColumns +
+                            "\nКол-во строк - " + numRows +
+                            "\nКол-во метрик - " + numMetrics
             );
         }
     }
@@ -250,18 +259,28 @@ public class OlapService {
         return olapDomainService.getInfoAboutCubes();
     }
 
-    public Path exportPivotTableExcel(OlapExportPivotTableRequest request) throws JsonProcessingException {
+    public TokenResponse exportPivotTableExcel(OlapExportPivotTableRequest request) throws JsonProcessingException {
         request.getCubeRequest().getRowsInterval().setFrom(0).setCount(Integer.MAX_VALUE);
         request.getCubeRequest().getColumnsInterval().setFrom(0).setCount(Integer.MAX_VALUE);
-
-        var user = userDomainService.getCurrentUser();
 
         var resultCube = getCube(request.getCubeRequest());
         var metadata = jobDomainService.getJobMetaData(request.getCubeRequest().getJobId());
         var config = olapConfigurationDomainService.getReportOlapConfiguration(request.getConfiguration());
+        var encrypt = jobDomainService.getJobData(request.getCubeRequest().getJobId()).reportData().encryptFile();
 
-        return excelReportDomainService.getExcelPivotTable(resultCube, metadata, objectMapper.readValue(config.getOlapConfig().getData(), HashMap.class), request, user.getId());
+        var code = (long) (Math.random() * 1000000);
 
+        excelReportDomainService.getExcelPivotTable(
+                resultCube,
+                metadata,
+                config.getOlapConfig().getData().isEmpty() ? new HashMap<>(): objectMapper.readValue(config.getOlapConfig().getData(), HashMap.class),
+                request, code, encrypt);
+
+        return new TokenResponse(tokenService.getToken(request.getCubeRequest().getJobId(), code));
+    }
+
+    public Path getExcelPivotPath(Long jobId, Long code) {
+        return excelReportDomainService.getExcelPivotPath(jobId, code);
     }
 
     private Pair<MeasureData, MeasureData> getRequestedMeasures(
@@ -604,28 +623,31 @@ public class OlapService {
                     int col = rowIndex[sortings.indexOf(sorting)][sorting.getTupleIndex()];
                     int row = sorting.getMetricId();
 
-                    var value1 = row1[col][row];
-                    var value2 = row2[col][row];
+                    var val1 = row1[col][row];
+                    var val2 = row2[col][row];
+
+                    var value1 = val1.getValue() == null ? "" : val1.getValue();
+                    var value2 = val2.getValue() == null ? "" : val2.getValue();
 
                     var type = dataTypes.get(sorting.getMetricId());
                     var compare = switch (type) {
                         case INTEGER -> {
-                            var v1 = value1.getValue().isEmpty() ? Integer.MIN_VALUE : Integer.parseInt(value1.getValue());
-                            var v2 = value2.getValue().isEmpty() ? Integer.MIN_VALUE : Integer.parseInt(value2.getValue());
+                            var v1 = value1.isEmpty() ? Integer.MIN_VALUE : Integer.parseInt(value1);
+                            var v2 = value2.isEmpty() ? Integer.MIN_VALUE : Integer.parseInt(value2);
                             yield Integer.compare(v1, v2);
                         }
-                        case STRING, DATE, TIMESTAMP, BOOLEAN -> value1.getValue().compareTo(value2.getValue());
+                        case STRING, DATE, TIMESTAMP, BOOLEAN -> value1.compareTo(value2);
                         case DOUBLE -> {
-                            var v1 = value1.getValue().isEmpty() ? Double.MIN_VALUE : Double.parseDouble(value1.getValue());
-                            var v2 = value2.getValue().isEmpty() ? Double.MIN_VALUE : Double.parseDouble(value2.getValue());
+                            var v1 = value1.isEmpty() ? Double.MIN_VALUE : Double.parseDouble(value1);
+                            var v2 = value2.isEmpty() ? Double.MIN_VALUE : Double.parseDouble(value2);
                             yield Double.compare(v1, v2);
                         }
                     };
 
                     if (compare == 0)
                         compare = switch (sortDirection) {
-                            case Column -> Integer.compare(value1.getRow(), value2.getRow());
-                            case Row -> Integer.compare(value1.getColumn(), value2.getColumn());
+                            case Column -> Integer.compare(val1.getRow(), val2.getRow());
+                            case Row -> Integer.compare(val1.getColumn(), val2.getColumn());
                         };
 
                     return sorting.getOrder().equals(SortingOrder.Ascending) ? compare : compare * -1;
@@ -728,4 +750,133 @@ public class OlapService {
         return result;
     }
 
+    public OlapCubeResponse getCubeNew(OlapCubeRequestNew request) {
+        var currentUser = userDomainService.getCurrentUser();
+        jobDomainService.checkAccessForJob(request.getJobId());
+
+        jobDomainService.updateJobStats(request.getJobId(), false, true, false);
+
+        log.debug("Start processing cube");
+        var startTime = System.currentTimeMillis();
+        final var jobData = jobDomainService.getJobData(request.getJobId());
+        var endTime = System.currentTimeMillis() - startTime;
+        log.debug("Job data acquired: " + endTime);
+
+        olapUserChoiceDomainService.setOlapUserChoice(jobData.reportId(), currentUser.getId(), true);
+
+        startTime = System.currentTimeMillis();
+        var sourceCube = olapDomainService.getCubeData(jobData);
+        endTime = System.currentTimeMillis() - startTime;
+        log.debug("Report data acquired: " + endTime);
+
+        OlapCubeRequest cubeRequest;
+        if (request.hasDerivedFields()) {
+            startTime = System.currentTimeMillis();
+            final var result = derivedFieldService.preProcessCube(sourceCube, request);
+            sourceCube = result.getL();
+            cubeRequest = result.getR();
+            endTime = System.currentTimeMillis() - startTime;
+            log.debug("Derived fields calculated: " + endTime);
+        } else {
+            cubeRequest = new OlapCubeRequest()
+                    .setJobId(request.getJobId())
+                    .setColumnsInterval(request.getColumnsInterval())
+                    .setRowsInterval(request.getRowsInterval())
+                    .setColumnSort(request.getColumnSort())
+                    .setRowSort(request.getRowSort())
+                    .setMetricPlacement(request.getMetricPlacement())
+                    .setColumnFields(columnsFromNew(request))
+                    .setRowFields(rowsFromNew(request))
+                    .setMetrics(fromNew(request.getMetrics()))
+                    .setFilterGroup(request.getFilterGroup() == null ? null : fromNew(request.getFilterGroup()))
+                    .setMetricFilterGroup(request.getMetricFilterGroup());
+
+        }
+
+        startTime = System.currentTimeMillis();
+        final var checkedFilterRows = olapDomainService.filterCubeData(sourceCube, cubeRequest.getFilterGroup());
+        endTime = System.currentTimeMillis() - startTime;
+        log.debug("Cube filtered: " + endTime);
+
+        startTime = System.currentTimeMillis();
+        var measures = getRequestedMeasures(sourceCube, cubeRequest.getColumnFields(), cubeRequest.getRowFields(), checkedFilterRows);
+        endTime = System.currentTimeMillis() - startTime;
+        log.debug("Measures acquired: " + endTime);
+
+        checkMaxDataVolume(measures, cubeRequest.getMetrics());
+
+        startTime = System.currentTimeMillis();
+        var metricValues = calculateMetricsValues(measures, cubeRequest.getMetrics(), cubeRequest.getColumnFields(), cubeRequest.getRowFields(), cubeRequest.getMetricFilterGroup(), sourceCube, checkedFilterRows, false);
+        endTime = System.currentTimeMillis() - startTime;
+        log.debug("Metrics calculation: " + endTime);
+
+        startTime = System.currentTimeMillis();
+        var metricResults = collectMetricResult(metricValues, cubeRequest.getMetrics());
+        endTime = System.currentTimeMillis() - startTime;
+        log.debug("Metrics collection: " + endTime);
+
+        startTime = System.currentTimeMillis();
+        var sortedMetrics = sortedResults(cubeRequest, sourceCube, metricResults, measures);
+        endTime = System.currentTimeMillis() - startTime;
+        log.debug("Metrics sorting: " + endTime);
+
+        startTime = System.currentTimeMillis();
+        var sortedMeasures = getResultMeasures(sortedMetrics, measures);
+        endTime = System.currentTimeMillis() - startTime;
+        log.debug("Get result measures: " + endTime);
+
+
+        if (cubeRequest.getMetricFilterGroup() != null && (!cubeRequest.getMetricFilterGroup().getFilters().isEmpty() || !cubeRequest.getMetricFilterGroup().getChildGroups().isEmpty())) {
+            startTime = System.currentTimeMillis();
+            var dataTypesMetrics = getDataTypesForMetrics(sourceCube, cubeRequest.getMetrics());
+            var metricResultFilters = olapDomainService.filterMetricResult(sortedMetrics, cubeRequest.getMetricFilterGroup(), dataTypesMetrics);
+            endTime = System.currentTimeMillis() - startTime;
+            log.debug("Metrics filtered: " + endTime);
+
+
+            return getOlapCubeFilterMetricResponse(cubeRequest, sortedMetrics, metricResultFilters, sortedMeasures, sourceCube);
+
+        } else {
+
+            var columValues = sortedMeasures.getL().stream().skip(cubeRequest.getColumnsInterval().getFrom()).limit(cubeRequest.getColumnsInterval().getCount()).toList();
+            var rowValues = sortedMeasures.getR().stream().skip(cubeRequest.getRowsInterval().getFrom()).limit(cubeRequest.getRowsInterval().getCount()).toList();
+            sortedMetrics = getPageResult(sortedMetrics, new Pair<>(columValues, rowValues), cubeRequest);
+
+            return new OlapCubeResponse()
+                    .setColumnValues(columValues)
+                    .setRowValues(rowValues)
+                    .setMetricValues(getOlapMetricResponse(cubeRequest, sortedMetrics, sourceCube))
+                    .setTotalColumns(measures.getL().totalCount())
+                    .setTotalRows(measures.getR().totalCount());
+        }
+    }
+
+    private FilterGroup fromNew(FilterGroupNew filterGroup) {
+        return new FilterGroup(
+                filterGroup.getOperationType(),
+                filterGroup.isInvertResult(),
+                filterGroup.getChildGroups().stream().map(this::fromNew).toList(),
+                filterGroup.getFilters().stream().map(filter -> new FilterDefinition(
+                                filter.getField().getFieldId(),
+                                filter.getFilterType(),
+                                filter.isInvertResult(),
+                                filter.getRounding(),
+                                filter.isCanRounding(),
+                                filter.getValues()
+                        ))
+                        .toList()
+        );
+    }
+
+    private List<MetricDefinition> fromNew(List<MetricDefinitionNew> metrics) {
+        return metrics.stream().map(metric -> new MetricDefinition(metric.getField().getFieldId(), metric.getAggregationType())).toList();
+    }
+
+    private LinkedHashSet<Long> rowsFromNew(OlapCubeRequestNew request) {
+        return request.getRowFields().stream().map(FieldDefinition::getFieldId).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    private LinkedHashSet<Long> columnsFromNew(OlapCubeRequestNew request) {
+        return request.getColumnFields().stream().map(FieldDefinition::getFieldId).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
 }

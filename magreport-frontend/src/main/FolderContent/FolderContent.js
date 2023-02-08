@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import clsx from 'clsx';
 // dataHub
 import dataHub from 'ajax/DataHub';
 
@@ -26,6 +26,8 @@ import SearchIcon from '@material-ui/icons/Search';
 
 //import CopyMoveFolderBrowser from './CopyMoveFolderBrowser';
 import DesignerFolderBrowser from 'main/Main/Development/Designer/DesignerFolderBrowser';
+import {JobStatuses} from './JobFilters/JobStatuses';
+import isHollyday from 'HollydayFunctions';
 
 // styles
 import { FolderContentCSS } from './FolderContentCSS';
@@ -80,7 +82,8 @@ import SortModalWindow from './ModalWindows/SortModalWindow';
  * @param {reportCallback}   props.onSortClick - действие при сортировке
  * @param {onAddToFavorites} props.onAddToFavorites - function(folderId, reportId) - действие при добавлении в избранное
  * @param {onAddToFavorites} props.onRefresh - function() - обновить отображение содержимого каталога
- * @param {Boolean}          props.showDialog - показать диалоговое окно
+ * @param {Boolean}          props.onShowSqlDialogClick - показать диалоговое окно с SQL - запросом
+ * @param {Boolean}          props.onShowHistoryStatusClick - показать диалоговое окно с историей статусов
  * @param {Boolean}          props.contextAllowed - разрешено показывать контекстное меню (сортировка)
  * @param {Boolean}          props.copyAndMoveAllowed - разрешено показывать контекстное меню для каталогов и объектов
  * @param {Boolean}          props.notAllowedForItems - запрешено показывать контекстное меню для объектов
@@ -88,7 +91,8 @@ import SortModalWindow from './ModalWindows/SortModalWindow';
 
 export default function FolderContent(props){
     const classes = FolderContentCSS();
-
+    
+    const defaultStatuses = Object.values(JobStatuses);
     const [searchOpen, setSearchOpen] = useState(false);
     const [panelOpen, setPanelOpen] = useState(false);
 
@@ -97,11 +101,12 @@ export default function FolderContent(props){
     const [windowData, setWindowData] = useState(null);
     const [page, setPage] = useState(1);
     const [elementsOnPage, setElementsOnPage] = useState(10)
-    const [countElement, setCountElement] = useState(100)
+    const [countElement, setCountElement] = useState(100);
     const [filterValues, setFilterValues] = useState(props.filters || {
+        reportIds: null,
         periodStart: null,
-        periodEnd: null, 
-        selectedStatuses: ['RUNNING','SCHEDULED','COMPLETE','FAILED','CANCELING','CANCELED'],
+        periodEnd: null,
+        selectedStatuses: defaultStatuses
     })
     const [contextPosition, setContextPosition] = useState({
         mouseX: null,
@@ -251,7 +256,7 @@ export default function FolderContent(props){
         }
     }
 
-    const itemName =  props.itemsType === FolderItemTypes.report || props.itemsType === FolderItemTypes.reportsDev ? "отчёт"
+    const itemName =  props.itemsType === FolderItemTypes.reports || props.itemsType === FolderItemTypes.reportsDev ? "отчёт"
                     : props.itemsType === FolderItemTypes.job || props.itemsType === FolderItemTypes.userJobs ? "задание"
                     : props.itemsType === FolderItemTypes.datasource ? "источник данных"
                     : props.itemsType === FolderItemTypes.dataset ? "набор данных"
@@ -344,7 +349,7 @@ export default function FolderContent(props){
         Формируем карточки объектов
     */
 
-    let items = props.itemsType === FolderItemTypes.report ? props.data.reports :
+    let items = props.itemsType === FolderItemTypes.reports ? props.data.reports :
                 props.itemsType === FolderItemTypes.favorites ? props.data.reports :
                 props.itemsType === FolderItemTypes.job || props.itemsType === FolderItemTypes.userJobs ? props.data.jobs :
                 props.itemsType === FolderItemTypes.datasource ? props.data.dataSources :
@@ -397,6 +402,7 @@ export default function FolderContent(props){
                     <ItemCard
                         itemType = {props.itemsType}
                         data = {i}
+                        currentUser = {props.currentUser}
                         roleType={{isAdmin: isAdmin, isDeveloper: isDeveloper}}
                         isSearched = {isSearched}
                         editButton = {hasRWRight && !(props.showItemControls === false)}
@@ -411,9 +417,10 @@ export default function FolderContent(props){
                         onAddDeleteFavorites = {() => props.onAddDeleteFavorites(index, folderId, i.id, i.favorite)}
                         onLinkPathClick = {props.onFolderClick}
                         onDependenciesClick = {() => props.onDependenciesClick(i.id)}
-                        showDialog = {props.showDialog}
+                        onShowSqlDialogClick = {props.onShowSqlDialogClick}
+                        onShowHistoryStatusClick = {props.onShowHistoryStatusClick}
                         onContextMenu={handleContextClickObject}
-                        
+                        onJobAddComment={(comment) => props.onJobAddComment(i.id, index, comment)}   
                     />
                 </Grid>
 
@@ -493,9 +500,10 @@ export default function FolderContent(props){
         let filters = filterValues
         if (isCleared){
             filters = {
+                reportIds: null,
                 periodStart: null,
                 periodEnd: null,
-                selectedStatuses: ['RUNNING','SCHEDULED','COMPLETE','FAILED','CANCELING','CANCELED'],
+                selectedStatuses: defaultStatuses,
                 isCleared: true
             }
             setFilterValues(filters)
@@ -545,7 +553,7 @@ export default function FolderContent(props){
 
             {props.searchParams && !searchOpen &&
 
-                <Paper elevation={3} className={classes.openSearchBtn}>
+                <Paper elevation={3} className={clsx(classes.openSearchBtn, {[classes.openSearchBtnHeight]: isHollyday() === -1, [classes.openSearchBtnHeightHollyday]: isHollyday() >= 0})}>
                     <IconButton
                         size="small"
                         aria-label="searchBtn"
@@ -615,7 +623,7 @@ export default function FolderContent(props){
 				</div>
             </div>
             {
-                (props.itemsType === FolderItemTypes.report || props.itemsType === FolderItemTypes.dataset || 
+                (props.itemsType === FolderItemTypes.reports || props.itemsType === FolderItemTypes.dataset || 
                 props.itemsType === FolderItemTypes.datasource || props.itemsType === FolderItemTypes.filterTemplate ||
                 props.itemsType === FolderItemTypes.filterInstance || (props.itemsType === FolderItemTypes.roles && props.data.name !== 'SYSTEM') ||
                 props.itemsType === FolderItemTypes.reportsDev || props.itemsType === FolderItemTypes.securityFilters ||

@@ -16,6 +16,7 @@ import ru.magnit.magreportbackend.exception.QueryExecutionException;
 import ru.magnit.magreportbackend.service.dao.ConnectionPoolManager;
 import ru.magnit.magreportbackend.service.jobengine.filter.FilterQueryBuilder;
 import ru.magnit.magreportbackend.service.jobengine.filter.FilterQueryExecutor;
+import ru.magnit.magreportbackend.service.jobengine.impl.ClickHouseQueryBuilder;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -28,9 +29,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.CLICK_HOUSE;
 import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.DB2;
 import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.H2;
 import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.IMPALA;
+import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.MSSQL;
 import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.ORACLE;
 import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.POSTGRESQL;
 import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.SAP_HANA;
@@ -51,9 +54,12 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
             Map.entry(IMPALA, ImpalaFilterQueryBuilder.class),
             Map.entry(TERADATA, TeradataFilterQueryBuilder.class),
             Map.entry(ORACLE, OracleFilterQueryBuilder.class),
+            Map.entry(MSSQL, MsSqlFilterQueryBuilder.class),
             Map.entry(POSTGRESQL, PostgreSqlFilterQueryBuilder.class),
-            Map.entry(DB2, PostgreSqlFilterQueryBuilder.class),
-            Map.entry(SAP_HANA, SapHanaFilterQueryBuilder.class)
+            Map.entry(DB2, Db2FilterQueryBuilder.class),
+            Map.entry(SAP_HANA, SapHanaFilterQueryBuilder.class),
+            Map.entry(CLICK_HOUSE, ClickHouseQueryBuilder.class)
+
     );
 
     @Override

@@ -40,7 +40,6 @@ import ru.magnit.magreportbackend.repository.ExcelTemplateFolderRepository;
 import ru.magnit.magreportbackend.repository.ExcelTemplateFolderRoleRepository;
 import ru.magnit.magreportbackend.repository.ExcelTemplateRepository;
 import ru.magnit.magreportbackend.repository.ReportExcelTemplateRepository;
-import ru.magnit.magreportbackend.util.JsonUtils;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -95,7 +94,10 @@ public class ExcelTemplateDomainService {
         } else {
             var folder = folderRepository.getReferenceById(folderId);
 
-            return excelTemplateFolderResponseMapper.from(folder);
+            var response = excelTemplateFolderResponseMapper.from(folder);
+            response.setPath(getPathToFolder(folderId));
+
+            return response;
         }
     }
 
@@ -163,7 +165,7 @@ public class ExcelTemplateDomainService {
 
     @Transactional
     public void deleteFolderPermittedToRole(List<Long> folderIds, Long roleId) {
-        excelTemplateFolderRoleRepository.deleteAllByFolderIdInAndRoleId(folderIds,roleId);
+        excelTemplateFolderRoleRepository.deleteAllByFolderIdInAndRoleId(folderIds, roleId);
     }
 
     @Transactional
@@ -192,7 +194,7 @@ public class ExcelTemplateDomainService {
     public String getTemplatePathForReport(long reportId, Long templateId) {
 
         if (templateId == null) {
-            final var defaultReportTemplate = reportExcelTemplateRepository.getTopByReportIdAndIsDefaultIsTrue(reportId);
+            final var defaultReportTemplate = reportExcelTemplateRepository.getTopByReportIdAndIsDefaultIsTrue(reportId).orElseThrow();
             templateId = defaultReportTemplate.getExcelTemplate().getId();
         }
 
@@ -260,7 +262,10 @@ public class ExcelTemplateDomainService {
     public Long getDefaultExcelTemplateToReport(Long reportId) {
 
         final var defaultReportTemplate = reportExcelTemplateRepository.getTopByReportIdAndIsDefaultIsTrue(reportId);
-        return defaultReportTemplate.getExcelTemplate().getId();
+        if (defaultReportTemplate.isPresent())
+            return defaultReportTemplate.get().getExcelTemplate().getId();
+        else
+            throw new InvalidParametersException(String.format("The default excel template was not found for the report: %s", reportId));
     }
 
     @Transactional

@@ -50,7 +50,7 @@ public class ScheduleDomainService {
     public Long addSchedule(UserView currentUser, ScheduleAddRequest request) {
 
         var schedule = scheduleMapper.from(request);
-        if(ScheduleTypeEnum.getById(request.getScheduleTypeId()).equals(ScheduleTypeEnum.EVERY_N_MINUTES) && request.getIntervalMinutes() < 5)
+        if (ScheduleTypeEnum.getById(request.getScheduleTypeId()).equals(ScheduleTypeEnum.EVERY_N_MINUTES) && request.getIntervalMinutes() < 5)
             throw new InvalidParametersException("The interval must be greater than 5");
 
         schedule.setUser(new User(currentUser.getId()));
@@ -73,7 +73,7 @@ public class ScheduleDomainService {
     @Transactional
     public void editSchedule(ScheduleAddRequest request) {
         var schedule = repository.getReferenceById(request.getId());
-        if(ScheduleTypeEnum.getById(request.getScheduleTypeId()).equals(ScheduleTypeEnum.EVERY_N_MINUTES) && request.getIntervalMinutes() < 5)
+        if (ScheduleTypeEnum.getById(request.getScheduleTypeId()).equals(ScheduleTypeEnum.EVERY_N_MINUTES) && request.getIntervalMinutes() < 5)
             throw new InvalidParametersException("The interval must be greater than 5");
         repository.save(scheduleMerger.merge(schedule, request));
         setPlanStartDate(request.getId(), 0);
@@ -91,7 +91,7 @@ public class ScheduleDomainService {
         if (schedule.getType().getId().equals(ScheduleTypeEnum.MANUAL.getId())) return;
 
         if (schedule.getType().getId().equals(ScheduleTypeEnum.EVERY_N_MINUTES.getId())) {
-           var date = getNextDateForEveryNMinutes(schedule);
+            var date = getNextDateForEveryNMinutes(schedule);
             schedule.setPlanStartDate(date);
             schedule.setLastStartDate(LocalDateTime.now());
             repository.save(schedule);
@@ -120,12 +120,18 @@ public class ScheduleDomainService {
     public List<LocalDate> getNextDateSchedule(Long id, Long typeId) {
 
         return switch (ScheduleTypeEnum.getById(typeId)) {
-            case EVERY_DAY, EVERY_N_MINUTES -> calendarRepository.getDatesForEveryDaySchedule().stream().map(ScheduleCalendarInfo::getDate).toList();
-            case EVERY_WEEK -> calendarRepository.getDatesForEveryWeekSchedule(id).stream().map(ScheduleCalendarInfo::getDate).toList();
-            case EVERY_MONTH -> calendarRepository.getDatesForEveryMonthSchedule(id).stream().map(ScheduleCalendarInfo::getDate).toList();
-            case DAY_END_MONTH -> calendarRepository.getDatesForDayEndMonthSchedule(id).stream().map(ScheduleCalendarInfo::getDate).toList();
-            case WEEK_MONTH -> calendarRepository.getDatesForWeekMonthSchedule(id).stream().map(ScheduleCalendarInfo::getDate).toList();
-            case WEEK_END_MONTH -> calendarRepository.getDatesForWeekEndMonthSchedule(id).stream().map(ScheduleCalendarInfo::getDate).toList();
+            case EVERY_DAY, EVERY_N_MINUTES ->
+                    calendarRepository.getDatesForEveryDaySchedule().stream().map(ScheduleCalendarInfo::getDate).toList();
+            case EVERY_WEEK ->
+                    calendarRepository.getDatesForEveryWeekSchedule(id).stream().map(ScheduleCalendarInfo::getDate).toList();
+            case EVERY_MONTH ->
+                    calendarRepository.getDatesForEveryMonthSchedule(id).stream().map(ScheduleCalendarInfo::getDate).toList();
+            case DAY_END_MONTH ->
+                    calendarRepository.getDatesForDayEndMonthSchedule(id).stream().map(ScheduleCalendarInfo::getDate).toList();
+            case WEEK_MONTH ->
+                    calendarRepository.getDatesForWeekMonthSchedule(id).stream().map(ScheduleCalendarInfo::getDate).toList();
+            case WEEK_END_MONTH ->
+                    calendarRepository.getDatesForWeekEndMonthSchedule(id).stream().map(ScheduleCalendarInfo::getDate).toList();
             case MANUAL -> Collections.emptyList();
         };
     }
@@ -144,27 +150,19 @@ public class ScheduleDomainService {
     }
 
     private LocalDateTime getNextDateForEveryNMinutes(Schedule schedule) {
-        LocalDateTime dateTime ;
-        var time = LocalTime.of(schedule.getHour().intValue(), schedule.getMinute().intValue(), schedule.getSecond().intValue());
-        long minutes = ChronoUnit.MINUTES.between(time, LocalTime.now());
 
-        BigDecimal count;
-        if (minutes > 0) {
-            count = BigDecimal.valueOf((double) minutes / schedule.getIntervalMinutes()).setScale(0, RoundingMode.UP);
-        } else {
-            count = BigDecimal.valueOf((double) minutes / schedule.getIntervalMinutes()).setScale(0, RoundingMode.DOWN);
-        }
+        var timeStart = LocalTime.of(schedule.getHour().intValue(), schedule.getMinute().intValue(), schedule.getSecond().intValue());
+        var timeStop = schedule.getFinishTime();
+        var now = LocalTime.now();
 
-        var newTime = time.plusMinutes(count.intValue() * schedule.getIntervalMinutes());
+        if (timeStop.isBefore(timeStart)) throw new InvalidParametersException("Finish time is before  start time");
 
-        if (schedule.getPlanStartDate() == null ) {
-            dateTime = newTime.isBefore(time) ? LocalDateTime.of(LocalDate.now(), time) : LocalDateTime.of(LocalDate.now(),newTime);
-        }
+        if (timeStart.isAfter(now)) return LocalDateTime.of(LocalDate.now(), timeStart);
+        if (timeStop.isBefore(now)) return LocalDateTime.of(LocalDate.now().plusDays(1), timeStart);
 
-        else {
-            dateTime = schedule.getPlanStartDate().plusMinutes(schedule.getIntervalMinutes());
-        }
-
-        return dateTime;
+        long minutes = ChronoUnit.MINUTES.between(timeStart, LocalTime.now());
+        var count = BigDecimal.valueOf((double) minutes / schedule.getIntervalMinutes()).setScale(0, RoundingMode.UP);
+        var newTime = timeStart.plusMinutes(count.intValue() * schedule.getIntervalMinutes());
+        return LocalDateTime.of(LocalDate.now(), newTime);
     }
 }

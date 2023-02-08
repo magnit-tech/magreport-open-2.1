@@ -19,19 +19,19 @@ import AsyncAutocomplete from '../../../../main/AsyncAutocomplete/AsyncAutocompl
 
 // actions
 import { actionUsersLoaded, actionUsersLoadFailed, actionManageUsers, actionAllUserChecked, actionUserAdd, actionUserRoleDelete, actionUserSelect } from 'redux/actions/admin/actionUsers'
-import { showAlertDialog, hideAlertDialog } from 'redux/actions/actionsAlertDialog'
+import { showAlertDialog, hideAlertDialog } from 'redux/actions/UI/actionsAlertDialog'
 
 // styles 
 import { UsersCSS } from "./UsersCSS";
 
-
 function UserDesigner(props){
 
-    const { enqueueSnackbar } = useSnackbar();
-    const [selectedUser, setSelectedUser] = useState(props.items?.selectedUser?.id||-1);
-    const [selectedRoleToAdd, setSelectedRoleToAdd] = useState("");
     const classes = UsersCSS();
 
+    const { enqueueSnackbar } = useSnackbar();
+    
+    const [selectedUser, setSelectedUser] = useState(props.items?.selectedUser?.id||-1);
+    const [selectedRoleToAdd, setSelectedRoleToAdd] = useState("");
 
 
     function handleSelectUser (id) {

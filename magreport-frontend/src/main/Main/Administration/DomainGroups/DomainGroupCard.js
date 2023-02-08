@@ -10,7 +10,7 @@ import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
 // styles
 import { connect } from 'react-redux';
 //actions
-import { showAlertDialog, hideAlertDialog } from 'redux/actions/actionsAlertDialog'
+import { showAlertDialog, hideAlertDialog } from 'redux/actions/UI/actionsAlertDialog'
 
 
 function DomainGroupCard(props){

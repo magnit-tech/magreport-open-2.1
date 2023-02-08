@@ -299,6 +299,7 @@ class SecurityFilterControllerTest {
     private SecurityFilterResponse getSecurityFilterResponse() {
         return new SecurityFilterResponse(
                 ID,
+                FOLDER_ID,
                 new FilterInstanceResponse(),
                 FilterOperationTypeEnum.IS_BETWEEN,
                 NAME,

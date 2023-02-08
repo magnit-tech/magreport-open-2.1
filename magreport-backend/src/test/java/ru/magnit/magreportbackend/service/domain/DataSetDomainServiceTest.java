@@ -8,9 +8,11 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import ru.magnit.magreportbackend.domain.dataset.DataSet;
+import ru.magnit.magreportbackend.domain.dataset.DataSetField;
 import ru.magnit.magreportbackend.domain.dataset.DataSetFolder;
 import ru.magnit.magreportbackend.domain.dataset.DataSetType;
 import ru.magnit.magreportbackend.domain.dataset.DataType;
+import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.dto.inner.UserView;
 import ru.magnit.magreportbackend.dto.request.dataset.DataSetAddRequest;
 import ru.magnit.magreportbackend.dto.request.dataset.DataSetCreateFromMetaDataRequest;
@@ -44,7 +46,10 @@ import ru.magnit.magreportbackend.repository.DataSetFolderRepository;
 import ru.magnit.magreportbackend.repository.DataSetRepository;
 import ru.magnit.magreportbackend.repository.DataSetTypeRepository;
 
+import java.sql.JDBCType;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -54,6 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -149,8 +155,8 @@ class DataSetDomainServiceTest {
 
         verify(dataSetFolderResponseMapper).from((DataSetFolder) any());
         verifyNoMoreInteractions(dataSetFolderResponseMapper);
-        verify(folderRepository).getReferenceById(anyLong());
-        verify(folderRepository).existsById(anyLong());
+        verify(folderRepository, times(2)).getReferenceById(anyLong());
+        verify(folderRepository, times(2)).existsById(anyLong());
         verifyNoMoreInteractions(folderRepository);
 
         when(folderRepository.getAllByParentFolderIsNull()).thenReturn(Collections.emptyList());
@@ -240,7 +246,8 @@ class DataSetDomainServiceTest {
     @Test
     void getDataSet() {
         when(dataSetRepository.existsById(anyLong())).thenReturn(true);
-        when(dataSetRepository.getReferenceById(anyLong())).thenReturn(new DataSet());
+        when(folderRepository.existsById(anyLong())).thenReturn(true);
+        when(dataSetRepository.getReferenceById(anyLong())).thenReturn(getDataset(TYPE_ID));
         when(dataSetResponseMapper.from((DataSet) any())).thenReturn(getDataSetResponse());
 
         DataSetResponse response = service.getDataSet(ID);
@@ -416,12 +423,17 @@ class DataSetDomainServiceTest {
     @Test
     void refreshDataSet() {
 
-        assertNotNull(service.refreshDataSet(getDataSetResponse().setTypeId(0L), Collections.emptyList()));
+        when(dataSetFieldRepository.getDataSetFieldsByDataSetId(anyLong())).thenReturn( new ArrayList<>(Arrays.asList(getDataSetField(),getDataSetField().setName("-"))));
+        when(dataSetFieldAddRequestMapper.from((ObjectFieldResponse) any())).thenReturn(new DataSetFieldAddRequest());
+        when(dataSetFieldMapper.from((DataSetFieldAddRequest) any())).thenReturn(getDataSetField());
 
-        verify(dataSetFieldRepository).markFieldSync(anyLong(), any());
+        assertNotNull(service.refreshDataSet(getDataSetResponse().setTypeId(0L), Arrays.asList(getObjectFieldResponse(NAME), getObjectFieldResponse(""))));
 
+        verify(dataSetFieldAddRequestMapper).from((ObjectFieldResponse) any());
+        verify(dataSetFieldMapper).from((DataSetFieldAddRequest) any());
+        verify(dataSetFieldRepository).getDataSetFieldsByDataSetId(anyLong());
         verify(dataSetFieldRepository).saveAll(any());
-        verifyNoMoreInteractions(dataSetFieldRepository);
+        verifyNoMoreInteractions(dataSetFieldRepository,dataSetFieldAddRequestMapper, dataSetFieldMapper);
     }
 
     @Test
@@ -611,8 +623,19 @@ class DataSetDomainServiceTest {
         return new DataSet()
                 .setId(ID)
                 .setType(new DataSetType().setId(idType))
-                .setFolder(new DataSetFolder());
+                .setFolder(new DataSetFolder().setId(ID));
     }
 
+    private DataSetField getDataSetField(){
+        return new DataSetField()
+                .setName(NAME);
+    }
+
+    private ObjectFieldResponse getObjectFieldResponse(String name) {
+        return new ObjectFieldResponse()
+                .setFieldName(name)
+                .setRemarks(DESCRIPTION)
+                .setDataType(4);
+    }
 
 }

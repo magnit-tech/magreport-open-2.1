@@ -1,6 +1,7 @@
 package ru.magnit.magreportbackend.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
@@ -12,16 +13,20 @@ import ru.magnit.magreportbackend.dto.inner.RoleView;
 import ru.magnit.magreportbackend.dto.request.reportjob.ExcelReportRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobAddRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobCommentRequest;
+import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobFilterRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobHistoryRequestFilter;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobShareRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportPageRequest;
 import ru.magnit.magreportbackend.dto.response.filterreport.FilterReportResponse;
+import ru.magnit.magreportbackend.dto.response.report.ReportJobFilterResponse;
 import ru.magnit.magreportbackend.dto.response.report.ReportResponse;
+import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobHistoryResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobMetadataResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportPageResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportSqlQueryResponse;
+import ru.magnit.magreportbackend.dto.response.reportjob.ScheduledReportResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.TokenResponse;
 import ru.magnit.magreportbackend.dto.response.user.UserResponse;
 import ru.magnit.magreportbackend.exception.InvalidParametersException;
@@ -35,6 +40,7 @@ import ru.magnit.magreportbackend.service.domain.FolderDomainService;
 import ru.magnit.magreportbackend.service.domain.FolderPermissionsDomainService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
 import ru.magnit.magreportbackend.service.domain.OlapConfigurationDomainService;
+import ru.magnit.magreportbackend.service.domain.OlapUserChoiceDomainService;
 import ru.magnit.magreportbackend.service.domain.ReportDomainService;
 import ru.magnit.magreportbackend.service.domain.ReportJobUserDomainService;
 import ru.magnit.magreportbackend.service.domain.TokenService;
@@ -43,9 +49,11 @@ import ru.magnit.magreportbackend.service.domain.UserDomainService;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static ru.magnit.magreportbackend.domain.user.SystemRoles.UNBOUNDED_JOB_ACCESS;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReportJobService {
@@ -76,14 +84,14 @@ public class ReportJobService {
     private final UserDomainService userDomainService;
     private final TokenService tokenService;
     private final ReportJobUserDomainService reportJobUserDomainService;
-
     private final OlapConfigurationDomainService olapConfigurationDomainService;
+    private final OlapUserChoiceDomainService olapUserChoiceDomainService;
 
     public TokenResponse createExcelReport(ExcelReportRequest request) {
 
         final var job = jobDomainService.getJob(request.getId());
-        if(job.getStatus().equals(ReportJobStatusEnum.EXPORT) && excelTemplateDomainService.getDefaultExcelTemplateToReport(job.getReport().id()).equals(request.getExcelTemplateId())){
-                throw new ReportExportException("Report export to Excel already started");
+        if (job.getStatus().equals(ReportJobStatusEnum.EXPORT) && excelTemplateDomainService.getDefaultExcelTemplateToReport(job.getReport().id()).equals(request.getExcelTemplateId())) {
+            throw new ReportExportException("Report export to Excel already started");
         }
 
         final var jobData = jobDomainService.getJobData(request.getId());
@@ -130,7 +138,7 @@ public class ReportJobService {
         final var templatePath = excelTemplateDomainService.getTemplatePathForReport(jobData.reportData().id(), request.getExcelTemplateId());
 
         excelReportDomainService.saveReportToExcel(jobData, templatePath, request.getExcelTemplateId());
-        excelReportDomainService.moveReportToRms(request.getId(), request.getExcelTemplateId());
+        excelReportDomainService.moveReportToRms(request.getId(), request.getExcelTemplateId(), jobData.reportData().encryptFile());
     }
 
     public ReportJobResponse addJob(ReportJobAddRequest request) {
@@ -144,10 +152,39 @@ public class ReportJobService {
         stripEmptyFilters(request);
         checkMandatoryFilters(request, report);
         checkDateParameters(request, report);
+        checkSameReportAlreadyRunning(request);
 
         Long jobId = jobDomainService.addJob(request);
 
         return jobDomainService.getJob(jobId);
+    }
+
+    private void checkSameReportAlreadyRunning(ReportJobAddRequest request) {
+        final var currentParameters = request.getParameters();
+        final var currentUser = userDomainService.getCurrentUser();
+        final var activeJobs = jobDomainService.getActiveJobs(
+                request.getReportId(),
+                currentUser.getId(),
+                List.of(
+                        ReportJobStatusEnum.RUNNING.getId(),
+                        ReportJobStatusEnum.EXPORT.getId(),
+                        ReportJobStatusEnum.CANCELING.getId(),
+                        ReportJobStatusEnum.PENDING_DB_CONNECTION.getId(),
+                        ReportJobStatusEnum.SCHEDULED.getId()
+                )
+        );
+        activeJobs.forEach(job -> {
+            final var jobParameters = jobDomainService.getJobParameters(job.getId());
+            if (isSameParameters(currentParameters, jobParameters)) {
+                throw new InvalidParametersException("Отчет с такими параметрами Вами уже запущен.");
+            }
+        });
+    }
+
+    private boolean isSameParameters(List<ReportJobFilterRequest> requestParams, List<ReportJobFilterResponse> responseParams) {
+        if (requestParams.size() != responseParams.size()) return false;
+        final var reqParamMap = requestParams.stream().collect(Collectors.toMap(ReportJobFilterRequest::getFilterId, ReportJobFilterRequest::getParameters));
+        return responseParams.stream().allMatch(parameter -> parameter.getParameters().equals(reqParamMap.get(parameter.getFilterId())));
     }
 
     private boolean checkReportPermission(Long reportId) {
@@ -242,35 +279,46 @@ public class ReportJobService {
     }
 
     public ReportJobResponse getJob(ReportJobRequest request) {
-        var response = jobDomainService.getJob(request.getJobId());
-        checkAccessForJob(response.getId(),response.getReport().id(), response.getReport().name());
-        response.setCanExecute(checkReportPermission(response.getReport().id()));
-        response.setExcelRowLimit(excelRowLimit);
-        return response;
+        if (request.getJobId() != null) {
+            var response = jobDomainService.getJob(request.getJobId());
+            var currentUser = userDomainService.getCurrentUser();
+            checkAccessForJob(response.getId(), response.getReport().id(), response.getReport().name());
+            response.setCanExecute(checkReportPermission(response.getReport().id()));
+            response.setOlapLastUserChoice(olapUserChoiceDomainService.getOlapUserChoice(response.getReport().id(), currentUser.getId()));
+            response.setExcelRowLimit(excelRowLimit);
+            return response;
+        } else {
+            var user = userDomainService.getCurrentUser();
+            log.warn(String.format("JobId is null! User: %s/%s", user.getDomain().name(), user.getName()));
+            return null;
+        }
     }
 
     public ReportJobResponse getJob(Long jobId) {
-        return jobDomainService.getJob(jobId);
+      return jobDomainService.getJob(jobId);
     }
 
     public List<ReportJobResponse> getMyJobs(ReportJobHistoryRequestFilter filter) {
-
+        var currentUser = userDomainService.getCurrentUser();
         var responses = jobDomainService.getMyJobs();
-        responses.forEach(response -> response.setCanExecute(checkReportPermission(response.getReport().id())));
+        responses.forEach(response -> {
+            response.setCanExecute(checkReportPermission(response.getReport().id()));
+            response.setOlapLastUserChoice(olapUserChoiceDomainService.getOlapUserChoice(response.getReport().id(), currentUser.getId()));
+        });
         return applyFilter(responses, filter);
     }
 
     public List<ReportJobResponse> getAllJobs(ReportJobHistoryRequestFilter filter) {
-
-        var responses = jobDomainService.getAllJobs();
+        var responses = applyFilter(jobDomainService.getAllJobs(), filter);
         responses.forEach(response -> response.setCanExecute(checkReportPermission(response.getReport().id())));
-        return applyFilter(responses, filter);
+        return responses;
     }
 
     public ReportPageResponse getReportPage(ReportPageRequest request) {
-
+        var currentUser = userDomainService.getCurrentUser();
         var jobData = jobDomainService.getJobData(request.getJobId());
-        if (jobData.isComplete()) {
+        if (jobData.isReportReadyToDisplay()) {
+            olapUserChoiceDomainService.setOlapUserChoice(jobData.reportId(), currentUser.getId(), false);
             return avroReportDomainService.getPage(jobData, request.getPageNumber(), request.getRowsPerPage());
         }
 
@@ -309,7 +357,7 @@ public class ReportJobService {
         var currentUser = userDomainService.getCurrentUser();
         var job = jobDomainService.getJob(request.getJobId());
         if (job.getUser().name().equals(currentUser.getName())) {
-            var users = request.getUsers().stream().map(u -> userDomainService.getUserResponse(u.getUserName(),u.getDomain())).toList();
+            var users = request.getUsers().stream().map(u -> userDomainService.getUserResponse(u.getUserName(), u.getDomain())).toList();
             reportJobUserDomainService.addUsersJob(ReportJobUserTypeEnum.SHARE, request.getJobId(), users);
             olapConfigurationDomainService.createCurrentConfigurationForUsers(users.stream().map(UserResponse::getId).toList(), request.getJobId(), currentUser.getId());
         } else {
@@ -325,21 +373,37 @@ public class ReportJobService {
     }
 
     public void addReportJobComment(ReportJobCommentRequest request) {
-        var currentUser =userDomainService.getCurrentUser();
+        var currentUser = userDomainService.getCurrentUser();
         jobDomainService.addReportJobComment(request.getJobId(), currentUser.getId(), request.getComment());
     }
 
-    private List<ReportJobResponse> applyFilter(List<ReportJobResponse> source, ReportJobHistoryRequestFilter filter){
+    private List<ReportJobResponse> applyFilter(List<ReportJobResponse> source, ReportJobHistoryRequestFilter filter) {
         if (filter == null) return source;
         return source.stream().filter(entry -> isConformToFilter(entry, filter)).toList();
     }
 
+    @SuppressWarnings("java:S3776")
     private boolean isConformToFilter(ReportJobResponse source, ReportJobHistoryRequestFilter filter) {
-        if (filter.getFrom() == null && filter.getTo() == null && (filter.getStatuses() == null || filter.getStatuses().isEmpty()) && (filter.getUsers() == null || filter.getUsers().isEmpty())) return true;
+        if (filter.getFrom() == null && filter.getTo() == null && (filter.getStatuses() == null || filter.getStatuses().isEmpty()) && (filter.getUsers() == null || filter.getUsers().isEmpty()))
+            return true;
         var result = filter.getFrom() == null || (filter.getFrom().isBefore(source.getCreated()) || filter.getFrom().isEqual(source.getCreated()));
-        if (filter.getTo() != null && !(filter.getTo().isAfter(source.getCreated()) || filter.getTo().isEqual(source.getCreated()))) result = false;
-        if (filter.getStatuses() != null && !filter.getStatuses().isEmpty() && !filter.getStatuses().contains(source.getStatus())) result = false;
-        if (filter.getUsers() != null && !filter.getUsers().isEmpty() && !filter.getUsers().contains(source.getUser().name())) result = false;
+        if (filter.getTo() != null && !(filter.getTo().isAfter(source.getCreated()) || filter.getTo().isEqual(source.getCreated())))
+            result = false;
+        if (filter.getStatuses() != null && !filter.getStatuses().isEmpty() && !filter.getStatuses().contains(source.getStatus()))
+            result = false;
+        if (filter.getUsers() != null && !filter.getUsers().isEmpty() && !filter.getUsers().contains(source.getUser().id()))
+            result = false;
+        if (filter.getReportIds() != null && !filter.getReportIds().isEmpty() && !filter.getReportIds().contains(source.getReport().id()))
+            result = false;
         return result;
+    }
+
+    public ReportJobHistoryResponse getHistory(ReportJobRequest request) {
+        final var history = jobDomainService.getJobStatHistory(request.getJobId());
+        return new ReportJobHistoryResponse(request.getJobId(), history);
+    }
+
+    public List<ScheduledReportResponse> getAllScheduledReports() {
+        return jobDomainService.getAllScheduledReports();
     }
 }

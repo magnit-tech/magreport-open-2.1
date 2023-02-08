@@ -9,6 +9,7 @@ import ru.magnit.magreportbackend.domain.reportjob.ReportJob;
 
 import javax.persistence.Tuple;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -18,6 +19,8 @@ public interface ReportJobRepository extends JpaRepository<ReportJob, Long> {
     List<ReportJob> getAllByUserId(Long userId);
 
     List<ReportJob> getAllByIdIn(List<Long> idList);
+
+    List<ReportJob> getAllByReportIdAndUserIdAndStatusIdIn(Long reportId, Long userId, Collection<Long> statuses);
 
     ReportJob getFirstByUserIdAndReportIdOrderByIdDesc(Long userId, Long reportId);
 
@@ -40,13 +43,16 @@ public interface ReportJobRepository extends JpaRepository<ReportJob, Long> {
             "       ET.EXCEL_TEMPLATE_ID," +
             "       ET.NAME," +
             "       ET.DESCRIPTION," +
-            "       RET.IS_DEFAULT " +
+            "       RET.IS_DEFAULT, " +
+            "       RJ.COMMENT, " +
+            "       OUC.IS_LAST_USER_CHOICE " +
             "FROM REPOSITORY.REPORT_JOB RJ" +
             "         JOIN REPOSITORY.REPORT R ON R.REPORT_ID = RJ.REPORT_ID" +
             "         JOIN REPOSITORY.USERS U ON U.USER_ID = RJ.USER_ID" +
             "         JOIN REPOSITORY.REPORT_EXCEL_TEMPLATE RET ON RET.REPORT_ID = RJ.REPORT_ID" +
             "         JOIN REPOSITORY.EXCEL_TEMPLATE ET ON ET.EXCEL_TEMPLATE_ID = RET.EXCEL_TEMPLATE_ID" +
-            "         JOIN REPOSITORY.DOMAINS D on U.DOMAIN_ID = D.DOMAIN_ID",
+            "         JOIN REPOSITORY.DOMAINS D on U.DOMAIN_ID = D.DOMAIN_ID" +
+            "         JOIN REPOSITORY.OLAP_USER_CHOICE OUC ON OUC.REPORT_ID = RJ.REPORT_ID AND OUC.USER_ID = RJ.USER_ID",
             nativeQuery = true)
     List<Tuple> getAllJobWithTemplate();
 
