@@ -309,13 +309,9 @@ public class ReportJobService {
     }
 
     public List<ReportJobResponse> getAllJobs(ReportJobHistoryRequestFilter filter) {
-        var currentUser = userDomainService.getCurrentUser();
-        var responses = jobDomainService.getAllJobs();
-        responses.forEach(response -> {
-            response.setCanExecute(checkReportPermission(response.getReport().id()));
-            response.setOlapLastUserChoice(olapUserChoiceDomainService.getOlapUserChoice(response.getReport().id(), currentUser.getId()));
-        });
-        return applyFilter(responses, filter);
+        var responses = applyFilter(jobDomainService.getAllJobs(), filter);
+        responses.forEach(response -> response.setCanExecute(checkReportPermission(response.getReport().id())));
+        return responses;
     }
 
     public ReportPageResponse getReportPage(ReportPageRequest request) {
