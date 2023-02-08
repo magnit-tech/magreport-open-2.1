@@ -30,6 +30,6 @@ public class WriterFactoryImpl implements WriterFactory {
 
     @Override
     public Writer createWriter(OlapCubeResponse data, ReportJobMetadataResponse metadata, Map<String, Object> config, OlapExportPivotTableRequest request, Path exportPath) {
-        return new PivotTableWriter(data, request, metadata, config, telemetryService, exportPath, nameDataList);
+        return new PivotTableWriter2(data, request, metadata, config, telemetryService, exportPath, nameDataList);
     }
 }
