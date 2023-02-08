@@ -2,12 +2,14 @@ package ru.magnit.magreportbackend.expression.impl;
 
 import org.junit.jupiter.api.Test;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
-import ru.magnit.magreportbackend.domain.derivedfield.Expressions;
+import ru.magnit.magreportbackend.domain.enums.Expressions;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
+import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class AddExpressionTest {
 
@@ -34,7 +36,7 @@ class AddExpressionTest {
                     .setConstantValue("-1")
             ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression);
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
         final var expressionResult = expression.calculate(0);
 
         assertEquals("8.5", expressionResult.getL());
@@ -60,10 +62,36 @@ class AddExpressionTest {
                     .setConstantValue("-1")
             ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression);
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
         final var expressionResult = expression.calculate(0);
 
         assertEquals("4", expressionResult.getL());
+        assertEquals(DataTypeEnum.INTEGER, expressionResult.getR());
+    }
+
+    @Test
+    void additionNullTest() {
+        final var sourceExpression = new FieldExpressionResponse()
+            .setType(Expressions.ADD)
+            .setParameters(List.of(
+                new FieldExpressionResponse()
+                    .setType(Expressions.CONSTANT_VALUE)
+                    .setConstantType(DataTypeEnum.INTEGER)
+                    .setConstantValue("2"),
+                new FieldExpressionResponse()
+                    .setType(Expressions.CONSTANT_VALUE)
+                    .setConstantType(DataTypeEnum.INTEGER)
+                    .setConstantValue(null),
+                new FieldExpressionResponse()
+                    .setType(Expressions.CONSTANT_VALUE)
+                    .setConstantType(DataTypeEnum.INTEGER)
+                    .setConstantValue("-1")
+            ));
+
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expressionResult = expression.calculate(0);
+
+        assertNull(expressionResult.getL());
         assertEquals(DataTypeEnum.INTEGER, expressionResult.getR());
     }
 }

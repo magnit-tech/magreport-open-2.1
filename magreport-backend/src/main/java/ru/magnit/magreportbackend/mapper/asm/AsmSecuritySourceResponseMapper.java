@@ -26,6 +26,7 @@ public class AsmSecuritySourceResponseMapper implements Mapper<AsmSecuritySource
                 dataSetResponseMapper.from(source.getDataSet()),
                 source.getPreSql(),
                 source.getPostSql(),
+                source.getRoleDescription(),
                 fieldResponseMapper.from(source.getFields()),
                 securityFilterResponseMapper.from(source.getSecurityFilters()),
                 source.getCreatedDateTime(),

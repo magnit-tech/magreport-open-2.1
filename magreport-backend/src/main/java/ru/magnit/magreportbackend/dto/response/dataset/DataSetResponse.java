@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import ru.magnit.magreportbackend.dto.response.datasource.DataSourceResponse;
+import ru.magnit.magreportbackend.dto.response.folder.FolderNodeResponse;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -23,6 +24,7 @@ public class DataSetResponse {
 
     private Long id;
     private Long typeId;
+    private Long folderId;
     private String name;
     private String description;
     private String catalogName;
@@ -32,6 +34,7 @@ public class DataSetResponse {
     private DataSourceResponse dataSource;
     private String userName;
     private List<DataSetFieldResponse> fields = Collections.emptyList();
+    private List<FolderNodeResponse> path = Collections.emptyList();
 
     @JsonFormat(pattern = ISO_DATE_TIME_PATTERN)
     private LocalDateTime created;

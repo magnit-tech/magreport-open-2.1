@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @ToString
 @NoArgsConstructor
 public class ReportFieldResponse {
-
     private Long id;
     private Long dataSetFieldId;
     private String name;

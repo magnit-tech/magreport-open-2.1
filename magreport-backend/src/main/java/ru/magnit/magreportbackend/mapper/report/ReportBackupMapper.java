@@ -15,11 +15,13 @@ public class ReportBackupMapper implements Mapper<ReportBackupTuple, Report> {
                 source.getId(),
                 source.getFolder().getId(),
                 source.getDataSet().getId(),
+                source.getUser().getId(),
                 source.getRequirementsLink(),
                 source.getName(),
                 source.getDescription(),
                 source.getCreatedDateTime(),
-                source.getModifiedDateTime()
+                source.getModifiedDateTime(),
+                source.getEncryptFile()
         );
     }
 }

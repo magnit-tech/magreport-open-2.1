@@ -40,6 +40,7 @@ public class FilterTemplateResponseMapper implements Mapper<FilterTemplateRespon
 
         return new FilterTemplateResponse()
                 .setId(source.getId())
+                .setFolderId(source.getFolder().getId())
                 .setName(source.getName())
                 .setDescription(source.getDescription())
                 .setUserName(source.getUser().getName())

@@ -4,7 +4,7 @@ import SidebarItems from 'main/Main/Sidebar/SidebarItems';
 import {FolderItemTypes} from './FolderItemTypes';
 
 export function folderItemTypeSidebarItem(itemType){
-    let sidebarItem = itemType === FolderItemTypes.report ? SidebarItems.reports
+    let sidebarItem = itemType === FolderItemTypes.reports ? SidebarItems.reports
                     :itemType === FolderItemTypes.favorites ? SidebarItems.favorites
                     :itemType === FolderItemTypes.roles ? SidebarItems.admin.subItems.roles
                     :itemType === FolderItemTypes.reportsDev ? SidebarItems.development.subItems.reportsDev

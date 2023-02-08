@@ -3,9 +3,6 @@ import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { CircularProgress } from '@material-ui/core';
 
-// dataHub
-import dataHub from 'ajax/DataHub';
-
 // styles 
 import { JobUsernameSelectCSS } from './JobFiltersCSS'
 
@@ -13,7 +10,8 @@ import { JobUsernameSelectCSS } from './JobFiltersCSS'
   * Компонент выпадающего списка пользователей
   * 
   * @param {props} user - список пользователей, для отображения в фильтре, если выбраны
-  * @param {props} dataHub - Объект для доступа к БД
+  * @param {props} label - заголовок поля
+  * @param {props} onDataLoad - Объект для доступа к БД
   * @param {props} onChange - функция выбранное значение
   * @returns {Component} React component
   */
@@ -42,7 +40,7 @@ function JobUsernameSelect(props){
             (async () => {
                 let entity = [];
                 if (entityToAddList.length === 0){
-                    dataHub.userController.users(handleAllUsers);
+                    props.onDataLoad(handleAllUsers);
 
                     function handleAllUsers(magrepResponse){
                         if (magrepResponse.ok && active){
@@ -59,7 +57,7 @@ function JobUsernameSelect(props){
                             );
 
                             for (let i of entityTmp){
-                                entity.push(i.name);
+                                entity.push({id: i.id, name: i.name});
                             };
 
                             setEntityToAddList(entityTmp);
@@ -69,7 +67,7 @@ function JobUsernameSelect(props){
                 }
                 else {
                     for (let i of entityToAddList){
-                        entity.push(i.name);
+                        entity.push({id: i.id, name: i.name});
                     };
                 };
                 setOptionsAsyncEntity(entity);
@@ -99,19 +97,21 @@ function JobUsernameSelect(props){
             onClose={() => {
                 setOpenAsyncEntity(false);
             }}
-            getOptionSelected={(option, value) => option.name === value.name}
+            getOptionLabel = {option => option.name}
+            getOptionSelected={(option, value) => option.id === value.id}
             className={classes.formControl}
             options={optionsAsyncEntity}
             loading={loadingAsync}
-            value={props.user ? props.user : null}
+            value={props.user ? props.user : []}
             noOptionsText={"Нет элементов"}
             onChange={handleOnChange}
+            multiple
             renderInput={params => (
                 <TextField
                     {...params}
                     id="textuserType"
                     variant="filled"
-                    label={"Пользователь"}
+                    label={props.label}
                     InputProps={{
                         ...params.InputProps,
                         endAdornment: (

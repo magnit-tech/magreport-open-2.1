@@ -22,6 +22,7 @@ import ru.magnit.magreportbackend.dto.response.user.UserResponse;
 import ru.magnit.magreportbackend.service.ReportJobService;
 import ru.magnit.magreportbackend.service.RoleService;
 import ru.magnit.magreportbackend.service.ScheduleService;
+import ru.magnit.magreportbackend.service.SettingsService;
 import ru.magnit.magreportbackend.service.UserService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
 import ru.magnit.magreportbackend.service.domain.JobTokenDomainService;
@@ -56,6 +57,7 @@ public class ScheduleEngine implements JobEngine, InitializingBean {
     private final MailTextDomainService mailTextDomainService;
     private final JobTokenDomainService jobTokenDomainService;
     private final ReportJobUserDomainService reportJobUserDomainService;
+    private final SettingsService settingsService;
 
 
     private final Map<Long, Long> jobRunners = new HashMap<>();
@@ -93,7 +95,7 @@ public class ScheduleEngine implements JobEngine, InitializingBean {
     private Long daysBeforeExpired;
 
     @Value("${magreport.mail.file-size}")
-    private Long maxFileSize;
+    private String maxFileSize;
 
     @Override
     @Scheduled(initialDelay = 5000, fixedDelay = 5000)
@@ -163,7 +165,7 @@ public class ScheduleEngine implements JobEngine, InitializingBean {
             if (job != null) {
 
                 switch (job.getStatus()) {
-                    case SCHEDULED, RUNNING, EXPORT -> {}
+                    case SCHEDULED, RUNNING, EXPORT, PENDING_DB_CONNECTION-> {/*Wait finish job*/}
                     case COMPLETE -> {
                         scheduleService.updateStatusScheduleTask(jobRunners.get(idJob), ScheduleTaskStatusEnum.COMPLETE);
                         taskRunners.put(jobRunners.get(idJob), idJob);
@@ -191,7 +193,7 @@ public class ScheduleEngine implements JobEngine, InitializingBean {
                         scheduleService.updateStatusScheduleTask(jobRunners.get(idJob), ScheduleTaskStatusEnum.SCHEDULED);
                         forRemove.add(idJob);
                     }
-                    default -> throw new IllegalStateException("Unexpected value: " + job.getStatus());
+                    default -> throw new IllegalStateException("Unexpected status job: " + job.getStatus());
                 }
             } else {
                 scheduleService.updateStatusScheduleTask(jobRunners.get(idJob), ScheduleTaskStatusEnum.SCHEDULED);
@@ -207,7 +209,7 @@ public class ScheduleEngine implements JobEngine, InitializingBean {
         tasks.forEach(task -> {
             try {
                 var job = reportJobService.getJob(taskRunners.get(task.getId()));
-                if (job.getRowCount() == 0 && !task.getSendEmptyReport()) {
+                if (job.getRowCount() == 0 && Boolean.FALSE.equals(task.getSendEmptyReport())) {
                     scheduleService.updateStatusScheduleTask(task.getId(), ScheduleTaskStatusEnum.SCHEDULED);
                     log.debug("ScheduleTask with id: " + task.getId() + " completed successfully! Mail not send!");
                     taskRunners.remove(task.getId());
@@ -222,8 +224,9 @@ public class ScheduleEngine implements JobEngine, InitializingBean {
                     reportJobService.createExcelReport(excelTemplateRequest);
                     var excelReport = reportJobService.getPathToExcelReport(excelTemplateRequest).toFile();
 
+                    long fileSize = Long.parseLong(settingsService.getValueSetting(maxFileSize));
 
-                    if (excelReport.length() <= maxFileSize) {
+                    if (excelReport.length() <= fileSize) {
 
                         var nameFile = task.getReport().getName() + " " + LocalDate.now() + ".xlsm";
                         mailTextDomainService.sendScheduleMailExcel(scheduleMailCompleteExcel,
@@ -265,11 +268,15 @@ public class ScheduleEngine implements JobEngine, InitializingBean {
             } catch (Exception ex) {
                 log.error(" ScheduleTask with id: " + task.getId() + " complete error! ", ex);
                 scheduleService.updateStatusScheduleTask(task.getId(), ScheduleTaskStatusEnum.FAILED);
-                mailTextDomainService.sendScheduleMailFailed(
-                        scheduleMailFailed,
-                        task,
-                        taskRunners.get(task.getId()),
-                        new Pair<String, StackTraceElement[]>().setL(ex.getMessage()).setR(ex.getStackTrace()));
+                try {
+                    mailTextDomainService.sendScheduleMailFailed(
+                            scheduleMailFailed,
+                            task,
+                            taskRunners.get(task.getId()),
+                            new Pair<String, StackTraceElement[]>().setL(ex.getMessage()).setR(ex.getStackTrace()));
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                }
             }
 
             taskRunners.remove(task.getId());

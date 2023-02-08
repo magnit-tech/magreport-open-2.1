@@ -33,5 +33,28 @@
     <include file="classpath:/db/changelog/patches/2022-11-08/all.xml"/>
     <include file="classpath:/db/changelog/patches/2022-11-10/all.xml"/>
     <include file="classpath:/db/changelog/patches/2022-11-10-01/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2022-11-11/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2022-11-17/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2022-11-17-01/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2022-11-28/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2022-11-29/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2022-11-30/all.xml"/>
+    <includeAll path="classpath:/db/changelog/patches/2022-12-01" errorIfMissingOrEmpty="false"/>
+    <includeAll path="classpath:/db/changelog/patches/2022-12-01-01" errorIfMissingOrEmpty="false"/>
+    <include file="classpath:/db/changelog/patches/2022-12-02-01/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2022-12-02-02/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2022-12-02-03/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2022-12-15/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2022-12-20/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2022-12-22/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2022-12-28/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2022-12-29/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2022-12-30/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2022-12-31/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2023-01-12/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2023-01-13/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2023-01-23/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2023-01-24/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2023-02-02/all.xml"/>
 
 </databaseChangeLog>

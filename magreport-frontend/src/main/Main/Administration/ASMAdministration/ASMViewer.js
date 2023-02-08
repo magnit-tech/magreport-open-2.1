@@ -1,13 +1,14 @@
 import React from "react";
 import {connect} from "react-redux";
-import {useNavigateBack} from "main/Main/Navbar/navbarHooks";
+
+import { useParams, useNavigate } from 'react-router-dom'
 
 // data
 import DataLoader from "main/DataLoader/DataLoader";
 import dataHub from "ajax/DataHub";
 
 // local
-import PageTabs from 'main/PageTabs/PageTabs';
+import PageTabs from 'components/PageTabs/PageTabs';
 import ViewerPage from "main/Main/Development/Viewer/ViewerPage";
 import ViewerTextField from "main/Main/Development/Viewer/ViewerTextField";
 import ViewerChildCard from "main/Main/Development/Viewer/ViewerChildCard";
@@ -15,7 +16,9 @@ import {ViewerCSS} from "main/Main/Development/Viewer/ViewerCSS";
 
 import ExternalSecuritySourceViewer from "./ASMSecuritySourceViewer";
 import {actionAsmDataLoaded, actionAsmDataLoadFailed} from "redux/actions/admin/actionAsm";
-import {hideAlertDialog, showAlertDialog} from "redux/actions/actionsAlertDialog";
+import {hideAlertDialog, showAlertDialog} from "redux/actions/UI/actionsAlertDialog";
+import { viewItemNavbar } from "redux/actions/navbar/actionNavbar";
+
 import {FolderItemTypes} from "main/FolderContent/FolderItemTypes";
 
 // functions
@@ -38,7 +41,6 @@ import {createViewerPageName} from "main/Main/Development/Viewer/viewerHelpers";
 /**
  * Компонент просмотра объекта ASM
  * @param {Object} props - свойства компонента
- * @param {Object} props.asmId - ID просматриваемого компонента
  * @param {Object} props.state - asmDesigner State
  * @param {actionAsmDataLoaded} props.actionAsmDataLoaded - callback, добавляет в state успешно загруженные данных
  * @param {actionAsmDataLoadFailed} props.actionAsmDataLoadFailed - callback, добавляет в state загруженные данные
@@ -49,10 +51,11 @@ import {createViewerPageName} from "main/Main/Development/Viewer/viewerHelpers";
  */
 function ASMViewer(props) {
 
-    const navigateBack = useNavigateBack();
+    const {id} = useParams()
+    const navigate = useNavigate();
 
     const loadFunc = dataHub.asmController.get;
-    const loadParams = [props.asmId];
+    const loadParams = [id];
 
     const classes = ViewerCSS();
 
@@ -88,7 +91,6 @@ function ASMViewer(props) {
             </div>
     })
 
-
     securitySources.forEach((securitySource, index) => {
         tabs.push({
             tablabel: "Настройка " + securitySource.sourceType,
@@ -104,14 +106,14 @@ function ASMViewer(props) {
         <DataLoader
             loadFunc={loadFunc}
             loadParams={loadParams}
-            onDataLoaded={(loadedData) => props.actionAsmDataLoaded(loadedData)}
+            onDataLoaded={(loadedData) => props.actionAsmDataLoaded(loadedData, 'view')}
             onDataLoadFailed={(error) => props.actionAsmDataLoadFailed(error)}
         >
             <ViewerPage
-                id={props.asmId}
+                id={id}
                 itemType={FolderItemTypes.asm}
                 disabledPadding={true}
-                onOkClick={navigateBack}
+                onOkClick={() => navigate('/ui/asm')}
                 >
                 <PageTabs
                     tabsdata={tabs}
@@ -133,6 +135,7 @@ const mapDispatchToProps = {
     actionAsmDataLoadFailed,
     showAlertDialog,
     hideAlertDialog,
+    viewItemNavbar
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(ASMViewer);

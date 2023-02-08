@@ -22,10 +22,13 @@ import ru.magnit.magreportbackend.dto.response.report.ReportResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobBaseStats;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobMetadataResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobResponse;
+import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobStatisticsResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobUserResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportSqlQueryResponse;
+import ru.magnit.magreportbackend.dto.response.reportjob.ScheduledReportResponse;
 import ru.magnit.magreportbackend.exception.FileSystemException;
 import ru.magnit.magreportbackend.exception.InvalidParametersException;
+import ru.magnit.magreportbackend.mapper.report.ScheduledReportResponseMapper;
 import ru.magnit.magreportbackend.mapper.reportjob.ReportJobBaseStatsTupleMapper;
 import ru.magnit.magreportbackend.mapper.reportjob.ReportJobDataMapper;
 import ru.magnit.magreportbackend.mapper.reportjob.ReportJobFilterResponseMapper;
@@ -33,11 +36,13 @@ import ru.magnit.magreportbackend.mapper.reportjob.ReportJobMapper;
 import ru.magnit.magreportbackend.mapper.reportjob.ReportJobMetadataResponseMapper;
 import ru.magnit.magreportbackend.mapper.reportjob.ReportJobResponseMapper;
 import ru.magnit.magreportbackend.mapper.reportjob.ReportJobResponseTupleMapper;
+import ru.magnit.magreportbackend.mapper.reportjob.ReportJobStatisticsResponseMapper;
 import ru.magnit.magreportbackend.mapper.reportjob.ReportJobUserResponseMapper;
 import ru.magnit.magreportbackend.repository.ReportJobFilterRepository;
 import ru.magnit.magreportbackend.repository.ReportJobRepository;
 import ru.magnit.magreportbackend.repository.ReportJobStatisticsRepository;
 import ru.magnit.magreportbackend.repository.ReportJobUserRepository;
+import ru.magnit.magreportbackend.repository.ReportRepository;
 import ru.magnit.magreportbackend.service.ExcelTemplateService;
 import ru.magnit.magreportbackend.util.FileUtils;
 
@@ -50,6 +55,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -68,7 +74,7 @@ public class JobDomainService {
     private final ReportJobRepository repository;
     private final UserDomainService userDomainService;
     private final ReportJobStatisticsRepository statisticsRepository;
-
+    private final ReportRepository reportRepository;
     private final ReportJobBaseStatsTupleMapper baseStatsTupleMapper;
     private final ReportJobFilterRepository reportJobFilterRepository;
     private final ReportJobUserRepository reportJobUserRepository;
@@ -79,9 +85,9 @@ public class JobDomainService {
     private final ReportJobResponseTupleMapper reportJobResponseTupleMapper;
     private final ReportJobFilterResponseMapper reportJobFilterResponseMapper;
     private final ReportJobMetadataResponseMapper reportJobMetadataResponseMapper;
-
     private final ReportJobUserResponseMapper reportJobUserResponseMapper;
-
+    private final ReportJobStatisticsResponseMapper statisticsResponseMapper;
+    private final ScheduledReportResponseMapper scheduledReportResponseMapper;
     @Value("${magreport.jobengine.job-retention-time}")
     private Long jobRetentionTime;
 
@@ -90,6 +96,9 @@ public class JobDomainService {
 
     @Value("${magreport.reports.rms-out-folder}")
     private String rmsOutFolder;
+
+    @Value("${magreport.reports.decrypt-out-folder}")
+    private String decryptOutFolder;
 
     @Value("${magreport.jobengine.clean-rms-out-folder}")
     private Boolean clearRmsOutFolder;
@@ -127,7 +136,7 @@ public class JobDomainService {
         final var job = repository.getReferenceById(id);
         final var jobStatus =  ReportJobStatusEnum.getById(job.getStatus().getId());
 
-        if ((jobStatus.equals(SCHEDULED) || jobStatus.equals(PENDING_DB_CONNECTION)) && status.equals(CANCELING))
+        if ((jobStatus.equals(SCHEDULED) || jobStatus.equals(PENDING_DB_CONNECTION)) && status.equals(CANCELING) || jobStatus.equals(CANCELING))
             status = CANCELED;
 
         if (checkFinalStatus(job.getStatus().getId())) {
@@ -191,8 +200,14 @@ public class JobDomainService {
 
     @Transactional
     public ReportJobResponse getJob(Long jobId) {
-        var job = repository.findById(jobId);
-        return job.map(reportJobResponseMapper::from).orElse(null);
+            var job = repository.findById(jobId);
+            if (job.isPresent()) {
+                var response = reportJobResponseMapper.from(job.get());
+                response.setExcelTemplates(excelTemplateService.getAllReportExcelTemplateToReport(new ReportIdRequest().setId(response.getReport().id())));
+                return response;
+            }
+            else
+                throw new InvalidParametersException(String.format("Report job not found, id: %s", jobId));
     }
 
     @Transactional
@@ -276,20 +291,27 @@ public class JobDomainService {
             }
         });
 
+        List<Path> removeFiles = new ArrayList<>();
+
         if (Boolean.TRUE.equals(clearRmsOutFolder)) {
-            var removeFiles = Arrays.stream(Objects.requireNonNull(new File(FileUtils.replaceHomeShortcut(rmsOutFolder))
+             removeFiles.addAll(Arrays.stream(Objects.requireNonNull(new File(FileUtils.replaceHomeShortcut(rmsOutFolder))
                             .listFiles()))
                     .filter(file -> new Date(file.lastModified()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().isBefore(LocalDateTime.now().minusHours(jobRetentionTime)))
-                    .map(file -> Path.of(file.getAbsolutePath())).toList();
-
-            removeFiles.forEach(file -> {
-                try {
-                    Files.deleteIfExists(file);
-                } catch (IOException ex) {
-                    throw new FileSystemException("Error trying to delete report file for name:" + file.getFileName(), ex);
-                }
-            });
+                    .map(file -> Path.of(file.getAbsolutePath())).toList());
         }
+
+        removeFiles.addAll(Arrays.stream(Objects.requireNonNull(new File(FileUtils.replaceHomeShortcut(decryptOutFolder)).listFiles()))
+                .filter(file -> new Date(file.lastModified()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().isBefore(LocalDateTime.now().minusHours(24)))
+                .map(file -> Path.of(file.getAbsolutePath())).toList());
+
+        removeFiles.forEach(file -> {
+            try {
+                Files.deleteIfExists(file);
+            } catch (IOException ex) {
+                throw new FileSystemException("Error trying to delete report file for name:" + file.getFileName(), ex);
+            }
+        });
+
         repository.deleteAll(oldJobs);
         log.debug("Clearing of the old job data complete");
     }
@@ -375,6 +397,24 @@ public class JobDomainService {
 
     }
 
+    @Transactional
+    public List<ReportJobStatisticsResponse> getJobStatHistory(Long jobId) {
+        return statisticsRepository
+            .getAllByReportJobIdOrderById(jobId)
+            .stream()
+            .map(statisticsResponseMapper::from)
+            .toList();
+    }
+
+    @Transactional
+    public List<ReportJobResponse> getActiveJobs(Long reportId, Long userId, Collection<Long> statuses) {
+        return reportJobResponseMapper.from(repository.getAllByReportIdAndUserIdAndStatusIdIn(reportId, userId, statuses));
+    }
+
+    public List<ScheduledReportResponse> getAllScheduledReports() {
+        return scheduledReportResponseMapper.from(reportRepository.findAllScheduledReports());
+    }
+
     private boolean checkFinalStatus(Long status) {
         return !status.equals(ReportJobStatusEnum.FAILED.getId()) &&
                 !status.equals(ReportJobStatusEnum.COMPLETE.getId()) &&
@@ -382,17 +422,22 @@ public class JobDomainService {
     }
 
     private void saveStats(ReportJob job) {
-        var jobStats = new ReportJobStatistics()
-                .setReportJob(new ReportJob(job.getId()))
-                .setReport(new Report(job.getReport().getId()))
-                .setUser(new User(job.getUser().getId()))
-                .setRowCount(job.getRowCount())
-                .setStatus(job.getStatus())
-                .setState(job.getState())
-                .setExportExcelCount(0L)
-                .setOlapRequestCount(0L)
-                .setIsShare(false);
 
-        statisticsRepository.save(jobStats);
+        var lastRecord = statisticsRepository.getLastRecord(job.getId());
+
+        if (lastRecord != null && lastRecord.getStatus().equals(job.getStatus())) return;
+
+            var jobStats = new ReportJobStatistics()
+                    .setReportJob(new ReportJob(job.getId()))
+                    .setReport(new Report(job.getReport().getId()))
+                    .setUser(new User(job.getUser().getId()))
+                    .setRowCount(job.getRowCount())
+                    .setStatus(job.getStatus())
+                    .setState(job.getState())
+                    .setExportExcelCount(0L)
+                    .setOlapRequestCount(0L)
+                    .setIsShare(false);
+
+            statisticsRepository.save(jobStats);
     }
 }

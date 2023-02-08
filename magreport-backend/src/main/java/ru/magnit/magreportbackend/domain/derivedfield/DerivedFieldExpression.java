@@ -8,6 +8,7 @@ import lombok.experimental.Accessors;
 import ru.magnit.magreportbackend.domain.BaseEntity;
 import ru.magnit.magreportbackend.domain.dataset.DataType;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
+import ru.magnit.magreportbackend.domain.enums.Expressions;
 import ru.magnit.magreportbackend.domain.report.ReportField;
 import ru.magnit.magreportbackend.domain.user.User;
 

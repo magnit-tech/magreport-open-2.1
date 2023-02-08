@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
+import clsx from 'clsx';
 
 // material-ui
 import FilterListIcon from '@material-ui/icons/FilterList';
-//import Typography from '@material-ui/core/Typography';
 import { MuiPickersUtilsProvider, KeyboardDateTimePicker } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import ruLocale from "date-fns/locale/ru";
@@ -10,8 +10,6 @@ import format from "date-fns/format";
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import Badge from '@material-ui/core/Badge';
-//import DoneOutlineIcon from '@material-ui/icons/DoneOutline';
-//import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import CloseIcon from '@material-ui/icons/Close';
 import DoneIcon from '@material-ui/icons/Done';
 import AccessTimeIcon from '@material-ui/icons/AccessTime';
@@ -24,8 +22,13 @@ import JobStatusSelect from './JobFilters/JobStatusSelect'
 import JobUsernameSelect from './JobFilters/JobUsernameSelect'
 import {FolderItemTypes} from './FolderItemTypes';
 import Slide from '@material-ui/core/Slide';
+import {dateCorrection} from '../../../src/utils/dateFunctions'
+
+// dataHub
+import dataHub from 'ajax/DataHub';
 // styles
 import { TimeSlider, FolderContentCSS } from './FolderContentCSS';
+import isHollyday from 'HollydayFunctions';
 
 class RuLocalizedUtils extends DateFnsUtils {
     getCalendarHeaderText(date) {
@@ -120,22 +123,26 @@ export default function FilterPanel(props){
             if (value && key !== 'selectedStatuses' && key !=='isCleared') {
                 return acc+1
             }
-            if (key === 'selectedStatuses' && value.length !== 6){
+            if (key === 'selectedStatuses' && value.length !== 8){
                 return acc+1
             }
             return acc
         }, 0)
     };
+
+    function handleSelectChange(type, selectArray){
+        props.onFilterChange(type, selectArray)
+    }
     
     return (
         <div >
         { 
             !panelOpen 
             ?
-            <div className={classes.filterButton}>
-                <Badge color="secondary" overlap="circular" badgeContent={countFilters}>
+            <div className={clsx(classes.filterButton, {[classes.filterBtnTop]: isHollyday() === -1, [classes.filterBtnTopHollyday]: isHollyday() >= 0})}>
+                <Badge classes={{badge: classes.badge}} color="secondary" overlap="circular" badgeContent={countFilters}>
                     <Tooltip title = "Фильтры" placement="top"> 
-                        <Paper elevation={3} className={classes.openSearchBtn}>
+                        <Paper elevation={3} className={clsx(classes.openSearchBtn, {[classes.openSearchBtnHeight]: isHollyday() === -1, [classes.openSearchBtnHeightHollyday]: isHollyday() >= 0})}>
                             <IconButton
                                 size="small"
                                 aria-label="searchBtn"
@@ -165,8 +172,8 @@ export default function FilterPanel(props){
 										format="dd.MM.yyyy HH:mm"
 										margin="normal"
 										inputVariant="filled"
-										value={props.filters.periodStart}
-										onChange={date => props.onFilterChange('periodStart', date)}
+										value={dateCorrection(props.filters.periodStart, true)}
+										onChange={date => props.onFilterChange('periodStart', dateCorrection(date, false))}
                                         label="Начало периода"
                                         cancelLabel="ОТМЕНИТЬ"
                                         okLabel="СОХРАНИТЬ"
@@ -182,8 +189,8 @@ export default function FilterPanel(props){
 										format="dd.MM.yyyy HH:mm"
 										margin="normal"
 										inputVariant="filled"
-										value={props.filters.periodEnd}
-										onChange={date => props.onFilterChange('periodEnd', date)}
+										value={dateCorrection(props.filters.periodEnd, true)}
+										onChange={date => props.onFilterChange('periodEnd', dateCorrection(date, false))}
                                         label="Конец периода"
                                         cancelLabel="ОТМЕНИТЬ"
                                         okLabel="СОХРАНИТЬ"
@@ -203,11 +210,21 @@ export default function FilterPanel(props){
 						{ props.itemsType === FolderItemTypes.userJobs &&
 							<Grid item>
 								<JobUsernameSelect 
-									user={props.filters.user}
-									onChange={user => props.onFilterChange('user', user)}
+                                    user={props.filters.user}
+                                    label={"Пользователи"}
+                                    onDataLoad={dataHub.userController.users}
+									onChange={users => handleSelectChange('user', users)}
 								/>
 							</Grid>
 						}
+                        <Grid item>
+                            <JobUsernameSelect 
+                                label={"Отчёты"}
+                                user={props.filters.reportIds}
+                                onDataLoad={dataHub.reportJobController.getAllReports}
+								onChange={reports => handleSelectChange('reportIds', reports)}
+							/>
+						</Grid>
 						<Grid item className = {classes.itemStatusFilter}>
 							<JobStatusSelect 
 								selectedStatuses={props.filters.selectedStatuses}

@@ -76,7 +76,8 @@ class ExportDataInExternalTableDomainServiceTest {
                         NAME,
                         NAME,
                         Collections.emptyList(),
-                        null),
+                        null,
+                        true),
                 Collections.emptyList(),
                 Collections.emptyList()
         );
@@ -122,6 +123,7 @@ class ExportDataInExternalTableDomainServiceTest {
                                         NAME,
                                         NAME,
                                         NAME,
+                                        ID,
                                         Collections.singletonList(new ReportFilterLevelData(
                                                 ID,
                                                 -1L,
@@ -143,7 +145,8 @@ class ExportDataInExternalTableDomainServiceTest {
                                         Collections.emptyList(),
                                         Collections.emptyList()
 
-                                )))
+                                ))),
+                        true
                 ),
                 Collections.singletonList(new ReportJobFilterData(
                         ID,
@@ -153,6 +156,8 @@ class ExportDataInExternalTableDomainServiceTest {
                         FilterTypeEnum.DATE_VALUE,
                         FilterOperationTypeEnum.IS_EQUAL,
                         "*",
+                        null,
+                        "",
                         Collections.singletonList(new ReportJobTupleData(
                                 Collections.singletonList(
                                         new ReportJobTupleFieldData(ID, ID,ID,ID, NAME,DataTypeEnum.DATE,NAME))

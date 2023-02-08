@@ -22,7 +22,6 @@ public record ScheduleTaskBackupTuple (
         String reportTitleMail,
         String errorBodyMail,
         String errorTitleMail,
-        boolean sendExpiredMail,
         boolean sendEmptyReport,
         LocalDate expirationDate,
         LocalDateTime created,

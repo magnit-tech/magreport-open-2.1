@@ -58,6 +58,11 @@ public class ScheduleTaskDomainService {
     }
 
     @Transactional
+    public void deleteScheduleTaskByReport(Long reportId){
+        repository.deleteByReportId(reportId);
+    }
+
+    @Transactional
     public List<ScheduleTaskShortResponse> getAllScheduleTask() {
         return scheduleTaskShortResponseMapper.from(repository.findAll());
     }
@@ -95,11 +100,17 @@ public class ScheduleTaskDomainService {
 
         if (ScheduleTaskStatusEnum.getById(task.getStatus().getId()) == ScheduleTaskStatusEnum.INACTIVE && status != ScheduleTaskStatusEnum.SCHEDULED) return;
 
+
         if (status == ScheduleTaskStatusEnum.RUNNING &&
                 ScheduleTaskStatusEnum.getById(task.getStatus().getId()) != ScheduleTaskStatusEnum.SCHEDULED &&
                 ScheduleTaskStatusEnum.getById(task.getStatus().getId()) != ScheduleTaskStatusEnum.FAILED)
             throw new InvalidParametersException(
                     "Запуск задания с id: " + idTask + " из текущего статуса (" + ScheduleTaskStatusEnum.getById(task.getStatus().getId()) + ") невозможен");
+
+
+        if (status == ScheduleTaskStatusEnum.SCHEDULED && ScheduleTaskStatusEnum.getById(task.getStatus().getId()).equals(ScheduleTaskStatusEnum.EXPIRED)){
+            task.setExpirationDate(task.getExpirationDate().plusDays(task.getRenewalPeriod()));
+        }
 
         switch (status) {
             case RUNNING, COMPLETE, EXPIRED, CHANGED, INACTIVE ->

@@ -22,6 +22,7 @@ public class MetricBlankFilter implements MetricFilterNode{
 
     @Override
     public boolean filter(int column, int row) {
-        return invert != (data[column][row][metric].getValue().isEmpty());
+        var currentVal = data[column][row][metric].getValue() == null ? "" : data[column][row][metric].getValue();
+        return invert != (currentVal.isEmpty());
     }
 }

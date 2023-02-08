@@ -1,6 +1,11 @@
 import React, {useState} from 'react';
 import {useSnackbar} from 'notistack';
 
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+
+import { useDispatch } from "react-redux";
+import { viewItemNavbar } from "redux/actions/navbar/actionNavbar";
+
 // components
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
@@ -16,32 +21,27 @@ import DataLoader from 'main/DataLoader/DataLoader';
 import {createViewerPageName} from "../Viewer/viewerHelpers";
 import {FolderItemTypes} from "../../../FolderContent/FolderItemTypes";
 
-/**
- * Просмотрщик шаблона фильтра
- * @param {Object} props - свойства компонента
- * @param {Number} props.filterTemplateId - ID просматриваемого шаблона фильтра
- * @param {onOkClick} props.onOkClick - callback, вызываемый при нажатии кнопки "ОК"
- * @return {JSX.Element}
- * @constructor
- */
-export default function FilterTemplatesViewer({filterTemplateId = -1, onOkClick = f => f}) {
+
+export default function FilterTemplatesViewer() {
+
+    const { id, folderId } = useParams()
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const dispatch = useDispatch()
 
     const {enqueueSnackbar} = useSnackbar();
 
     const [data, setData] = useState({});
 
-    let loadFunc = dataHub.filterTemplateController.get;
-    let loadParams = [filterTemplateId];
-
-    /*
-        Data loading
-    */
-
+    /* Data loading  */
     function handleDataLoaded(loadedData) {
         setData({
             ...data,
             ...loadedData
         });
+
+        dispatch(viewItemNavbar('filterTemplate', loadedData.name, id, folderId, loadedData.path))
     }
 
     function handleDataLoadFailed(message) {
@@ -119,17 +119,18 @@ export default function FilterTemplatesViewer({filterTemplateId = -1, onOkClick 
     // building component
     return (
         <DataLoader
-            loadFunc={loadFunc}
-            loadParams={loadParams}
+            loadFunc={dataHub.filterTemplateController.get}
+            loadParams={[id]}
             onDataLoaded={handleDataLoaded}
             onDataLoadFailed={handleDataLoadFailed}
         >
                 <ViewerPage
                     pageName={createViewerPageName(FolderItemTypes.filterTemplate, data.name)}
                     id={data.id}
+                    folderId = {folderId}
                     itemType={FolderItemTypes.filterTemplate}
+                    onOkClick={() => location.state ? navigate(location.state) : navigate(`/ui/filterTemplate/${folderId}`)}
                     readOnly
-                    onOkClick={onOkClick}
                 >
                     <ViewerTextField
                         label={"Название"}

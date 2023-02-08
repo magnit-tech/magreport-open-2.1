@@ -14,6 +14,7 @@ public interface ScheduleTaskRepository extends JpaRepository<ScheduleTask, Long
     List<ScheduleTask> findByStatusId(Long status);
     ScheduleTask findByCode(String code);
     List<ScheduleTask> findByReportId(Long reportId);
+    List<ScheduleTask> deleteByReportId(Long reportId);
     @Query(
             nativeQuery = true,
             value = "SELECT * FROM REPOSITORY.SCHEDULE_TASK S " +

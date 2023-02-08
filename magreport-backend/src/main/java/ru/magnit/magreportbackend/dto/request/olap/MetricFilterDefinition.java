@@ -18,15 +18,9 @@ import java.util.List;
 @NoArgsConstructor
 @Accessors(chain = true)
 public class MetricFilterDefinition {
-
     private Long metricId;
-
     private MetricFilterType filterType;
-
     private boolean invertResult;
-
     private int rounding;
-
     private List<String> values = Collections.emptyList();
-
 }

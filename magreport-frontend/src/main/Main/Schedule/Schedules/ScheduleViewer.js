@@ -1,12 +1,17 @@
 import React, {useState} from "react";
 import {useSnackbar} from "notistack";
 
+import { useParams, useNavigate } from 'react-router-dom'
+
+import { useDispatch } from "react-redux";
+import { viewItemNavbar } from "redux/actions/navbar/actionNavbar";
+
 // dataHub
 import dataHub from "ajax/DataHub";
 
 // local components
 import DataLoader from "main/DataLoader/DataLoader";
-import PageTabs from "main/PageTabs/PageTabs";
+import PageTabs from "components/PageTabs/PageTabs";
 import ViewerPage from "main/Main/Development/Viewer/ViewerPage";
 import ViewerTextField from "main/Main/Development/Viewer/ViewerTextField";
 import ScheduleParametersViewer from "./ScheduleParametersViewer";
@@ -18,18 +23,13 @@ import {createViewerPageName} from "main/Main/Development/Viewer/viewerHelpers";
 // constants
 import {FolderItemTypes} from "main/FolderContent/FolderItemTypes";
 
-/**
- * @callback onOkClick
- */
-/**
- * Компонент просмотра расписаний
- * @param {Object} props - параметры компонента
- * @param {Number} props.scheduleId - идентификатор расписания
- * @param {onOkClick} props.onOkClick - callback, вызываемый при нажатии кнопки ОК
- * @return {JSX.Element}
- * @constructor
- */
-export default function ScheduleViewer(props) {
+
+export default function ScheduleViewer() {
+    
+    const { id } = useParams()
+    const navigate = useNavigate();
+
+    const dispatch = useDispatch()
 
     const {enqueueSnackbar} = useSnackbar();
 
@@ -37,12 +37,9 @@ export default function ScheduleViewer(props) {
 
     const [data, setData] = useState({tasks: []});
 
-    const loadFunc = dataHub.scheduleController.get;
-    const loadParams = [props.scheduleId];
-
-
     function handleDataLoaded(loadedData) {
         setData(loadedData);
+        dispatch(viewItemNavbar('schedules', loadedData.name, id, null, null))
     }
 
     function handleDataLoadFailed(message) {
@@ -83,15 +80,15 @@ export default function ScheduleViewer(props) {
     })
 
     return <DataLoader
-        loadFunc={loadFunc}
-        loadParams={loadParams}
+        loadFunc={dataHub.scheduleController.get}
+        loadParams={[id]}
         onDataLoaded={handleDataLoaded}
         onDataLoadFailed={handleDataLoadFailed}
     >
         <ViewerPage
             itemType={FolderItemTypes.schedules}
-            id={props.scheduleId}
-            onOkClick={props.onOkClick}
+            id={id}
+            onOkClick={() => navigate('/ui/schedules')}
             disabledPadding={true}
             readOnly={!hasRWRight}
         >

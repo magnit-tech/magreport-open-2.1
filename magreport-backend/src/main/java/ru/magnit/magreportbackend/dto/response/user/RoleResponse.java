@@ -8,8 +8,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import ru.magnit.magreportbackend.dto.response.folder.FolderNodeResponse;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 
 import static ru.magnit.magreportbackend.util.Constant.ISO_DATE_TIME_PATTERN;
 
@@ -32,6 +35,9 @@ public class RoleResponse {
 
     @Schema(description ="Описание роли")
     private String description;
+
+    @Schema(description ="Путь к роле")
+    private List<FolderNodeResponse> path = Collections.emptyList();
 
     @JsonFormat(pattern = ISO_DATE_TIME_PATTERN)
     @Schema(description ="Дата и время создания роли")

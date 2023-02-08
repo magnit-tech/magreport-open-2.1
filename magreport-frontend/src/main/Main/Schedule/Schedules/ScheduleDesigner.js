@@ -1,5 +1,10 @@
-import React, {useState} from "react";
+import React, { useState, useEffect} from "react";
 import {useSnackbar} from "notistack";
+
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+
+import { useDispatch } from "react-redux";
+import { editItemNavbar, addItemNavbar } from "redux/actions/navbar/actionNavbar";
 
 // dataHub
 import dataHub from "ajax/DataHub";
@@ -9,49 +14,46 @@ import {CircularProgress} from "@material-ui/core";
 
 // local components
 import DataLoader from "main/DataLoader/DataLoader";
-import PageTabs from "main/PageTabs/PageTabs";
+import PageTabs from "components/PageTabs/PageTabs";
 import DesignerPage from "main/Main/Development/Designer/DesignerPage";
 import DesignerTextField from "main/Main/Development/Designer/DesignerTextField";
 import ScheduleParameters from "./ScheduleParameters";
 
 
-/**
- * @callback onExit
- */
+export default function ScheduleDesigner() {
 
-/**
- * Компонент создания и редактирования расписаний
- * @param {Object} props - параметры компонента
- * @param {String} props.mode - "create" - создание; "edit" - редактирование
- * @param {Number} props.scheduleId - идентификатор расписания
- * @param {onExit} props.onExit - callback, вызываемый при закрытии формы
- * @return {JSX.Element}
- * @constructor
- */
-export default function ScheduleDesigner(props) {
+    const { id } = useParams()
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        if(!id) {
+            dispatch(addItemNavbar('schedules', null, null))
+        }
+    }, []) // eslint-disable-line
 
     const {enqueueSnackbar} = useSnackbar();
 
     const [uploading, setUploading] = useState(false);
 
-    const [id, setId] = useState(props.scheduleId);
     const [name, setName] = useState();
     const [description, setDescription] = useState();
     const [scheduleType, setScheduleType] = useState();
     const [parameters, setParameters] = useState({});
-    //const [tasks, setTasks] = useState([]);
+    // const [tasks, setTasks] = useState([]);
 
     const [nameError, setNameError] = useState(true);
     const [descriptionError, setDescriptionError] = useState(true);
     const [parametersErrors, setParametersErrors] = useState({scheduleTypeId: true})
 
-    const pageName = props.mode === "create" ? "Создание расписания" : "Редактирование расписания";
-
+    const pageName = id ? "Редактирование расписания" : "Создание расписания";
 
     let loadFunc;
     let loadParams = [];
 
-    if (props.mode === "edit") {
+    if (id) {
         loadFunc = dataHub.scheduleController.get;
         loadParams = [id];
     }
@@ -72,22 +74,21 @@ export default function ScheduleDesigner(props) {
         setDescriptionError(!Boolean(newDescription));
     }
 
-   /* function handleChangeTasks(newTasks) {
-        setTasks(newTasks || []);
-    }*/
-
     function handleChangeParameters(newParameters = {}, newErrors = {scheduleTypeId: true}) {
         setParameters(newParameters);
         setParametersErrors(newErrors);
     }
 
     function handleDataLoaded(loadedData) {
-        setId(loadedData.id);
+        // setId(loadedData.id);
         setScheduleType(loadedData.type);
         handleChangeName(loadedData.name);
         handleChangeDescription(loadedData.description);
         //handleChangeTasks(loadedData.tasks);
         handleChangeParameters(loadedData);
+        if (id) {
+            dispatch(editItemNavbar('schedules', loadedData.name, id, null, null))
+        }
     }
 
     function handleDataLoadFailed(message) {
@@ -100,7 +101,7 @@ export default function ScheduleDesigner(props) {
             enqueueSnackbar(`Форма содержит ошибки`, {variant: "error"});
             return;
         }
-        if (props.mode === "create") {
+        if (!id) {
             dataHub.scheduleController.add(
                 name,
                 description,
@@ -123,18 +124,14 @@ export default function ScheduleDesigner(props) {
     function handleAddedEdited(magRepResponse) {
         
         if (magRepResponse.ok) {
-            props.onExit();
+            location.state ? navigate(location.state) : navigate(`/ui/schedules`)
             enqueueSnackbar("Расписание успешно сохранено", {variant : "success"});
         } else {
             setUploading(false);
-            const actionWord = props.mode === "create" ? "создании" : "обновлении";
+            const actionWord = id ? "обновлении" : "создании";
             enqueueSnackbar(`При ${actionWord} возникла ошибка: ${magRepResponse.data}`,
                 {variant: "error"});
         }
-    }
-
-    function handleCancel() {
-        props.onExit();
     }
 
     // building component
@@ -146,7 +143,7 @@ export default function ScheduleDesigner(props) {
         tabcontent: uploading ? <CircularProgress/> :
             <DesignerPage
                 onSaveClick={handleSave}
-                onCancelClick={handleCancel}
+                onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/schedules`)}
             >
                 <DesignerTextField
                     label="Название"

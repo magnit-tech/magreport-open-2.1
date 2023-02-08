@@ -8,6 +8,8 @@ import ru.magnit.magreportbackend.dto.response.datasource.DataSourceResponse;
 import ru.magnit.magreportbackend.dto.response.datasource.DataSourceTypeResponse;
 import ru.magnit.magreportbackend.mapper.Mapper;
 
+import java.util.Collections;
+
 @Service
 @RequiredArgsConstructor
 public class DataSourceResponseMapper implements Mapper<DataSourceResponse, DataSource> {
@@ -22,6 +24,7 @@ public class DataSourceResponseMapper implements Mapper<DataSourceResponse, Data
     private DataSourceResponse mapBaseProperties(DataSource source) {
         return new DataSourceResponse(
             source.getId(),
+            source.getFolder().getId(),
             source.getName(),
             source.getDescription(),
             source.getUrl(),
@@ -29,6 +32,7 @@ public class DataSourceResponseMapper implements Mapper<DataSourceResponse, Data
             dataSourceTypeResponseMapper.from(source.getType()),
             source.getPoolSize(),
             source.getUser().getName(),
+            Collections.emptyList(),
             source.getCreatedDateTime(),
             source.getModifiedDateTime()
         );

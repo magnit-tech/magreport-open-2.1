@@ -10,6 +10,7 @@ import lombok.experimental.Accessors;
 import ru.magnit.magreportbackend.domain.schedule.ScheduleTypeEnum;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import static ru.magnit.magreportbackend.util.Constant.ISO_DATE_TIME_PATTERN;
@@ -38,16 +39,13 @@ public class ScheduleResponse {
     private Long weekEndMonth;
     private Long intervalMinutes;
     private List<ScheduleTaskShortResponse> tasks;
-
     private String userName;
-
     @JsonFormat(pattern = ISO_DATE_TIME_PATTERN)
     private LocalDateTime planStartDate;
-
     @JsonFormat(pattern = ISO_DATE_TIME_PATTERN)
     private LocalDateTime created;
-
     @JsonFormat(pattern = ISO_DATE_TIME_PATTERN)
     private LocalDateTime modified;
+    private LocalTime finishTime;
 
 }

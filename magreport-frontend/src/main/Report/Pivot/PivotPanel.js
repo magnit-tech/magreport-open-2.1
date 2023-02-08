@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { connect } from 'react-redux';
 
+import { useSearchParams } from 'react-router-dom'
+
 import { DragDropContext } from  'react-beautiful-dnd';
 import Measure from 'react-measure';
 import Dialog from '@material-ui/core/Dialog';
@@ -9,7 +11,7 @@ import Grid from '@material-ui/core/Grid';
 import { useSnackbar } from 'notistack';
 
 //actions
-import { showAlertDialog, hideAlertDialog } from 'redux/actions/actionsAlertDialog'
+import { showAlertDialog, hideAlertDialog } from 'redux/actions/UI/actionsAlertDialog'
 import { setAggModalParams } from 'redux/actions/olap/olapAction.js'
 
 // magreport
@@ -46,8 +48,8 @@ import validateSaveConfig from 'utils/validateSaveConfig';
  * @param {Number} props.reportId - id отчёта
  * @param {Number} props.folderId - id разработческой папки в которой находится отчет
  * @param {String} props.jobOwnerName - login владельца отчета
- * @param {*} props.fullScreen - признак, является ли режим отображения сводной полноэкранным
- * @param {*} props.onRestartReportClick - function() - callback перезапуска отчёта
+ * @param {*} props.fullScreen - признак, является ли режим отображения сводной полноэкранным\
+ * @param {*} props.onRestartReportClick - function() - callback перезапуска отчёта на панели сводной
  * @param {*} props.onViewTypeChange - function() - callback смена вида с сводной на простую таблицу
  * @param {*} props.onFullScreen - function - callback полноэкранный режим
 */
@@ -56,6 +58,8 @@ function PivotPanel(props){
 
     const styles = PivotCSS();
     const { enqueueSnackbar } = useSnackbar();
+
+    const [searchParams, setSearchParams] = useSearchParams();
 
     useEffect(() => {
         // Проверка пользователя на разработчика отчета
@@ -112,27 +116,14 @@ function PivotPanel(props){
     // Индекс поля для которого настраивается фильтрация в списке полей фильтрации
     const [filterFieldIndex, setFilterFieldIndex] = useState(undefined);
 
-    // Очистить всю сводную
-    function handleClearAllOlap() {
-        props.showAlertDialog('Очистить всю конфигурацию?', null, null, handleConfirmClearAllOlap)
-    }
-
-    function handleConfirmClearAllOlap(answer){
-        if (answer){
-            oldAndNewConfiguration.current.newConfiguration.clearAll()
-            setPivotConfiguration(oldAndNewConfiguration.current.newConfiguration);
-            handleSaveCurrentConfig(oldAndNewConfiguration.current.newConfiguration.stringify())
-            resetDataLoader()
-        }
-        props.hideAlertDialog()
-    }
-
     /*
         Данные и отображение данных
     */
 
     // Объект конфигурации
     const [pivotConfiguration, setPivotConfiguration] = useState(new PivotConfiguration());
+
+    const dataProvider = useRef()
 
     // Предоставление данных для таблицы - dataProvider
     const dataProviderRef = useRef(new PivotDataProvider(props.jobId, handleTableDataReady, handleTableDataLoadFailed/*, initialColumnCount, initialRowCount*/));
@@ -213,6 +204,7 @@ function PivotPanel(props){
     */
 
     function handleMetadataLoaded(data){
+        dataProvider.current = data
         let fieldIdToNameMapping = new Map();
         for(let v of data.fields){
             fieldIdToNameMapping[v.id] = v.name;
@@ -222,8 +214,15 @@ function PivotPanel(props){
         let newConfiguration = new PivotConfiguration(pivotConfiguration);
         newConfiguration.create({}, data);
 
-        // Загрузка текущей конфигурации
-        dataHub.olapController.getCurrentConfig(props.jobId, ({ok, data}) => ok && handleGetCurrentConfig(data, newConfiguration))
+        const configId = searchParams.get('configId')
+
+        if(configId) {
+            // Загрузка определенной конфигурации
+            dataHub.olapController.getCurrentConfig(props.jobId, ({ok, data}) => ok && handleGetChoosenCurrentConfig(data, newConfiguration, configId))
+        } else {
+            // Загрузка текущей конфигурации
+            dataHub.olapController.getCurrentConfig(props.jobId, ({ok, data}) => ok && handleGetCurrentConfig(data, newConfiguration))
+        }
     }
 
     function handleTableDataReady(newTableData){
@@ -284,29 +283,24 @@ function PivotPanel(props){
     // Получение текущей конфигурации
     function handleGetCurrentConfig(responseData, newConfiguration){
         configOlap.current.createLists(responseData)
-
+        
         if (responseData.olapConfig.data.length > 0) {
-
-            const configData = JSON.parse(responseData.olapConfig.data),
-                  { columnFrom, columnCount, rowFrom, rowCount } = configData
-
-            
+            const configData = JSON.parse(responseData.olapConfig.data)
+            const { columnFrom, columnCount, rowFrom, rowCount } = configData
 
             // Проверка на валидацию сохраненных полей конфигурации olapConfig с полями из Metadata
             const isSaveConfigValide = !validateSaveConfig(configData.fieldsLists, newConfiguration.fieldsLists.allFields)
 
             if (isSaveConfigValide) {
                 newConfiguration.restore(configData);
-                if (columnFrom>columnCount || rowFrom>rowCount ){
+                if (columnFrom>columnCount || rowFrom>rowCount ) {
                     newConfiguration.setColumnFrom(0);
                     newConfiguration.setRowFrom(0);
                 }
-
-                const {rowSort, columnSort} = newConfiguration.sortOrder
                 
                 let sortingValuesAreValide = true
 
-                if (!rowSort && !columnSort) {
+                if (!newConfiguration.sortOrder?.rowSort && !newConfiguration.sortOrder?.columnSort) {
                     sortingValuesAreValide = false
                 }
 
@@ -320,11 +314,63 @@ function PivotPanel(props){
                 setSortingValues(sortingValuesAreValide ? newConfiguration.sortOrder : {})
 
             } else {
-                enqueueSnackbar('Не удалось загрузить конфигурацию', {variant : "error"});
-                handleDeleteConfig({id: responseData.reportOlapConfigId})
+                enqueueSnackbar('Не удалось загрузить конфигурацию. Поля в конфигурации не соответсвуют отчету', {variant : "error"});
             }
-
         }
+
+        setSearchParams({view: 'pivot'})
+
+        setPivotConfiguration(newConfiguration);
+    }
+
+    // Получение выбранной конфигурации
+    function handleGetChoosenCurrentConfig(responseData, newConfiguration, configId){
+        configOlap.current.createLists(responseData)
+        
+        dataHub.olapController.getChoosenConfig(configId, ({ok, data}) => { if(ok) {
+            const configData = JSON.parse(data.olapConfig.data),
+                    { columnFrom, columnCount, rowFrom, rowCount } = configData
+
+            // Проверка на валидацию сохраненных полей конфигурации olapConfig с полями из Metadata
+            const isSaveConfigValide = !validateSaveConfig(configData.fieldsLists, newConfiguration.fieldsLists.allFields)
+
+            if (isSaveConfigValide) {
+                newConfiguration.restore(configData);
+                if (columnFrom>columnCount || rowFrom>rowCount ){
+                    newConfiguration.setColumnFrom(0);
+                    newConfiguration.setRowFrom(0);
+                }
+                
+                let sortingValuesAreValide = true
+
+                if (!newConfiguration.sortOrder?.rowSort && !newConfiguration.sortOrder?.columnSort) {
+                    sortingValuesAreValide = false
+                }
+
+                dataProviderRef.current.loadDataForNewFieldsLists(newConfiguration.fieldsLists, newConfiguration.filterGroup, newConfiguration.metricFilterGroup, sortingValuesAreValide ? newConfiguration.sortOrder : {}, newConfiguration.columnFrom, columnCount, newConfiguration.rowFrom, rowCount);
+    
+                oldAndNewConfiguration.current = {
+                    oldConfiguration: new PivotConfiguration(pivotConfiguration),
+                    newConfiguration: new PivotConfiguration(newConfiguration)
+                }
+
+                setSortingValues(sortingValuesAreValide ? newConfiguration.sortOrder : {})
+
+                configOlap.current.loadChosenConfig(data.olapConfig.data, (ok) => {
+                    if (ok) {
+                        handleSetConfigDialog('closeConfigDialog')
+                        enqueueSnackbar('Конфигурация "' + data.olapConfig.name + '" успешно загружена' , {variant : "success"});
+                    } else {
+                        enqueueSnackbar('Не удалось загрузить конфигурацию "' + data.olapConfig.name + '". Некорректные данные.', {variant : "error"});
+                    }
+                })
+
+            } else {
+                enqueueSnackbar('Не удалось загрузить конфигурацию. Поля в конфигурации не соответсвуют отчету', {variant : "error"});
+            }
+        }})
+
+        setSearchParams({view: 'pivot'})
 
         setPivotConfiguration(newConfiguration);
     }
@@ -373,16 +419,25 @@ function PivotPanel(props){
                     setAvaibleConfigs(data)
                     return setShowConfigDialog(true)
                 } else if (type === 'ConfigSaveDialog') {
-                    for (var key in data) {
-                        if (key !== 'sharedJobConfig') {
-                            data[key].map(item => configsArr.push(item))
+
+                    if(isReportDeveloper.current === true) {
+                        for (let itemKey in data) {
+                            data[itemKey].map(item => configsArr.push(item))
                         }
+                        setAvaibleConfigs(configsArr)
+                    } else {
+                        for (var key in data) {
+                            if (key !== 'sharedJobConfig') {
+                                data[key].map(item => configsArr.push(item))
+                            }
+                        }
+                        setAvaibleConfigs(configsArr)
                     }
-                    setAvaibleConfigs(configsArr)
+
                     return setShowConfigSaveDialog(true)
                 } 
 
-                for (var itemKey in data) {
+                for (let itemKey in data) {
                     data[itemKey].map(item => configsArr.push(item))
                 }
 
@@ -418,6 +473,7 @@ function PivotPanel(props){
 
         if (isCertainConfigValide) {
             setTableDataLoadStatus(1);
+            setSearchParams({view: 'pivot'})
             return configOlap.current.loadChosenConfig(data, (ok) => {
                 if (ok) {
                     resetDataLoader()
@@ -428,8 +484,8 @@ function PivotPanel(props){
             })
         }
 
-        enqueueSnackbar('Не удалось загрузить конфигурацию. Некорректные данные.', {variant : "error"})
-        return configOlap.current.loadChosenConfig(reportOlapConfigId)
+        enqueueSnackbar('Не удалось загрузить конфигурацию. Поля в конфигурации не соответсвуют отчету', {variant : "error"})
+        return configOlap.current.loadChosenConfig(reportOlapConfigId, (ok) => {})
     }
 
     // Сохраняем по умолчанию для отчета/задания
@@ -448,6 +504,75 @@ function PivotPanel(props){
             return enqueueSnackbar('Не удалось обновить конфигурацию "' + item.olapConfig.name + '"', {variant : "error"});
         })
     }
+
+    // Очистить всю сводную
+    function handleClearAllOlap() {
+        props.showAlertDialog('Очистить всю конфигурацию?', null, null, handleConfirmClearAllOlap)
+    }
+
+    // Очистить всю сводную после подтверждения
+    function handleConfirmClearAllOlap(answer){
+        if (answer){
+            oldAndNewConfiguration.current.newConfiguration.clearAll()
+            setPivotConfiguration(oldAndNewConfiguration.current.newConfiguration);
+            handleSaveCurrentConfig(oldAndNewConfiguration.current.newConfiguration.stringify())
+            resetDataLoader()
+        }
+        props.hideAlertDialog()
+    }
+
+    // Экспорт сводной в Excel
+    function handleExportToExcel() {
+        const payload = {
+            cubeRequest: {
+              jobId: props.jobId,
+              columnFields: pivotConfiguration.fieldsLists.columnFields.map( (v) => (v.fieldId)),
+              rowFields: pivotConfiguration.fieldsLists.rowFields.map( (v) => (v.fieldId)),
+              metrics: tableData.metrics.map( (v) => ({fieldId: v.fieldId, aggregationType : v.aggregationType}) ),
+              metricPlacement: pivotConfiguration.columnsMetricPlacement === true ? "COLUMNS" : "ROWS",
+              filterGroup: pivotConfiguration.filterGroup,
+              metricFilterGroup: pivotConfiguration.metricFilterGroup,
+              columnsInterval: {
+                from: pivotConfiguration.columnFrom,
+                count: 42
+              },
+              rowsInterval: {
+                from: pivotConfiguration.rowFrom,
+                count: 150
+              },
+              allFieldIds: pivotConfiguration.fieldsLists.allFields.map(item => item.id)
+            },
+            configuration: configOlap.current.configData.reportOlapConfigId,
+            stylePivotTable: false
+        }
+
+        if(pivotConfiguration.sortOrder?.columnSort && pivotConfiguration.sortOrder.columnSort.data[0].order.trim() !== '') {
+            payload.cubeRequest.columnSort = [pivotConfiguration.sortOrder.columnSort.data[0]]
+        }
+
+        if(pivotConfiguration.sortOrder?.rowSort && pivotConfiguration.sortOrder.rowSort.data[0].order.trim() !== '') {
+            payload.cubeRequest.rowSort = [pivotConfiguration.sortOrder.rowSort.data[0]]
+        }
+
+        enqueueSnackbar("Запущен экспорт в Excel. Формирование файла может происходить достаточно ДОЛГО " +
+        "в виду необходимости его криптографической обработки в целях информационной безопасности", {variant : "info"});
+        dataHub.olapController.createExcelPivotTable(payload, handleExcelFileResponseNew)
+    }
+
+    function handleExcelFileResponseNew(resp){
+        if (resp.ok){
+            const url = resp.data.urlFile + resp.data.token
+            const link = document.createElement('a');
+            link.href = url;
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+        }
+        else {
+            enqueueSnackbar("Не удалось получить файл с сервера", { variant: 'error'});
+        }
+    }
+
 
 
     /*
@@ -991,6 +1116,7 @@ function PivotPanel(props){
                                 mergeMode = {pivotConfiguration.mergeMode}
                                 fullScreen = {pivotFullScreen}
                                 onMergeModeChange = {handleSetMergeMode}
+                                onRestartReportClick = {() => props.onRestartReportClick()}
                                 onViewTypeChange = {props.onViewTypeChange}
                                 onFullScreen = {handleFullScreen}
                                 fieldsVisibility = {fieldsVisibility}
@@ -1000,6 +1126,7 @@ function PivotPanel(props){
                                 showShareToolBtn = {showShareToolBtn}
                                 onSortingDialog = {handleShowSortingDialog}
                                 onClearAllOlap = {handleClearAllOlap}
+                                onExportToExcel = {handleExportToExcel}
                             />
                             {fieldsVisibility &&
                                 <PivotFieldsList

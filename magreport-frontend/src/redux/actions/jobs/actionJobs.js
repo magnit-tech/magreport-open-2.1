@@ -2,7 +2,9 @@ import store from 'redux/store';
 import dataHub from 'ajax/DataHub';
 import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
 
-import { JOBS_FILTER, JOB_CANCEL, JOB_CANCELED, JOB_CANCEL_FAILED, JOB_SQL_CLICK, JOB_SQL_CLOSE , JOB_SQL_LOADED, JOB_SQL_LOAD_FAILED } from '../../reduxTypes'
+import { JOBS_FILTER, JOB_CANCEL, JOB_CANCELED, JOB_CANCEL_FAILED, JOB_SQL_CLICK, JOB_DIALOG_CLOSE , JOB_SQL_LOADED, JOB_SQL_LOAD_FAILED, 
+        JOB_STATUS_HISTORY_CLICK, JOB_STATUS_HISTORY_LOADED, JOB_STATUS_HISTORY_LOAD_FAILED, 
+        JOB_ADD_COMMENT, JOB_ADD_COMMENT_SUCCESS, JOB_ADD_COMMENT_FAILED} from '../../reduxTypes'
 
 export function actionFilterJobs(itemsType, filters){
     return {
@@ -57,8 +59,8 @@ export const showSqlDialog = (itemsType, titleName, id) =>{
     }
 }
 
-export const hideSqlDialog = (itemsType) =>{
-    return {type: JOB_SQL_CLOSE, open: false, itemsType, data: {}}
+export const hideJobDialog = (itemsType) =>{
+    return {type: JOB_DIALOG_CLOSE, open: false, itemsType, data: {}}
 }
 
 export const actionJobSqlLoadFailed = error =>{
@@ -66,4 +68,60 @@ export const actionJobSqlLoadFailed = error =>{
         type: JOB_SQL_LOAD_FAILED,
         error
     }
+}
+
+function handleClickStatusHistory(magrepResponse){
+    let type = magrepResponse.ok ? JOB_STATUS_HISTORY_LOADED : JOB_STATUS_HISTORY_LOAD_FAILED;
+    let data = magrepResponse.data;
+
+    store.dispatch({
+        open: true,
+        type: type,
+        data : data,
+    });
+}
+
+export const actionShowStatusHistory = (itemsType, titleName, id) => {
+    if (itemsType === FolderItemTypes.job || itemsType === FolderItemTypes.userJobs) {
+        dataHub.reportJobController.getHistory(id, handleClickStatusHistory)
+    }
+    return {
+        type: JOB_STATUS_HISTORY_CLICK,
+        itemsType,
+        titleName,
+        id
+    }
+}
+
+export const actionStatusHistoryLoadFailed = error =>{
+    return {
+        type: JOB_STATUS_HISTORY_LOAD_FAILED,
+        error
+    }
+}
+
+
+
+function handleJobAddComment(itemsType, jobId, jobIndex, comment, magrepResponse){
+    let type = magrepResponse.ok ? JOB_ADD_COMMENT_SUCCESS : JOB_ADD_COMMENT_FAILED;
+
+    store.dispatch({
+        type,
+        itemsType,
+        jobId,
+        jobIndex,
+        comment
+    });
+}
+
+export function actionJobAddComment(itemsType, jobId, jobIndex, comment){
+
+    dataHub.reportJobController.addComment(jobId, comment, m => handleJobAddComment(itemsType, jobId, jobIndex, comment, m))
+    return({
+        type: JOB_ADD_COMMENT,
+        itemsType,
+        jobIndex,
+        jobId,
+        comment
+    })
 }

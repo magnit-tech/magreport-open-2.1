@@ -43,10 +43,10 @@ public class EmailService {
     String tag;
 
     @Value("${magreport.mail.party-size-users}")
-    Long partySize;
+    String partySizeCode;
 
     @Value("${magreport.mail.pause-between-send-party}")
-    Long pauseBetweenSendParty;
+    String pauseBetweenSendPartyCode;
 
 
     private static final String ERROR_MESSAGE = "Error to send email";
@@ -57,6 +57,9 @@ public class EmailService {
             log.info("The ability to send messages is disabled");
             return;
         }
+
+        long partySize = Long.parseLong(settingsService.getValueSetting(partySizeCode));
+        long pauseBetweenSendParty = Long.parseLong(settingsService.getValueSetting(pauseBetweenSendPartyCode));
 
         if (request.checkItem()) {
             var mailSender = getMailSender();

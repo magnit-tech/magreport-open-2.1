@@ -28,7 +28,8 @@ public class ScheduleMapper implements Mapper<Schedule, ScheduleAddRequest> {
                 .setDifferenceTime(source.getDifferenceTime())
                 .setName(source.getName())
                 .setDescription(source.getDescription())
-                .setIntervalMinutes(source.getIntervalMinutes());
+                .setIntervalMinutes(source.getIntervalMinutes())
+                .setFinishTime(source.getFinishTime());
 
     }
 }

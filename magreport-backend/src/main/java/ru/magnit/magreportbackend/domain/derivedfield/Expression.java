@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import ru.magnit.magreportbackend.domain.EntityWithName;
+import ru.magnit.magreportbackend.domain.enums.Expressions;
 import ru.magnit.magreportbackend.domain.user.User;
 
 import javax.persistence.AttributeOverride;
@@ -55,6 +56,9 @@ public class Expression extends EntityWithName {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "expression")
     private List<DerivedFieldExpression> derivedFieldExpressions = Collections.emptyList();
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "expression")
+    private List<ExpressionTag> tags = Collections.emptyList();
 
     @Override
     public Expression setId(Long id) {

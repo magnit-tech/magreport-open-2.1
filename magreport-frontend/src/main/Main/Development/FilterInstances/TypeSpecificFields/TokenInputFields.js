@@ -103,7 +103,7 @@ export default function TokenInputFields(props){
             >
                 <DesignerFolderItemPicker
                     label = "Набор данных"
-                    value = {datasetData && datasetData.name ?  datasetData.schemaName + '.' + datasetData.name + ' (' + datasetData.dataSource.name  +')' : null}
+                    value = {datasetData && datasetData.name ? 'id: ' + datasetData.id +', ' + datasetData.schemaName + '.' + datasetData.name + ' (' + datasetData.dataSource.name  +')' : null}
                     itemType = {FolderItemTypes.dataset}
                     onChange = {handleChangeDataset}
                     displayBlock

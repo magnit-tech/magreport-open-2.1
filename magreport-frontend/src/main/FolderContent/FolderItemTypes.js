@@ -1,28 +1,41 @@
 import dataHub from 'ajax/DataHub';
 
 export const FolderItemTypes = {
-    report : "report",
+    reports : "reports",
+    favorites: 'favorites',
     job : "job",
+
+    // Admin
+    roles : "roles",
+    users: "users",
+    securityFilters: "securityFilters",
+    userJobs: 'userJobs',
+    asm: 'asm',
+    logs: 'logs',
+    settings: 'settings',
+    systemMailTemplates: 'systemMailTemplates',
+    mailSender: 'mailSender',
+    cubes: 'cubes',
+    theme: 'theme',
+
+    // Development
     datasource : "datasource",
     dataset : "dataset",
     filterTemplate : "filterTemplate",
     filterInstance : "filterInstance",
     reportsDev : "reportsDev",
-    roles : "roles",
-    securityFilters: "securityFilters",
-    excelTemplates: "excelTemplates",
-    userJobs: 'userJobs',
-    favorites: 'favorites',
-    asm: 'asm',
+
+    // Schedules
     schedules: 'schedules',
-    systemMailTemplates: 'systemMailTemplates',
     scheduleTasks: 'scheduleTasks',
-    theme: 'theme',
-    cubes: 'cubes'
+    
+    // ...
+    excelTemplates: "excelTemplates",
+
 }
 
 export function dataHubItemController(itemType){
-    let controller = itemType === FolderItemTypes.report || itemType === FolderItemTypes.favorites ? dataHub.folderController
+    let controller = itemType === FolderItemTypes.reports || itemType === FolderItemTypes.favorites ? dataHub.folderController
                     :itemType === FolderItemTypes.reportsDev ? dataHub.reportController
                     :itemType === FolderItemTypes.job || itemType === FolderItemTypes.userJobs ? dataHub.reportJobController
                     :itemType === FolderItemTypes.dataset ? dataHub.datasetController
@@ -42,7 +55,7 @@ export function dataHubItemController(itemType){
 }
 
 export function folderItemTypeName(itemType, changeRest){
-    let name =   itemType === FolderItemTypes.report ? changeRest ? "ссылка на отчёт" : "ссылку на отчёт"
+    let name =   itemType === FolderItemTypes.reports ? changeRest ? "ссылка на отчёт" : "ссылку на отчёт"
                 :itemType === FolderItemTypes.favorites ? "избранное"
                 :itemType === FolderItemTypes.job || itemType === FolderItemTypes.userJobs ? "задание"
                 :itemType === FolderItemTypes.reportsDev ? "отчёт"
@@ -63,7 +76,7 @@ export function folderItemTypeName(itemType, changeRest){
 }
 
 export function folderItemTypesName(itemType, changeRest){
-    let name =   itemType === FolderItemTypes.report ? "Отчёты"
+    let name =   itemType === FolderItemTypes.reports ? "Отчёты"
                 :itemType === FolderItemTypes.favorites ? "Избранное"
                 :itemType === FolderItemTypes.job || itemType === FolderItemTypes.userJobs ? "Задания"
                 :itemType === FolderItemTypes.reportsDev ? "Разработка отчётов"
@@ -84,7 +97,7 @@ export function folderItemTypesName(itemType, changeRest){
 
 
 export function dataHubRightsController(itemType){
-    let controller = itemType === FolderItemTypes.report || itemType === FolderItemTypes.favorites ? dataHub.folderController
+    let controller = itemType === FolderItemTypes.reports || itemType === FolderItemTypes.favorites ? dataHub.folderController
                     :itemType === FolderItemTypes.reportsDev ? dataHub.reportController
                     :itemType === FolderItemTypes.dataset ? dataHub.datasetController
                     :itemType === FolderItemTypes.datasource ? dataHub.datasourceController

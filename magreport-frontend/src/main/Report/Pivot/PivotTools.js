@@ -1,7 +1,7 @@
 import React from 'react';
 import Icon from '@mdi/react'
-import { mdiDeleteForever, mdiTable, mdiTableMergeCells, mdiTableSplitCell, mdiTableColumn, 
-        mdiTableRow, mdiTableHeadersEyeOff, mdiTableHeadersEye, mdiCog, mdiContentSaveCogOutline, mdiShareAll, mdiSort } from '@mdi/js';
+import { mdiDeleteForever, mdiPlay, mdiTable, mdiTableMergeCells, mdiTableSplitCell, mdiTableColumn, 
+        mdiTableRow, mdiTableHeadersEyeOff, mdiTableHeadersEye, mdiCog, mdiContentSaveCogOutline, mdiShareAll, mdiSort, mdiMicrosoftExcel } from '@mdi/js';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Tooltip from '@material-ui/core/Tooltip/Tooltip';
@@ -21,12 +21,13 @@ import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
  * @param {*} props.onConfigDialog - открытие диалогового окна для Config или ConfigSave, при определенном отправленом значение
  * @param {*} props.onShareJobDialog - открытие диалогового окна для ShareJob
  * @param {*} props.showShareToolBtn - отображение кнопки 'Поделиться заданием' (true/false)
+ * @param {*} props.onExportToExcel - function() - callback экспорт в Excel
  * @returns 
  */
 export default function PivotTools(props){
 
     function handleViewTypeChange(){
-        props.onViewTypeChange('PlainTable');
+        props.onViewTypeChange('plain');
     }
 
     return(
@@ -90,6 +91,21 @@ export default function PivotTools(props){
                             >
                                 <Icon 
                                     path={props.mergeMode ? mdiTableSplitCell : mdiTableMergeCells}
+                                    size={1}
+                                />
+                            </IconButton>
+                        }
+                    />
+                </Tooltip>
+                <Tooltip title="Перезапустить отчёт" placement='top'>
+                    <FormControlLabel
+                        control={
+                            <IconButton
+                                size="small"
+                                aria-label="restart"
+                                onClick={() => props.onRestartReportClick(true)}
+                            >
+                                <Icon path={mdiPlay}
                                     size={1}
                                 />
                             </IconButton>
@@ -167,6 +183,21 @@ export default function PivotTools(props){
                                 onClick={() => {props.onSortingDialog(true)} }
                             >
                                 <Icon path={mdiSort}
+                                    size={1}
+                                />
+                            </IconButton>
+                        }
+                    />
+                </Tooltip>
+                <Tooltip title="Экспорт в Excel"  placement='top'>
+                    <FormControlLabel
+                        control={
+                            <IconButton
+                                size="small"
+                                aria-label="sortingDialog"
+                                onClick={() => {props.onExportToExcel(true)} }
+                            >
+                                <Icon path={mdiMicrosoftExcel}
                                     size={1}
                                 />
                             </IconButton>

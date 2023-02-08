@@ -4,7 +4,7 @@ import FolderDescriptionWindow from './ModalWindows/FolderDescriptionWindow'
 import RoleModalWindow from './ModalWindows/RoleModalWindow'
 // import RoleUserListWindow from './ModalWindows/RoleUserListWindow'
 import GrantsModalWindow from './ModalWindows/GrantsModalWindow';
-import SqlViewer from '../FolderContent/ModalWindows/SqlViewer';
+import ItemCardDialogViewer from '../FolderContent/ModalWindows/ItemCardDialogViewer';
 
 export default function ItemWindow(props){
     
@@ -51,6 +51,6 @@ export default function ItemWindow(props){
         )
     }
 
-    return (<SqlViewer/>)
+    return (<ItemCardDialogViewer/>)
     
 }

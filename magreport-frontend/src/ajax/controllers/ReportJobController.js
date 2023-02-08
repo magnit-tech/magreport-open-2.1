@@ -10,6 +10,9 @@ const JOB_CANCEL_URL = CONTROLLER_URL + '/cancel';
 const JOB_SQL_URL = CONTROLLER_URL + '/get-sql-query';
 const JOB_GET_SHARED_JOB_USERS = CONTROLLER_URL + '/get-users-job';
 const JOB_SHARE = CONTROLLER_URL + '/share';
+const JOB_GET_HISTORY = CONTROLLER_URL + '/get-history';
+const JOB_ADD_COMMENT = CONTROLLER_URL + '/add-comment';
+const JOB_GET_ALL_REPORTS = CONTROLLER_URL + '/get-all-reports';
 
 export default function ReportJobController(dataHub){
 
@@ -21,8 +24,15 @@ export default function ReportJobController(dataHub){
         return dataHub.requestService(JOB_ADD_URL, METHOD, body, callback);
     }        
 
-    this.getMyJobs = (callback) => {
-        const body = {};
+    this.getMyJobs = (from, to, users, reportIds, statuses, callback) => {
+        const body = {
+            from, 
+            to,
+            users,
+            reportIds: reportIds? reportIds.map(i=>i.id): [],
+            statuses
+        };
+        
         return dataHub.requestService(JOB_GET_USER_JOBS_URL, METHOD, body , magrepResponse => handleExtReponse(magrepResponse, callback));
     }
 
@@ -44,14 +54,6 @@ export default function ReportJobController(dataHub){
         return dataHub.requestService(JOB_GET_DATA_PAGE, METHOD, body, callback);   
     }
 
-    // this.getExcelReport = (jobId, callback) => {
-    //     const body = {
-    //         id : jobId
-    //     };
-
-    //     return dataHub.downloadFile(JOB_EXCEL_REPORT, METHOD, body, callback);          
-    // }
-
     this.getExcelReport = (excelTemplateId, jobId, callback) => {
         const body = {
             excelTemplateId,
@@ -60,8 +62,14 @@ export default function ReportJobController(dataHub){
         return dataHub.requestService(JOB_EXCEL_REPORT, METHOD, body, callback);          
     }
 
-    this.getAllUsersJobs = (callback) => {
-        const body = {};
+    this.getAllUsersJobs = (from, to, statuses, users, reportIds, callback) => {
+        const body = {
+            from, 
+            to, 
+            statuses,
+            users:  users? users.map(i=>i.id): [],
+            reportIds: reportIds? reportIds.map(i=>i.id): []
+        };
         return dataHub.requestService(JOB_GET_ALL_USER_JOBS_URL, METHOD, body , magrepResponse => handleExtReponse(magrepResponse, callback));   
     }
 
@@ -113,4 +121,28 @@ export default function ReportJobController(dataHub){
 
         return dataHub.requestService(JOB_SHARE, METHOD, body, callback); 
     }
+
+    this.getHistory = (jobId, callback) => {
+        const body = {
+            jobId
+        };
+
+        return dataHub.requestService(JOB_GET_HISTORY, METHOD, body, callback)
+        
+    }
+
+    this.addComment = (jobId, comment, callback) => {
+        const body = {
+            jobId,
+            comment
+        };
+
+        return dataHub.requestService(JOB_ADD_COMMENT, METHOD, body, callback)
+        
+    }
+
+    this.getAllReports = (callback) => {
+        const body = {};
+        return dataHub.requestService(JOB_GET_ALL_REPORTS, METHOD, body, callback)
+    }  
 }

@@ -1,16 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import clsx from "clsx";
 
 import { PivotCSS } from '../PivotCSS';
 
+import { withStyles } from '@material-ui/core/styles';
+
 import Draggable from 'react-draggable';
 
-import { Dialog, DialogActions, DialogTitle, Paper, Box, TextField, Button } from "@material-ui/core";
+import { Dialog, DialogActions, DialogTitle, Paper, Box, TextField, Button, IconButton, ButtonGroup, Tooltip, FormControlLabel, FormControl, Select, MenuItem, InputBase } from "@material-ui/core";
 
 // icons
 import Icon from '@mdi/react'
-import { mdiDeleteSweep } from '@mdi/js';
+import { mdiDeleteSweep, mdiTextBoxRemoveOutline } from '@mdi/js';
+// import { mdiChevronLeft, mdiChevronRight } from '@mdi/js';
 
 // Color Picker
 import { CompactPicker } from 'react-color';
@@ -31,6 +34,35 @@ function PaperComponent(props) {
     );
 }
 
+// Создание списка c MenuItems для селекта "Размер шрифта"
+const menuItems = () => {
+	const arr = []
+	for (let i = 1; i < 31; i++) {
+		arr.push(<MenuItem key={i} value={i}>{i}</MenuItem>)
+	}
+	return arr
+}
+
+const SelectInput = withStyles((theme) => ({
+	root: {
+		  maxWidth: '100px',
+	},
+	input: {
+		borderRadius: 4,
+		position: 'relative',
+		backgroundColor: theme.palette.background.paper,
+		border: '1px solid #ced4da',
+		fontSize: 16,
+		padding: '10px 26px 10px 12px',
+		transition: theme.transitions.create(['border-color', 'box-shadow']),
+		'&:focus': {
+			borderRadius: 4,
+			borderColor: '#80bdff',
+			boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
+		},
+	},
+}))(InputBase);
+
 
 export default function FormattingDialog(props){
 
@@ -38,34 +70,69 @@ export default function FormattingDialog(props){
 
 	const cellData = props.cellData
 
+	const ITEM_HEIGHT = 48;
+	const ITEM_PADDING_TOP = 8;
+	const MenuProps = {
+		PaperProps: {
+			style: {
+			maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+			width: 250,
+			},
+		},
+	};
+
+	useEffect(() => {
+		let newConditionalArray = cellData.conditionalFormatting
+
+		if (newConditionalArray.length > 0) {
+			newConditionalArray.map(function(current) {
+				if(!current.hasOwnProperty('rounding')) {
+					current.rounding = cellData.style[0].rounding
+					current.fontStyle = cellData.style[0].fontStyle
+					current.fontSize = cellData.style[0].fontSize
+					current.fontColor = cellData.style[0].fontColor || '#000000'
+					return current;
+				}
+				return current
+			});
+			setRanges(newConditionalArray)
+		} else {
+			setRanges([		
+			{
+				id: 1,
+				color: '#FCDC00',
+				valueFrom: 'Infinity',
+				valueTo: 'Infinity',
+				rounding: cellData.style[0].rounding,
+				fontStyle: cellData.style[0].fontStyle,
+				fontSize: cellData.style[0].fontSize,
+				fontColor: cellData.style[0].fontColor || '#000000',
+			}])
+		}
+
+	}, [cellData]) 
+
 	const [active, setActive] = useState(null)
 
 	const [errorValueFrom, setErrorValueFrom] = useState(null)
 	const [errorValueTo, setErrorValueTo] = useState(null)
 
-	const [ranges, setRanges] = useState( cellData?.conditionalFormatting.length > 0 ? cellData.conditionalFormatting :
-	[
-		{
-			id: 1,
-			color: '#008000',
-			valueFrom: 'Infinity',
-			valueTo: 'Infinity',
-		},
-	])
+	const [ranges, setRanges] = useState([])
 
-	const [isOpen, setOpen] = useState(false);
+	const [isOpenColor, setOpenColor] = useState(false);
+	const [isOpenFontColor, setOpenFontColor] = useState(false);
 
-	// Цвет шрифта
-	const handleChangeFontColor = (hex) => {
+	//
+	function changeActiveAndRanges(field) {
 		const arr = ranges.map(item => {
-			if(item.id === active.id) {
-				return { ...item, color: hex }
+			if (item.id === active.id) {
+				return { ...item, ...field }
 			} else {
 				return item
 			}
 		})
-		setActive({...active, color: hex})
 		setRanges(arr)
+		setActive({...active, ...field})
 	}
 
 	function computedValue(value) {
@@ -142,53 +209,75 @@ export default function FormattingDialog(props){
 	function handleChangeValueFrom(event) {
 		setErrorValueTo(null)
 		setErrorValueFrom(null)
-		const value = Number(event.target.value)
+
+		const value = event.target.value 
 		const valueTo = active.valueTo
 		const valueFrom = ranges[ranges.findIndex(i => i.id === active.id) - 1].valueFrom 
 
-		if (value <= valueFrom && valueFrom !== 'Infinity') {
+		if (Number(value) <= Number(valueFrom) && valueFrom !== 'Infinity') {
 			setErrorValueFrom((<span>Макс. значение: {valueFrom}</span>))
-		} else if(value >= valueTo && valueTo !== 'Infinity') {
+		} else if(Number(value) >= Number(valueTo) && valueTo !== 'Infinity') {
 			setErrorValueFrom((<span>Мин. значение: {valueTo}</span>))
-		} else {
-			const arr = ranges.map(item => {
-				if (item.id === active.id) {
-					return { ...item, valueFrom: value }
-				} else {
-					return item
-				}
-			})
-			arr[ranges.findIndex(i => i.id === active.id) - 1].valueTo = value
-			setActive({...active, valueFrom: value})
-			setRanges(arr)
+		} else if (value === '-' || value === '+' || value.endsWith('.') || value.trim() === '') {
+			setErrorValueFrom((<span>Недопустимое значение</span>))
 		}
+
+		const arr = ranges.map(item => {
+			if (item.id === active.id) {
+				return { ...item, valueFrom: value }
+			} else {
+				return item
+			}
+		})
+		arr[ranges.findIndex(i => i.id === active.id) - 1].valueTo = value
+		setActive({...active, valueFrom: value})
+		setRanges(arr)
 	}
 
 	// Изменение поля "До:"
 	function handleChangeValueTo(event) {
 		setErrorValueTo(null)
 		setErrorValueFrom(null)
-		const value = Number(event.target.value)
+
+		const value = event.target.value
 		const valueFrom = active.valueFrom
 		const valueTo = ranges[ranges.findIndex(i => i.id === active.id) + 1].valueTo
 
-		if (value <= valueFrom && valueFrom !== 'Infinity') {
+		if (Number(value) <= Number(valueFrom) && valueFrom !== 'Infinity') {
 			setErrorValueTo((<span>Мин. значение: {valueFrom}</span>))
-		} else if(value >= valueTo && valueTo !== 'Infinity') {
+		} else if(Number(value) >= Number(valueTo) && valueTo !== 'Infinity') {
 			setErrorValueTo((<span>Макс. значение: {valueTo}</span>))
-		} else {
-			const arr = ranges.map(item => {
-				if (item.id === active.id) {
-					return { ...item, valueTo: value }
-				} else {
-					return item
-				}
-			})
-			arr[ranges.findIndex(i => i.id === active.id) + 1].valueFrom = value
-			setActive({...active, valueTo: value})
-			setRanges(arr)
+		} else if (value === '-' || value === '+' || value.endsWith('.') || value.trim() === '') {
+			setErrorValueTo((<span>Недопустимое значение</span>))
 		}
+
+		const arr = ranges.map(item => {
+			if (item.id === active.id) {
+				return { ...item, valueTo: value }
+			} else {
+				return item
+			}
+		})
+		arr[ranges.findIndex(i => i.id === active.id) + 1].valueFrom = value
+		setActive({...active, valueTo: value})
+		setRanges(arr)
 	}
+
+	// Вычесление числа десятичных знаков (округление)
+	// const handleChangeRounding = (action) => {
+	// 	let number = active.rounding;
+
+	// 	if (action === 'decrase' && number > 0) {
+	// 		changeActiveAndRanges({rounding: --number} )
+	// 	} else if (action === 'incrase' && (number >= 0 && number < 20)) {
+	// 		changeActiveAndRanges({rounding: ++number})
+	// 	}
+	// }
+
+	const handleValueInput = (e) => {
+		const onlyNums = e.target.value.replace(/[^-,0-9.]/g, '').replace(/(\..*?)\..*/g, '$1').replace(/^0[^.]/, '0');
+		e.target.value = onlyNums;
+    }
 
   	return (
         <Dialog
@@ -232,6 +321,7 @@ export default function FormattingDialog(props){
 
 				{ active && 
 					<Box>
+						{/* Значения */}
 						<Box className={classes.CFD_choiceBlock}>
 							<span>Значения:</span>
 							<Box className={classes.CFD_values}>
@@ -252,13 +342,14 @@ export default function FormattingDialog(props){
 										<TextField 
 											error={!!errorValueFrom}
 											label="От:" 
-											type="number" 
+											type="text" 
 											value={active.valueFrom} 
 											variant="outlined" 
 											margin="dense"
 											className={classes.textField}
+											onInput = {handleValueInput}
 											onChange={handleChangeValueFrom}
-										/>	
+										/>
 										{errorValueFrom}
 									</Box>
 								}
@@ -280,11 +371,12 @@ export default function FormattingDialog(props){
 										<TextField
 											error={!!errorValueTo}
 											label="До:" 
-											type="number" 
+											type="text" 
 											value={active.valueTo} 
 											variant="outlined" 
 											margin="dense"
 											className={classes.textField}
+											onInput = {handleValueInput}
 											onChange={handleChangeValueTo}
 										/>	
 										{errorValueTo}
@@ -293,22 +385,136 @@ export default function FormattingDialog(props){
 							</Box>
 						</Box>
 
+						{/* Цвет фона */}
 						<Box className={clsx(classes.FD_fontColorSection, classes.CFD_fontColor)}>
-							<span>Задний фон:</span>
+							<span>Цвет фона:</span>
 							<Box
 								className={classes.FD_fontColorWrapper}
-								onClick={() => setOpen(!isOpen)}
+								onClick={() => setOpenColor(!isOpenColor)}
 							>
 								<Box 
 									className={classes.FD_fontColorCircle}
 									style={{ background: active.color }}
 								/>
-								{isOpen && 
+								{isOpenColor && 
 									<CompactPicker
 										color={active.color}
-										onChangeComplete={(color) => handleChangeFontColor(color.hex)}
+										onChangeComplete={(color) => changeActiveAndRanges({color: color.hex})}
 									/>
 								}
+							</Box>
+						</Box>
+
+						<Box>
+							{/* Число десятичных знаков */}
+							{/* <Box className={classes.FD_wrapperForActionSections}>
+								<Box whiteSpace="nowrap">Число десятичных знаков:</Box>
+
+								<Box className={classes.FD_inputNumberWithArrows}>
+									<IconButton 
+										size="small" 
+										aria-label="decrase" 
+										onClick={() => handleChangeRounding("decrase")}
+									>
+										<Icon path={mdiChevronLeft} size={1} />
+									</IconButton>
+									<input 
+										type='text' 
+										className={classes.FD_inputForNumber}
+										value={active.rounding}
+										readOnly
+									/>
+									<IconButton 
+										size="small" 
+										aria-label="incrase" 
+										onClick={() => handleChangeRounding("incrase")}
+									>
+										<Icon path={mdiChevronRight} size={1} />
+									</IconButton>
+								</Box>
+							</Box> */}
+							
+							{/* Начертание */}
+							<Box className={classes.FD_wrapperForActionSections}>
+								<Box whiteSpace="nowrap">Начертание:</Box>
+								<Box className={classes.FD_inscriptionBtns}>
+									<ButtonGroup size="small" aria-label="inscriptionBtnsGroup">
+										<Button 
+											style={{ fontWeight: 'bold'}}
+											className={active.fontStyle === 'bold' && classes.FD_inscriptionBtn}
+											onClick={() => changeActiveAndRanges({fontStyle: 'bold'})}
+										>
+											Ж
+										</Button>
+										<Button 
+											style={{ fontStyle: 'italic'}}
+											className={active.fontStyle === 'italic' && classes.FD_inscriptionBtn}
+											onClick={() => changeActiveAndRanges({fontStyle: 'italic'})}
+										>
+											К
+										</Button>
+										<Button 
+											style={{ textDecoration: 'underline'}}
+											className={active.fontStyle === 'underline' && classes.FD_inscriptionBtn}
+											onClick={() => changeActiveAndRanges({fontStyle: 'underline'})}
+										>
+											Ч
+										</Button>
+									</ButtonGroup>
+								</Box>
+								<Box className={classes.FD_clearInscriptionBtn}>
+									<Tooltip title={ 'Очистить начертание' }  placement='top'>
+										<FormControlLabel 
+											control={
+												<IconButton
+													aria-label="clearInscription" 
+													onClick={() => changeActiveAndRanges({fontStyle: 'normal'})}
+												>
+													<Icon path={mdiTextBoxRemoveOutline} size={1} />
+												</IconButton>
+											}
+										/>
+									</Tooltip>
+								</Box>
+							</Box>
+
+							{/* Размер: */}
+							<Box className={classes.FD_wrapperForActionSections}>
+								<Box whiteSpace="nowrap">Размер:</Box>
+								<FormControl className={classes.FD_fontSizeSelect}>
+									<Select
+										id="fontSizeSelect"
+										value={active.fontSize}
+										onChange={(e) => changeActiveAndRanges({fontSize: e.target.value})}
+										input={<SelectInput />}
+										MenuProps={MenuProps}
+									>
+										{menuItems()}
+									</Select>
+								</FormControl>
+							</Box>
+
+							{/* Цвет шрифта */}
+							<Box className={classes.FD_wrapperForActionSections}>
+								<Box className={classes.FD_fontColorSection}>
+									<Box whiteSpace="nowrap">Цвет шрифта:</Box>
+									<Box
+										className={classes.FD_fontColorWrapper}
+										onClick={() => setOpenFontColor(!isOpenFontColor)}
+									>
+											<Box 
+												className={classes.FD_fontColorCircle}
+												style={{ background: active.fontColor }}
+											/>
+											
+										{isOpenFontColor && 
+											<CompactPicker
+												color={active.fontColor}
+												onChangeComplete={(color) => changeActiveAndRanges({fontColor: color.hex})}
+											/>
+										}
+									</Box>
+								</Box>
 							</Box>
 						</Box>
 

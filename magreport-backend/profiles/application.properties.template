@@ -47,6 +47,7 @@ magreport.excel-template.nameDataList=data
 magreport.reports.folder=./data
 magreport.reports.rms-in-folder=./export
 magreport.reports.rms-out-folder=./export
+magreport.reports.decrypt-out-folder=./export
 
 # JobEngine properties
 magreport.jobengine.thread-pool-size=10

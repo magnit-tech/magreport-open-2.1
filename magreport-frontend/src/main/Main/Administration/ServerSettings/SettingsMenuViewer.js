@@ -18,7 +18,7 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import DesignerTextField from 'main/Main/Development/Designer/DesignerTextField'
 import HistorySettingsDialog from './HistorySettingsDialog';
 import DesignerPage from "main/Main/Development/Designer/DesignerPage";
-import PageTabs from 'main/PageTabs/PageTabs';
+import PageTabs from 'components/PageTabs/PageTabs';
 import StyleConsts from '../../../../StyleConsts';
 
 // styles

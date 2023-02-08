@@ -11,13 +11,17 @@ import java.util.List;
 
 @Repository
 public interface ReportJobStatisticsRepository extends JpaRepository<ReportJobStatistics, Long> {
-    @Query(value = "SELECT DISTINCT RJS.REPORT_JOB_ID," +
-        "       RJS.REPORT_ID," +
-        "       R.NAME AS reportName," +
-        "       U.NAME AS userName " +
-        "FROM REPOSITORY.REPORT_JOB_STATISTICS RJS" +
-        "         JOIN REPOSITORY.REPORT R ON R.REPORT_ID = RJS.REPORT_ID" +
-        "         JOIN REPOSITORY.USERS U ON U.USER_ID = RJS.USER_ID",
+    @Query(value = "SELECT " +
+            "RJS.REPORT_JOB_ID, " +
+            "RJS.REPORT_ID, " +
+            "R.NAME AS reportName, " +
+            "U.NAME AS userName " +
+            "FROM (" +
+            "            SELECT RJS.REPORT_JOB_ID, RJS.REPORT_ID, RJS.USER_ID" +
+            "            FROM REPOSITORY.REPORT_JOB_STATISTICS RJS" +
+            "                    GROUP BY RJS.REPORT_JOB_ID, RJS.REPORT_ID, USER_ID ) AS RJS" +
+            "    JOIN REPOSITORY.REPORT R ON R.REPORT_ID = RJS.REPORT_ID" +
+            "    JOIN REPOSITORY.USERS U ON U.USER_ID = RJS.USER_ID",
         nativeQuery = true)
     List<Tuple> getDistinctBaseStats();
 
@@ -25,4 +29,5 @@ public interface ReportJobStatisticsRepository extends JpaRepository<ReportJobSt
             nativeQuery = true)
     ReportJobStatistics getLastRecord (@Param("reportJobId") Long reportJobId);
 
+    List<ReportJobStatistics> getAllByReportJobIdOrderById(Long jobId);
 }

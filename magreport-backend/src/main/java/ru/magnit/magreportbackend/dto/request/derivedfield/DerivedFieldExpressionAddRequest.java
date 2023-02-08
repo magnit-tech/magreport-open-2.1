@@ -2,14 +2,16 @@ package ru.magnit.magreportbackend.dto.request.derivedfield;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
-import ru.magnit.magreportbackend.domain.derivedfield.Expressions;
+import ru.magnit.magreportbackend.domain.enums.Expressions;
 
+import java.util.Collections;
 import java.util.List;
 
 @Getter
@@ -17,6 +19,7 @@ import java.util.List;
 @Accessors(chain = true)
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class DerivedFieldExpressionAddRequest {
     @JsonIgnore
     private Long ordinal;
@@ -24,5 +27,5 @@ public class DerivedFieldExpressionAddRequest {
     private Long referenceId;
     private String constantValue;
     private DataTypeEnum constantType;
-    private List<DerivedFieldExpressionAddRequest> parameters;
+    private List<DerivedFieldExpressionAddRequest> parameters = Collections.emptyList();
 }

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="ADD_SETTINGS_LOGIN_PAGE" author="vyushin_aa">
+
+        <insert tableName="SERVER_SETTINGS_FOLDER">
+            <column name="ORDINAL" valueNumeric="2"/>
+            <column name="CODE" value="LOGIN_CONFIG"/>
+            <column name="NAME" value="Настройки экрана авторизации"/>
+            <column name="DESCRIPTION" value=""/>
+        </insert>
+
+        <insert tableName="SERVER_SETTINGS">
+            <column name="FOLDER_ID" valueComputed="SELECT SERVER_SETTINGS_FOLDER_ID FROM REPOSITORY.SERVER_SETTINGS_FOLDER WHERE CODE='LOGIN_CONFIG'"/>
+            <column name="ORDINAL" valueNumeric="1"/>
+            <column name="CODE" value="loginHelpMessage"/>
+            <column name="NAME" value= "Текст ссылки проблем с входом" />
+            <column name="DESCRIPTION" value="Текст ссылки проблем с входом"/>
+        </insert>
+
+        <insert tableName="SERVER_SETTINGS">
+            <column name="FOLDER_ID" valueComputed="SELECT SERVER_SETTINGS_FOLDER_ID FROM REPOSITORY.SERVER_SETTINGS_FOLDER WHERE CODE='LOGIN_CONFIG'"/>
+            <column name="ORDINAL" valueNumeric="2"/>
+            <column name="CODE" value="loginHelpLink"/>
+            <column name="NAME" value= "Ссылка для создания письма" />
+            <column name="DESCRIPTION" value="Ссылка для создания письма"/>
+        </insert>
+
+    </changeSet>
+
+</databaseChangeLog>

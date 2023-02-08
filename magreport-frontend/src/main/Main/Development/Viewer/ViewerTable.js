@@ -43,7 +43,7 @@ export default function ViewerTable(props) {
             <TableHead>
                 <TableRow>
                     {columns.map(row =>
-                        <TableCell align="center" className={classes.tableCellHead}>{row.label}</TableCell>
+                        <TableCell key={Math.random()} align="center" className={classes.tableCellHead}>{row.label}</TableCell>
                     )}
                 </TableRow>
             </TableHead>
@@ -52,7 +52,7 @@ export default function ViewerTable(props) {
                     <TableRow key={row[keyName]}
                               className={!checkIsValidRow(row) ? classes.invalidRow : null}>
                         {columns.map(col => (
-                            <TableCell align="center">{row[col.key]}</TableCell>
+                            <TableCell key={Math.random()} align="center">{row[col.key]}</TableCell>
                             )
                         )}
                     </TableRow>

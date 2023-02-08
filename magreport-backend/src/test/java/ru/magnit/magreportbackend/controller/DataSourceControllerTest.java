@@ -235,6 +235,7 @@ class DataSourceControllerTest {
 
         return new DataSourceResponse(
                 ID,
+                ID,
                 NAME,
                 DESCRIPTION,
                 URL,
@@ -242,6 +243,7 @@ class DataSourceControllerTest {
                 new DataSourceTypeResponse(ID, NAME, DESCRIPTION, CREATED_TIME, MODIFIED_TIME),
                 POOL_SIZE,
                 "Creator",
+                Collections.emptyList(),
                 CREATED_TIME,
                 MODIFIED_TIME
         );

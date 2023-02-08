@@ -1,9 +1,12 @@
 import React, {useState} from "react";
 import {useSnackbar} from "notistack";
 
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+
 import dataHub from "ajax/DataHub";
 import { connect } from 'react-redux';
-import { showAlert, hideAlert } from '../../../../redux/actions/actionsAlert'
+import { showAlert, hideAlert } from '../../../../redux/actions/UI/actionsAlert'
+import { viewItemNavbar } from "redux/actions/navbar/actionNavbar";
 
 import DataLoader from "main/DataLoader/DataLoader";
 
@@ -15,35 +18,34 @@ import {ViewerCSS} from "main/Main/Development/Viewer/ViewerCSS";
 import {createViewerTextFields} from "main/Main/Development/Viewer/viewerHelpers";
 
 import Button from '@material-ui/core/Button';
-import Alerts from "main/Alerts/Alerts";
+import Alerts from "components/Alerts/Alerts";
 
 import Icon from '@mdi/react'  
 import { mdiCheckDecagram } from '@mdi/js';
 
 
 /**
- * @callback onOkClick
- */
-/**
  * Компонент просмотра источника данных
  * @param {Object} props - параметры компонента
- * @param {Number} props.datasourceId - ID источника данных
- * @param {onOkClick} props.onOkClick - callback вызываемый при нажатии кнопки ОК
  * @constructor
  */
+
 function DatasourceViewer(props) {
 
     const classes = ViewerCSS();
 
+    const { id, folderId } = useParams()
+    const navigate = useNavigate();
+    const location = useLocation();
+
     const {enqueueSnackbar} = useSnackbar();
 
     const [data, setData] = useState({});
-
-    let loadFunc = dataHub.datasourceController.get;
-    let loadParams = [props.datasourceId];
+    
 
     function handleDataLoaded(loadedData) {
         setData(loadedData);
+        props.viewItemNavbar('datasource', loadedData.name, id, folderId, loadedData.path)
     }
 
     function handleDataLoadFailed(message) {
@@ -53,7 +55,6 @@ function DatasourceViewer(props) {
 
     function checkConnection(id) {
         dataHub.datasourceController.check(id,  checkConnectionAnswer);
-    
     }
 
     function checkConnectionAnswer(magrepResponse){
@@ -94,17 +95,18 @@ function DatasourceViewer(props) {
 
     return (
         <DataLoader
-            loadFunc={loadFunc}
-            loadParams={loadParams}
+            loadFunc={dataHub.datasourceController.get}
+            loadParams={[id]}
             onDataLoaded={handleDataLoaded}
             onDataLoadFailed={handleDataLoadFailed}
         >
             <ViewerPage
                 id={data.id}
                 name={data.name}
+                folderId = {folderId}
                 itemType={FolderItemTypes.datasource}
                 disabledPadding={true}
-                onOkClick={props.onOkClick}
+                onOkClick={() => location.state ? navigate(location.state) : navigate(`/ui/datasource/${folderId}`)}
                 pageName = {`Просмотр источника данных: ${data.name}`}
                 readOnly={!hasRWRight}
             >
@@ -129,7 +131,8 @@ function DatasourceViewer(props) {
 
 const mapDispatchToProps = {
     showAlert,
-    hideAlert
+    hideAlert,
+    viewItemNavbar
 }
 
 export default connect(null, mapDispatchToProps)(DatasourceViewer);
