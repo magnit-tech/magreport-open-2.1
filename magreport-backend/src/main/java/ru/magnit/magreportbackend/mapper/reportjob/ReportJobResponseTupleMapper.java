@@ -51,8 +51,7 @@ public class ReportJobResponseTupleMapper implements Mapper<ReportJobResponse, T
                 false,
                 0L,
                 source.get("COMMENT", String.class),
-                true
-
+                source.get("IS_LAST_USER_CHOICE", Boolean.class)
         );
     }
 
