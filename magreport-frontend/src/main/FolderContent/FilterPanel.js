@@ -102,7 +102,12 @@ export default function FilterPanel(props){
         }
       ]; 
     const classes = FolderContentCSS();
-    const [panelOpen, setPanelOpen] = useState(false)
+    const [panelOpen, setPanelOpen] = useState(false);
+
+    let countFilters = Object.entries(props.filters).reduce((acc, [key, value]) => {
+        if (value && value !== null && value.length !== 0  && key !=='isCleared') return acc+1
+        else return acc
+    }, 0);
 
     function handleClick(isCleared){
         setPanelOpen(false)
@@ -116,19 +121,6 @@ export default function FilterPanel(props){
           </span>
         );
     }
-
-    let countFilters = 0
-    if (props.filters){
-        countFilters = Object.entries(props.filters).reduce((acc, [key, value]) => {
-            if (value && key !== 'selectedStatuses' && key !=='isCleared') {
-                return acc+1
-            }
-            if (key === 'selectedStatuses' && value.length !== 8){
-                return acc+1
-            }
-            return acc
-        }, 0)
-    };
 
     function handleSelectChange(type, selectArray){
         props.onFilterChange(type, selectArray)
