@@ -58,7 +58,7 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
             Map.entry(POSTGRESQL, PostgreSqlFilterQueryBuilder.class),
             Map.entry(DB2, Db2FilterQueryBuilder.class),
             Map.entry(SAP_HANA, SapHanaFilterQueryBuilder.class),
-            Map.entry(CLICK_HOUSE, ClickHouseQueryBuilder.class)
+            Map.entry(CLICK_HOUSE, ClickHouseFilterQueryBuilder.class)
 
     );
 
