@@ -106,7 +106,7 @@ export default function FolderContent(props){
         reportIds: null,
         periodStart: null,
         periodEnd: null,
-        selectedStatuses: defaultStatuses
+        selectedStatuses: null, //defaultStatuses
     })
     const [contextPosition, setContextPosition] = useState({
         mouseX: null,
@@ -503,7 +503,7 @@ export default function FolderContent(props){
                 reportIds: null,
                 periodStart: null,
                 periodEnd: null,
-                selectedStatuses: defaultStatuses,
+                selectedStatuses: null, //defaultStatuses,
                 isCleared: true
             }
             setFilterValues(filters)
