@@ -16,6 +16,8 @@ public record ReportJobFilterData(
         FilterTypeEnum filterType,
         FilterOperationTypeEnum operationType,
         String code,
+        Long maxCountItems,
+        String filterName,
         List<ReportJobTupleData> fieldValues
 ) {
     public String getValue() {

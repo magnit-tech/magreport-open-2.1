@@ -39,11 +39,9 @@ import SortingDialog from './UI/SortingDialog/index';
 import FormattingDialog from './UI/FormattingDialog';
 import ConditionalFormattingDialog from './UI/ConditionalFormattingDialog';
 
-import FormulaEditor, {nodeType} from "./maglangFormulaEditor/FormulaEditor/FormulaEditor";
-
 //utils
 import validateSaveConfig from 'utils/validateSaveConfig';
-import CreateFieldDialog from './UI/CreateFieldDialog';
+import DerivedFieldDialog from './UI/DerivedFieldDialog/DerivedFieldDialog';
 
 
 /**
@@ -52,6 +50,7 @@ import CreateFieldDialog from './UI/CreateFieldDialog';
  * @param {Number} props.folderId - id разработческой папки в которой находится отчет
  * @param {String} props.jobOwnerName - login владельца отчета
  * @param {*} props.fullScreen - признак, является ли режим отображения сводной полноэкранным\
+ * @param {*} props.onRestartReportClick - function() - callback перезапуска отчёта на панели сводной
  * @param {*} props.onViewTypeChange - function() - callback смена вида с сводной на простую таблицу
  * @param {*} props.onFullScreen - function - callback полноэкранный режим
 */
@@ -1105,25 +1104,25 @@ function PivotPanel(props){
         ***************************************************
     */
 
-    function updateDerivedFieldsList(magrepResponse){
-        let newPivotConfiguration = new PivotConfiguration(pivotConfiguration);
-        newPivotConfiguration.createDerivedFields(magrepResponse.data.derivedFields);
-        setPivotConfiguration(newPivotConfiguration);
-    }
+    // function updateDerivedFieldsList(magrepResponse){
+    //     let newPivotConfiguration = new PivotConfiguration(pivotConfiguration);
+    //     newPivotConfiguration.createDerivedFields(magrepResponse.data.derivedFields);
+    //     setPivotConfiguration(newPivotConfiguration);
+    // }
 
-    function handleDerivedFieldSave(derivedFieldObject){
-        if(derivedFieldObject.id === undefined){
-            dataHub.derivedFieldController.add(
-                props.reportId, 
-                derivedFieldObject.fieldName, 
-                derivedFieldObject.fieldDesc, 
-                derivedFieldObject.expression,
-                derivedFieldObject.expressionText,
-                ()=>{dataHub.olapController.getJobMetadataExtended(props.jobId, props.reportId, updateDerivedFieldsList)});
+    function handleDerivedFieldCloseAndUpdate(bool){
+        if(bool){
+            // dataHub.derivedFieldController.add(
+            //     props.reportId, 
+            //     derivedFieldObject.fieldName, 
+            //     derivedFieldObject.fieldDesc, 
+            //     derivedFieldObject.expression,
+            //     derivedFieldObject.expressionText,
+            //     ()=>{dataHub.olapController.getJobMetadataExtended(props.jobId, props.reportId, updateDerivedFieldsList)});
+            // dataHub.olapController.getJobMetadataExtended(props.jobId, props.reportId, updateDerivedFieldsList)
+            resetDataLoader()
         }
-        else{
-            // Здесь должно быть редактирование поля
-        }
+
         setCreateFieldDialogOpen(false);
     }
 
@@ -1153,6 +1152,7 @@ function PivotPanel(props){
                                 mergeMode = {pivotConfiguration.mergeMode}
                                 fullScreen = {pivotFullScreen}
                                 onMergeModeChange = {handleSetMergeMode}
+                                onRestartReportClick = {() => props.onRestartReportClick()}
                                 onViewTypeChange = {props.onViewTypeChange}
                                 onFullScreen = {handleFullScreen}
                                 fieldsVisibility = {fieldsVisibility}
@@ -1399,12 +1399,11 @@ function PivotPanel(props){
                 />
             }
             {createFieldDialogOpen &&
-                <CreateFieldDialog
+                <DerivedFieldDialog
                     open = {createFieldDialogOpen}
                     jobId = {props.jobId}
                     reportId = {props.reportId}
-                    onSave = {handleDerivedFieldSave}
-                    onCancel = {() => {setCreateFieldDialogOpen(false)}}
+                    onCancel = {(bool) => handleDerivedFieldCloseAndUpdate(bool)}
                 />
             }
         </div>

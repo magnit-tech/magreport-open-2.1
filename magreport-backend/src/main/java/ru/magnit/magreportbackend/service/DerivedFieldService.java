@@ -13,6 +13,7 @@ import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportFieldData;
 import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldAddRequest;
+import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldCheckNameRequest;
 import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldGetAvailableRequest;
 import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldRequest;
 import ru.magnit.magreportbackend.dto.request.olap.FieldDefinition;
@@ -297,13 +298,22 @@ public class DerivedFieldService {
             .filter(ReportFieldTypeResponse::getVisible)
             .map(entry -> new Pair<>(new FieldDefinition(entry.getId(), OlapFieldTypes.REPORT_FIELD), entry.getType()))
             .collect(Collectors.toMap(Pair::getL, entry -> new Pair<>(0, entry.getR())));
-        derivedFields.forEach(field-> fieldIndexes.put(new FieldDefinition(field.getId(), OlapFieldTypes.DERIVED_FIELD), new Pair<>(0, field.getDataType())));
+        derivedFields.forEach(field -> fieldIndexes.put(new FieldDefinition(field.getId(), OlapFieldTypes.DERIVED_FIELD), new Pair<>(0, field.getDataType())));
 
         final var expressionContext = new ExpressionCreationContext(fieldIndexes, null, null);
         final var fieldExpression = fieldExpressionResponseRequestMapper.from(request.getExpression());
         final var expression = fieldExpression.getType().init(fieldExpression, expressionContext);
 
         return new DerivedFieldTypeResponse(expression.inferType());
+    }
+
+    public boolean checkFieldName(DerivedFieldCheckNameRequest request) {
+        final var userId = userDomainService.getCurrentUser().getId();
+        final var fieldName = Boolean.TRUE.equals(request.getIsPublic()) ?
+            request.getReportId() + "_" + request.getName() :
+            request.getReportId() + "_" + userId + "_" + request.getName();
+
+        return !domainService.isFieldExists(request.getReportId(), fieldName);
     }
 
     private void checkPermission(DerivedFieldAddRequest request) {

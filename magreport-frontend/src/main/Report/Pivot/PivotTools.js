@@ -1,6 +1,6 @@
 import React from 'react';
-import Icon from '@mdi/react'
-import { mdiDeleteForever, mdiTable, mdiTableMergeCells, mdiTableSplitCell, mdiTableColumn, 
+import Icon from '@mdi/react';
+import { mdiDeleteForever, mdiPlay, mdiTable, mdiTableMergeCells, mdiTableSplitCell, mdiTableColumn, 
         mdiTableRow, mdiTableHeadersEyeOff, mdiTableHeadersEye, mdiCog, mdiContentSaveCogOutline, mdiShareAll, mdiSort, mdiMicrosoftExcel,
         mdiApplicationArrayOutline  } from '@mdi/js';
 import FormGroup from '@material-ui/core/FormGroup';
@@ -99,6 +99,21 @@ export default function PivotTools(props){
                         }
                     />
                 </Tooltip>
+                <Tooltip title="Перезапустить отчёт" placement='top'>
+                    <FormControlLabel
+                        control={
+                            <IconButton
+                                size="small"
+                                aria-label="restart"
+                                onClick={() => props.onRestartReportClick(true)}
+                            >
+                                <Icon path={mdiPlay}
+                                    size={1}
+                                />
+                            </IconButton>
+                        }
+                    />
+                </Tooltip>
                 <Tooltip title="Простая таблица"  placement='top'>
                     <FormControlLabel
                         control={
@@ -191,7 +206,7 @@ export default function PivotTools(props){
                         }
                     />
                 </Tooltip>
-                <Tooltip title="Добавить поле"  placement='top'>
+                <Tooltip title="Производные поля"  placement='top'>
                     <FormControlLabel
                         control={
                             <IconButton
