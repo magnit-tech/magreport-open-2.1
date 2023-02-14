@@ -242,7 +242,7 @@ export default function PlainTablePanel(props){
                 {
                     canExecute 
                     && 
-                    <Tooltip title="Перезапустить отчет">
+                    <Tooltip title="Перезапустить отчёт">
                         <span>
                             <IconButton className={classes.iconButton}
                                 size="small"

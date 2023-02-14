@@ -94,7 +94,7 @@ const mapStateToProps = state => {
     return {
         state : state.folderData,
         currentFolderData : state.folderData.currentFolderData,
-        filters : state.folderData.filters
+        filters : state.folderData.jobsFilters
     }
 }
 

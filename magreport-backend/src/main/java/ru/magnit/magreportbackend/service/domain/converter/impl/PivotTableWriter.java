@@ -55,8 +55,8 @@ public class PivotTableWriter implements Writer {
     private final Path exportPath;
     private final String nameDataList;
 
-    private Integer shiftRowCount = 0;
-    private Integer shiftColCount = 0;
+    private int shiftRowCount;
+    private int shiftColCount;
     private boolean mergeMode = false;
     private boolean columnsMetricPlacement = false;
 
@@ -121,7 +121,7 @@ public class PivotTableWriter implements Writer {
             }
 
             telemetryService.setState(telemetryId, ExcelExportTelemetry.APPLY_STYLES);
-            mergeCells(sheet);
+            starterMergeCell(sheet);
 
             updateSizeColumns(sheet);
 
@@ -261,6 +261,8 @@ public class PivotTableWriter implements Writer {
 
         List<List<Pair<OlapMetricResponse, String>>> metricsValue = new ArrayList<>();
 
+        var shift = shiftColCount == 0 ? 1 : shiftColCount;
+
         for (int r = 0; r < data.getTotalRows(); r++) {
             var rowValues = new ArrayList<Pair<OlapMetricResponse, String>>();
             for (int c = 0; c < data.getTotalColumns(); c++)
@@ -277,11 +279,11 @@ public class PivotTableWriter implements Writer {
 
             for (int v = 0; v < rowValues.size(); v++) {
                 if (i == 0) {
-                    var metaCell = metaRow.createCell(shiftColCount + v);
+                    var metaCell = metaRow.createCell(shift + v);
                     writeCellValue(metaCell, getMetadataValue(rowValues.get(v).getL().getAggregationType(), rowValues.get(v).getL().getFieldId()), DataTypeEnum.STRING, 1);
                 }
 
-                var cell = row.createCell(v + shiftColCount);
+                var cell = row.createCell(v + shift);
                 writeCellValue(cell, rowValues.get(v).getR(), rowValues.get(v).getL().getDataType(), 3);
             }
         }
@@ -369,54 +371,40 @@ public class PivotTableWriter implements Writer {
         if (!value.isEmpty()) {
             switch (type) {
                 case INTEGER -> {
-                    switch (colorType) {
-                        case 1 -> cell.setCellStyle(integerCellMetaStyle);
-                        case 2 -> cell.setCellStyle(integerCellMeasureStyle);
-                        case 3 -> cell.setCellStyle(integerCellMetricStyle);
-                        default -> throw new IllegalStateException(String.format("%s%s", ERROR_COLOR_TEXT, colorType));
-                    }
+                    setStyleCell(cell, integerCellMetaStyle, integerCellMeasureStyle, integerCellMetricStyle, colorType);
                     cell.setCellValue(Integer.parseInt(value));
                 }
                 case STRING, BOOLEAN -> {
-                    switch (colorType) {
-                        case 1 -> cell.setCellStyle(textCellMetaStyle);
-                        case 2 -> cell.setCellStyle(textCellMeasureStyle);
-                        case 3 -> cell.setCellStyle(textCellMetricStyle);
-                        default -> throw new IllegalStateException(String.format("%s%s", ERROR_COLOR_TEXT, colorType));
-                    }
+                    setStyleCell(cell, textCellMetaStyle, textCellMeasureStyle, textCellMetricStyle, colorType);
                     cell.setCellValue(value);
                 }
                 case DOUBLE -> {
-                    switch (colorType) {
-                        case 1 -> cell.setCellStyle(numericCellMetaStyle);
-                        case 2 -> cell.setCellStyle(numericCellMeasureStyle);
-                        case 3 -> cell.setCellStyle(numericCellMetricStyle);
-                        default -> throw new IllegalStateException(String.format("%s%s", ERROR_COLOR_TEXT, colorType));
-                    }
+                    setStyleCell(cell, numericCellMetaStyle, numericCellMeasureStyle, numericCellMetricStyle, colorType);
                     cell.setCellValue(Double.parseDouble(value));
                 }
                 case DATE -> {
-                    switch (colorType) {
-                        case 1 -> cell.setCellStyle(dateCellMetaStyle);
-                        case 2 -> cell.setCellStyle(dateCellMeasureStyle);
-                        case 3 -> cell.setCellStyle(dateCellMetricStyle);
-                        default -> throw new IllegalStateException(String.format("%s%s", ERROR_COLOR_TEXT, colorType));
-                    }
+                    setStyleCell(cell, dateCellMetaStyle, dateCellMeasureStyle, dateCellMetricStyle, colorType);
                     cell.setCellValue(LocalDate.parse(value));
                 }
                 case TIMESTAMP -> {
-                    switch (colorType) {
-                        case 1 -> cell.setCellStyle(dateCellMetaStyle);
-                        case 2 -> cell.setCellStyle(dateCellMeasureStyle);
-                        case 3 -> cell.setCellStyle(dateCellMetricStyle);
-                        default ->  throw new IllegalStateException(String.format("%s%s", ERROR_COLOR_TEXT, colorType));
-                    }
+                    setStyleCell(cell, dateCellMetaStyle, dateCellMeasureStyle, dateCellMetricStyle, colorType);
                     cell.setCellValue(LocalDateTime.parse(value.replace(" ", "T")));
                 }
                 default -> throw new IllegalStateException("Unexpected value: " + type);
             }
         } else {
+            setStyleCell(cell, textCellMetaStyle, textCellMeasureStyle, textCellMetricStyle, colorType);
             cell.setCellValue(value);
+        }
+
+    }
+
+    private void setStyleCell(Cell cell, CellStyle metaStyle, CellStyle measureStyle, CellStyle metricStyle, int colorType) {
+        switch (colorType) {
+            case 1 -> cell.setCellStyle(metaStyle);
+            case 2 -> cell.setCellStyle(measureStyle);
+            case 3 -> cell.setCellStyle(metricStyle);
+            default -> throw new IllegalStateException(String.format("%s%s", ERROR_COLOR_TEXT, colorType));
         }
     }
 
@@ -429,79 +417,17 @@ public class PivotTableWriter implements Writer {
         return sheet.getRow(index) == null ? sheet.createRow(index) : sheet.getRow(index);
     }
 
-    private void mergeCells(Sheet sheet) {
+    private void starterMergeCell(Sheet sheet) {
 
-        for (int i = 0; i < shiftRowCount; i++) {
+        if (shiftColCount == 0)
+            mergeRowCell(sheet, shiftRowCount, shiftColCount + 1, totalColumn + 1);
+        else
+            mergeRowCell(sheet, shiftRowCount, shiftColCount, totalColumn);
 
-            var row = sheet.getRow(i);
-
-
-            String currentValue = null;
-            int startIndex = 0;
-            for (int cellIndex = 0; cellIndex <= totalColumn; cellIndex++) {
-                var cell = row.getCell(cellIndex);
-                if (cell != null) {
-
-                    var newValue = cell.getStringCellValue();
-
-
-                    if (currentValue == null) {
-                        currentValue = newValue;
-                        startIndex = cellIndex;
-                        continue;
-                    }
-
-                    if (((currentValue.equals(newValue) && mergeMode) || currentValue.equals("")) && cellIndex != totalColumn)
-                        continue;
-
-                    if (startIndex != cellIndex - 1)
-                        sheet.addMergedRegion(new CellRangeAddress(i, i, startIndex, cellIndex == totalColumn ? cellIndex : cellIndex - 1));
-
-                    currentValue = newValue;
-                    startIndex = cellIndex;
-
-                } else if (cellIndex == totalColumn - 1 && (startIndex != cellIndex - 1)) {
-                    sheet.addMergedRegion(new CellRangeAddress(i, i, startIndex, cellIndex));
-
-                }
-            }
-        }
-
-
-        for (int cellIndex = 0; cellIndex < shiftColCount; cellIndex++) {
-
-            String currentValue = null;
-            int startIndex = 0;
-
-            for (int rowIndex = 0; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
-                var row = getRow(sheet, rowIndex);
-
-                var cell = row.getCell(cellIndex);
-                if (cell != null) {
-
-                    var newValue = cell.getStringCellValue();
-
-                    if (currentValue == null) {
-                        currentValue = newValue;
-                        startIndex = rowIndex;
-                        continue;
-                    }
-
-                    if (((currentValue.equals(newValue) && mergeMode)  || currentValue.equals("")) && rowIndex != sheet.getLastRowNum())
-                        continue;
-
-                    if (startIndex != rowIndex - 1)
-                        sheet.addMergedRegion(new CellRangeAddress(startIndex, rowIndex == sheet.getLastRowNum() ? rowIndex : rowIndex - 1, cellIndex, cellIndex));
-
-                    currentValue = newValue;
-                    startIndex = rowIndex;
-                } else if (rowIndex == sheet.getLastRowNum() && (startIndex != rowIndex - 1)) {
-                    sheet.addMergedRegion(new CellRangeAddress(startIndex, rowIndex, cellIndex, cellIndex));
-                }
-
-            }
-        }
-
+        if (columnsMetricPlacement)
+            mergeColumnCell(sheet, shiftRowCount + 1, sheet.getLastRowNum() + 1, shiftColCount);
+        else
+            mergeColumnCell(sheet, shiftRowCount, sheet.getLastRowNum() + 1, shiftColCount);
 
         sheet.getMergedRegions().forEach(r -> {
             RegionUtil.setBorderTop(BorderStyle.THIN, r, sheet);
@@ -510,6 +436,82 @@ public class PivotTableWriter implements Writer {
             RegionUtil.setBorderRight(BorderStyle.THIN, r, sheet);
         });
 
+    }
+
+    private void mergeRowCell(Sheet sheet, int stopMergeRow, int startMergeColumn, int stopMergeColumn) {
+
+        for (int i = 0; i < stopMergeRow; i++) {
+            var row = sheet.getRow(i);
+            String currentValue = null;
+            int startIndex = 0;
+
+            for (int cellIndex = startMergeColumn; cellIndex < stopMergeColumn; cellIndex++) {
+                var cell = row.getCell(cellIndex);
+                if (cell != null) {
+
+                    var newValue = getStringValueCell(cell);
+
+                    if (currentValue == null) {
+                        currentValue = newValue;
+                        startIndex = cellIndex;
+                        continue;
+                    }
+
+                    if (((currentValue.equals(newValue) && mergeMode) || newValue.equals("")) && cellIndex != stopMergeColumn - 1)
+                        continue;
+
+                    if (startIndex != cellIndex - 1)
+                        sheet.addMergedRegion(new CellRangeAddress(i, i, startIndex, cellIndex != stopMergeColumn - 1 ? cellIndex - 1 : cellIndex));
+
+                    currentValue = newValue;
+                    startIndex = cellIndex;
+
+                } else if (cellIndex == stopMergeColumn - 1 && (startIndex != cellIndex))
+                    sheet.addMergedRegion(new CellRangeAddress(i, i, startIndex, cellIndex));
+
+            }
+        }
+
+
+    }
+
+    private void mergeColumnCell(Sheet sheet, int startMergeRow, int stopMergeRow, int stopMergeColumn) {
+
+        for (int cellIndex = 0; cellIndex < stopMergeColumn; cellIndex++) {
+
+            String currentValue = null;
+            int startIndex = 0;
+
+            for (int rowIndex = startMergeRow; rowIndex < stopMergeRow; rowIndex++) {
+                var row = getRow(sheet, rowIndex);
+
+                var cell = row.getCell(cellIndex);
+                if (cell != null) {
+
+                    var newValue = getStringValueCell(cell);
+
+                    if (newValue.isEmpty() && columnsMetricPlacement) continue;
+
+                    if (currentValue == null) {
+                        currentValue = newValue;
+                        startIndex = rowIndex;
+                        continue;
+                    }
+
+                    if (((currentValue.equals(newValue) && mergeMode) || newValue.equals("")) && rowIndex != stopMergeRow - 1)
+                        continue;
+
+                    if (startIndex != rowIndex - 1)
+                        sheet.addMergedRegion(new CellRangeAddress(startIndex, rowIndex != stopMergeRow - 1 ? rowIndex - 1 : rowIndex, cellIndex, cellIndex));
+
+                    currentValue = newValue;
+                    startIndex = rowIndex;
+                } else if (rowIndex == stopMergeRow - 1 && (startIndex != rowIndex)) {
+                    sheet.addMergedRegion(new CellRangeAddress(startIndex, rowIndex, cellIndex, cellIndex));
+                }
+
+            }
+        }
     }
 
     private SXSSFSheet getSheet(SXSSFWorkbook workbook) {
@@ -523,6 +525,16 @@ public class PivotTableWriter implements Writer {
         return workbook.createSheet(nameDataList);
     }
 
+    private String getStringValueCell(Cell cell) {
+        return switch (cell.getCellType()) {
+            case _NONE, BLANK -> "";
+            case NUMERIC -> cell.getNumericCellValue() + "";
+            case STRING -> cell.getStringCellValue() + "";
+            case FORMULA -> cell.getCellFormula();
+            case BOOLEAN -> cell.getBooleanCellValue() + "";
+            case ERROR -> cell.getErrorCellValue() + "";
+        };
+    }
 }
 
 

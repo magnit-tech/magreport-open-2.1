@@ -22,6 +22,8 @@ import JobStatusSelect from './JobFilters/JobStatusSelect'
 import JobUsernameSelect from './JobFilters/JobUsernameSelect'
 import {FolderItemTypes} from './FolderItemTypes';
 import Slide from '@material-ui/core/Slide';
+import {dateCorrection} from '../../../src/utils/dateFunctions'
+
 // dataHub
 import dataHub from 'ajax/DataHub';
 // styles
@@ -100,7 +102,12 @@ export default function FilterPanel(props){
         }
       ]; 
     const classes = FolderContentCSS();
-    const [panelOpen, setPanelOpen] = useState(false)
+    const [panelOpen, setPanelOpen] = useState(false);
+
+    let countFilters = Object.entries(props.filters).reduce((acc, [key, value]) => {
+        if (value && value !== null && value.length !== 0  && key !=='isCleared') return acc+1
+        else return acc
+    }, 0);
 
     function handleClick(isCleared){
         setPanelOpen(false)
@@ -114,19 +121,6 @@ export default function FilterPanel(props){
           </span>
         );
     }
-
-    let countFilters = 0
-    if (props.filters){
-        countFilters = Object.entries(props.filters).reduce((acc, [key, value]) => {
-            if (value && key !== 'selectedStatuses' && key !=='isCleared') {
-                return acc+1
-            }
-            if (key === 'selectedStatuses' && value.length !== 8){
-                return acc+1
-            }
-            return acc
-        }, 0)
-    };
 
     function handleSelectChange(type, selectArray){
         props.onFilterChange(type, selectArray)
@@ -170,8 +164,8 @@ export default function FilterPanel(props){
 										format="dd.MM.yyyy HH:mm"
 										margin="normal"
 										inputVariant="filled"
-										value={props.filters.periodStart}
-										onChange={date => props.onFilterChange('periodStart', date)}
+										value={dateCorrection(props.filters.periodStart, true)}
+										onChange={date => props.onFilterChange('periodStart', dateCorrection(date, false))}
                                         label="Начало периода"
                                         cancelLabel="ОТМЕНИТЬ"
                                         okLabel="СОХРАНИТЬ"
@@ -187,8 +181,8 @@ export default function FilterPanel(props){
 										format="dd.MM.yyyy HH:mm"
 										margin="normal"
 										inputVariant="filled"
-										value={props.filters.periodEnd}
-										onChange={date => props.onFilterChange('periodEnd', date)}
+										value={dateCorrection(props.filters.periodEnd, true)}
+										onChange={date => props.onFilterChange('periodEnd', dateCorrection(date, false))}
                                         label="Конец периода"
                                         cancelLabel="ОТМЕНИТЬ"
                                         okLabel="СОХРАНИТЬ"

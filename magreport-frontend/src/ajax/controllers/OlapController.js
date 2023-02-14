@@ -21,6 +21,8 @@ const GET_AVAILABLE_CONFIGS = CONTROLLER_URL + '/configuration/get-available';
 const SET_DEFAULT_CONFIG = CONTROLLER_URL + '/configuration/set-default';
 const SAVE_GENERAL_ACCESS = CONTROLLER_URL + '/configuration/report-share';
 
+
+
 export default function OlapController(dataHub){
 
     this.getJobMetadata = (jobId, callback) => {

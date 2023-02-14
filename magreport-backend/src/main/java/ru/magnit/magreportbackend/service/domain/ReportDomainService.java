@@ -220,13 +220,22 @@ public class ReportDomainService {
 
     @Transactional
     public void deleteReportToFavorites(UserView currentUser, ReportIdRequest request) {
-
         favReportRepository.deleteByUserIdAndReportId(currentUser.getId(), request.getId());
     }
 
     @Transactional
     public void deleteFavReportsByReportId(Long reportId) {
         favReportRepository.deleteByReportId(reportId);
+    }
+
+    @Transactional
+    public void deleteFavReportsByFoldertId(Long folderId) {
+        favReportRepository.deleteByFolderId(folderId);
+    }
+
+    @Transactional
+    public void deleteFavReport(Long userId, Long reportId, Long folderId) {
+        favReportRepository.deleteByUserIdAndReportIdAndFolderId(userId, reportId, folderId);
     }
 
     @Transactional
@@ -476,6 +485,12 @@ public class ReportDomainService {
             .stream()
             .flatMap(fr -> fr.getPermissions().stream())
             .anyMatch(frp -> frp.getAuthority().getEnum() == targetAuthority);
+    }
+
+    @Transactional
+    public boolean checkValidField(Long reportId){
+        var reportField = reportFieldRepository.findById(reportId).orElseThrow();
+        return reportField.getDataSetField().getIsSync();
     }
 
     private ReportFolder copyFolder(ReportFolder originalFolder, ReportFolder parentFolder, User currentUser, List<ReportFolderRole> destParentFolderRoles) {

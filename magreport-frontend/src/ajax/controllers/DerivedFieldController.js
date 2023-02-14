@@ -6,23 +6,67 @@ const METHOD = 'POST';
 const GET_JOB_METADATA = '/report-job/get-metadata';
 
 const FIELD_ADD = CONTROLLER_URL + '/add';
+const FIELD_EDIT = CONTROLLER_URL + '/edit';
+const FIELD_DELETE = CONTROLLER_URL + '/delete';
+const FIELD_CHECK_NAME = CONTROLLER_URL + '/check_name';
+
 const GET_DERIVED_FIELDS = CONTROLLER_URL + '/get-by-report';
 const EXPRESSIONS_GET_ALL =  CONTROLLER_URL + '/expressions/get-all';
 
 
 export default function DerivedFieldController(dataHub){
 
-    this.add = (reportId, fieldName, fieldDesc, expression, expressionText, callback) => {
+    this.getAllDerivedFields = (reportId, callback) => {
+        const body = { 
+            reportId
+        }
+
+        return dataHub.requestService(GET_DERIVED_FIELDS, METHOD, body, callback); 
+    }
+
+    this.add = (reportId, obj, callback) => {
         let body = {
             reportId: reportId,
-            isPublic: false,
-            name: fieldName,
-            description: fieldDesc,
-            expression: expression,
-            expressionText: expressionText
+            isPublic: obj.isPublic,
+            name: obj.name,
+            description: obj.description,
+            expression: obj.expression,
+            expressionText: obj.expressionText
         }
 
         return dataHub.requestService(FIELD_ADD, METHOD, body, callback); 
+    }
+
+    this.edit = (reportId, obj, callback) => {
+        const body = {
+            id: obj.id,
+            reportId: reportId,
+            isPublic: obj.isPublic,
+            name: obj.name,
+            description: obj.description,
+            expression: obj.expression,
+            expressionText: obj.expressionText
+        }
+
+        return dataHub.requestService(FIELD_EDIT, METHOD, body, callback); 
+    }
+
+    this.delete = (id, callback) => {
+        let body = {
+            id
+        }
+
+        return dataHub.requestService(FIELD_DELETE, METHOD, body, callback); 
+    }
+
+    this.checkName = (reportId, isPublic, name, callback) => {
+        let body = {
+            reportId,
+            isPublic,
+            name
+        }
+
+        return dataHub.requestService(FIELD_CHECK_NAME, METHOD, body, callback); 
     }
 
     this.expressionsGetAll = (callback) => {
