@@ -1,0 +1,255 @@
+
+import dataHub from "ajax/DataHub";
+import { nodeType } from "../../../maglangFormulaEditor/FormulaEditor/FormulaEditor";
+
+// Вспомогательные функции
+function getAll(reportId, ownerName, listOfChangedFields, callback) {
+	dataHub.derivedFieldController.getAllDerivedFields(reportId, ({ok, data}) => {
+
+		if(ok) {
+			let res = [];
+			let newField = listOfChangedFields.find(city => city.id === 'new')
+
+			for (const element of data) {
+				let obj = listOfChangedFields.find(city => city.id === element.id)
+				if(obj) {
+					res.push(obj)
+				} else {
+					element["originalName"] = element.name;
+					element["isCorrect"] = true;
+					element["isFormulaCorrect"] = true;
+					element["needSave"] = false;
+					element["owner"] = ownerName === element.userName ? true : false;
+					res.push(element)
+				}
+			}
+			
+			if(newField) res.push(newField)
+
+			return callback(res, data)
+		} else {
+			return callback([])
+		}
+	})
+}
+
+
+// Экспортирующиеся функции
+export function loadAllFields(reportId, userName, callback) {
+	dataHub.derivedFieldController.getAllDerivedFields(reportId, ({ok, data}) => {
+		if(ok) {
+			const editedData = data.map((el) => {
+				el["originalName"] = el.name;
+				el["isCorrect"] = true;
+				el["isFormulaCorrect"] = true;
+				el["needSave"] = false;
+				el["owner"] = userName === el.userName ? true : false;
+				return el;
+			})
+
+			return callback(data, editedData)
+		}
+	})
+}
+
+export function loadFieldsAndExpressions(jobId, reportId, callback) {
+	dataHub.derivedFieldController.getFieldsAndExpressions(jobId, reportId, ({ok, data}) => {
+		if(ok) {
+			let functionsList = data.expressions.map(
+				(f) => ({functionId: f.id, functionName: f.name, functionDesc: f.description, functionSignature: ""}));
+			let originalFieldsList = data.fields.filter((f) => (f.visible)).map(
+					(f) => ({fieldId: f.id, fieldName: f.name, fieldDesc: f.description, valueType: f.type}));
+			let derivedFieldsList = data.derivedFields.map(
+					(f) => ({fieldId: f.id, fieldName: f.name, fieldDesc: f.description, valueType: f.type, fieldOwner: f.userName}));
+
+			return callback({functionsList, originalFieldsList, derivedFieldsList})
+		} else {
+			return callback({})
+		}
+	})
+}
+
+export function saveNewField(obj, reportId, ownerName, listOfChangedFields, callback) {
+	
+	let str = '';
+	let variant = '';
+	const changedList = listOfChangedFields.filter(item => item.id !== obj.id)
+
+	dataHub.derivedFieldController.add(reportId, obj, ({ok}) => {
+		if (ok) {
+			str = `Новое производное поле "${obj.name}" успешно сохранено`
+			variant = {variant: "success"}
+		
+			let changedListWithoutNew = changedList.filter(item => item.id !== 'new')
+
+			getAll(reportId, ownerName, changedListWithoutNew, (data, originalData) => {
+				return callback(true, data, originalData, str, variant, changedListWithoutNew)
+			})
+		} else {
+			str = `Произошла ошибка при сохранение нового производного поля "${obj.name}"`
+			variant = {variant: "error"}
+			return callback(ok, ['hiiiiii'], str, variant)
+		}
+	})
+}
+
+export function saveEditField(obj, reportId, ownerName, listOfChangedFields, callback) {
+	
+	let str = '';
+	let variant = '';
+	const changedList = listOfChangedFields.filter(item => item.id !== obj.id)
+
+	dataHub.derivedFieldController.edit(reportId, obj, ({ok}) => {
+		if (ok) {
+			str = `Производное поле "${obj.name}" успешно обновлено`
+			variant = {variant: "success"}
+			
+			getAll(reportId, ownerName, changedList, (data, originalData) => {
+				return callback(true, data, originalData, str, variant, changedList)
+			})
+		} else {
+			str = `Произошла ошибка при обновление производного поля "${obj.name}"`
+			variant = {variant: "error"}
+			return callback(ok, ['hiiiiii'], str, variant)
+		}
+	})
+}
+
+export function deleteField(id, reportId, ownerName, listOfChangedFields,  callback) {
+	let str = '';
+	let variant = '';
+
+	const changedList = listOfChangedFields.filter(item => item.id !== id)
+
+	dataHub.derivedFieldController.delete(id, ({ok}) => {
+		if (ok) {
+			str = "Производное поле успешно удаленно"
+			variant = {variant: "success"}
+		
+			getAll(reportId, ownerName, changedList, (data, originalData) => {
+				return callback(true, data, originalData, str, variant, changedList)
+			})
+		} else {
+			str = "Произошла ошибка при удаление производного поля"
+			variant = {variant: "error"}
+			return callback(ok, ['hiiiiii'], str, variant)
+		}
+	})
+}
+
+
+
+// DFD_form
+export function checkForDifferenceFromOriginalField(obj, loadedDerivedFields) {
+	let result = false
+
+	const originalField = loadedDerivedFields.find(item => item.id === obj.id)
+
+	let arr = ['name', 'description', 'expression', 'expressionText']
+
+	for (const key of arr) {
+		if(originalField[key] === obj[key]) {
+			continue
+		} else {
+			result = true
+			break
+		}
+	}
+
+	return result
+}
+
+// Построение семнатического дерева формулы в серверной форме 
+export function buildServerExression(treeRoot){
+	// to format of /derived-field/add
+	if(treeRoot === null || treeRoot.isError){
+		return null;
+	}
+	else{
+		return getExpressionForNode(treeRoot);
+	}
+	
+}
+
+function getExpressionForNode(node){
+
+	if(node.nodeType === nodeType.formulaRoot){
+		if(node.children.length > 0){
+			return getExpressionForNode(node.children[0]);
+		}
+		else{
+			return {};
+		}
+	}
+	else if(node.nodeType === nodeType.numLiteral){
+		return {
+			type: "CONSTANT_VALUE",
+			constantValue: node.value.toString(),
+			"constantType": "DOUBLE"
+		}
+	}
+	else if(node.nodeType === nodeType.stringLiteral){
+		return {
+			type: "CONSTANT_VALUE",
+			constantValue: node.value,
+			"constantType": "STRING"
+		}
+	}
+	else if(node.nodeType === nodeType.originalField){
+		return {
+			type: "REPORT_FIELD_VALUE",
+			referenceId: node.fieldId
+		}
+	}      
+	else if(node.nodeType === nodeType.derivedField){
+		return {
+			type: "DERIVED_FIELD_VALUE",
+			referenceId: node.fieldId
+		}
+	}   
+	else if(node.nodeType === nodeType.arithmSum){
+		return {
+			type: "ADD",
+			parameters: [getExpressionForNode(node.children[0]), getExpressionForNode(node.children[1])]
+		}
+	}                   
+	else if(node.nodeType === nodeType.arithmSubtraction){
+		return {
+			type: "SUBTRACT",
+			parameters: [getExpressionForNode(node.children[0]), getExpressionForNode(node.children[1])]
+		}
+	}   
+	else if(node.nodeType === nodeType.arithmProduct){
+		return {
+			type: "MULTIPLY",
+			parameters: [getExpressionForNode(node.children[0]), getExpressionForNode(node.children[1])]
+		}
+	}    
+	else if(node.nodeType === nodeType.arithmFraction){
+		return {
+			type: "DIVIDE",
+			parameters: [getExpressionForNode(node.children[0]), getExpressionForNode(node.children[1])]
+		}
+	}   
+	else if(node.nodeType === nodeType.unaryArithmMinus){
+		return {
+			type: "SUBTRACT",
+			parameters: [getExpressionForNode({type: "CONSTANT_VALUE", constantValue: "0", "constantType": "INTEGER"}), getExpressionForNode(node.children[0])]
+		}
+	}  
+	else if(node.nodeType === nodeType.functionCall){
+		let type = node.functionName;
+		let parameters = [];
+
+		for(let child of node.children){
+			parameters.push(getExpressionForNode(child));
+		}
+
+		return {
+			type: type,
+			parameters: parameters
+		}
+	}                            
+}
+
+

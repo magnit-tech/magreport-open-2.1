@@ -1,20 +1,23 @@
-import React, {useState, useRef, useCallback} from "react";
+import React, {useState, useRef, useEffect} from "react";
 
 import { PivotCSS } from '../../PivotCSS';
 
-import { Paper, Dialog, DialogTitle, DialogActions, Button } from '@material-ui/core';
+import { useAuth } from "router/useAuth";
 
-import Draggable from 'react-draggable';
+import { useSnackbar } from 'notistack';
 
-import clsx from "clsx";
-
-import dataHub from "ajax/DataHub";
-import FormulaEditor, {nodeType} from "../../maglangFormulaEditor/FormulaEditor/FormulaEditor";
-import DataLoader from "main/DataLoader/DataLoader";
+import { connect } from 'react-redux';
+import {showAlertDialog, hideAlertDialog} from 'redux/actions/UI/actionsAlertDialog';
 
 // Components
-import DerivedFieldDialogList from "./DerivedFieldDialogList";
-import DerivedFieldDialogForm from "./DerivedFieldDialogForm";
+import DerivedFieldDialogList from "./ui/DFD_List";
+import DerivedFieldDialogForm from "./ui/DFD_Form";
+import { Paper, Dialog, DialogTitle, DialogActions, Button, CircularProgress } from '@material-ui/core';
+
+// functions
+import { loadAllFields, loadFieldsAndExpressions, saveNewField, saveEditField, deleteField} from './lib/DFD_functions'
+import { useCallback } from "react";
+import { useMemo } from "react";
 
 
 /**
@@ -35,70 +38,220 @@ function PaperComponent(props) {
     );
 }
 
-export default function DerivedFieldDialog(props){
+function DerivedFieldDialog(props){
 
-    // const classes = PivotCSS();
+    const { open, jobId, reportId } = props
 
-    const [activeDerivedField, setActiveDerivedField] = useState(null)
+    const classes = PivotCSS();
+    const { enqueueSnackbar } = useSnackbar();
+    const { user } = useAuth()
 
-    const [objToSave, setObjToSave] = useState({
-		fieldName: '',
-		fieldDesc: '',
-		expression: '',
-		expressionText: '',
-        isFormulaCorrect: false
-	})
+    const [loading, setLoading] = useState(false)
 
-    function handleEditObjectToSave(obj) {
-        setObjToSave(obj)
+    const [loadedDerivedFields, setLoadedDerivedFields] = useState([])
+
+    const [editedDerivedFields, setEditedDerivedFields] = useState([])
+
+    const [activeIndex, setActiveIndex] = useState(null)
+
+    const listOfChangedFields = useRef([])
+
+    const allFieldsAndExpressions = useRef([])
+
+    const thereHaveBeenChanges = useRef(false)
+
+    useEffect(() => handleLoadAllFields(), [open]) // eslint-disable-line
+
+    const disabledSaveAllButton = useMemo(() => {
+        let result = true 
+        
+        if (editedDerivedFields.length > 0 && listOfChangedFields.current.length > 0) {
+            listOfChangedFields.current.forEach(item => {
+                if(!item.isCorrect || !item.isFormulaCorrect) {
+                    result = false
+                }
+            })
+        }
+
+        return result
+
+    }, [editedDerivedFields, listOfChangedFields]);
+
+    // Загрузка текущих производных полей
+    function handleLoadAllFields() {
+        setLoading(true)
+
+        loadAllFields(reportId, user.current.name, (data, editedData) => {
+            setLoadedDerivedFields(data)
+            setEditedDerivedFields(editedData)
+            handleLoadFieldsAndExpressions()
+        })
     }
+    // Загрузка текущих производных полей
+    function handleLoadFieldsAndExpressions() {
+        loadFieldsAndExpressions(jobId, reportId, (obj) => {
+            allFieldsAndExpressions.current = obj
+            setLoading(false)
+        })
+    }
+
+
+    const handleEditObjectToSave = useCallback((list, obj) => {
+
+        const cond = listOfChangedFields.current.some(function(e){ 
+            return e.id === obj.id;
+        });
+
+        if (cond) {
+            listOfChangedFields.current = listOfChangedFields.current.map(o => {
+                if (o.id === obj.id) {
+                  return obj;
+                }
+                return o;
+            });
+        } else {
+            listOfChangedFields.current.push(obj)
+        }
+
+        setEditedDerivedFields(list)
+    }, []);
+
+    
+    // Сохранение нового поля
+    function handleSaveNewField(obj) {
+        saveNewField(obj, reportId, user.current.name, listOfChangedFields.current, (ok, data, originalData, str, variant, changedList) => {
+            if(ok) {
+                enqueueSnackbar(str, variant)
+                setEditedDerivedFields(data)
+                setLoadedDerivedFields(originalData)
+                setActiveIndex(data[data.length - 1].id)
+                listOfChangedFields.current = changedList
+                thereHaveBeenChanges.current = true
+            } else {
+                enqueueSnackbar(str, variant)
+            }
+        })
+    }
+
+    // Сохранение отредактированого поля
+    function handleSaveEditField(obj) {
+        saveEditField(obj, reportId, user.current.name, listOfChangedFields.current, (ok, data, originalData, str, variant, changedList) => {
+            if(ok) {
+                enqueueSnackbar(str, variant)
+                setEditedDerivedFields(data)
+                setLoadedDerivedFields(originalData)
+                listOfChangedFields.current = changedList
+                thereHaveBeenChanges.current = true
+            } else {
+                enqueueSnackbar(str, variant)
+            }
+        })
+    }
+
+    // Добавление нового поля
+    function handleAddNewField() {
+        let newObj = {
+            id: 'new',
+            name: '',
+            description: '',
+            expression: '',
+            expressionText: '',
+            isCorrect: false,
+            isFormulaCorrect: false,
+            needSave: true,
+        }
+
+        setActiveIndex('new')
+        setEditedDerivedFields([...editedDerivedFields, newObj])
+        listOfChangedFields.current.push(newObj)
+    }
+
+    // Удаление
+    function handleDelete(id) {
+        if(id === 'new') {
+            setEditedDerivedFields(editedDerivedFields.filter((item) => item.id !== 'new'))
+            listOfChangedFields.current = listOfChangedFields.current.filter((item) => item.id !== 'new')
+            setActiveIndex(null)
+        } else {
+            deleteField(id, reportId, user.current.name, listOfChangedFields.current, (ok, data, originalData, str, variant, changedList) => {
+                if(ok) {
+                    enqueueSnackbar(str, variant)
+                    setEditedDerivedFields(data)
+                    setLoadedDerivedFields(originalData)
+                    setActiveIndex(id === activeIndex ? null : activeIndex)
+                    listOfChangedFields.current = changedList
+                    thereHaveBeenChanges.current = true
+                } else {
+                    enqueueSnackbar(str, variant)
+                }
+            })
+        }
+    }
+
+    // При нажатие на кнопку "отменить"
+    function handleClose() {
+        let needAsk = false
+        editedDerivedFields.forEach(el => {
+            if(el.needSave) {
+                needAsk = true
+            }
+        })
+    
+        if(needAsk) {
+            props.showAlertDialog(`Внимание, есть несохраненные поля. Вы действительно хотите выйти?`, null, null, answer => handleCloseAnswer(answer))
+        } else {
+            handleCloseAnswer(true)
+        }
+    }
+    function handleCloseAnswer(answer){
+        if (answer) props.onCancel(thereHaveBeenChanges.current)
+        props.hideAlertDialog()
+    }
+
 
     return (
         <Dialog
-            open={props.open}
+            open={open}
             PaperComponent={PaperComponent}
             aria-labelledby="drag-title"
         >
+            <DialogTitle id="drag-title"> Производные поля </DialogTitle>
 
-            <DialogTitle style={{ cursor: 'move' }} id="drag-title"> Производные поля </DialogTitle>
+            <div className={classes.DFD_main}>
+                
+                { loading ? <CircularProgress /> 
+                    : <>
+                        <DerivedFieldDialogList
+                            editedDerivedFields = {editedDerivedFields}
+                            activeIndex = {activeIndex}
+                            onAddNew = {() => handleAddNewField()}
+                            onChoose = {(index) => setActiveIndex(index)}
+                            onDelete = {(id) => handleDelete(id)}
+                        />
 
-            <div style={{display: 'flex', backgroundColor: 'darkgrey'}}>
-
-                <DerivedFieldDialogList 
-                    reportId={props.reportId} 
-                    onChoose = {(obj) => setActiveDerivedField(obj)}
-                    onDelete = {(id) => console.log(id)}
-                />
-
-                <DerivedFieldDialogForm 
-                    jobId={props.jobId} 
-                    reportId={props.reportId} 
-                    activeDerivedField={activeDerivedField}
-                    onEdit = {(obj) => handleEditObjectToSave(obj)}
-                />
-
+                        <DerivedFieldDialogForm 
+                            reportId = {reportId}
+                            activeIndex={activeIndex}
+                            allFieldsAndExpressions = {allFieldsAndExpressions.current}
+                            loadedDerivedFields = {loadedDerivedFields}
+                            editedDerivedFields = {editedDerivedFields}
+                            onEdit = {handleEditObjectToSave}
+                            onSave = {(obj) => obj.id === 'new' ? handleSaveNewField(obj) : handleSaveEditField(obj)}
+                        />
+                    </>
+                }
             </div>
 
             <DialogActions>
-				<Button 
-					color="primary" 
-                    disabled = { (objToSave.isFormulaCorrect && objToSave.fieldName.trim().length > 0) ? false : true }
-                    onClick={() => props.onSave(objToSave)}
-                    // onClick={() => console.log(objToSave)}
-				>
-					Сохранить
-				</Button>
-				<Button 
-					color="primary" 
-                    disabled = { (objToSave.isFormulaCorrect && objToSave.fieldName.trim().length > 0) ? false : true }
-                    onClick={() => props.onSave(objToSave)}
-                    // onClick={() => console.log(objToSave)}
+				{/* <Button
+					color="primary"
+                    disabled = {disabledSaveAllButton} 
 				>
 					Сохранить все и выйти
-				</Button>
+				</Button> */}
 				<Button 
 					color="primary" 
-					onClick={() => props.onCancel()}
+					onClick={() => handleClose()}
 				>
 					Отменить
 				</Button>
@@ -107,3 +260,10 @@ export default function DerivedFieldDialog(props){
         </Dialog>
     )
 }
+
+const mapDispatchToProps = {
+    showAlertDialog, 
+    hideAlertDialog,
+}
+
+export default connect(null, mapDispatchToProps)(DerivedFieldDialog)

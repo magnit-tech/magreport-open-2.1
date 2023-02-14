@@ -56,8 +56,6 @@ const tempNodeType = {
 }
 
 export default function FormulaEditor(props){
-  console.log(props);
-
     const editor = useRef();
     const [errorMessages, setErrorMessages] = useState("");
 
@@ -93,7 +91,6 @@ export default function FormulaEditor(props){
     /*
       Completion
     */
-
     const functionsCompletionList = props.functions.map((v) => ({label: v.functionName, type: "function", detail: v.functionDesc, info: v.functionSignature}));
     const originalFieldsCompletionList = props.originalFields.map((v) => ({label: v.fieldName, type: "variable", detail: v.fieldDesc}));
     const derivedFieldsCompletionList = props.derivedFields.map((v) => ({label: v.fieldName, type: "variable", detail: v.fieldOwner + ": " + v.fieldDesc}));
@@ -136,7 +133,6 @@ export default function FormulaEditor(props){
     */
 
       function replaceIdWithNames(codeWithId){
-        // console.log(codeWithId);
         let pattern = /(\[\d+\])|(\[\[\d+\]\])/g;
   
         function replacer(match, ...arg){
@@ -166,10 +162,6 @@ export default function FormulaEditor(props){
       }
   
       const initialCode = useMemo(() => replaceIdWithNames(props.initialCode), [props.initialCode]);
-
-// console.log(initialCode);
-// console.log(props.initialCode);
-
       function replaceNamesWithId(code){
         return code;
       }

@@ -787,5 +787,75 @@ export const PivotCSS = makeStyles(theme => ({
     },
     SJ_iconButton: {
         color: 'white'
-    }
+    },
+
+    DFD_main: {
+        display: 'flex',
+        padding: '10px',
+        backgroundColor: theme.palette.drawerColor
+    },
+    DFD_form: {
+        position: 'relative', 
+        padding: '20px 20px 5px 20px', 
+        margin: '10px 15px', 
+        background: 'white', 
+        borderRadius: '8px',
+        boxShadow: '0px 0px 13px -5px rgba(34, 60, 80, 0.17)'
+    },
+    DFD_formErrorText: {
+        margin: '10px 0 0 0',
+        color: 'red',
+        fontSize: '15px'
+    },
+    DFD_menuItemRed: {
+        color: 'red',
+    },
+    DFD_menuItemBold: {
+        '& span.MuiTypography-body1': {
+            fontWeight: 'bold',
+        },
+    },
+    DFD_list: {
+        width: '300px',
+        margin: '10px 15px'
+    },
+    DFD_listBlock: {
+        height: '605px', 
+        overflow: 'auto', 
+        background: 'white', 
+        borderRadius: '8px', 
+        
+    },
+    DFD_listBtn: {
+        width: '100%', 
+        marginTop: '15px'
+    },
+    DFD_listTooltipMenu: {
+        listStyleType: 'none',
+        margin: 0, 
+        padding: '10px'
+    },
+    DFD_modal: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+        height: '100%',
+        width: '100%',
+        zIndex: 99,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: '8px'
+    },
+    DFD_modalBox: {
+        padding: '10px 20px',
+        background: 'white',
+        borderRadius: '8px'
+    },
+    DFD_modalText: {
+        margin: 0,
+        fontSize: '16px',
+        textAlign: 'center',
+    },
 }))
