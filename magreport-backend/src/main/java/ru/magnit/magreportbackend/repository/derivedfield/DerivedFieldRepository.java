@@ -12,4 +12,6 @@ public interface DerivedFieldRepository extends JpaRepository<DerivedField, Long
     List<DerivedField> getAllByReportId(Long reportId);
 
     boolean existsByReportIdAndUniqueName(Long reportId, String fieldName);
+
+    boolean existsByReportIdAndUniqueNameAndIdIsNot(Long reportId, String fieldName, Long id);
 }
