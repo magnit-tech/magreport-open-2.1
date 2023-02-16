@@ -22,7 +22,7 @@ public class PostgreSqlQueryBuilder implements QueryBuilder {
     public String getQuery(ReportJobData reportData) {
         if (PROCEDURE.equalsIsLong(reportData.dataSetTypeId())) {
             String nameProcedure = reportData.reportData().schemaName() + "." + reportData.reportData().tableName();
-            return String.format("CALL %s (%s)", nameProcedure, reportData.id());
+            return String.format("{? = call %s(%s)}", nameProcedure, reportData.id());
         }
 
         return templateParserService.parseTemplate(templatePath, reportData);

@@ -1,5 +1,6 @@
 package ru.magnit.magreportbackend.dto.request.derivedfield;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,6 +12,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class DerivedFieldCheckNameRequest {
     private Long reportId;
     private Boolean isPublic = false;

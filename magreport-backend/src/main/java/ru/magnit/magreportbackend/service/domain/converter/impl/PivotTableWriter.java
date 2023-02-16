@@ -401,8 +401,9 @@ public class PivotTableWriter implements Writer {
         cellStyle.setBorderRight(BorderStyle.THIN);
         cellStyle.setBorderTop(BorderStyle.THIN);
         cellStyle.setBorderLeft(BorderStyle.THIN);
-        cellStyle.setAlignment(HorizontalAlignment.CENTER);
+        cellStyle.setAlignment(HorizontalAlignment.LEFT);
         cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        cellStyle.setWrapText(true);
         return cellStyle;
     }
 
@@ -526,6 +527,7 @@ public class PivotTableWriter implements Writer {
 
                 startRow = row;
                 startCol = col;
+                currentValue = value;
             }
         }
 
