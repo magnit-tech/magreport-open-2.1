@@ -1,0 +1,9 @@
+<#-- @ftlvariable name="schema" type="java.lang.String" -->
+CREATE TABLE ${schema}.T_REPORT_FILTER_FIELD (
+    JOB_ID INTEGER,
+    REPORT_FILTER_FIELD_ID INTEGER,
+    TUPLE_ID INTEGER,
+    FIELD_NAME VARCHAR(255),
+    DATA_TYPE_FIELD VARCHAR(255),
+    LEVEL INTEGER
+);
