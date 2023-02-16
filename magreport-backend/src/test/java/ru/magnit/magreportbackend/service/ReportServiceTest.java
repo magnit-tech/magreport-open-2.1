@@ -45,6 +45,7 @@ import ru.magnit.magreportbackend.service.domain.FolderEntitySearchDomainService
 import ru.magnit.magreportbackend.service.domain.FolderPermissionsDomainService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
 import ru.magnit.magreportbackend.service.domain.OlapConfigurationDomainService;
+import ru.magnit.magreportbackend.service.domain.OlapUserChoiceDomainService;
 import ru.magnit.magreportbackend.service.domain.ReportDomainService;
 import ru.magnit.magreportbackend.service.domain.ScheduleTaskDomainService;
 import ru.magnit.magreportbackend.service.domain.UserDomainService;
@@ -123,6 +124,9 @@ class ReportServiceTest {
 
     @Mock
     private OlapConfigurationDomainService olapConfigurationDomainService;
+
+    @Mock
+    private OlapUserChoiceDomainService olapUserChoiceDomainService;
 
 
     @Test
@@ -280,6 +284,7 @@ class ReportServiceTest {
         service.deleteReport(new ReportRequest().setId(ID));
 
         verify(domainService).deleteReport(any());
+        verify(olapUserChoiceDomainService).deleteUsersChoiceForReport(anyLong());
         verify(scheduleTaskDomainService).deleteScheduleTaskByReport(anyLong());
         verify(olapConfigurationDomainService).deleteReportOlapConfigurationByReport(anyLong());
         verify(excelTemplateDomainService).removeReportExcelTemplate(anyLong());
