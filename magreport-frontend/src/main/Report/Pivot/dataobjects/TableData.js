@@ -55,16 +55,14 @@ export function TableData() {
 
             subTableData.metrics = this.metrics.map( (m) => {
                 let subValues = [];
-
-                //console.log(mColumnCount, mRowCount);
-
+                
                 for(let i = 0; i < mColumnCount; i++){
                     subValues.push(new Array(mRowCount));
                     for(let j = 0; j < mRowCount; j++){
-                        //console.log(i, j);
-                        subValues[i][j] = m.values[innerColumnFrom + i][innerRowFrom + j];
+                        subValues[i][j] = m.values[innerColumnFrom + i] ? m.values[innerColumnFrom + i][innerRowFrom + j] : ''
                     }
                 }
+
 
                 return {
                     ...m,
