@@ -45,8 +45,8 @@ import ru.magnit.magreportbackend.service.domain.FilterReportDomainService;
 import ru.magnit.magreportbackend.service.domain.FolderEntitySearchDomainService;
 import ru.magnit.magreportbackend.service.domain.FolderPermissionsDomainService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
-import ru.magnit.magreportbackend.service.domain.MailTextDomainService;
 import ru.magnit.magreportbackend.service.domain.OlapConfigurationDomainService;
+import ru.magnit.magreportbackend.service.domain.OlapUserChoiceDomainService;
 import ru.magnit.magreportbackend.service.domain.ReportDomainService;
 import ru.magnit.magreportbackend.service.domain.ScheduleTaskDomainService;
 import ru.magnit.magreportbackend.service.domain.SecurityFilterDomainService;
@@ -76,12 +76,12 @@ public class ReportService {
     private final FolderEntitySearchDomainService folderEntitySearchDomainService;
     private final ExcelTemplateDomainService excelTemplateDomainService;
     private final ScheduleTaskDomainService scheduleTaskDomainService;
-    private final MailTextDomainService mailTextDomainService;
     private final ReportFolderRepository reportFolderRepository;
     private final ReportResponseMapper reportResponseMapper;
     private final PermissionCheckerSystem permissionCheckerSystem;
     private final SecurityFilterDomainService securityFilterDomainService;
     private final OlapConfigurationDomainService olapConfigurationDomainService;
+    private final OlapUserChoiceDomainService olapUserChoiceDomainService;
 
     public ReportFolderResponse getFolder(FolderRequest request) {
 
@@ -177,6 +177,7 @@ public class ReportService {
         scheduleTaskDomainService.deleteScheduleTaskByReport(request.getId());
         excelTemplateDomainService.removeReportExcelTemplate(request.getId());
         reportDomainService.deleteFavReportsByReportId(request.getId());
+        olapUserChoiceDomainService.deleteUsersChoiceForReport(request.getId());
         reportDomainService.deleteReport(request.getId());
 
     }
