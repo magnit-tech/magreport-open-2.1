@@ -69,7 +69,7 @@ export default function DerivedFieldDialogForm(props){
                 debouncePostObjToSave(currentField)
             }
 		},
-		[debouncedSearchTerm, reportId]
+		[debouncedSearchTerm, reportId] // eslint-disable-line
 	);
 
     const disabledSaveButton = useMemo(() => {
@@ -110,18 +110,20 @@ export default function DerivedFieldDialogForm(props){
 
     // Отправка в родителя измененный список полей и само поле
     function debouncePostObjToSave(item) {
-        clearTimeout(timeout.current)
+        if(item.id) {
+            clearTimeout(timeout.current)
 
-        timeout.current = setTimeout(() => {
-            const newList = editedDerivedFields.map(o => {
-                if (o.id === item.id) {
-                    return item;
-                }
-                return o;
-            });
-
-            props.onEdit(newList, item)
-        }, 600)
+            timeout.current = setTimeout(() => {
+                const newList = editedDerivedFields.map(o => {
+                    if (o.id === item.id) {
+                        return item;
+                    }
+                    return o;
+                });
+    
+                props.onEdit(newList, item)
+            }, 600)
+        }
     }
 
 	return (

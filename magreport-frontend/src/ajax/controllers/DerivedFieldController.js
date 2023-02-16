@@ -27,7 +27,7 @@ export default function DerivedFieldController(dataHub){
     this.add = (reportId, obj, callback) => {
         let body = {
             reportId: reportId,
-            isPublic: obj.isPublic,
+            isPublic: true,
             name: obj.name,
             description: obj.description,
             expression: obj.expression,
@@ -41,7 +41,7 @@ export default function DerivedFieldController(dataHub){
         const body = {
             id: obj.id,
             reportId: reportId,
-            isPublic: obj.isPublic,
+            isPublic: true,
             name: obj.name,
             description: obj.description,
             expression: obj.expression,
