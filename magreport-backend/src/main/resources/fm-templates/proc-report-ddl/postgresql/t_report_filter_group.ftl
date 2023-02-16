@@ -1,0 +1,7 @@
+<#-- @ftlvariable name="schema" type="java.lang.String" -->
+CREATE TABLE ${schema}.T_REPORT_FILTER_GROUP (
+    JOB_ID INTEGER,
+    FILTER_GROUP_NAME VARCHAR(255),
+    PARENT_FILTER_GROUP_NAME VARCHAR(255),
+    GROUP_OPERATION VARCHAR(255)
+);

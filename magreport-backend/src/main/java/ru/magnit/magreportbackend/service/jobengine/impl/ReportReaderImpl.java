@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import ru.magnit.magreportbackend.domain.dataset.DataSetTypeEnum;
+import ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum;
 import ru.magnit.magreportbackend.dto.inner.jobengine.CacheEntry;
 import ru.magnit.magreportbackend.dto.inner.jobengine.CacheRow;
 import ru.magnit.magreportbackend.dto.inner.jobengine.ReportReaderData;
@@ -19,6 +20,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -44,13 +46,40 @@ public class ReportReaderImpl implements ReportReader {
             var connection = poolManager.getConnection(readerData.dataSource())
         ) {
             status = ReaderStatus.RUNNING;
-            processData(connection);
+            if (readerData.dataSource().type() == DataSourceTypeEnum.POSTGRESQL && readerData.report().dataSetTypeId() == DataSetTypeEnum.PROCEDURE.ordinal()) {
+                processPostgresFunction(connection);
+            } else {
+                processData(connection);
+            }
             status = isCanceled ? ReaderStatus.CANCELED : ReaderStatus.FINISHED;
         } catch (Exception ex) {
             status = ReaderStatus.FAILED;
             errorDescription = ex.getMessage() + "\n" + ex;
             status = isCanceled ? ReaderStatus.CANCELED : ReaderStatus.FAILED;
             if (status == ReaderStatus.FAILED) throw new QueryExecutionException("Error trying to execute query", ex);
+        }
+    }
+
+    private void processPostgresFunction(Connection connection) throws SQLException {
+        var query = queryBuilder.getQuery(readerData.report());
+        log.debug("Query for job " + readerData.jobId() + ": " + query);
+        if (isCanceled) return;
+        try (final var statement = connection.prepareCall(query)) {
+            runningStatement.set(statement);
+            connection.setAutoCommit(false);
+            statement.registerOutParameter(1, Types.OTHER);
+            statement.execute();
+            final var reportFields = readerData.report().reportData().fields()
+                .stream()
+                .filter(ReportFieldData::visible)
+                .toList();
+
+            try (final var resultSet =  (ResultSet) statement.getObject(1)) {
+                while (resultSet.next() && !isCanceled) {
+                    processDataEntry(resultSet, reportFields);
+                }
+                log.debug("Total time of reader waiting writer (jobId:" + readerData.jobId() + "): " + waitTime / 1000.0);
+            }
         }
     }
 
