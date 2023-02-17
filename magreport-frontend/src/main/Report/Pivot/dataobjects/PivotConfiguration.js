@@ -139,19 +139,24 @@ export default function PivotConfiguration(pivotConfiguration){
         this.fieldsLists.setFieldFilterByFieldIndex(index, filterObject);
     }
 
+    // Переименование
+    this.setNewNameByFieldIndex = (index, newName) => {
+        this.fieldsLists = new FieldsLists(this.fieldsLists);
+        this.fieldsLists.setNewNameByFieldIndex(index, newName);
+    }
+
     // Задание группы фильтров
 
     this.replaceFilter = (i = null) => {
-
         this.filterGroup = new PivotFilterGroup();
         this.filterGroup.replaceFilter(this.fieldsLists.filterFields.filter((item, index) => item.aggFuncName === "" && index !== i && !item.isOff));
 
-
         this.metricFilterGroup = new PivotFilterGroup();
         this.metricFilterGroup.replaceFilter(this.fieldsLists.filterFields.filter(item => item.aggFuncName !== "" && !item.isOff).map(i =>{
+
             return (
             {...i, filter: {
-                metricId: this.fieldsLists.metricFields.findIndex(m => m.fieldId === i.filter.fieldId && m.aggFuncName === i.aggFuncName),
+                metricId: this.fieldsLists.metricFields.findIndex(m => m.fieldId === i.filter.field.fieldId && m.aggFuncName === i.aggFuncName),
                 filterType: (i.filter.values === '' || i.filter.values === null || i.filter.values.length === 0) ? 'BLANK' : i.filter.filterType, 
                 invertResult: i.filter.invertResult, 
                 values: i.filter.values,
