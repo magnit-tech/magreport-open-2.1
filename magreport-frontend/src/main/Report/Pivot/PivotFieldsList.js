@@ -113,6 +113,7 @@ export default function PivotFieldsList(props){
                                                     index = {ind}
                                                     fieldId = {v.fieldId}
                                                     fieldName = {v.fieldName}
+                                                    newfieldName = {v.newName}
                                                     aggFuncName = {v.aggFuncName}
                                                     filter = {v.filter}
                                                     filtered = {v.filtered}
