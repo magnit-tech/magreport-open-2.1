@@ -17,6 +17,7 @@ import ru.magnit.magreportbackend.dto.request.asm.AsmSecurityRequest;
 import ru.magnit.magreportbackend.dto.response.ResponseBody;
 import ru.magnit.magreportbackend.dto.response.ResponseList;
 import ru.magnit.magreportbackend.dto.response.asm.AsmSecurityResponse;
+import ru.magnit.magreportbackend.dto.response.asm.AsmSecurityShortResponse;
 import ru.magnit.magreportbackend.service.ExternalSecurityService;
 import ru.magnit.magreportbackend.util.LogHelper;
 
@@ -102,10 +103,10 @@ public class ExternalSecurityController {
     @ResponseStatus(HttpStatus.OK)
     @PostMapping(value = AMS_SECURITIES_GET_ALL,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseList<AsmSecurityResponse> getAllAsmSecurity() {
+    public ResponseList<AsmSecurityShortResponse> getAllAsmSecurity() {
         LogHelper.logInfoUserMethodStart();
 
-        var result = ResponseList.<AsmSecurityResponse>builder()
+        var result = ResponseList.<AsmSecurityShortResponse>builder()
                 .success(true)
                 .message("")
                 .data(service.getAllAsmSecurity())
