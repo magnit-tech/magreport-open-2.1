@@ -55,6 +55,11 @@ midNight.setMinutes(0);
 midNight.setSeconds(0);
 midNight.setMilliseconds(0);
 
+now.setHours(23);
+now.setMinutes(59);
+now.setSeconds(59);
+now.setMilliseconds(999);
+
 const initialState = {
 	currentFolderId : null,
     needReload : true,
