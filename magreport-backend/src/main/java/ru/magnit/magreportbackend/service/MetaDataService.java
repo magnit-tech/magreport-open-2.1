@@ -11,6 +11,7 @@ import ru.magnit.magreportbackend.dto.response.datasource.ObjectFieldResponse;
 import ru.magnit.magreportbackend.exception.MetaDataQueryException;
 import ru.magnit.magreportbackend.service.dao.ConnectionPoolManager;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -206,26 +207,8 @@ public class MetaDataService {
                 connection.setAutoCommit(false);
                 statement.registerOutParameter(1, Types.OTHER);
                 statement.execute();
-                final var resultSet =  (ResultSet) statement.getObject(1);
 
-                var resultSetMD = resultSet.getMetaData();
-                int cols = resultSetMD.getColumnCount();
-                for (int i = 1; i <= cols; i++) {
-                    var fieldMetaData = new ObjectFieldResponse()
-                        .setCatalogName(resultSetMD.getCatalogName(i))
-                        .setSchemaName(resultSetMD.getSchemaName(i))
-                        .setTableName(resultSetMD.getTableName(i))
-                        .setFieldName(resultSetMD.getColumnName(i))
-                        .setFieldSize(resultSetMD.getColumnDisplaySize(i))
-                        .setDataType(resultSetMD.getColumnType(i))
-                        .setDataTypeName(resultSetMD.getColumnTypeName(i))
-                        .setDecimalDigits(resultSetMD.getScale(i))
-                        .setNullable(resultSetMD.isNullable(i) == ResultSetMetaData.columnNullable)
-                        .setOrdinalPosition(i);
-
-                    result.add(fieldMetaData);
-                }
-                resultSet.close();
+                processResultSet(dataSource, result, statement);
             } catch (SQLException ex) {
                 throw new MetaDataQueryException(QUERY_ERROR + dataSource, ex);
             }
@@ -237,28 +220,39 @@ public class MetaDataService {
             Connection connection = poolManager.getConnection(dataSource);
             Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             ResultSet resultSet = statement.executeQuery(query)) {
-
-            var resultSetMD = resultSet.getMetaData();
-            int cols = resultSetMD.getColumnCount();
-            for (int i = 1; i <= cols; i++) {
-                var fieldMetaData = new ObjectFieldResponse()
-                    .setCatalogName(resultSetMD.getCatalogName(i))
-                    .setSchemaName(resultSetMD.getSchemaName(i))
-                    .setTableName(resultSetMD.getTableName(i))
-                    .setFieldName(resultSetMD.getColumnName(i))
-                    .setFieldSize(resultSetMD.getColumnDisplaySize(i))
-                    .setDataType(resultSetMD.getColumnType(i))
-                    .setDataTypeName(resultSetMD.getColumnTypeName(i))
-                    .setDecimalDigits(resultSetMD.getScale(i))
-                    .setNullable(resultSetMD.isNullable(i) == ResultSetMetaData.columnNullable)
-                    .setOrdinalPosition(i);
-
-                result.add(fieldMetaData);
-            }
+            processFields(result, resultSet);
         } catch (SQLException ex) {
             throw new MetaDataQueryException(QUERY_ERROR + dataSource, ex);
         }
         return result;
+    }
+
+    private static void processResultSet(DataSourceData dataSource, LinkedList<ObjectFieldResponse> result, CallableStatement statement) {
+        try (final var resultSet =  (ResultSet) statement.getObject(1)) {
+            processFields(result, resultSet);
+        } catch (SQLException ex) {
+            throw new MetaDataQueryException(QUERY_ERROR + dataSource, ex);
+        }
+    }
+
+    private static void processFields(LinkedList<ObjectFieldResponse> result, ResultSet resultSet) throws SQLException {
+        var resultSetMD = resultSet.getMetaData();
+        int cols = resultSetMD.getColumnCount();
+        for (int i = 1; i <= cols; i++) {
+            var fieldMetaData = new ObjectFieldResponse()
+                .setCatalogName(resultSetMD.getCatalogName(i))
+                .setSchemaName(resultSetMD.getSchemaName(i))
+                .setTableName(resultSetMD.getTableName(i))
+                .setFieldName(resultSetMD.getColumnName(i))
+                .setFieldSize(resultSetMD.getColumnDisplaySize(i))
+                .setDataType(resultSetMD.getColumnType(i))
+                .setDataTypeName(resultSetMD.getColumnTypeName(i))
+                .setDecimalDigits(resultSetMD.getScale(i))
+                .setNullable(resultSetMD.isNullable(i) == ResultSetMetaData.columnNullable)
+                .setOrdinalPosition(i);
+
+            result.add(fieldMetaData);
+        }
     }
 
     public void checkDataSource(DataSourceData dataSource) {
