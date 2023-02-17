@@ -64,4 +64,11 @@ public class ReportJobResponse {
 
     @JsonFormat(shape = JsonFormat.Shape.BOOLEAN)
     Boolean olapLastUserChoice;
+
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER_INT)
+    int countShareUsers;
+
+    @JsonFormat(shape = JsonFormat.Shape.OBJECT)
+    List<UserShortResponse> shareUsers;
+
 }

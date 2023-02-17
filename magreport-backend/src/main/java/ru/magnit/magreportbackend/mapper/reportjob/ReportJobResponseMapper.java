@@ -11,6 +11,7 @@ import ru.magnit.magreportbackend.mapper.auth.UserShortResponseMapper;
 import ru.magnit.magreportbackend.mapper.report.ReportShortResponseMapper;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +42,8 @@ public class ReportJobResponseMapper implements Mapper<ReportJobResponse, Report
                 false,
             0L,
                 source.getComment(),
-                null);
+                null,
+                0,
+                Collections.emptyList());
     }
 }
