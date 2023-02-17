@@ -306,7 +306,13 @@ export function FieldsLists(fieldsLists){
     this.setFieldFilterByFieldIndex = (index, filterObject) => {
         this.filterFields[index] = new FieldData(this.filterFields[index]);
         this.filterFields[index].setFilter(filterObject);
-    }    
+    }
+    
+    // Переименование
+    this.setNewNameByFieldIndex = (index, newName) => {
+        this.filterFields[index] = new FieldData(this.filterFields[index]);
+        this.filterFields[index].setNewName(newName);
+    }
 
     // Передаем тип данных метрики
     this.setDataType = (fieldIndex, dataType) => {
