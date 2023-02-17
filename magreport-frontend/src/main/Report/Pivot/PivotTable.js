@@ -484,7 +484,7 @@ export default function(props){
         }
 
         let layout =                                                   
-            <div className={`metricValueCellArrowsWrapp ${styles.metricValueCellArrowsWrapp}`}>
+            <div className={'metricValueCellArrowsWrapp'}>
             { rowSortValue !== 'rowAscending' && <Icon path={mdiArrowRightCircle} size={0.7} key='rowAscending' className={styles.metricValueCellArrow} onClick={() => handleClickOnAddSortingArrow('row', 'Ascending', {cell})}/>}
             { rowSortValue !== 'rowDescending' && <Icon path={mdiArrowLeftCircle} size={0.7} key='rowDescending' className={styles.metricValueCellArrow} onClick={() => handleClickOnAddSortingArrow('row', 'Descending', {cell})}/>}
             { columnSortValue !== 'columnAscending' && <Icon path={mdiArrowDownCircle} size={0.7} key='columnAscending' className={styles.metricValueCellArrow} onClick={() => handleClickOnAddSortingArrow('column', 'Ascending', {cell})}/>}
