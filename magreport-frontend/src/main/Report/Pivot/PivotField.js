@@ -25,6 +25,7 @@ import { List, Modal } from '@material-ui/core';
  * @param {*} props.fieldId - id поля
  * @param {*} props.index - индекс поля в списке поля
  * @param {*} props.fieldName - имя поля
+ * @param {*} props.newfieldName - имя поля, заданное пользователем
  * @param {*} props.aggFuncName - имя агрегирующей функции (для метрик)
  * @param {*} props.filter - фильтр на поле
  * @param {*} props.filtered - признак наличия фильтрации по полю
@@ -129,6 +130,9 @@ function PivotField(props){
         );
     }
 
+    console.log('PivotField');
+    console.log(props)
+
     return(
         <Draggable draggableId={props.listName + "-" + props.fieldId.toString() + "-" + props.index} index={props.index}>
             {(provided, snapshot)=>(
@@ -173,7 +177,8 @@ function PivotField(props){
                                 {props.filtered &&
                                     <Icon path={mdiFilter} size={0.5}/> 
                                 }
-                                {(props.aggFuncName ? AggFunc.get(props.aggFuncName) + ' ' : '') + props.fieldName} 
+                                {props.newfieldName !== '' ? props.newfieldName :
+                                (props.aggFuncName ? AggFunc.get(props.aggFuncName) + ' ' : '') + props.fieldName} 
                             </div>
                         </div>
                     </Popover>
@@ -216,7 +221,8 @@ function PivotField(props){
                             {props.filtered && props.listName !== 'filterFields' &&
                                 <Icon path={mdiFilter} size={0.8}/>
                             }
-                            {(props.aggFuncName ? AggFunc.get(props.aggFuncName) + ' ' : '') + props.fieldName}
+                            {props.newfieldName !== '' ? props.newfieldName :
+                            (props.aggFuncName ? AggFunc.get(props.aggFuncName) + ' ' : '') + props.fieldName}
                         </div>
                             
                     </ListItemText>
