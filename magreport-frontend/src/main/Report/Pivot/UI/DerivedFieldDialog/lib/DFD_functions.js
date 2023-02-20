@@ -175,7 +175,7 @@ export function checkForDifferenceFromOriginalField(obj, loadedDerivedFields) {
 
 	const originalField = loadedDerivedFields.find(item => item.id === obj.id)
 
-	let arr = ['name', 'description', 'expressionText']
+	let arr = ['name', 'description', 'expressionText', 'isPublic']
 
 	for (const key of arr) {
 		if(originalField[key] === obj[key]) {
