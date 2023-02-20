@@ -244,15 +244,15 @@ public class ScheduleEngine implements JobEngine, InitializingBean {
                     }
                 } else if (task.getTypeTask() == ScheduleTaskTypeEnum.USER_TASK) {
 
-                    var users = task.getDestinationUsers().stream().map(DestinationUserResponse::getUserName).collect(Collectors.toList());
+                    var users = task.getDestinationUsers().stream().map(user -> new UserRequest(user.getUserName(),user.getDomainName())).collect(Collectors.toList());
                     users.addAll(task.getDestinationRoles().stream()
                             .map(role -> roleService.getRoleUsers(new RoleRequest().setId(role.getRoleId())))
                             .flatMap(user -> user.getUsers().stream())
-                            .map(UserResponse::getName).toList());
+                            .map(user -> new UserRequest(user.getName(), user.getDomain().name())).toList());
 
                     reportJobUserDomainService.addUsersJob(ReportJobUserTypeEnum.SCHEDULE, taskRunners.get(task.getId()), users
                             .stream()
-                            .map(user -> userService.getUserResponse(new UserRequest().setUserName(user)))
+                            .map(userService::getUserResponse)
                             .collect(Collectors.toList()));
 
                     mailTextDomainService.sendScheduleMailWeb(
