@@ -5,7 +5,7 @@ import { PivotCSS } from '../../../PivotCSS';
 import dataHub from "ajax/DataHub";
 import useDebounce from "../lib/useDebounce";
 
-import { Button, DialogActions, TextField } from '@material-ui/core';
+import { Button, DialogActions, FormControlLabel, Switch, TextField } from '@material-ui/core';
 
 import FormulaEditor from "../../../maglangFormulaEditor/FormulaEditor/FormulaEditor";
 import DerivedFieldDialogModal from "./DFD_Modal";
@@ -15,7 +15,7 @@ import { buildServerExression, checkForDifferenceFromOriginalField } from "../li
 /**
     * @param {Number} props.reportId - id отчёта
     * @param {Number | String} props.activeIndex - id текущего поля
-    * @param {String} props.user - login пользователя
+    * @param {Boolean} props.isReportDeveloper - обладает ли пользователь правами разработчика данного отчёта
     * @param {Array} props.allFieldsAndExpressions - список всех доступных производных полей
     * @param {Array} props.loadedDerivedFields - список всех доступных производных полей (не изменные)
 	* @param {Array} props.editedDerivedFields - список всех доступных производных полей (измененные, добавлены новые поля в объекты)
@@ -25,14 +25,15 @@ import { buildServerExression, checkForDifferenceFromOriginalField } from "../li
 
 export default function DerivedFieldDialogForm(props){
 
-    const { reportId, activeIndex, user, allFieldsAndExpressions, loadedDerivedFields, editedDerivedFields } = props
+    const { reportId, activeIndex, isReportDeveloper, allFieldsAndExpressions, loadedDerivedFields, editedDerivedFields } = props
 
     const classes = PivotCSS();
 
     const [currentField, setCurrentField] = useState({
         name: '',
         description: '',
-        expressionText: ''
+        expressionText: '',
+        isPublic: false
     });
 
     console.log(currentField);
@@ -94,6 +95,15 @@ export default function DerivedFieldDialogForm(props){
     // Изменение описания поля
 	function handleChangeDesc(desc) {
         let item = {...currentField, description: desc}
+        item['needSave'] = currentField.id !== 'new' ? checkForDifferenceFromOriginalField(item, loadedDerivedFields) : true
+
+        setCurrentField(item)
+        debouncePostObjToSave(item)
+	}
+
+    // Изменение "Общего назначения"
+	function handleChangePublic(value) {
+        let item = {...currentField, isPublic: value}
         item['needSave'] = currentField.id !== 'new' ? checkForDifferenceFromOriginalField(item, loadedDerivedFields) : true
 
         setCurrentField(item)
@@ -180,7 +190,14 @@ export default function DerivedFieldDialogForm(props){
                 onChange = {handleFormulaChange}
             />
 
-            <DialogActions>
+            <DialogActions style={{justifyContent: 'space-between'}}>
+                { isReportDeveloper &&
+                    <FormControlLabel
+                        control={<Switch checked={currentField.isPublic} onChange={(event) => handleChangePublic(event.target.checked)} name="checkedA" />}
+                        label="Общего назначения"
+                    />
+                }
+
 				<Button 
                     variant="contained" 
                     color="primary" 
