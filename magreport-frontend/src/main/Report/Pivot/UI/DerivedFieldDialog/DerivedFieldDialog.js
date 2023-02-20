@@ -137,6 +137,7 @@ function DerivedFieldDialog(props){
             isCorrect: false,
             isFormulaCorrect: false,
             needSave: true,
+            owner: true
         }
 
         setActiveIndex('new')
@@ -251,6 +252,7 @@ function DerivedFieldDialog(props){
                         <DerivedFieldDialogForm 
                             reportId = {reportId}
                             activeIndex={activeIndex}
+                            user={user.current}
                             allFieldsAndExpressions = {allFieldsAndExpressions.current}
                             loadedDerivedFields = {loadedDerivedFields}
                             editedDerivedFields = {editedDerivedFields}
@@ -262,13 +264,13 @@ function DerivedFieldDialog(props){
             </div>
 
             <DialogActions>
-				<Button
+				{/* <Button
 					color="primary"
                     disabled = {disabledSaveAllButton}
                     onClick={() => handleSaveAllFields()}
 				>
 					Сохранить все и выйти
-				</Button>
+				</Button> */}
 				<Button 
 					color="primary" 
 					onClick={() => onClose()}
