@@ -66,6 +66,9 @@ function DerivedFieldDialogList(props){
 	return (
 		<div className={classes.DFD_list}>	
 			<List id="block" className={classes.DFD_listBlock}>
+				{editedDerivedFields.length === 0 && 
+					<p style={{textAlign: 'center', fontSize: '16px'}}>Список полей пуст</p>
+				}
 				{editedDerivedFields.map((field) => {
 
 					const options = { year: 'numeric', month: 'numeric', day: 'numeric' };

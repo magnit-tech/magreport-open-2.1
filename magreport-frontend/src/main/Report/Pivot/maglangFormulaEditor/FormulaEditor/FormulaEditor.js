@@ -15,6 +15,7 @@ import { TextField } from "@material-ui/core";
 /**
  * 
  * @param {*} props.height
+ * @param {*} props.disabled
  * @param {*} props.initialCode - исходный текст формулы с id вместо названий
  * @param {*} props.functions - массив описаний функций: {functionId, functionName, functionDesc, functionSignature}
  * @param {*} props.originalFields - массив объектов исходных полей отчёта {fieldId, fieldName, fieldDesc, valueType}
@@ -56,6 +57,7 @@ const tempNodeType = {
 }
 
 export default function FormulaEditor(props){
+
     const editor = useRef();
     const [errorMessages, setErrorMessages] = useState("");
 
@@ -66,7 +68,7 @@ export default function FormulaEditor(props){
         theme: 'light',
         settings: {
           background: '#ffffff',
-          foreground: '#75baff',
+          foreground: props.disabled ? 'grey' : '#75baff',
           caret: '#5d00ff',
           selection: '#036dd626',
           selectionMatch: '#036dd626',
@@ -76,7 +78,7 @@ export default function FormulaEditor(props){
         },
         styles: [
           { tag: t.comment, color: '#787b8099' },
-          { tag: t.variableName, color: '#0080ff' , fontWeight: "bold"},
+          { tag: t.variableName, color: props.disabled ? 'grey' : '#0080ff' , fontWeight: "bold"},
           { tag: t.propertyName, color: '#00b300' , fontWeight: "bold"},
           { tag: t.function(t.variableName), color: '#862d59' , fontWeight: "normal"},
           { tag: [t.string, t.special(t.brace)], color: '#5c6166' },
@@ -364,6 +366,7 @@ export default function FormulaEditor(props){
               value={initialCode}
               height={props.height}
               theme={codeEditorTheme}
+              editable={!props.disabled}
               extensions={[new LanguageSupport(MagreportLanguage, [completion])]}
               onChange={handleChange}
             />
@@ -381,6 +384,7 @@ export default function FormulaEditor(props){
               rows={5}
               variant="outlined"
               value={errorMessages}
+              disabled={props.disabled}
             />
 
         </div>

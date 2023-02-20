@@ -110,7 +110,7 @@ export function saveEditField(obj, reportId, ownerName, listOfChangedFields, cal
 		} else {
 			str = `Произошла ошибка при обновление производного поля "${obj.name}"`
 			variant = {variant: "error"}
-			return callback(ok, ['hiiiiii'], str, variant)
+			return callback(ok, ['hiiiiii'], [], str, variant)
 		}
 	})
 }
@@ -137,6 +137,36 @@ export function deleteField(id, reportId, ownerName, listOfChangedFields,  callb
 	})
 }
 
+export function saveAllFields(reportId, listOfChangedFields, callback) {
+
+	// aaa(reportId, listOfChangedFields, (arr) => console.log(arr))
+
+	let promises = []
+	let str = '';
+	let variant = '';
+
+	listOfChangedFields.forEach((field) => {
+		if(field.id === 'new') {
+			promises.push(
+				new Promise(resolve => {
+					dataHub.derivedFieldController.add(reportId, field, ({ok}) => resolve(ok ?  null : field))
+				})
+			)
+
+		} else {
+			promises.push(
+				new Promise(resolve => {
+					dataHub.derivedFieldController.edit(reportId, field, ({ok}) => resolve(ok ?  null : field))
+				})
+			)
+			
+		}
+	})
+
+	Promise.all(promises)
+		.then(results  => console.log(results ))
+		.catch(err => {console.error('wait! oh shh...')})
+}
 
 
 // DFD_form
@@ -145,7 +175,7 @@ export function checkForDifferenceFromOriginalField(obj, loadedDerivedFields) {
 
 	const originalField = loadedDerivedFields.find(item => item.id === obj.id)
 
-	let arr = ['name', 'description', 'expression', 'expressionText']
+	let arr = ['name', 'description', 'expressionText']
 
 	for (const key of arr) {
 		if(originalField[key] === obj[key]) {
@@ -154,6 +184,7 @@ export function checkForDifferenceFromOriginalField(obj, loadedDerivedFields) {
 			result = true
 			break
 		}
+		
 	}
 
 	return result

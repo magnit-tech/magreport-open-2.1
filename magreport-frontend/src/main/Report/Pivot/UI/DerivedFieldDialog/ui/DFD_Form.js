@@ -15,6 +15,7 @@ import { buildServerExression, checkForDifferenceFromOriginalField } from "../li
 /**
     * @param {Number} props.reportId - id отчёта
     * @param {Number | String} props.activeIndex - id текущего поля
+    * @param {String} props.user - login пользователя
     * @param {Array} props.allFieldsAndExpressions - список всех доступных производных полей
     * @param {Array} props.loadedDerivedFields - список всех доступных производных полей (не изменные)
 	* @param {Array} props.editedDerivedFields - список всех доступных производных полей (измененные, добавлены новые поля в объекты)
@@ -24,7 +25,7 @@ import { buildServerExression, checkForDifferenceFromOriginalField } from "../li
 
 export default function DerivedFieldDialogForm(props){
 
-    const { reportId, activeIndex, allFieldsAndExpressions, loadedDerivedFields, editedDerivedFields } = props
+    const { reportId, activeIndex, user, allFieldsAndExpressions, loadedDerivedFields, editedDerivedFields } = props
 
     const classes = PivotCSS();
 
@@ -33,6 +34,8 @@ export default function DerivedFieldDialogForm(props){
         description: '',
         expressionText: ''
     });
+
+    console.log(currentField);
 
 	const debouncedSearchTerm = useDebounce(currentField.name, 500);
     const timeout = useRef()
@@ -69,7 +72,7 @@ export default function DerivedFieldDialogForm(props){
                 debouncePostObjToSave(currentField)
             }
 		},
-		[debouncedSearchTerm, reportId]
+		[debouncedSearchTerm, reportId] // eslint-disable-line
 	);
 
     const disabledSaveButton = useMemo(() => {
@@ -79,6 +82,7 @@ export default function DerivedFieldDialogForm(props){
             return true
         }
     }, [currentField]);
+
 
     // Изменение названия поля
 	function handleChangeName(name) {
@@ -110,18 +114,20 @@ export default function DerivedFieldDialogForm(props){
 
     // Отправка в родителя измененный список полей и само поле
     function debouncePostObjToSave(item) {
-        clearTimeout(timeout.current)
+        if(item.id) {
+            clearTimeout(timeout.current)
 
-        timeout.current = setTimeout(() => {
-            const newList = editedDerivedFields.map(o => {
-                if (o.id === item.id) {
-                    return item;
-                }
-                return o;
-            });
-
-            props.onEdit(newList, item)
-        }, 600)
+            timeout.current = setTimeout(() => {
+                const newList = editedDerivedFields.map(o => {
+                    if (o.id === item.id) {
+                        return item;
+                    }
+                    return o;
+                });
+    
+                props.onEdit(newList, item)
+            }, 600)
+        }
     }
 
 	return (
@@ -141,6 +147,7 @@ export default function DerivedFieldDialogForm(props){
                     }}
                     variant="outlined"
                     value={currentField.name}
+                    disabled={!currentField.owner}
                     onChange={(event) => handleChangeName(event.target.value)}
                     error={ currentField.name.replace(/\s/g,"") === "" || !currentField.isCorrect}
                 />
@@ -159,13 +166,14 @@ export default function DerivedFieldDialogForm(props){
                 }}
                 variant="outlined"
                 value={currentField.description}
+                disabled={!currentField.owner}
                 onChange={(event) => handleChangeDesc(event.target.value)}
             />
 
             <FormulaEditor
                 height = "200px"
+                disabled={!currentField.owner}
                 initialCode={currentField.expressionText}
-                // initialCode={''}
                 functions = {allFieldsAndExpressions.functionsList}
                 originalFields = {allFieldsAndExpressions.originalFieldsList}
                 derivedFields = {allFieldsAndExpressions.derivedFieldsList}
