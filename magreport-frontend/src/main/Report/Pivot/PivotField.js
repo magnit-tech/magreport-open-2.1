@@ -130,9 +130,6 @@ function PivotField(props){
         );
     }
 
-    console.log('PivotField');
-    console.log(props)
-
     return(
         <Draggable draggableId={props.listName + "-" + props.fieldId.toString() + "-" + props.index} index={props.index}>
             {(provided, snapshot)=>(
