@@ -24,6 +24,7 @@ import { useMemo } from "react";
 	* @param {Boolean} props.open - boolean-значение отображения модального окна
     * @param {*} props.jobId - id задания
     * @param {*} props.reportId - id отчёта
+    * @param {*} props.isReportDeveloper - обладает ли пользователь правами разработчика данного отчёта 
 	* @param {*} props.onCancel - function - callback отмены/закрытия модального окна
 	* @param {*} props.onSave - function - callback сохранения поля
 **/
@@ -40,7 +41,7 @@ function PaperComponent(props) {
 
 function DerivedFieldDialog(props){
 
-    const { open, jobId, reportId } = props
+    const { open, jobId, reportId, isReportDeveloper } = props
 
     const classes = PivotCSS();
     const { enqueueSnackbar } = useSnackbar();
@@ -134,6 +135,7 @@ function DerivedFieldDialog(props){
             description: '',
             expression: '',
             expressionText: '',
+            isPublic: false,
             isCorrect: false,
             isFormulaCorrect: false,
             needSave: true,
@@ -188,7 +190,6 @@ function DerivedFieldDialog(props){
     // Сохранение отредактированого поля
     function handleSaveEditField(obj) {
         saveEditField(obj, reportId, user.current.name, listOfChangedFields.current, (ok, data, originalData, str, variant, changedList) => {
-            console.log(ok);
             if(ok) {
                 enqueueSnackbar(str, variant)
                 setEditedDerivedFields(data)
@@ -252,7 +253,7 @@ function DerivedFieldDialog(props){
                         <DerivedFieldDialogForm 
                             reportId = {reportId}
                             activeIndex={activeIndex}
-                            user={user.current}
+                            isReportDeveloper={isReportDeveloper}
                             allFieldsAndExpressions = {allFieldsAndExpressions.current}
                             loadedDerivedFields = {loadedDerivedFields}
                             editedDerivedFields = {editedDerivedFields}

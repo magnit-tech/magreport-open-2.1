@@ -1404,6 +1404,7 @@ function PivotPanel(props){
                     open = {createFieldDialogOpen}
                     jobId = {props.jobId}
                     reportId = {props.reportId}
+                    isReportDeveloper = {isReportDeveloper.current}
                     onCancel = {(bool) => handleDerivedFieldCloseAndUpdate(bool)}
                 />
             }
