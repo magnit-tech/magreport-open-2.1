@@ -319,7 +319,7 @@ public class DerivedFieldService {
     private void checkPermission(DerivedFieldAddRequest request) {
         if (Boolean.TRUE.equals(request.getIsPublic())) {
             final var userRoes = userDomainService.getCurrentUserRoles(null);
-            final var isDeveloper = userRoes.stream().anyMatch(role -> role.getId().equals(SystemRoles.DEVELOPER.getId()));
+            final var isDeveloper = userRoes.stream().anyMatch(role -> role.getName().equals(SystemRoles.DEVELOPER.name()) || role.getName().equals(SystemRoles.ADMIN.name()));
             final var hasWriteAccess = reportDomainService.isReportAccessible(request.getReportId(), FolderAuthorityEnum.WRITE, userRoes.stream().map(RoleView::getId).toList());
             if (!isDeveloper) {
                 throw new InvalidParametersException("Для создания общедоступных производных полей необходимо обладать ролью DEVELOPER.");
