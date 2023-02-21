@@ -309,9 +309,9 @@ export function FieldsLists(fieldsLists){
     }
     
     // Переименование
-    this.setNewNameByFieldIndex = (index, newName) => {
-        this.filterFields[index] = new FieldData(this.filterFields[index]);
-        this.filterFields[index].setNewName(newName);
+    this.setNewNameByFieldIndex = (fieldsListsName, index, newName) => {
+        this[fieldsListsName][index] = new FieldData(this[fieldsListsName][index]);
+        this[fieldsListsName][index].setNewName(newName);
     }
 
     // Передаем тип данных метрики

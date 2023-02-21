@@ -23,6 +23,7 @@ import PivotTools from './PivotTools'
 import {PivotCSS} from './PivotCSS'
 import TableRangeControl from './TableRangeControl'
 import PivotFilterModal from './PivotFilterModal'
+import PivotMetricModal from './PivotMetricModal'     
 
 //dataobjects
 import PivotDataProvider from './dataobjects/PivotDataProvider'
@@ -112,6 +113,7 @@ function PivotPanel(props){
 
     // модальное окно задания фильтра
     const [filterModalOpen, setFilterModalOpen] = useState(false);
+    const [metricModalOpen, setMetricModalOpen] = useState(false);
     const [filterModalStyle, setFilterModalStyle] = useState('');
 
     // модальное окно создания нового поля
@@ -119,6 +121,9 @@ function PivotPanel(props){
 
     // Индекс поля для которого настраивается фильтрация в списке полей фильтрации
     const [filterFieldIndex, setFilterFieldIndex] = useState(undefined);
+
+    // Индекс редактируемой метрики
+    const [metricFieldIndex, setMetricFieldIndex] = useState(undefined);
 
     /*
         Данные и отображение данных
@@ -875,11 +880,25 @@ function PivotPanel(props){
         setFilterModalOpen(false);
     }
     
+
+    // Закрытие модального окна без переименования метрики
+    function handleMetricModalClose(){
+            setPivotConfiguration(oldAndNewConfiguration.current.oldConfiguration);
+            setMetricModalOpen(false);
+    }
+
+    // Задание описания метрики
+    function handleRenameMetric(newName){
+        oldAndNewConfiguration.current.newConfiguration.setNewNameByFieldIndex('metricFields', oldAndNewConfiguration.current.newFieldIndex, newName);
+        setPivotConfiguration(new PivotConfiguration(oldAndNewConfiguration.current.newConfiguration));
+        setMetricModalOpen(false);
+    }
+
     // Вызывается по подтверждению задания объекта фильтрации в модальном окне
     function handleSetFilterValue(filterObject, newName){
 
         if (filterObject.values.length > 0 || filterObject.filterType === "BLANK"){
-        oldAndNewConfiguration.current.newConfiguration.setNewNameByFieldIndex(oldAndNewConfiguration.current.newFieldIndex, newName);
+        oldAndNewConfiguration.current.newConfiguration.setNewNameByFieldIndex('filterFields', oldAndNewConfiguration.current.newFieldIndex, newName);
         oldAndNewConfiguration.current.newConfiguration.setFieldFilterByFieldIndex(oldAndNewConfiguration.current.newFieldIndex, filterObject);
         oldAndNewConfiguration.current.newConfiguration.setColumnFrom(0);
         oldAndNewConfiguration.current.newConfiguration.setRowFrom(0);
@@ -938,11 +957,31 @@ function PivotPanel(props){
         handleSaveCurrentConfig(newPivotConfiguration.stringify());
     }
 
+    // Вызывается при нажатии на метрику
     function handleMetricFieldButtonClick(event, i){
+        let newPivotConfiguration = new PivotConfiguration(pivotConfiguration);
+
+        oldAndNewConfiguration.current = {
+            newFieldIndex : i,
+            oldConfiguration: new PivotConfiguration(pivotConfiguration),
+            newConfiguration: new PivotConfiguration(newPivotConfiguration)
+        }
+
+        setMetricFieldIndex(i);
+
+        setMetricModalOpen(true);
+
+        setFilterModalStyle({
+            top: event.screenY,
+            left: event.screenX,
+            transform: `translate(0%, -20%)`,
+        })
+    }
+
+    function handleMetricFieldContextClick(event, i){
         let dataType = pivotConfiguration.fieldsLists.allFields.find(item=> item.fieldId === pivotConfiguration.fieldsLists.metricFields[i].fieldId).type;
         props.setAggModalParams({open: true, index: i, type: 'change', dataType: dataType});
     }
-
     /*
         ***************************************************
         Context Menu
@@ -1141,8 +1180,8 @@ function PivotPanel(props){
                                     droppableId = "filterFields"
                                     fields = {pivotConfiguration.fieldsLists.filterFields}
                                     direction = "vertical"
-                                    onButtonClick = {(event, i) => handleFilterFieldButtonClick(event, i)}
-                                    onButtonOffClick = {(event, i) => handleFilterFieldButtonOffClick(event, i)}
+                                    onClick = {(event, i) => handleFilterFieldButtonClick(event, i)}
+                                    onContextClick = {(event, i) => handleFilterFieldButtonOffClick(event, i)}
                                 />
                             }
                         </Grid>
@@ -1200,7 +1239,13 @@ function PivotPanel(props){
                                     droppableId = "metricFields"
                                     fields = {pivotConfiguration.fieldsLists.metricFields}
                                     direction = "horizontal"
-                                    onButtonClick = {handleMetricFieldButtonClick}
+
+
+                                 //   onClick = {(event, i) => handleFilterFieldButtonClick(event, i)}
+                                  //  onContextClick = {(event, i) => handleFilterFieldButtonOffClick(event, i)}
+
+                                    onClick = {(event, i) => handleMetricFieldButtonClick(event, i)}
+                                    onContextClick = {(event, i) => handleMetricFieldContextClick(event, i)}
                                     onChooseAggForMetric = {(funcName, index) => handleChooseAggForMetric(funcName, index)}
                                     onCloseAggModal = {handleAggModalClose}
                                 />
@@ -1229,7 +1274,10 @@ function PivotPanel(props){
                                         droppableId = "metricFields"
                                         fields = {pivotConfiguration.fieldsLists.metricFields}
                                         direction = "vertical"
-                                        onButtonClick = {handleMetricFieldButtonClick}
+                                        onClick = {(event, i) => handleMetricFieldButtonClick(event, i)}
+                                        onContextClick = {(event, i) => handleMetricFieldContextClick(event, i)}
+                                        //onClick = {handleMetricFieldButtonClick}
+                                        //onContextClick = {handleMetricFieldContextClick}
                                         onChooseAggForMetric = {(funcName, index) => handleChooseAggForMetric(funcName, index)}
                                         onCloseAggModal = {handleAggModalClose}
                                     />
@@ -1342,6 +1390,16 @@ function PivotPanel(props){
                 onClose = {handleFilterModalClose}
                 onOK = {handleSetFilterValue}
             />
+            <PivotMetricModal
+                open = {metricModalOpen}
+                style = {filterModalStyle}
+                jobId = {props.jobId}
+                field = {pivotConfiguration.fieldsLists.metricFields[metricFieldIndex]}
+                fieldsLists = {pivotConfiguration.fieldsLists}
+                onClose = {handleMetricModalClose}
+                onOK = {handleRenameMetric}
+            />
+            
             {formattingDialog && 
                 <FormattingDialog
                     open = {formattingDialog}

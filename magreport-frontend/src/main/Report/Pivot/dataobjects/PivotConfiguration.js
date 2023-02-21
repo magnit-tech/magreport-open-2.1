@@ -140,9 +140,9 @@ export default function PivotConfiguration(pivotConfiguration){
     }
 
     // Переименование
-    this.setNewNameByFieldIndex = (index, newName) => {
+    this.setNewNameByFieldIndex = (fieldsListName, index, newName) => {
         this.fieldsLists = new FieldsLists(this.fieldsLists);
-        this.fieldsLists.setNewNameByFieldIndex(index, newName);
+        this.fieldsLists.setNewNameByFieldIndex(fieldsListName, index, newName);
     }
 
     // Задание группы фильтров

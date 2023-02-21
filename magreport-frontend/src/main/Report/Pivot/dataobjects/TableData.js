@@ -34,6 +34,7 @@ export function TableData() {
 
         for(let i in this.metrics){
             this.metrics[i].metricName = fieldsLists.metricFields[i].name;
+            this.metrics[i].metricNewName = fieldsLists.metricFields[i].newName;
         }
     }
 
