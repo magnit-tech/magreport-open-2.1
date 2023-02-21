@@ -113,7 +113,7 @@ export default function(props){
                 let m = props.tableData.metrics[mIndex];
                 tableRow.push({
                     fieldIndex : mIndex,
-                    data : AggFunc.get(m.aggregationType) + " " + m.metricName,
+                    data : m.metricNewName !== '' ? m.metricNewName : AggFunc.get(m.aggregationType) + " " + m.metricName,
                     type : "metricName",
                     colSpan : 1,
                     rowSpan : 1
@@ -125,7 +125,7 @@ export default function(props){
     function printMetricInRow(tableRow, metricNum, rowNum) {
         tableRow.push({
             fieldIndex : metricNum,
-            data : AggFunc.get(props.tableData.metrics[metricNum].aggregationType) + " " + props.tableData.metrics[metricNum].metricName,
+            data : props.tableData.metrics[metricNum].metricNewName !=='' ? props.tableData.metrics[metricNum].metricNewName : AggFunc.get(props.tableData.metrics[metricNum].aggregationType) + " " + props.tableData.metrics[metricNum].metricName,
             type : "metricName",
             style: props.pivotConfiguration.fieldsLists.metricFields[metricNum]?.formatting || '',
             colSpan : 1,
@@ -718,7 +718,7 @@ function mergeCells(tableRows, columnDimensionsNum, nHeaderRows, colsMetricFacto
     }
 
     // merge rows
-    let rowSpan = new Array();
+    let rowSpan = new Array(); // eslint-disable-line
     for(let i = tableRows.length - rowsMetricFactor; i >= nHeaderRows; i -= rowsMetricFactor){
         for(let j = 0; j < tableRows[i].length; j++){
             if(tableRows[i][j].type === "dimensionValue"){
