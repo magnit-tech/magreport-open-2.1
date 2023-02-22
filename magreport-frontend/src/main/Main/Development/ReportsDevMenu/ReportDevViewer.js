@@ -83,7 +83,7 @@ function ReportDevViewer({actionLoaded = f=>f, actionLoadedFailed = f=>f, viewIt
     // constructing component
     // tabs
     const tabs = []
-
+    
     // headers tab
     tabs.push({
         tablabel: "Заголовки",
@@ -101,7 +101,7 @@ function ReportDevViewer({actionLoaded = f=>f, actionLoadedFailed = f=>f, viewIt
 
                 <ViewerChildCard
                     id={dataSet.id}
-                    parentFolderId={dataSet.dataSource?.folderId}
+                    parentFolderId={dataSet.folderId}
                     itemType={FolderItemTypes.dataset}
                     name={dataSet.name}
                 />
