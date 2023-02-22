@@ -164,9 +164,27 @@ export default function FormulaEditor(props){
       }
   
       const initialCode = useMemo(() => replaceIdWithNames(props.initialCode), [props.initialCode]);
-      function replaceNamesWithId(code){
-        return code;
-      }
+
+      function replaceNamesWithId(codeWithId){
+          let pattern = /(\[[^\[\]]+\])|(\[\[[^\[\]]+\]\])/g;
+    
+          function replacer(match, ...arg){
+            if(match[0] === '[' && match[1] === '[')
+            {
+              let name = match.slice(2,-2);
+
+              return '[[' + derivedFieldNameToId.get(name) + ']]';
+            }
+            else
+            {
+              let name = match.slice(1,-1);
+
+              return '[' + originalFieldNameToId.get(name) + ']';
+            }
+          }
+    
+          return codeWithId.replace(pattern, replacer);
+      }      
   
     /*
     ********************************************************
