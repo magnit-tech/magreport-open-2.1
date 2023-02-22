@@ -20,6 +20,7 @@ import ru.magnit.magreportbackend.dto.response.folderreport.FolderResponse;
 import ru.magnit.magreportbackend.dto.response.permission.FolderPermissionsResponse;
 import ru.magnit.magreportbackend.dto.response.report.PublishedReportResponse;
 import ru.magnit.magreportbackend.exception.InvalidParametersException;
+import ru.magnit.magreportbackend.exception.PermissionDeniedException;
 import ru.magnit.magreportbackend.service.domain.FolderDomainService;
 import ru.magnit.magreportbackend.service.domain.FolderPermissionsDomainService;
 import ru.magnit.magreportbackend.service.domain.ReportDomainService;
@@ -82,6 +83,11 @@ public class FolderService {
         }
 
         final var foldersPermissions = folderPermissionsDomainService.getFoldersReportPermissionsForRoles(folderIds, roleIds).stream().collect(Collectors.toMap(FolderRoleResponse::getFolderId, FolderRoleResponse::getAuthority));
+        var authority = foldersPermissions.getOrDefault(folderResponse.getId(), FolderAuthorityEnum.NONE);
+        if (authority.equals(FolderAuthorityEnum.NONE) && folderResponse.getId() != null){
+            throw new PermissionDeniedException(String.format("У Вас нет прав доступа к папке '%s'", folderResponse.getName()));
+        }
+
         folderResponse.setAuthority(foldersPermissions.getOrDefault(folderResponse.getId(), FolderAuthorityEnum.NONE));
         folderResponse.getChildFolders().forEach(folder -> folder.setAuthority(foldersPermissions.getOrDefault(folder.getId(), FolderAuthorityEnum.NONE)));
 
