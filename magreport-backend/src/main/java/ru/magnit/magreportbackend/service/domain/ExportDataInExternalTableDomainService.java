@@ -71,6 +71,7 @@ public class ExportDataInExternalTableDomainService {
                         var field = fieldsFilter.get(fieldData.fieldId());
                         queryInserts.add(getInsertReportFilterField(idJob, schema, fieldData.fieldId(), idTuple.get(), field.filterCodeFieldName(),  field.filterFieldType(), fieldData.level()));
                         queryInserts.add(getInsertReportFilterFieldValueByTypeField(idJob, schema, idTuple.get(),  field.filterFieldType(), fieldData));
+                        if (jobFilter.filterType() == FilterTypeEnum.TOKEN_INPUT) idTuple.getAndIncrement();
                     }
                 });
                 idTuple.getAndIncrement();

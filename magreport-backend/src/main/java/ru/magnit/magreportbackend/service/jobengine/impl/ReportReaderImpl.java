@@ -12,6 +12,7 @@ import ru.magnit.magreportbackend.dto.inner.reportjob.ReportFieldData;
 import ru.magnit.magreportbackend.exception.QueryExecutionException;
 import ru.magnit.magreportbackend.exception.ReportExportException;
 import ru.magnit.magreportbackend.service.dao.ConnectionPoolManager;
+import ru.magnit.magreportbackend.service.jobengine.DataProcessor;
 import ru.magnit.magreportbackend.service.jobengine.QueryBuilder;
 import ru.magnit.magreportbackend.service.jobengine.ReaderStatus;
 import ru.magnit.magreportbackend.service.jobengine.ReportReader;
@@ -22,7 +23,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
@@ -40,17 +43,16 @@ public class ReportReaderImpl implements ReportReader {
     private String errorDescription = null;
     private final AtomicReference<PreparedStatement> runningStatement = new AtomicReference<>();
 
+    private final Map<DataSourceTypeEnum, Map<DataSetTypeEnum, DataProcessor<Connection>>> dataProcessors = initDataProcessors();
+
     @Override
     public void run() {
         try (
             var connection = poolManager.getConnection(readerData.dataSource())
         ) {
             status = ReaderStatus.RUNNING;
-            if (readerData.dataSource().type() == DataSourceTypeEnum.POSTGRESQL && readerData.report().dataSetTypeId() == DataSetTypeEnum.PROCEDURE.ordinal()) {
-                processPostgresFunction(connection);
-            } else {
-                processData(connection);
-            }
+            final var processor = dataProcessors.get(readerData.dataSource().type()).get(DataSetTypeEnum.values()[(int) readerData.report().dataSetTypeId()]);
+            processor.apply(connection);
             status = isCanceled ? ReaderStatus.CANCELED : ReaderStatus.FINISHED;
         } catch (Exception ex) {
             status = ReaderStatus.FAILED;
@@ -65,10 +67,10 @@ public class ReportReaderImpl implements ReportReader {
         log.debug("Query for job " + readerData.jobId() + ": " + query);
         if (isCanceled) return;
         try (final var statement = connection.prepareCall(query)) {
-            runningStatement.set(statement);
             connection.setAutoCommit(false);
             statement.registerOutParameter(1, Types.OTHER);
             statement.execute();
+            runningStatement.set(statement);
             final var reportFields = readerData.report().reportData().fields()
                 .stream()
                 .filter(ReportFieldData::visible)
@@ -198,5 +200,20 @@ public class ReportReaderImpl implements ReportReader {
     @Override
     public String getErrorDescription() {
         return errorDescription;
+    }
+
+    private Map<DataSourceTypeEnum, Map<DataSetTypeEnum, DataProcessor<Connection>>> initDataProcessors() {
+        final var processors = new EnumMap<DataSourceTypeEnum, Map<DataSetTypeEnum, DataProcessor<Connection>>>(DataSourceTypeEnum.class);
+        for (final var dataSourceType : DataSourceTypeEnum.values()){
+            processors.put(dataSourceType, new EnumMap<>(DataSetTypeEnum.class));
+            for (final var dataSetType : DataSetTypeEnum.values()) {
+                if (dataSourceType == DataSourceTypeEnum.POSTGRESQL && dataSetType == DataSetTypeEnum.PROCEDURE) {
+                    processors.get(dataSourceType).put(dataSetType, this::processPostgresFunction);
+                } else {
+                    processors.get(dataSourceType).put(dataSetType, this::processData);
+                }
+            }
+        }
+        return processors;
     }
 }

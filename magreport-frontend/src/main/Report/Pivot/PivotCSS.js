@@ -229,15 +229,15 @@ export const PivotCSS = makeStyles(theme => ({
     metricValueCell: {
         width: '100px',
         cursor : 'pointer',
+        "& .metricValueCellArrowsWrapp" :{
+            display: 'none',
+            zIndex: 999,
+        },
         "&:hover" :{
             "& .metricValueCellArrowsWrapp" :{
                 display: 'contents'
             },
         },
-    },
-    metricValueCellArrowsWrapp: {
-        display: 'none',
-        zIndex: 999,
     },
     metricValueCellArrow: {
         "& path" :{
