@@ -65,7 +65,7 @@ function DerivedFieldDialogList(props){
 
 	return (
 		<div className={classes.DFD_list}>	
-			<List id="block" className={classes.DFD_listBlock}>
+			<List id="block" className={clsx(classes.DFD_listBlock, 'MuiPaper-root')}>
 				{editedDerivedFields.length === 0 && 
 					<p style={{textAlign: 'center', fontSize: '16px'}}>Список полей пуст</p>
 				}
