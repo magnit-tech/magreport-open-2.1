@@ -7,6 +7,9 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Paper from '@material-ui/core/Paper';
 import Draggable from 'react-draggable';
 import TextField from '@material-ui/core/TextField';
+
+import DesignerTextField from '../../Main/Development/Designer/DesignerTextField';
+
 // local
 import {AggFunc} from '../../FolderContent/JobFilters/JobStatuses';
 import {PivotCSS} from './PivotCSS';
@@ -63,33 +66,37 @@ export default function PivotMetricModal(props){
                 Метрика
             </DialogTitle>
             <DialogContent style={{display: 'flex', flex: 1, flexDirection: 'column'}}>
-            <TextField
+            <DesignerTextField
                 id="fieldName"
                 label={"функция"}
                 variant="outlined"
                 size="small"
-                style={{margin: '0px 16px 8px 36px', width: '408px'}}
-                defaultValue={(props.field?.aggFuncName ? AggFunc.get(props.field?.aggFuncName) + ' ' : '')}
-                InputProps={{readOnly: true}}
+                margin = '0px 8px 8px'
+                minWidth = '408px'
+                value={(props.field?.aggFuncName ? AggFunc.get(props.field?.aggFuncName) + ' ' : '')}
+                disabled
             />
-            <TextField
+            <DesignerTextField
                 id="fieldName"
                 label={"название"}
                 variant="outlined"
                 size="small"
-                style={{margin: '0px 16px 8px 36px', width: '408px'}}
-                defaultValue={props.field?.fieldName}
-                InputProps={{readOnly: true}}
+                margin = '0px 8px 8px'
+                minWidth = '408px'
+                value={props.field?.fieldName}
+                disabled
             />
-            <TextField
+            <DesignerTextField
                 id="fieldName"
                 label={'описание'}
                 variant="outlined"
                 size="small"
                 multiline
-                style={{margin: '0px 16px 8px 36px', width: '408px'}}
-                defaultValue = {newName}
-                onChange = {(e)=>setNewName(e.target.value)}
+                margin = '0px 8px 8px'
+                minWidth = '408px'
+                value = {newName}
+                clearable
+                onChange = {(val)=>setNewName(val)}
             />
             </DialogContent>
             <DialogActions>
