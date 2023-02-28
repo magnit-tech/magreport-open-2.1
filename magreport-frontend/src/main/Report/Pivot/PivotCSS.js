@@ -798,7 +798,6 @@ export const PivotCSS = makeStyles(theme => ({
         position: 'relative', 
         padding: '20px 20px 5px 20px', 
         margin: '10px 15px', 
-        background: 'white', 
         borderRadius: '8px',
         boxShadow: '0px 0px 13px -5px rgba(34, 60, 80, 0.17)'
     },
@@ -821,8 +820,7 @@ export const PivotCSS = makeStyles(theme => ({
     },
     DFD_listBlock: {
         height: '605px', 
-        overflow: 'auto', 
-        background: 'white', 
+        overflow: 'auto',
         borderRadius: '8px', 
         
     },
@@ -850,7 +848,6 @@ export const PivotCSS = makeStyles(theme => ({
     },
     DFD_modalBox: {
         padding: '10px 20px',
-        background: 'white',
         borderRadius: '8px'
     },
     DFD_modalText: {
