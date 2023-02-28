@@ -205,6 +205,7 @@ export function FieldsLists(fieldsLists){
             // Обнуляем фильтр
             movingField.setFilter({});
             movingField.setIsOffFalse({});
+            movingField.setNewName('');
 
             if ((dragListName === "metricFields" && dropListName === "metricFields"  && dragListFieldIndex === dropListFieldIndex) ||
                 (dragListName === "filterFields" && dropListName === "filterFields"  && dragListFieldIndex === dropListFieldIndex)
