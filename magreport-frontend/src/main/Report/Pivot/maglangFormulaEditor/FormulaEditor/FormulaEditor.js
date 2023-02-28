@@ -67,13 +67,13 @@ export default function FormulaEditor(props){
     const codeEditorTheme = createTheme({
         theme: 'light',
         settings: {
-          background: '#ffffff',
+          background: '',
           foreground: props.disabled ? 'grey' : '#75baff',
           caret: '#5d00ff',
           selection: '#036dd626',
           selectionMatch: '#036dd626',
           lineHighlight: '#8a91991a',
-          gutterBackground: '#fff',
+          gutterBackground: 'inherit',
           gutterForeground: '#8a919966',
         },
         styles: [

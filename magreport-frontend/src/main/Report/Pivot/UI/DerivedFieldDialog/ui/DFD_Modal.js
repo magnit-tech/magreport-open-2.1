@@ -1,4 +1,5 @@
 import React from 'react'
+import clsx from 'clsx';
 import { PivotCSS } from '../../../PivotCSS';
 
 export default function DerivedFieldDialogModal(){
@@ -6,7 +7,7 @@ export default function DerivedFieldDialogModal(){
 
 	return (
 		<div className={classes.DFD_modal}>
-			<div className={classes.DFD_modalBox}>
+			<div className={clsx(classes.DFD_modalBox, 'MuiPaper-root')}>
 				<p className={classes.DFD_modalText}>Выберите доступное поле или создайте новое</p>
 			</div>
 		</div>

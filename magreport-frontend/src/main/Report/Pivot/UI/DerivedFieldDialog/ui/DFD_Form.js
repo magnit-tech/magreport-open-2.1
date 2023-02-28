@@ -11,6 +11,7 @@ import FormulaEditor from "../../../maglangFormulaEditor/FormulaEditor/FormulaEd
 import DerivedFieldDialogModal from "./DFD_Modal";
 
 import { buildServerExression, checkForDifferenceFromOriginalField } from "../lib/DFD_functions";
+import clsx from "clsx";
 
 /**
     * @param {Number} props.reportId - id отчёта
@@ -141,7 +142,7 @@ export default function DerivedFieldDialogForm(props){
     }
 
 	return (
-		<div className={classes.DFD_form}>
+		<div className={clsx(classes.DFD_form, 'MuiPaper-root')}>
 
             { activeIndex === null && <DerivedFieldDialogModal/> }
 
