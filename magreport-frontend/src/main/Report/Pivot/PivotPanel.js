@@ -828,6 +828,50 @@ function PivotPanel(props){
             setTableDataLoadStatus(1);
         }
     }
+    /*
+        ***************************************************
+        Переименование метрик
+        ***************************************************
+    */
+    
+    // Закрытие модального окна без переименования метрики
+    function handleMetricModalClose(){
+            setPivotConfiguration(oldAndNewConfiguration.current.oldConfiguration);
+            setMetricModalOpen(false);
+    }
+
+    // Вызывается при нажатии на метрику
+    function handleMetricFieldButtonClick(event, i){
+        let newPivotConfiguration = new PivotConfiguration(pivotConfiguration);
+
+        oldAndNewConfiguration.current = {
+            newFieldIndex : i,
+            oldConfiguration: new PivotConfiguration(pivotConfiguration),
+            newConfiguration: new PivotConfiguration(newPivotConfiguration)
+        }
+
+        setMetricFieldIndex(i);
+
+        setMetricModalOpen(true);
+
+        setFilterModalStyle({
+            top: event.screenY,
+            left: event.screenX,
+            transform: `translate(0%, -20%)`,
+        })
+    }
+    
+    // Задание описания метрики
+    function handleRenameMetric(newName){
+        oldAndNewConfiguration.current.newConfiguration.setNewNameByFieldIndex('metricFields', oldAndNewConfiguration.current.newFieldIndex, newName);
+        setPivotConfiguration(new PivotConfiguration(oldAndNewConfiguration.current.newConfiguration));
+
+        setMetricModalOpen(false);
+		setTableDataLoadStatus(1);
+		dataProviderRef.current.loadDataForNewFieldsLists(oldAndNewConfiguration.current.newConfiguration.fieldsLists, oldAndNewConfiguration.current.newConfiguration.filterGroup, oldAndNewConfiguration.current.newConfiguration.metricFilterGroup, {}, 0, columnCount, 0, rowCount);
+		handleSaveCurrentConfig(oldAndNewConfiguration.current.newConfiguration.stringify())
+    }
+
 
     /*
         ***************************************************
@@ -878,20 +922,6 @@ function PivotPanel(props){
     function handleFilterModalClose(){
         setPivotConfiguration(oldAndNewConfiguration.current.oldConfiguration);
         setFilterModalOpen(false);
-    }
-    
-
-    // Закрытие модального окна без переименования метрики
-    function handleMetricModalClose(){
-            setPivotConfiguration(oldAndNewConfiguration.current.oldConfiguration);
-            setMetricModalOpen(false);
-    }
-
-    // Задание описания метрики
-    function handleRenameMetric(newName){
-        oldAndNewConfiguration.current.newConfiguration.setNewNameByFieldIndex('metricFields', oldAndNewConfiguration.current.newFieldIndex, newName);
-        setPivotConfiguration(new PivotConfiguration(oldAndNewConfiguration.current.newConfiguration));
-        setMetricModalOpen(false);
     }
 
     // Вызывается по подтверждению задания объекта фильтрации в модальном окне
@@ -955,27 +985,6 @@ function PivotPanel(props){
         setTableDataLoadStatus(1);
         dataProviderRef.current.loadDataForNewFieldsLists(oldAndNewConfiguration.current.newConfiguration.fieldsLists, oldAndNewConfiguration.current.newConfiguration.filterGroup, oldAndNewConfiguration.current.newConfiguration.metricFilterGroup, {}, 0, columnCount, 0, rowCount);            
         handleSaveCurrentConfig(newPivotConfiguration.stringify());
-    }
-
-    // Вызывается при нажатии на метрику
-    function handleMetricFieldButtonClick(event, i){
-        let newPivotConfiguration = new PivotConfiguration(pivotConfiguration);
-
-        oldAndNewConfiguration.current = {
-            newFieldIndex : i,
-            oldConfiguration: new PivotConfiguration(pivotConfiguration),
-            newConfiguration: new PivotConfiguration(newPivotConfiguration)
-        }
-
-        setMetricFieldIndex(i);
-
-        setMetricModalOpen(true);
-
-        setFilterModalStyle({
-            top: event.screenY,
-            left: event.screenX,
-            transform: `translate(0%, -20%)`,
-        })
     }
 
     function handleMetricFieldContextClick(event, i){
