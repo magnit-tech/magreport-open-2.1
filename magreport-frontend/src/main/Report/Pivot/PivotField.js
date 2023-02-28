@@ -128,89 +128,91 @@ function PivotField(props){
             </Modal>
         );
     }
-
-    return(
-        <Draggable draggableId={props.listName + "-" + props.fieldId.toString() + "-" + props.index} index={props.index}>
-            {(provided, snapshot)=>(
-                <ListItem
-                    //button
-                    className={clsx({
-                        [styles.offField] : props.isOff,
-                        [styles.field] : !props.isOff,
-                        [styles.derivedField] : !props.original,
-                        [styles.draggingField] : snapshot.isDragging
-                    })}
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    innerRef = {provided.innerRef}
-                    onClick={(props.listName === 'filterFields' ||  props.listName === 'metricFields') ? handleClick: ()=>{} }
-                    onContextMenu = {(props.listName === 'filterFields' ||  props.listName === 'metricFields') ? handleContextClick: ()=>{}  }
-                >
-                    <Popover
-                        id="mouse-over-popover"
-                        className={styles.popover}
-                        classes={{
-                            paper: clsx({
-                                [styles.offPaper] : props.isOff,
-                                [styles.paper] : !props.isOff
-                            })
-                        }} 
-                        open={openPopover}
-                        anchorEl={anchorEl}
-                        anchorOrigin={{
-                            vertical: 'center',
-                            horizontal: 'center',
-                        }}
-                        transformOrigin={{
-                            vertical: 'center',
-                            horizontal: 'center',
-                        }}
-                        onClose={handlePopoverClose}
-                        disableRestoreFocus
-                    >
-                        <div className={styles.popoverDiv}>
-                            <div className={styles.fieldTextHover}>
-                                {props.filtered &&
-                                    <Icon path={mdiFilter} size={0.5}/> 
-                                }
-                                {props.newfieldName !== '' ? props.newfieldName :
-                                (props.aggFuncName ? AggFunc.get(props.aggFuncName) + ' ' : '') + props.fieldName} 
-                            </div>
-                        </div>
-                    </Popover>
-
-                    <ListItemText className={clsx({
-                            [styles.listItemOffText]: props.isOff,
-                            [styles.listItemText]: !props.isOff
+    return (
+        <div>
+            <Draggable draggableId={props.listName + "-" + props.fieldId.toString() + "-" + props.index} index={props.index}>
+                {(provided, snapshot)=>(
+                    <ListItem
+                        //button
+                        className={clsx({
+                            [styles.offField] : props.isOff,
+                            [styles.field] : !props.isOff,
+                            [styles.derivedField] : !props.original,
+                            [styles.draggingField] : snapshot.isDragging
                         })}
-                        aria-owns={open ? 'mouse-over-popover' : undefined}
-                        aria-haspopup="true"
-                        onMouseEnter={handlePopoverOpen}
-                        onMouseLeave={handlePopoverClose}
-                        ref={parentRef}
-                    >                      
-                        <div className={styles.fieldText}>
-                            {props.filtered && props.listName !== 'filterFields' &&
-                                <Icon path={mdiFilter} size={0.8}/>
-                            }
-                            {props.newfieldName !== '' ? props.newfieldName :
-                            (props.aggFuncName ? AggFunc.get(props.aggFuncName) + ' ' : '') + props.fieldName}
-                        </div>
-                            
-                    </ListItemText>
-                    {
-                        (props.listName === "metricFields" && props.index === index) 
-                        &&
-                        <AggFuncList 
-                            dataType = {dataType}
-                            index = {index}
-                            open = {open}
-                        />
-                    }
-                </ListItem>
-          
-            )}
-        </Draggable>
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                        innerRef = {provided.innerRef}
+                        onClick={(props.listName === 'filterFields' ||  props.listName === 'metricFields') ? handleClick: ()=>{} }
+                        onContextMenu = {(props.listName === 'filterFields' ||  props.listName === 'metricFields') ? handleContextClick: ()=>{}  }
+                    >
+                        <Popover
+                            id="mouse-over-popover"
+                            className={styles.popover}
+                            classes={{
+                                paper: clsx({
+                                    [styles.offPaper] : props.isOff,
+                                    [styles.paper] : !props.isOff
+                                })
+                            }} 
+                            open={openPopover}
+                            anchorEl={anchorEl}
+                            anchorOrigin={{
+                                vertical: 'center',
+                                horizontal: 'center',
+                            }}
+                            transformOrigin={{
+                                vertical: 'center',
+                                horizontal: 'center',
+                            }}
+                            onClose={handlePopoverClose}
+                            disableRestoreFocus
+                        >
+                            <div className={styles.popoverDiv}>
+                                <div className={styles.fieldTextHover}>
+                                    {props.filtered &&
+                                        <Icon path={mdiFilter} size={0.5}/> 
+                                    }
+                                    {props.newfieldName !== '' && props.listName === 'metricFields' ? props.newfieldName :
+                                    (props.aggFuncName ? AggFunc.get(props.aggFuncName) + ' ' : '') + props.fieldName} 
+                                </div>
+                            </div>
+                        </Popover>
+            
+                        <ListItemText className={clsx({
+                                [styles.listItemOffText]: props.isOff,
+                                [styles.listItemText]: !props.isOff
+                            })}
+                            aria-owns={open ? 'mouse-over-popover' : undefined}
+                            aria-haspopup="true"
+                            onMouseEnter={handlePopoverOpen}
+                            onMouseLeave={handlePopoverClose}
+                            ref={parentRef}
+                        >                      
+                            <div className={styles.fieldText}>
+                                {props.filtered && props.listName !== 'filterFields' &&
+                                    <Icon path={mdiFilter} size={0.8}/>
+                                }
+                                {props.newfieldName !== '' && props.listName === 'metricFields' ? props.newfieldName :
+                                (props.aggFuncName ? AggFunc.get(props.aggFuncName) + ' ' : '') + props.fieldName}
+                            </div>
+                                
+                        </ListItemText>
+                        
+                    </ListItem>
+              
+                )}
+            </Draggable>
+            {
+                (props.listName === "metricFields" && props.index === index) 
+                &&
+                <AggFuncList 
+                    dataType = {dataType}
+                    index = {index}
+                    open = {open}
+                />
+            }
+        </div>
     )
 }
 
