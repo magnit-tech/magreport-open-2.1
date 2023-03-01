@@ -37,8 +37,6 @@ export default function DerivedFieldDialogForm(props){
         isPublic: false
     });
 
-    console.log(currentField);
-
 	const debouncedSearchTerm = useDebounce(currentField.name, 500);
     const timeout = useRef()
 
