@@ -9,7 +9,6 @@ import ru.magnit.magreportbackend.mapper.auth.RoleTypeResponseMapper;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +35,6 @@ public class AsmSecurityResponseMapper implements Mapper<AsmSecurityResponse, Ex
 
     @Override
     public List<AsmSecurityResponse> from(List<ExternalAuth> sources) {
-        return sources.stream().map(this::from).collect(Collectors.toList());
+        return sources.stream().map(this::from).toList();
     }
 }

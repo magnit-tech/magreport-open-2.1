@@ -7,7 +7,9 @@ import ru.magnit.magreportbackend.dto.inner.UserView;
 import ru.magnit.magreportbackend.dto.inner.asm.ExternalAuthSecurityView;
 import ru.magnit.magreportbackend.dto.request.asm.AsmSecurityAddRequest;
 import ru.magnit.magreportbackend.dto.response.asm.AsmSecurityResponse;
+import ru.magnit.magreportbackend.dto.response.asm.AsmSecurityShortResponse;
 import ru.magnit.magreportbackend.mapper.asm.AsmSecurityResponseMapper;
+import ru.magnit.magreportbackend.mapper.asm.AsmSecurityShortResponseMapper;
 import ru.magnit.magreportbackend.mapper.asm.ExternalAuthMapper;
 import ru.magnit.magreportbackend.mapper.asm.ExternalAuthMerger;
 import ru.magnit.magreportbackend.mapper.asm.ExternalAuthSecurityViewMapper;
@@ -24,6 +26,7 @@ public class ExternalSecurityDomainService {
 
     private final ExternalAuthMapper externalAuthMapper;
     private final AsmSecurityResponseMapper asmSecurityResponseMapper;
+    private final AsmSecurityShortResponseMapper asmSecurityShortResponseMapper;
     private final ExternalAuthSecurityViewMapper externalAuthSecurityViewMapper;
     private final ExternalAuthMerger externalAuthMerger;
 
@@ -44,10 +47,10 @@ public class ExternalSecurityDomainService {
     }
 
     @Transactional
-    public List<AsmSecurityResponse> getAllAsmSecurity() {
+    public List<AsmSecurityShortResponse> getAllAsmSecurity() {
         final var externalAuthList = authRepository.findAll();
 
-        return asmSecurityResponseMapper.from(externalAuthList);
+        return asmSecurityShortResponseMapper.from(externalAuthList);
     }
 
     @Transactional

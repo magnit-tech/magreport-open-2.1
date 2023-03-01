@@ -299,6 +299,8 @@ public class SecurityFilterDomainService {
                 filterRole.getSecurityFilter().getFilterInstance().getFilterTemplate().getType().getTypeEnum(),
                 filterRole.getSecurityFilter().getOperationType().getTypeEnum(),
                 "",
+                    null,
+                "",
                 filterRole.getFilterRoleTuples()
                     .stream()
                     .map(tuple -> new ReportJobTupleData(tuple.getTupleValues()
@@ -332,6 +334,8 @@ public class SecurityFilterDomainService {
                 "",
                 filterRole.getSecurityFilter().getFilterInstance().getFilterTemplate().getType().getTypeEnum(),
                 filterRole.getSecurityFilter().getOperationType().getTypeEnum(),
+                "",
+                null,
                 "",
                 filterRole.getFilterRoleTuples()
                     .stream()

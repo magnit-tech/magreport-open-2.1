@@ -220,13 +220,22 @@ public class ReportDomainService {
 
     @Transactional
     public void deleteReportToFavorites(UserView currentUser, ReportIdRequest request) {
-
         favReportRepository.deleteByUserIdAndReportId(currentUser.getId(), request.getId());
     }
 
     @Transactional
     public void deleteFavReportsByReportId(Long reportId) {
         favReportRepository.deleteByReportId(reportId);
+    }
+
+    @Transactional
+    public void deleteFavReportsByFoldertId(Long folderId) {
+        favReportRepository.deleteByFolderId(folderId);
+    }
+
+    @Transactional
+    public void deleteFavReport(Long userId, Long reportId, Long folderId) {
+        favReportRepository.deleteByUserIdAndReportIdAndFolderId(userId, reportId, folderId);
     }
 
     @Transactional
@@ -478,6 +487,12 @@ public class ReportDomainService {
             .anyMatch(frp -> frp.getAuthority().getEnum() == targetAuthority);
     }
 
+    @Transactional
+    public boolean checkValidField(Long reportId){
+        var reportField = reportFieldRepository.findById(reportId).orElseThrow();
+        return reportField.getDataSetField().getIsSync();
+    }
+
     private ReportFolder copyFolder(ReportFolder originalFolder, ReportFolder parentFolder, User currentUser, List<ReportFolderRole> destParentFolderRoles) {
 
         var folderCopy = reportFolderCloner.clone(originalFolder);
@@ -597,9 +612,14 @@ public class ReportDomainService {
     }
 
     private boolean isActiveJobs(Long id) {
+
         return reportRepository.getReferenceById(id).getReportJobs()
             .stream()
-            .allMatch(job -> Objects.equals(ReportJobStatusEnum.COMPLETE.getId(), job.getStatus().getId()) || Objects.equals(ReportJobStatusEnum.FAILED.getId(), job.getStatus().getId()));
+            .allMatch(job ->
+                    Objects.equals(ReportJobStatusEnum.COMPLETE.getId(), job.getStatus().getId()) ||
+                            Objects.equals(ReportJobStatusEnum.FAILED.getId(), job.getStatus().getId()) ||
+                            Objects.equals(ReportJobStatusEnum.CANCELED.getId(), job.getStatus().getId())
+                    );
     }
 
     private boolean isExistsFavReport( Long userId, Long reportId, Long folderId){

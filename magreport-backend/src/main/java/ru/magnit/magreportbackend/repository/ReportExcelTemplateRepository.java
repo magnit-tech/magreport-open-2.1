@@ -7,9 +7,10 @@ import org.springframework.data.repository.query.Param;
 import ru.magnit.magreportbackend.domain.excel.ReportExcelTemplate;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ReportExcelTemplateRepository extends JpaRepository<ReportExcelTemplate, Long> {
-    ReportExcelTemplate getTopByReportIdAndIsDefaultIsTrue(Long reportId);
+    Optional<ReportExcelTemplate> getTopByReportIdAndIsDefaultIsTrue(Long reportId);
 
     @Modifying
     @Query("UPDATE REPORT_EXCEL_TEMPLATE set isDefault = true where " +
