@@ -309,13 +309,60 @@ export default function FormattingDialog(props){
 				<Box className={classes.CFD_wrapper}>
 					{ranges.map(item => {
 						return (
-						<Box 
-							key={item.id}
-							className={clsx(classes.CFD_item, active?.id === item.id && 'active', (!!errorValueFrom || !!errorValueTo) && classes.CFD_errorChoiceBlock)} 
-							style={{backgroundColor: item.color}}
-							onClick={() => (!!errorValueFrom || !!errorValueTo) ? '' : setActive(item)}
-						>
-						</Box>
+							item.color === "inherit" 
+								? 
+									<Box
+										key={item.id}
+										className={clsx(classes.CFD_item, active?.id === item.id && 'active', (!!errorValueFrom || !!errorValueTo) && classes.CFD_errorChoiceBlock)}
+										onClick={() => (!!errorValueFrom || !!errorValueTo) ? '' : setActive(item)}
+									>
+										<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="-500 -500 1000 1000" preserveAspectRatio="xMidYMin slice"
+
+											style={{position: 'absolute', left: '0', top: '0'}}
+										> 
+											<defs>
+												<pattern id="CheckerPattern" patternUnits="userSpaceOnUse" x="0" y="0" width="100" height="100" viewBox="0 0 30 30">
+													<rect fill="#FFF" stroke="none" x="0" y="0" height="15" width="15"/>
+													<rect fill="#FFF" stroke="none" x="15" y="15" height="15" width="15"/>
+													<rect fill="#E5E5E5" stroke="none" x="15" y="0" height="15" width="15"/>
+													<rect fill="#E5E5E5" stroke="none" x="0" y="15" height="15" width="15"/>
+												</pattern>
+											</defs>
+											<g>
+												<rect fill="url(#CheckerPattern)" stroke="none" x="-500" y="-500" width="1000" height="1000"/>
+											</g>
+										</svg>
+										<span style={{
+												position: "inherit", 
+												color: item.fontColor, 
+												fontSize: item.fontSize, 
+												fontStyle: item.fontStyle === 'italic' && item.fontStyle, 
+												fontWeight: item.fontStyle === 'bold' && item.fontStyle,
+												textDecoration: item.fontStyle === 'underline' && item.fontStyle,
+											}}
+										>
+											123
+										</span>
+									</Box>
+								: 
+									<Box 
+										key={item.id}
+										className={clsx(classes.CFD_item, active?.id === item.id && 'active', (!!errorValueFrom || !!errorValueTo) && classes.CFD_errorChoiceBlock)} 
+										style={{backgroundColor: item.color}}
+										onClick={() => (!!errorValueFrom || !!errorValueTo) ? '' : setActive(item)}
+									>
+										<span style={{
+												position: "inherit", 
+												color: item.fontColor, 
+												fontSize: item.fontSize, 
+												fontStyle: item.fontStyle === 'italic' && item.fontStyle, 
+												fontWeight: item.fontStyle === 'bold' && item.fontStyle,
+												textDecoration: item.fontStyle === 'underline' && item.fontStyle,
+											}}
+										>
+											123
+										</span>
+									</Box>
 						)
 					})}
 				</Box>
@@ -387,24 +434,6 @@ export default function FormattingDialog(props){
 						</Box>
 
 						{/* Цвет фона */}
-						{/* <Box className={clsx(classes.FD_fontColorSection, classes.CFD_fontColor)}>
-							<span>Цвет фона:</span>
-							<Box
-								className={classes.FD_fontColorWrapper}
-								onClick={() => setOpenColor(!isOpenColor)}
-							>
-								<Box 
-									className={classes.FD_fontColorCircle}
-									style={{ background: active.color }}
-								/>
-								{isOpenColor && 
-									<CompactPicker
-										color={active.color}
-										onChangeComplete={(color) => changeActiveAndRanges({color: color.hex})}
-									/>
-								}
-							</Box>
-						</Box> */}
 						<Box className={classes.FD_wrapperForActionSections}>
 							<Box className={classes.FD_fontColorSection}>
 								<Box whiteSpace="nowrap"> Цвет фона: </Box>
@@ -443,10 +472,13 @@ export default function FormattingDialog(props){
 							</Box>
 							<Box className={classes.FD_autoFontColorSection}>
 								<FormControlLabel
-									control={
-										<Checkbox checked={active.color === 'inherit'} onChange={() => changeActiveAndRanges({color: 'inherit'})}/>
-									}
 									label="Прозрачный"
+									control={
+										<Checkbox 
+											checked={active.color === 'inherit'} 
+											onChange={() => changeActiveAndRanges(active.color === 'inherit' ? {color: '#fff'} : {color: 'inherit'})}
+										/>
+									}
 								/>
 							</Box>
 						</Box>
