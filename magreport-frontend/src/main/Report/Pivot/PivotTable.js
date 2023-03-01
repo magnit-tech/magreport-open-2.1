@@ -556,61 +556,61 @@ export default function(props){
     }
 
     const cellDataStyle = (cell) => {
+
+        let styleObj = {
+            margin: '2px', fontSize: '14px', fontFamily: 'Arial', fontWeight: cell.type === "dimensionName" || cell.type === "metricName" ? "bold" : "medium"
+        }
+
         if (cell.type === "metricValues" && cell.fieldId) {
 
             if (cell.conditionalFormatting && cell.conditionalFormatting.length > 0 && !cell.data.includes('%')) {
                 if (cell.conditionalFormatting.length === 1) {
-                    return  {   
-                            margin: '2px',
-                            height: cell.conditionalFormatting[0].fontSize ? `${cell.conditionalFormatting[0].fontSize + 5}px` : 'auto',
-                            fontWeight: cell.conditionalFormatting[0].fontStyle === 'bold' ? 'bold' : '400',
-                            fontStyle: cell.conditionalFormatting[0].fontStyle === 'italic' ? 'italic' : 'inherit',
-                            textDecoration: cell.conditionalFormatting[0].fontStyle === 'underline' ? 'underline' : 'none',
-                            fontSize: cell.conditionalFormatting[0].fontSize + 'px',
-                            color: cell.conditionalFormatting[0].fontColor,
-                            whiteSpace: 'nowrap'
-                        }
-                    
+                    styleObj = {   
+                        margin: '2px',
+                        height: cell.conditionalFormatting[0].fontSize ? `${cell.conditionalFormatting[0].fontSize + 5}px` : 'auto',
+                        fontWeight: cell.conditionalFormatting[0].fontStyle === 'bold' ? 'bold' : '400',
+                        fontStyle: cell.conditionalFormatting[0].fontStyle === 'italic' ? 'italic' : 'inherit',
+                        textDecoration: cell.conditionalFormatting[0].fontStyle === 'underline' ? 'underline' : 'none',
+                        fontSize: cell.conditionalFormatting[0].fontSize + 'px',
+                        color: cell.conditionalFormatting[0].fontColor,
+                        whiteSpace: 'nowrap'
+                    }
                 } 
                 
                 const cellData = Number(cell.data.replace(/\s/g,'').replace('%', ''))
     
                 for (let i = 0; i < cell.conditionalFormatting.length; i++) {
                     if (cellData < Number(cell.conditionalFormatting[i].valueTo)) {
-                        return  {   
-                                margin: '2px',
-                                height: cell.conditionalFormatting[i].fontSize ? `${cell.conditionalFormatting[i].fontSize + 5}px` : 'auto',
-                                fontWeight: cell.conditionalFormatting[i].fontStyle === 'bold' ? 'bold' : '400',
-                                fontStyle: cell.conditionalFormatting[i].fontStyle === 'italic' ? 'italic' : 'inherit',
-                                textDecoration: cell.conditionalFormatting[i].fontStyle === 'underline' ? 'underline' : 'none',
-                                fontSize: cell.conditionalFormatting[i].fontSize + 'px',
-                                color: cell.conditionalFormatting[i].fontColor,
-                                whiteSpace: 'nowrap'
-                            }
-                        
+                        styleObj = {   
+                            margin: '2px',
+                            height: cell.conditionalFormatting[i].fontSize ? `${cell.conditionalFormatting[i].fontSize + 5}px` : 'auto',
+                            fontWeight: cell.conditionalFormatting[i].fontStyle === 'bold' ? 'bold' : '400',
+                            fontStyle: cell.conditionalFormatting[i].fontStyle === 'italic' ? 'italic' : 'inherit',
+                            textDecoration: cell.conditionalFormatting[i].fontStyle === 'underline' ? 'underline' : 'none',
+                            fontSize: cell.conditionalFormatting[i].fontSize + 'px',
+                            color: cell.conditionalFormatting[i].fontColor,
+                            whiteSpace: 'nowrap'
+                        }
                     }
                 }
             } else if(cell.hasOwnProperty('style') && cell.style) {
                cell.style.filter((styleObj) => (styleObj.aggFuncName === cell.aggFuncName)).map((formatting) => {
-                    return {   
-                            margin: '2px',
-                            height: formatting.fontSize ? `${formatting.fontSize + 5}px` : 'auto',
-                            fontWeight: formatting.fontStyle === 'bold' ? 'bold' : '400',
-                            fontStyle: formatting.fontStyle === 'italic' ? 'italic' : 'inherit',
-                            textDecoration: formatting.fontStyle === 'underline' ? 'underline' : 'none',
-                            fontSize: formatting.fontSize + 'px',
-                            color: formatting.fontColor,
-                            whiteSpace: 'nowrap'
-                        }
-                    
+                    styleObj = {   
+                        margin: '2px',
+                        height: formatting.fontSize ? `${formatting.fontSize + 5}px` : 'auto',
+                        fontWeight: formatting.fontStyle === 'bold' ? 'bold' : '400',
+                        fontStyle: formatting.fontStyle === 'italic' ? 'italic' : 'inherit',
+                        textDecoration: formatting.fontStyle === 'underline' ? 'underline' : 'none',
+                        fontSize: formatting.fontSize + 'px',
+                        color: formatting.fontColor,
+                        whiteSpace: 'nowrap'
+                    }
                 })
             }
 
         }
 
-        return {
-            margin: '2px', fontSize: '14px', fontFamily: 'Arial', fontWeight: cell.type === "dimensionName" || cell.type === "metricName" ? "bold" : "medium"
-        }
+        return styleObj
     }
 
 
