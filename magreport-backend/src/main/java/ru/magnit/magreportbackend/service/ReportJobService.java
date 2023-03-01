@@ -40,6 +40,7 @@ import ru.magnit.magreportbackend.service.domain.FolderDomainService;
 import ru.magnit.magreportbackend.service.domain.FolderPermissionsDomainService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
 import ru.magnit.magreportbackend.service.domain.OlapConfigurationDomainService;
+import ru.magnit.magreportbackend.service.domain.OlapUserChoiceDomainService;
 import ru.magnit.magreportbackend.service.domain.ReportDomainService;
 import ru.magnit.magreportbackend.service.domain.ReportJobUserDomainService;
 import ru.magnit.magreportbackend.service.domain.TokenService;
@@ -84,6 +85,7 @@ public class ReportJobService {
     private final TokenService tokenService;
     private final ReportJobUserDomainService reportJobUserDomainService;
     private final OlapConfigurationDomainService olapConfigurationDomainService;
+    private final OlapUserChoiceDomainService olapUserChoiceDomainService;
 
     public TokenResponse createExcelReport(ExcelReportRequest request) {
 
@@ -161,15 +163,15 @@ public class ReportJobService {
         final var currentParameters = request.getParameters();
         final var currentUser = userDomainService.getCurrentUser();
         final var activeJobs = jobDomainService.getActiveJobs(
-            request.getReportId(),
-            currentUser.getId(),
-            List.of(
-                ReportJobStatusEnum.RUNNING.getId(),
-                ReportJobStatusEnum.EXPORT.getId(),
-                ReportJobStatusEnum.CANCELING.getId(),
-                ReportJobStatusEnum.PENDING_DB_CONNECTION.getId(),
-                ReportJobStatusEnum.SCHEDULED.getId()
-            )
+                request.getReportId(),
+                currentUser.getId(),
+                List.of(
+                        ReportJobStatusEnum.RUNNING.getId(),
+                        ReportJobStatusEnum.EXPORT.getId(),
+                        ReportJobStatusEnum.CANCELING.getId(),
+                        ReportJobStatusEnum.PENDING_DB_CONNECTION.getId(),
+                        ReportJobStatusEnum.SCHEDULED.getId()
+                )
         );
         activeJobs.forEach(job -> {
             final var jobParameters = jobDomainService.getJobParameters(job.getId());
@@ -227,33 +229,33 @@ public class ReportJobService {
     private void checkDateParameters(ReportJobAddRequest request, ReportResponse report) {
         final var datePattern = "\\d{4}-\\d{2}-\\d{2}";
         final var checkResult = report
-            .getAllFilters()
-            .stream()
-            .filter(filter -> filter.type() == FilterTypeEnum.DATE_RANGE || filter.type() == FilterTypeEnum.DATE_VALUE)
-            .allMatch(filter -> request
-                .getParameters()
+                .getAllFilters()
                 .stream()
-                .filter(param -> param.getFilterId().equals(filter.id()))
-                .flatMap(param -> param.getParameters().stream())
-                .flatMap(tuple -> tuple.getValues().stream())
-                .allMatch(value -> value.getValue().matches(datePattern))
-            );
+                .filter(filter -> filter.type() == FilterTypeEnum.DATE_RANGE || filter.type() == FilterTypeEnum.DATE_VALUE)
+                .allMatch(filter -> request
+                        .getParameters()
+                        .stream()
+                        .filter(param -> param.getFilterId().equals(filter.id()))
+                        .flatMap(param -> param.getParameters().stream())
+                        .flatMap(tuple -> tuple.getValues().stream())
+                        .allMatch(value -> value.getValue().matches(datePattern))
+                );
         if (!checkResult) throw new InvalidParametersException("Неправильный формат даты в параметрах");
     }
 
     private void stripEmptyFilters(ReportJobAddRequest request) {
 
         request
-            .getParameters()
-            .removeIf(parameter -> Objects.isNull(parameter.getParameters()));
+                .getParameters()
+                .removeIf(parameter -> Objects.isNull(parameter.getParameters()));
 
         request
-            .getParameters()
-            .removeIf(parameter -> parameter.getParameters().isEmpty());
+                .getParameters()
+                .removeIf(parameter -> parameter.getParameters().isEmpty());
 
         request
-            .getParameters()
-            .removeIf(parameter -> parameter.getParameters().stream().mapToLong(tuple -> tuple.getValues().size()).sum() == 0);
+                .getParameters()
+                .removeIf(parameter -> parameter.getParameters().stream().mapToLong(tuple -> tuple.getValues().size()).sum() == 0);
 
 
     }
@@ -262,29 +264,30 @@ public class ReportJobService {
         final var allFilters = report.getAllFilters();
 
         allFilters
-            .stream()
-            .filter(FilterReportResponse::mandatory)
-            .forEach(filter -> {
-                if (request.getParameters().stream().noneMatch(o -> o.getFilterId().equals(filter.id())))
-                    throw new InvalidParametersException(ERROR_TEXT_HEADER + filter.id() + " '" + filter.name() + ERROR_TEXT_FOOTER);
-                if (filter.type() == FilterTypeEnum.VALUE_LIST) {
-                    final var paramValues = request.getParameters().stream().filter(params -> params.getFilterId().equals(filter.id())).findFirst().orElseThrow(() -> new InvalidParametersException(ERROR_TEXT_HEADER + filter.id() + " '" + filter.name() + ERROR_TEXT_FOOTER));
-                    final var values = filterReportDomainService.getCleanedValueListValues(paramValues);
-                    if (values.isEmpty())
+                .stream()
+                .filter(FilterReportResponse::mandatory)
+                .forEach(filter -> {
+                    if (request.getParameters().stream().noneMatch(o -> o.getFilterId().equals(filter.id())))
                         throw new InvalidParametersException(ERROR_TEXT_HEADER + filter.id() + " '" + filter.name() + ERROR_TEXT_FOOTER);
-                }
-            });
+                    if (filter.type() == FilterTypeEnum.VALUE_LIST) {
+                        final var paramValues = request.getParameters().stream().filter(params -> params.getFilterId().equals(filter.id())).findFirst().orElseThrow(() -> new InvalidParametersException(ERROR_TEXT_HEADER + filter.id() + " '" + filter.name() + ERROR_TEXT_FOOTER));
+                        final var values = filterReportDomainService.getCleanedValueListValues(paramValues);
+                        if (values.isEmpty())
+                            throw new InvalidParametersException(ERROR_TEXT_HEADER + filter.id() + " '" + filter.name() + ERROR_TEXT_FOOTER);
+                    }
+                });
     }
 
     public ReportJobResponse getJob(ReportJobRequest request) {
         if (request.getJobId() != null) {
             var response = jobDomainService.getJob(request.getJobId());
+            var currentUser = userDomainService.getCurrentUser();
             checkAccessForJob(response.getId(), response.getReport().id(), response.getReport().name());
             response.setCanExecute(checkReportPermission(response.getReport().id()));
+            response.setOlapLastUserChoice(olapUserChoiceDomainService.getOlapUserChoice(response.getReport().id(), currentUser.getId()));
             response.setExcelRowLimit(excelRowLimit);
             return response;
-        }
-        else {
+        } else {
             var user = userDomainService.getCurrentUser();
             log.warn(String.format("JobId is null! User: %s/%s", user.getDomain().name(), user.getName()));
             return null;
@@ -292,26 +295,42 @@ public class ReportJobService {
     }
 
     public ReportJobResponse getJob(Long jobId) {
-        return jobDomainService.getJob(jobId);
+      return jobDomainService.getJob(jobId);
     }
 
     public List<ReportJobResponse> getMyJobs(ReportJobHistoryRequestFilter filter) {
-        var responses = jobDomainService.getMyJobs();
-        responses.forEach(response -> response.setCanExecute(checkReportPermission(response.getReport().id())));
-        return applyFilter(responses, filter);
+        var currentUser = userDomainService.getCurrentUser();
+        var responses = applyFilter(jobDomainService.getMyJobs(), filter) ;
+        responses.forEach(response -> {
+            response.setCanExecute(checkReportPermission(response.getReport().id()));
+            response.setOlapLastUserChoice(olapUserChoiceDomainService.getOlapUserChoice(response.getReport().id(), currentUser.getId()));
+
+            var users = reportJobUserDomainService.getShortUsersJob(response.getId());
+            response.setCountShareUsers(users.size());
+            response.setShareUsers(users.size() > 11 ? users.subList(0, 10) : users);
+        });
+        return responses ;
     }
 
-    public List<ReportJobResponse> getAllJobs(ReportJobHistoryRequestFilter filter) {
+    public List<ReportJobResponse>   getAllJobs(ReportJobHistoryRequestFilter filter) {
+        var responses = applyFilter(jobDomainService.getAllJobs(), filter);
+        responses.forEach(response -> {
 
-        var responses = jobDomainService.getAllJobs();
-        responses.forEach(response -> response.setCanExecute(checkReportPermission(response.getReport().id())));
-        return applyFilter(responses, filter);
+            response.setCanExecute(checkReportPermission(response.getReport().id()));
+
+            var users = reportJobUserDomainService.getShortUsersJob(response.getId());
+            response.setCountShareUsers(users.size());
+            response.setShareUsers(users.size() > 11 ? users.subList(0, 10) : users);
+
+        });
+        return responses;
     }
 
     public ReportPageResponse getReportPage(ReportPageRequest request) {
-
+        var currentUser = userDomainService.getCurrentUser();
         var jobData = jobDomainService.getJobData(request.getJobId());
         if (jobData.isReportReadyToDisplay()) {
+            olapUserChoiceDomainService.setOlapUserChoice(jobData.reportId(), currentUser.getId(), false);
             return avroReportDomainService.getPage(jobData, request.getPageNumber(), request.getRowsPerPage());
         }
 

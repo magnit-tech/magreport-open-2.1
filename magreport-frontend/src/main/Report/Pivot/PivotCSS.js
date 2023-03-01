@@ -53,11 +53,15 @@ export const PivotCSS = makeStyles(theme => ({
         pointerEvents: 'none'
     },
     fieldTextHover: {
+        fontSize: '10px', 
+        fontWeight: '500',
         height: 'fit-content',
         minHeight: '56px',
         textAlign: 'center',
-        display: 'table-cell',
-        verticalAlign: 'middle'
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+
     },
     paper: {
         minWidth: '48px',
@@ -102,6 +106,8 @@ export const PivotCSS = makeStyles(theme => ({
         maxWidth: '200px',
     },
     fieldText: {
+        fontSize: '9px', 
+        fontWeight: '500',
         maxHeight: '40px',
         overflow: 'hidden',
         display: 'block',
@@ -110,7 +116,9 @@ export const PivotCSS = makeStyles(theme => ({
     popoverDiv: {
         textAlign: 'center', 
         minHeight: '56px', 
-        display: 'table'
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     listItemText: {
         minWidth: '40px', 
@@ -221,15 +229,15 @@ export const PivotCSS = makeStyles(theme => ({
     metricValueCell: {
         width: '100px',
         cursor : 'pointer',
+        "& .metricValueCellArrowsWrapp" :{
+            display: 'none',
+            zIndex: 999,
+        },
         "&:hover" :{
             "& .metricValueCellArrowsWrapp" :{
                 display: 'contents'
             },
         },
-    },
-    metricValueCellArrowsWrapp: {
-        display: 'none',
-        zIndex: 999,
     },
     metricValueCellArrow: {
         "& path" :{

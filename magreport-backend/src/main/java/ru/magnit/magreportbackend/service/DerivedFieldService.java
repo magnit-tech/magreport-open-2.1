@@ -13,6 +13,7 @@ import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportFieldData;
 import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldAddRequest;
+import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldCheckNameRequest;
 import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldGetAvailableRequest;
 import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldRequest;
 import ru.magnit.magreportbackend.dto.request.olap.FieldDefinition;
@@ -65,6 +66,9 @@ public class DerivedFieldService {
     }
 
     public void addDerivedField(DerivedFieldAddRequest request) {
+        if (!checkFieldName(new DerivedFieldCheckNameRequest(request.getReportId(), request.getIsPublic(), request.getName()), null)) {
+            throw new InvalidParametersException("Нарушены правила именования производного поля. Имя общего поля должно быть уникально на уровне отчета, имя приватного поля должно быть уникально на уровне отчет/пользователь.");
+        }
         checkPermission(request);
         final var fieldType = inferFieldType(request);
         domainService.addDerivedField(request, fieldType.getFieldType(), userDomainService.getCurrentUser());
@@ -75,6 +79,9 @@ public class DerivedFieldService {
     }
 
     public void updateDerivedField(DerivedFieldAddRequest request) {
+        if (!checkFieldName(new DerivedFieldCheckNameRequest(request.getReportId(), request.getIsPublic(), request.getName()), request.getId())) {
+            throw new InvalidParametersException("Нарушены правила именования производного поля. Имя общего поля должно быть уникально на уровне отчета, имя приватного поля должно быть уникально на уровне отчет/пользователь.");
+        }
         checkPermission(request);
         final var fieldType = inferFieldType(request);
         domainService.updateDerivedField(request, fieldType.getFieldType(), userDomainService.getCurrentUser());
@@ -297,7 +304,7 @@ public class DerivedFieldService {
             .filter(ReportFieldTypeResponse::getVisible)
             .map(entry -> new Pair<>(new FieldDefinition(entry.getId(), OlapFieldTypes.REPORT_FIELD), entry.getType()))
             .collect(Collectors.toMap(Pair::getL, entry -> new Pair<>(0, entry.getR())));
-        derivedFields.forEach(field-> fieldIndexes.put(new FieldDefinition(field.getId(), OlapFieldTypes.DERIVED_FIELD), new Pair<>(0, field.getDataType())));
+        derivedFields.forEach(field -> fieldIndexes.put(new FieldDefinition(field.getId(), OlapFieldTypes.DERIVED_FIELD), new Pair<>(0, field.getDataType())));
 
         final var expressionContext = new ExpressionCreationContext(fieldIndexes, null, null);
         final var fieldExpression = fieldExpressionResponseRequestMapper.from(request.getExpression());
@@ -306,10 +313,19 @@ public class DerivedFieldService {
         return new DerivedFieldTypeResponse(expression.inferType());
     }
 
+    public boolean checkFieldName(DerivedFieldCheckNameRequest request, Long fieldId) {
+        final var userId = userDomainService.getCurrentUser().getId();
+        final var fieldName = Boolean.TRUE.equals(request.getIsPublic()) ?
+            request.getReportId() + "_" + request.getName() :
+            request.getReportId() + "_" + userId + "_" + request.getName();
+
+        return !domainService.isFieldExists(request.getReportId(), fieldName, fieldId);
+    }
+
     private void checkPermission(DerivedFieldAddRequest request) {
         if (Boolean.TRUE.equals(request.getIsPublic())) {
             final var userRoes = userDomainService.getCurrentUserRoles(null);
-            final var isDeveloper = userRoes.stream().anyMatch(role -> role.getId().equals(SystemRoles.DEVELOPER.getId()));
+            final var isDeveloper = userRoes.stream().anyMatch(role -> role.getName().equals(SystemRoles.DEVELOPER.name()) || role.getName().equals(SystemRoles.ADMIN.name()));
             final var hasWriteAccess = reportDomainService.isReportAccessible(request.getReportId(), FolderAuthorityEnum.WRITE, userRoes.stream().map(RoleView::getId).toList());
             if (!isDeveloper) {
                 throw new InvalidParametersException("Для создания общедоступных производных полей необходимо обладать ролью DEVELOPER.");

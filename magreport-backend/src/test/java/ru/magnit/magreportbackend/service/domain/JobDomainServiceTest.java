@@ -427,7 +427,10 @@ class JobDomainServiceTest {
                 Collections.emptyList(),
                 false,
             0L,
-                "comment"
+                "comment",
+                true,
+                0,
+                Collections.emptyList()
         );
     }
 

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldAddRequest;
+import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldCheckNameRequest;
 import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldGetAvailableRequest;
 import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldRequest;
 import ru.magnit.magreportbackend.dto.response.ResponseBody;
@@ -30,6 +31,7 @@ public class DerivedFieldController {
     public static final String DERIVED_FIELD_GET = "/api/v1/derived-field/get";
     public static final String DERIVED_FIELD_GET_ALL_BY_REPORT = "/api/v1/derived-field/get-by-report";
     public static final String DERIVED_FIELD_INFER_TYPE = "/api/v1/derived-field/infer-type";
+    public static final String DERIVED_FIELD_CHECK_NAME = "/api/v1/derived-field/check_name";
     public static final String DERIVED_FIELD_ADD = "/api/v1/derived-field/add";
     public static final String DERIVED_FIELD_UPDATE = "/api/v1/derived-field/edit";
     public static final String DERIVED_FIELD_DELETE = "/api/v1/derived-field/delete";
@@ -108,6 +110,26 @@ public class DerivedFieldController {
             .success(true)
             .message("")
             .data(service.inferFieldType(request))
+            .build();
+
+        LogHelper.logInfoUserMethodEnd();
+        return response;
+    }
+
+    @Operation(summary = "Проверка корректности имени производного поля (true - имя валидно, false - нет)")
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping(value = DERIVED_FIELD_CHECK_NAME,
+        consumes = APPLICATION_JSON_VALUE,
+        produces = APPLICATION_JSON_VALUE)
+    public ResponseBody<Boolean> derivedFieldCheckName(
+        @RequestBody
+        DerivedFieldCheckNameRequest request) {
+        LogHelper.logInfoUserMethodStart();
+
+        var response = ResponseBody.<Boolean>builder()
+            .success(true)
+            .message("")
+            .data(service.checkFieldName(request, null))
             .build();
 
         LogHelper.logInfoUserMethodEnd();
