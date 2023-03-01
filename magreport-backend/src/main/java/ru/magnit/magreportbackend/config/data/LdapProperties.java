@@ -14,6 +14,7 @@ public class LdapProperties {
     private LdapTypes type;
     private String description;
     private String url;
+    private String domainName;
     private String base;
     private String groupPath;
     private String userBase;
@@ -22,12 +23,6 @@ public class LdapProperties {
     private Long batchSize;
     private String userDn;
     private String password;
-
-    public String getDomainName() {
-        return Arrays.stream(base.split(","))
-            .map(part -> part.replace("DC=", "").trim())
-            .collect(Collectors.joining("."));
-    }
 
     public String[] getGroupPaths() {
         return groupPath.split(";");
