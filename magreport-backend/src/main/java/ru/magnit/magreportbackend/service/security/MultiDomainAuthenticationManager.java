@@ -50,7 +50,6 @@ public class MultiDomainAuthenticationManager implements AuthenticationManager {
         final var adProvider = new ActiveDirectoryLdapAuthenticationProvider(ldapProperties.getDomainName(), ldapProperties.getUrl());
         adProvider.setConvertSubErrorCodesToExceptions(true);
         adProvider.setUseAuthenticationRequestCredentials(true);
-        adProvider.setSearchFilter(ldapProperties.getUserFilter());
         return adProvider;
     }
 
