@@ -1,6 +1,7 @@
 import { makeStyles } from '@material-ui/core/styles';
 import StyleConsts from '../../../StyleConsts'; 
-import CatFingerPng from '../../../images/catFinger.png'
+import CatFingerPng from '../../../images/catFinger.png';
+import RosesPng from '../../../images/roses.png';
 
 export const HeaderCSS = makeStyles(theme => ({
     appBar: {
@@ -43,5 +44,13 @@ export const HeaderCSS = makeStyles(theme => ({
         //marginTop : '48px',
         height: '140px',
         width: '140px'
-    }
+    },
+    roses: {
+        backgroundImage : 'url(' + RosesPng + ')',
+        backgroundSize: 'contain',
+        backgroundRepeat: 'round',
+        backgroundPosition: 'center',
+        //marginTop : '48px',
+        height: '100%'
+    },
   }));
