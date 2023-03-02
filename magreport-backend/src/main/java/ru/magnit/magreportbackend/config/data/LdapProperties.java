@@ -5,9 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import ru.magnit.magreportbackend.service.enums.LdapTypes;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 @Getter
 @Setter
 public class LdapProperties {
