@@ -1,5 +1,6 @@
 package ru.magnit.magreportbackend.service.domain.converter.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +52,7 @@ public class PivotTableWriter implements Writer {
     private final OlapCubeResponse cubeData;
     private final OlapExportPivotTableRequest request;
     private final ReportJobMetadataResponse metadata;
-    private final Map<String, Object> config;
+    private final JsonNode config;
     private final TelemetryService telemetryService;
     private final Path exportPath;
     private final String nameDataList;
@@ -88,6 +89,7 @@ public class PivotTableWriter implements Writer {
     private int totalRow;
     private List<String> rowMetaNames = Collections.emptyList();
     private List<String> columnMetaNames = Collections.emptyList();
+    private List<String> metricUserNames = new ArrayList<>();
 
     private static final String ERROR_COLOR_TEXT = "Unknown color excel pivot table:";
 
@@ -196,9 +198,10 @@ public class PivotTableWriter implements Writer {
                         if (indexCol >= shift) {
                             if (!cubeData.getMetricValues().isEmpty()) {
                                 var metric = cubeData.getMetricValues().get(indexMetaValueMetric);
+                                var value = metricUserNames.get(indexMetaValueMetric);
                                 writeCellValue(
                                         cell,
-                                        getMetadataValue(metric.getAggregationType(), metric.getFieldId()),
+                                        value.equals("") ? getMetadataValue(metric.getAggregationType(), metric.getFieldId()) : value,
                                         DataTypeEnum.STRING,
                                         ColorCell.META);
 
@@ -299,9 +302,10 @@ public class PivotTableWriter implements Writer {
 
                     if (indexCol == shiftColCount && !cubeData.getMetricValues().isEmpty()) {
                         var metric = cubeData.getMetricValues().get(indexMetric);
+                        var value = metricUserNames.get(indexMetric);
                         writeCellValue(
                                 cell,
-                                getMetadataValue(metric.getAggregationType(), metric.getFieldId()),
+                                value.equals("") ? getMetadataValue(metric.getAggregationType(), metric.getFieldId()) : value,
                                 DataTypeEnum.STRING,
                                 ColorCell.META);
                     }
@@ -343,9 +347,10 @@ public class PivotTableWriter implements Writer {
 
     private void initConfig(Workbook wb) {
 
-        if (config.containsKey("mergeMode")) mergeMode = (boolean) config.get("mergeMode");
-        if (config.containsKey("columnsMetricPlacement"))
-            columnsMetricPlacement = (boolean) config.get("columnsMetricPlacement");
+      mergeMode = config.get("mergeMode").asBoolean();
+        columnsMetricPlacement = config.get("columnsMetricPlacement").asBoolean();
+
+        config.get("fieldsLists").get("metricFields").elements().forEachRemaining( f -> metricUserNames.add(f.get("newName").textValue()));
 
         initValues();
         initCellStyles(wb);
