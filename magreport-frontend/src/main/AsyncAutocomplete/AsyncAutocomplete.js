@@ -16,7 +16,7 @@ function AsyncAutocomplete(props){
     const loadingAsync = openAsyncEntity && optionsAsyncEntity.length === 0;
 
     function handleOnInputChange(e, value){
-        if ((value.length >= 3) && (props.typeOfEntity === "domainGroup")) { dataHub.adController.getDomainGroups (0, [], value, handleDomainGroups); }
+        if ((value.length >= 3) && (props.typeOfEntity === "domainGroup")) { dataHub.adController.getDomainGroups (0, [props.domainName], value, handleDomainGroups); }
     }
 
     function handleDomainGroups(magrepRespone){
