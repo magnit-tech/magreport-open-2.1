@@ -8,10 +8,10 @@ function getAll(reportId, ownerName, listOfChangedFields, callback) {
 
 		if(ok) {
 			let res = [];
-			let newField = listOfChangedFields.find(city => city.id === 'new')
+			let newField = listOfChangedFields.find(item => item.id === 'new')
 
 			for (const element of data) {
-				let obj = listOfChangedFields.find(city => city.id === element.id)
+				let obj = listOfChangedFields.find(item => item.id === element.id)
 				if(obj) {
 					res.push(obj)
 				} else {
@@ -88,7 +88,7 @@ export function saveNewField(obj, reportId, ownerName, listOfChangedFields, call
 		} else {
 			str = `Произошла ошибка при сохранение нового производного поля "${obj.name}"`
 			variant = {variant: "error"}
-			return callback(ok, ['hiiiiii'], str, variant)
+			return callback(ok, [], str, variant)
 		}
 	})
 }
@@ -110,7 +110,7 @@ export function saveEditField(obj, reportId, ownerName, listOfChangedFields, cal
 		} else {
 			str = `Произошла ошибка при обновление производного поля "${obj.name}"`
 			variant = {variant: "error"}
-			return callback(ok, ['hiiiiii'], [], str, variant)
+			return callback(ok, [], [], str, variant)
 		}
 	})
 }
@@ -132,14 +132,24 @@ export function deleteField(id, reportId, ownerName, listOfChangedFields,  callb
 		} else {
 			str = "Произошла ошибка при удаление производного поля"
 			variant = {variant: "error"}
-			return callback(ok, ['hiiiiii'], str, variant)
+			return callback(ok, [], str, variant)
 		}
 	})
 }
 
-export function saveAllFields(reportId, listOfChangedFields, callback) {
+function saveAllAfterPromise(results, reportId, ownerName, callback) {
 
-	// aaa(reportId, listOfChangedFields, (arr) => console.log(arr))
+	if (results.length > 0) {
+		getAll(reportId, ownerName, results, (data, originalData) => {
+			return callback(false, data, originalData);
+		})
+	} else {
+		return callback(true);
+	}
+
+}
+
+export function saveAllFields(reportId, ownerName, listOfChangedFields, callback) {
 
 	let promises = []
 	let str = '';
@@ -149,14 +159,14 @@ export function saveAllFields(reportId, listOfChangedFields, callback) {
 		if(field.id === 'new') {
 			promises.push(
 				new Promise(resolve => {
-					dataHub.derivedFieldController.add(reportId, field, ({ok}) => resolve(ok ?  null : field))
+					dataHub.derivedFieldController.add(reportId, field, ({data}) => resolve(data ? {...field, errorMessage: `Ошибка при сохранение: ${data}`} : 'ok'))
 				})
 			)
 
 		} else {
 			promises.push(
 				new Promise(resolve => {
-					dataHub.derivedFieldController.edit(reportId, field, ({ok}) => resolve(ok ?  null : field))
+					dataHub.derivedFieldController.edit(reportId, field, ({data}) => resolve(data ? {...field, errorMessage: `Ошибка при сохранение: ${data}`} : 'ok'))
 				})
 			)
 			
@@ -164,8 +174,22 @@ export function saveAllFields(reportId, listOfChangedFields, callback) {
 	})
 
 	Promise.all(promises)
-		.then(results  => console.log(results ))
-		.catch(err => {console.error('wait! oh shh...')})
+		.then(results  => saveAllAfterPromise(results.filter(i => typeof i === 'object'), reportId, ownerName, (bool, data, originalData) => {
+			if(bool) {
+				str = 'Все производные поля успешно сохранены'
+				variant = {variant: "success"}
+				return callback(true, [], str, variant)
+			} else {
+				str = 'При сохранение некоторых полей возникла ошибка, остальные поля успешно обновлены'
+				variant = {variant: "error"}
+				return callback(false, data, str, variant, originalData, results.filter(i => typeof i === 'object'))
+			}
+		}))
+		.catch(err => {
+			str = `Произошла ошибка. Обратитесь в поддержку. Ошибка: ${err.message}`
+			variant = {variant: "error"}
+			return callback(false, [], str, variant)
+		})
 }
 
 

@@ -403,8 +403,9 @@ export default function FormulaEditor(props){
               }}
               rows={5}
               variant="outlined"
-              value={errorMessages}
+              value={errorMessages ? errorMessages : props.error}
               disabled={props.disabled}
+              error={ !!errorMessages || !!props.error}
             />
 
         </div>

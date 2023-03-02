@@ -208,8 +208,20 @@ function DerivedFieldDialog(props){
     }
 
     function handleSaveAllFields() {
-
-        saveAllFields(reportId, listOfChangedFields.current, (arr) => console.log(arr))
+        saveAllFields(reportId, user.current.name, listOfChangedFields.current, (ok, data, str, variant, originalData, changedList) => {
+            if(ok) {
+                enqueueSnackbar(str, variant)
+                props.onCancel(true)
+            } else {
+                enqueueSnackbar(str, variant)
+                if(data.length > 0) {
+                    setEditedDerivedFields(data)
+                    setLoadedDerivedFields(originalData)
+                    listOfChangedFields.current = changedList
+                    thereHaveBeenChanges.current = true
+                }
+            }
+        })
     }
 
     // Удаление

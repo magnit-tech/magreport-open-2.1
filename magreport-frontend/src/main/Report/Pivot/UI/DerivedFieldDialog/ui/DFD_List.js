@@ -77,7 +77,10 @@ function DerivedFieldDialogList(props){
 						<ListItem button id={field.id} key={field.id} selected={activeIndex === field.id} onClick={() => props.onChoose(field.id)}>
 							<ListItemText
 								primary={`${(!field.isCorrect || !field.isFormulaCorrect || field.needSave) ? '*' : ''}${field.originalName || 'Новое поле'}`}
-								className = {clsx('', {[classes.DFD_menuItemRed]: !field.isCorrect || !field.isFormulaCorrect, [classes.DFD_menuItemBold]: !field.isCorrect || !field.isFormulaCorrect || field.needSave})}
+								className = {clsx('', { 
+									[classes.DFD_menuItemRed]: !field.isCorrect || !field.isFormulaCorrect || !!field?.errorMessage, 
+									[classes.DFD_menuItemBold]: !field.isCorrect || !field.isFormulaCorrect || field.needSave || !!field?.errorMessage
+								})}
 								secondary={
 									<>
 										<Typography
@@ -102,13 +105,14 @@ function DerivedFieldDialogList(props){
 							/>
 
 							<ListItemSecondaryAction>
-								{(!field.isCorrect || !field.isFormulaCorrect || field.needSave) && <IconButton edge="end">
+								{(!field.isCorrect || !field.isFormulaCorrect || field.needSave || !!field?.errorMessage) && <IconButton edge="end">
 									<HtmlTooltip
 										title={
 											<ul className={classes.DFD_listTooltipMenu}>
 												{field.needSave && <li> - Необходимо сохранить данное поле</li>}
 												{!field.isCorrect && <li> - Ошибка в название поля</li>}
 												{!field.isFormulaCorrect && <li> - Ошибка в редакторе поля</li>}
+												{!!field.errorMessage && <li> - Ошибка при сохранение поля</li>}
 											</ul>
 										}
 									>	
