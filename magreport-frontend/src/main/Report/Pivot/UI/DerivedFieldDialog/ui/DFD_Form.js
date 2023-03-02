@@ -34,10 +34,9 @@ export default function DerivedFieldDialogForm(props){
         name: '',
         description: '',
         expressionText: '',
-        isPublic: false
+        isPublic: false,
+        errorMessage: ''
     });
-
-    console.log(currentField);
 
 	const debouncedSearchTerm = useDebounce(currentField.name, 500);
     const timeout = useRef()
@@ -71,7 +70,9 @@ export default function DerivedFieldDialogForm(props){
                     }
                 })
             } else {
-                debouncePostObjToSave(currentField)
+                const correctItem = {...currentField, isCorrect: true}
+                setCurrentField(correctItem)
+                debouncePostObjToSave(correctItem)
             }
 		},
 		[debouncedSearchTerm, reportId] // eslint-disable-line
@@ -182,6 +183,7 @@ export default function DerivedFieldDialogForm(props){
             />
 
             <FormulaEditor
+                key={currentField.id}
                 height = "200px"
                 disabled={!currentField.owner}
                 initialCode={currentField.expressionText}
@@ -189,6 +191,7 @@ export default function DerivedFieldDialogForm(props){
                 originalFields = {allFieldsAndExpressions.originalFieldsList}
                 derivedFields = {allFieldsAndExpressions.derivedFieldsList}
                 onChange = {handleFormulaChange}
+                error = {currentField.errorMessage}
             />
 
             <DialogActions style={{justifyContent: 'space-between'}}>
