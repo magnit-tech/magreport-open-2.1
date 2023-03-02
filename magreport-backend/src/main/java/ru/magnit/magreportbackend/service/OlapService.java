@@ -273,7 +273,7 @@ public class OlapService {
         excelReportDomainService.getExcelPivotTable(
                 resultCube,
                 metadata,
-                config.getOlapConfig().getData().isEmpty() ? new HashMap<>(): objectMapper.readValue(config.getOlapConfig().getData(), HashMap.class),
+                objectMapper.readTree(config.getOlapConfig().getData()),
                 request, code, encrypt);
 
         return new TokenResponse(tokenService.getToken(request.getCubeRequest().getJobId(), code));
