@@ -109,19 +109,24 @@ function DerivedFieldDialog(props){
     // Сохранение в список изменений (listOfChangedFields)
     const onEditObjectToSave = useCallback((list, obj) => {
 
-        const cond = listOfChangedFields.current.some(function(e){ 
-            return e.id === obj.id;
-        });
+        const ref = listOfChangedFields.current
+        const cond = ref.some(e => e.id === obj.id)
 
         if (cond) {
-            listOfChangedFields.current = listOfChangedFields.current.map(o => {
-                if (o.id === obj.id) {
-                  return obj;
-                }
-                return o;
-            });
+
+            if(obj.needSave) {
+                listOfChangedFields.current = ref.map(o => {
+                    if (o.id === obj.id) {
+                      return obj;
+                    }
+                    return o;
+                });
+            } else {
+                listOfChangedFields.current = ref.filter(item => item.id !== obj.id)
+            }
+
         } else {
-            listOfChangedFields.current.push(obj)
+            if(obj.needSave) listOfChangedFields.current.push(obj)
         }
 
         setEditedDerivedFields(list)
@@ -203,8 +208,20 @@ function DerivedFieldDialog(props){
     }
 
     function handleSaveAllFields() {
-
-        saveAllFields(reportId, listOfChangedFields.current, (arr) => console.log(arr))
+        saveAllFields(reportId, user.current.name, listOfChangedFields.current, (ok, data, str, variant, originalData, changedList) => {
+            if(ok) {
+                enqueueSnackbar(str, variant)
+                props.onCancel(true)
+            } else {
+                enqueueSnackbar(str, variant)
+                if(data.length > 0) {
+                    setEditedDerivedFields(data)
+                    setLoadedDerivedFields(originalData)
+                    listOfChangedFields.current = changedList
+                    thereHaveBeenChanges.current = true
+                }
+            }
+        })
     }
 
     // Удаление
@@ -265,13 +282,13 @@ function DerivedFieldDialog(props){
             </div>
 
             <DialogActions>
-				{/* <Button
+				<Button
 					color="primary"
                     disabled = {disabledSaveAllButton}
                     onClick={() => handleSaveAllFields()}
 				>
 					Сохранить все и выйти
-				</Button> */}
+				</Button>
 				<Button 
 					color="primary" 
 					onClick={() => onClose()}
