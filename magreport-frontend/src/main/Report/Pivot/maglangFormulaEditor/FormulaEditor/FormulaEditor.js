@@ -172,14 +172,16 @@ export default function FormulaEditor(props){
             if(match[0] === '[' && match[1] === '[')
             {
               let name = match.slice(2,-2);
+              let id = derivedFieldNameToId.get(name);
 
-              return '[[' + derivedFieldNameToId.get(name) + ']]';
+              return '[[' + (id ? id : name) + ']]';
             }
             else
             {
               let name = match.slice(1,-1);
+              let id = originalFieldNameToId.get(name);
 
-              return '[' + originalFieldNameToId.get(name) + ']';
+              return '[' + (id ? id : name) + ']';
             }
           }
     
