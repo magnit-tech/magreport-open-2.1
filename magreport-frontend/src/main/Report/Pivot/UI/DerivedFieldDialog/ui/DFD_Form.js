@@ -35,7 +35,8 @@ export default function DerivedFieldDialogForm(props){
         description: '',
         expressionText: '',
         isPublic: false,
-        errorMessage: ''
+        errorMessage: '',
+        fontSize: 16
     });
 
 	const debouncedSearchTerm = useDebounce(currentField.name, 500);
@@ -142,6 +143,14 @@ export default function DerivedFieldDialogForm(props){
         }
     }
 
+    function handleChangeFontSize(value) {
+        let item = {...currentField}
+        item["fontSize"] = value
+
+        setCurrentField(item)
+		debouncePostObjToSave(item)
+    }
+
 	return (
 		<div className={clsx(classes.DFD_form, 'MuiPaper-root')}>
 
@@ -185,12 +194,14 @@ export default function DerivedFieldDialogForm(props){
             <FormulaEditor
                 key={currentField.id}
                 height = "200px"
+                fontSize = {currentField.fontSize}
                 disabled={!currentField.owner}
                 initialCode={currentField.expressionText}
                 functions = {allFieldsAndExpressions.functionsList}
                 originalFields = {allFieldsAndExpressions.originalFieldsList}
                 derivedFields = {allFieldsAndExpressions.derivedFieldsList}
                 onChange = {handleFormulaChange}
+                onChangeFontSize = {(value) => handleChangeFontSize(value)}
                 error = {currentField.errorMessage}
             />
 
