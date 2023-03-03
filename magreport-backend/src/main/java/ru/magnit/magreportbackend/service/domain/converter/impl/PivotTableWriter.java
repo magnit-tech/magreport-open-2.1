@@ -1,5 +1,6 @@
 package ru.magnit.magreportbackend.service.domain.converter.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +52,7 @@ public class PivotTableWriter implements Writer {
     private final OlapCubeResponse cubeData;
     private final OlapExportPivotTableRequest request;
     private final ReportJobMetadataResponse metadata;
-    private final Map<String, Object> config;
+    private final JsonNode config;
     private final TelemetryService telemetryService;
     private final Path exportPath;
     private final String nameDataList;
@@ -88,6 +89,7 @@ public class PivotTableWriter implements Writer {
     private int totalRow;
     private List<String> rowMetaNames = Collections.emptyList();
     private List<String> columnMetaNames = Collections.emptyList();
+    private List<String> metricUserNames = new ArrayList<>();
 
     private static final String ERROR_COLOR_TEXT = "Unknown color excel pivot table:";
 
@@ -108,8 +110,8 @@ public class PivotTableWriter implements Writer {
             telemetryService.setState(telemetryId, ExcelExportTelemetry.SHEET_PREPARATION);
             var sheet = getSheet(workbook);
 
-            var mergeCol = getMergeObjects(sheet, shiftColCount, false);
-            var mergeRow = getMergeObjects(sheet, shiftRowCount, true);
+            var mergeCol = getMergeObjects(sheet, cubeData.getRowValues().get(0).isEmpty() ? shiftColCount - 1 : shiftColCount, false);
+            var mergeRow = getMergeObjects(sheet, cubeData.getColumnValues().get(0).isEmpty() ? shiftRowCount - 1 : shiftRowCount, true);
 
             var typesRow = request.getCubeRequest().getRowFields().stream().map(f -> typeFields.get(f)).map(DataTypeEnum::valueOf).toList();
             var typesCol = request.getCubeRequest().getColumnFields().stream().map(f -> typeFields.get(f)).map(DataTypeEnum::valueOf).toList();
@@ -165,7 +167,7 @@ public class PivotTableWriter implements Writer {
             int indexMetaValueMetric = 0;
 
             int indexCell = 0;
-            while(indexCell < totalColumn){
+            while (indexCell < totalColumn) {
                 row.createCell(indexCell).setCellStyle(textCellMetricStyle);
                 indexCell++;
             }
@@ -178,7 +180,7 @@ public class PivotTableWriter implements Writer {
                         writeCellValue(cell, columnMetaNames.get(indexRow), DataTypeEnum.STRING, ColorCell.META);
                     }
 
-                    if (indexCol >= shift ) {
+                    if (indexCol >= shift) {
 
                         var mergeCell = mergeRow.get(indexRow);
                         var type = typesCol.get(indexRow);
@@ -186,7 +188,7 @@ public class PivotTableWriter implements Writer {
                         writeCellValue(cell, value, type, ColorCell.MEASURE);
                         mergeCell.mergeCell(value, cell.getRowIndex(), cell.getColumnIndex());
 
-                        indexCol += cubeData.getMetricValues().size() - 1;
+                        indexCol += cubeData.getMetricValues().isEmpty() ? 0 : cubeData.getMetricValues().size() - 1;
                         index++;
                     }
 
@@ -194,16 +196,19 @@ public class PivotTableWriter implements Writer {
 
                     if (indexRow == shiftRowCount) {
                         if (indexCol >= shift) {
-                            var metric = cubeData.getMetricValues().get(indexMetaValueMetric);
-                            writeCellValue(
-                                    cell,
-                                    getMetadataValue(metric.getAggregationType(), metric.getFieldId()),
-                                    DataTypeEnum.STRING,
-                                    ColorCell.META);
+                            if (!cubeData.getMetricValues().isEmpty()) {
+                                var metric = cubeData.getMetricValues().get(indexMetaValueMetric);
+                                var value = metricUserNames.get(indexMetaValueMetric);
+                                writeCellValue(
+                                        cell,
+                                        value.equals("") ? getMetadataValue(metric.getAggregationType(), metric.getFieldId()) : value,
+                                        DataTypeEnum.STRING,
+                                        ColorCell.META);
 
-                            if (indexMetaValueMetric == cubeData.getMetricValues().size() - 1) {
-                                indexMetaValueMetric = 0;
-                            } else indexMetaValueMetric++;
+                                if (indexMetaValueMetric == cubeData.getMetricValues().size() - 1) {
+                                    indexMetaValueMetric = 0;
+                                } else indexMetaValueMetric++;
+                            }
                         } else
                             writeCellValue(
                                     cell,
@@ -214,27 +219,30 @@ public class PivotTableWriter implements Writer {
                     } else {
 
                         if (indexCol >= shift) {
+                            if (!cubeData.getMetricValues().isEmpty()) {
+                                writeCellValue(
+                                        cell,
+                                        cubeData.getMetricValues().get(indexMetric).getValues().get(indexValueMetric).get(indexRow - shiftRowCount - 1),
+                                        cubeData.getMetricValues().get(indexMetric).getDataType(),
+                                        ColorCell.METRIC);
 
-                            writeCellValue(
-                                    cell,
-                                    cubeData.getMetricValues().get(indexMetric).getValues().get(indexValueMetric).get(indexRow - shiftRowCount - 1),
-                                    cubeData.getMetricValues().get(indexMetric).getDataType(),
-                                    ColorCell.METRIC);
-
-                            if (indexMetric == cubeData.getMetricValues().size() - 1) {
-                                indexMetric = 0;
-                                indexValueMetric++;
-                            } else
-                                indexMetric++;
+                                if (indexMetric == cubeData.getMetricValues().size() - 1) {
+                                    indexMetric = 0;
+                                    indexValueMetric++;
+                                } else
+                                    indexMetric++;
+                            }
                         } else {
-                            var mergeCell = mergeCol.get(indexCol);
-                            var value = cubeData.getRowValues().get(indexRow - shiftRowCount - 1).isEmpty() ? "" : cubeData.getRowValues().get(indexRow - shiftRowCount - 1).get(indexCol);
-                            writeCellValue(
-                                    cell,
-                                    value,
-                                    typesRow.get(indexCol),
-                                    ColorCell.MEASURE);
-                            mergeCell.mergeCell(value, cell.getRowIndex(), cell.getColumnIndex());
+                            if (!cubeData.getRowValues().get(indexRow - shiftRowCount - 1).isEmpty()) {
+                                var mergeCell = mergeCol.get(indexCol);
+                                var value = cubeData.getRowValues().get(indexRow - shiftRowCount - 1).get(indexCol);
+                                writeCellValue(
+                                        cell,
+                                        value,
+                                        typesRow.get(indexCol),
+                                        ColorCell.MEASURE);
+                                mergeCell.mergeCell(value, cell.getRowIndex(), cell.getColumnIndex());
+                            }
                         }
                     }
                 }
@@ -267,11 +275,11 @@ public class PivotTableWriter implements Writer {
                                 ColorCell.META);
                     }
 
-                    if (indexCol == shiftColCount) {
+                    if (indexCol == shiftColCount && !columnMetaNames.isEmpty()) {
                         writeCellValue(cell, columnMetaNames.get(indexRow), DataTypeEnum.STRING, ColorCell.META);
                     }
 
-                    if (indexCol > shiftColCount) {
+                    if (indexCol > shiftColCount && !cubeData.getColumnValues().get(indexCol - shiftColCount - 1).isEmpty()) {
                         var mergeCell = mergeRow.get(indexRow);
                         var type = typesCol.get(indexRow);
                         var value = cubeData.getColumnValues().get(indexCol - shiftColCount - 1).get(indexRow);
@@ -292,16 +300,17 @@ public class PivotTableWriter implements Writer {
                         mergeCell.mergeCell(value, cell.getRowIndex(), cell.getColumnIndex());
                     }
 
-                    if (indexCol == shiftColCount) {
+                    if (indexCol == shiftColCount && !cubeData.getMetricValues().isEmpty()) {
                         var metric = cubeData.getMetricValues().get(indexMetric);
+                        var value = metricUserNames.get(indexMetric);
                         writeCellValue(
                                 cell,
-                                getMetadataValue(metric.getAggregationType(), metric.getFieldId()),
+                                value.equals("") ? getMetadataValue(metric.getAggregationType(), metric.getFieldId()) : value,
                                 DataTypeEnum.STRING,
                                 ColorCell.META);
                     }
 
-                    if (indexCol > shiftColCount) {
+                    if (indexCol > shiftColCount && !cubeData.getMetricValues().isEmpty()) {
 
                         writeCellValue(
                                 cell,
@@ -314,7 +323,7 @@ public class PivotTableWriter implements Writer {
 
             if (indexRow >= shiftRowCount) {
                 indexPrevRow = indexValueMetric;
-                if (indexMetric == cubeData.getMetricValues().size() - 1) {
+                if (indexMetric == (cubeData.getMetricValues().isEmpty() ? 0 : cubeData.getMetricValues().size() - 1)) {
                     indexMetric = 0;
                     indexValueMetric++;
 
@@ -338,9 +347,10 @@ public class PivotTableWriter implements Writer {
 
     private void initConfig(Workbook wb) {
 
-        if (config.containsKey("mergeMode")) mergeMode = (boolean) config.get("mergeMode");
-        if (config.containsKey("columnsMetricPlacement"))
-            columnsMetricPlacement = (boolean) config.get("columnsMetricPlacement");
+      mergeMode = config.get("mergeMode").asBoolean();
+        columnsMetricPlacement = config.get("columnsMetricPlacement").asBoolean();
+
+        config.get("fieldsLists").get("metricFields").elements().forEachRemaining( f -> metricUserNames.add(f.get("newName").textValue()));
 
         initValues();
         initCellStyles(wb);
@@ -380,15 +390,30 @@ public class PivotTableWriter implements Writer {
             shiftRowCount = cubeData.getColumnValues().get(0).size();
             shiftColCount = cubeData.getRowValues().get(0).isEmpty() ? 1 : cubeData.getRowValues().get(0).size();
 
-            totalColumn = shiftColCount + cubeData.getTotalColumns() * cubeData.getMetricValues().size();
+            totalColumn = shiftColCount + cubeData.getTotalColumns() * (cubeData.getMetricValues().isEmpty() ? 1 : cubeData.getMetricValues().size());
             totalRow = shiftRowCount + cubeData.getTotalRows() + 1;
         } else {
             shiftRowCount = cubeData.getColumnValues().get(0).isEmpty() ? 1 : cubeData.getColumnValues().get(0).size();
             shiftColCount = cubeData.getRowValues().get(0).size();
 
             totalColumn = shiftColCount + cubeData.getTotalColumns() + 1;
-            totalRow = shiftRowCount + cubeData.getTotalRows() * cubeData.getMetricValues().size();
+            totalRow = shiftRowCount + cubeData.getTotalRows() * (cubeData.getMetricValues().isEmpty() ? 1 : cubeData.getMetricValues().size());
         }
+
+        if (cubeData.getRowValues().get(0).isEmpty() && cubeData.getColumnValues().get(0).isEmpty() && cubeData.getMetricValues().isEmpty())
+            totalColumn = totalRow = shiftRowCount = shiftColCount = 0;
+
+
+        if (cubeData.getRowValues().get(0).isEmpty() && cubeData.getMetricValues().isEmpty()) {
+            shiftColCount = 0;
+            totalRow = shiftRowCount;
+        }
+
+        if (cubeData.getColumnValues().get(0).isEmpty() && cubeData.getMetricValues().isEmpty()) {
+            totalColumn = shiftColCount;
+        }
+
+
     }
 
     private CellStyle initCellStyle(Workbook wb, short dataType, short color) {
