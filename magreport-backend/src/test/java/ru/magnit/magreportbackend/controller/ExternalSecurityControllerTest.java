@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.magnit.magreportbackend.dto.request.asm.AsmSecurityAddRequest;
 import ru.magnit.magreportbackend.dto.request.asm.AsmSecurityRequest;
 import ru.magnit.magreportbackend.dto.response.asm.AsmSecurityResponse;
+import ru.magnit.magreportbackend.dto.response.asm.AsmSecurityShortResponse;
 import ru.magnit.magreportbackend.dto.response.user.RoleTypeResponse;
 import ru.magnit.magreportbackend.service.ExternalSecurityService;
 
@@ -145,7 +146,7 @@ class ExternalSecurityControllerTest {
     @Test
     void getAllAsmSecurity() throws Exception {
         Long id = 1L;
-        when(service.getAllAsmSecurity()).thenReturn(Collections.singletonList(getAsmSecurityResponse(id)));
+        when(service.getAllAsmSecurity()).thenReturn(Collections.singletonList(getAsmSecurityShortResponse(id)));
 
         mvc
                 .perform(post(AMS_SECURITIES_GET_ALL))
@@ -186,6 +187,20 @@ class ExternalSecurityControllerTest {
                 NAME,
                 DESCRIPTION,
                 Collections.emptyList(),
+                "Creator",
+                new RoleTypeResponse(),
+                true,
+                CREATED,
+                MODIFIED,
+                Collections.emptyList()
+        );
+    }
+
+    private AsmSecurityShortResponse getAsmSecurityShortResponse(Long id) {
+        return new AsmSecurityShortResponse(
+                id,
+                NAME,
+                DESCRIPTION,
                 "Creator",
                 new RoleTypeResponse(),
                 true,

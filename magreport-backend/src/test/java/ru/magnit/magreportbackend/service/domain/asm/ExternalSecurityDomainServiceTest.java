@@ -9,8 +9,10 @@ import ru.magnit.magreportbackend.domain.asm.ExternalAuth;
 import ru.magnit.magreportbackend.dto.inner.UserView;
 import ru.magnit.magreportbackend.dto.request.asm.AsmSecurityAddRequest;
 import ru.magnit.magreportbackend.dto.response.asm.AsmSecurityResponse;
+import ru.magnit.magreportbackend.dto.response.asm.AsmSecurityShortResponse;
 import ru.magnit.magreportbackend.dto.response.user.RoleTypeResponse;
 import ru.magnit.magreportbackend.mapper.asm.AsmSecurityResponseMapper;
+import ru.magnit.magreportbackend.mapper.asm.AsmSecurityShortResponseMapper;
 import ru.magnit.magreportbackend.mapper.asm.ExternalAuthMapper;
 import ru.magnit.magreportbackend.mapper.asm.ExternalAuthMerger;
 import ru.magnit.magreportbackend.repository.ExternalAuthRepository;
@@ -52,6 +54,9 @@ class ExternalSecurityDomainServiceTest {
 
     @Mock
     private AsmSecurityResponseMapper responseMapper;
+
+    @Mock
+    private AsmSecurityShortResponseMapper shortResponseMapper;
 
     @Mock
     private ExternalAuthMapper authMapper;
@@ -136,16 +141,16 @@ class ExternalSecurityDomainServiceTest {
                 getExternalAuth(firstId), getExternalAuth(secondId)
         );
         final var asmSecurityResponseList = Arrays.asList(
-                getAsmSecurityResponse(firstId), getAsmSecurityResponse(secondId)
+                getAsmSecurityShortResponse(firstId), getAsmSecurityShortResponse(secondId)
         );
 
         when(authRepository.findAll()).thenReturn(externalAuthList);
-        when(responseMapper.from(externalAuthList)).thenReturn(asmSecurityResponseList);
+        when(shortResponseMapper.from(externalAuthList)).thenReturn(asmSecurityResponseList);
 
         final var result = domainService.getAllAsmSecurity();
 
         verify(authRepository).findAll();
-        verify(responseMapper).from(externalAuthList);
+        verify(shortResponseMapper).from(externalAuthList);
 
         assertEquals(asmSecurityResponseList.size(), result.size());
     }
@@ -179,6 +184,21 @@ class ExternalSecurityDomainServiceTest {
                 NAME,
                 DESCRIPTION,
                 Collections.emptyList(),
+                "Creator",
+                new RoleTypeResponse(),
+                true,
+                CREATED,
+                MODIFIED,
+                Collections.emptyList()
+
+        );
+    }
+
+    private AsmSecurityShortResponse getAsmSecurityShortResponse(Long id) {
+        return new AsmSecurityShortResponse(
+                id,
+                NAME,
+                DESCRIPTION,
                 "Creator",
                 new RoleTypeResponse(),
                 true,

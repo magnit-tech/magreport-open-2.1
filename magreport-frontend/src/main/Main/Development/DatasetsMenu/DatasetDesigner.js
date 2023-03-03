@@ -330,7 +330,7 @@ export default function DatasetDesigner(){
             <DesignerFolderItemPicker
                 minWidth = {StyleConsts.designerTextFieldMinWidth}
                 label = {fieldLabels.datasourceId}
-                value = {'id: ' + data.datasourceId + ', ' + data.datasourceName}
+                value = {(data.datasourceId && data.datasourceName) ? 'id: ' + data.datasourceId + ', ' + data.datasourceName : null}
                 itemType = {FolderItemTypes.datasource}
                 onChange = {handleChangeDatasource}
                 displayBlock
