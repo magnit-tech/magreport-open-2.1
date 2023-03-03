@@ -29,7 +29,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import isHollyday from  '../../../HollydayFunctions';
 
 import { setLightTheme, setDarkTheme } from '../../../redux/actions/admin/actionThemeDesign';
-import NewYearPanel from './newyearpanel';
+import HollydayPanel from './HollydayPanel';
 
 function PaperComponent(props) {
     return (
@@ -82,7 +82,7 @@ function Header(props){
 
     return(
         <AppBar position="static" className={clsx(classes.appBar, {[classes.appBarHeight]: isHollyday() === -1, [classes.appBarHeightHollyday]: isHollyday() >= 0})}>
-            <NewYearPanel/>
+            <HollydayPanel/>
             <Menu
                 id="simple-menu"
                 anchorEl={anchorEl}

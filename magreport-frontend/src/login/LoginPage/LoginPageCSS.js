@@ -1,10 +1,10 @@
 
 import { makeStyles} from '@material-ui/core/styles';
 import LoginCatPng from '../../images/LoginCat.png';
-import NewYearCatPng from '../../images/NewYearCat.png'
-import NewYearCatPng1 from '../../images/NewYearCat1.png'
-import NewYearCatPng2 from '../../images/NewYearCat2.png'
-
+import NewYearCatPng from '../../images/NewYearCat.png';
+import NewYearCatPng1 from '../../images/NewYearCat1.png';
+import NewYearCatPng2 from '../../images/NewYearCat2.png';
+import MarthCatPng from '../../images/MarthCat.png';
 
 export const LoginPageCSS = makeStyles(theme => ({
     main: {
@@ -50,6 +50,14 @@ export const LoginPageCSS = makeStyles(theme => ({
     },
     newYearLoginCat2: {
         backgroundImage : 'url(' + NewYearCatPng2 + ')',
+        backgroundSize: 'contain',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+        marginTop : '48px',
+        height: '400px'
+    },
+    marthLoginCat: {
+        backgroundImage : 'url(' + MarthCatPng + ')',
         backgroundSize: 'contain',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center',
