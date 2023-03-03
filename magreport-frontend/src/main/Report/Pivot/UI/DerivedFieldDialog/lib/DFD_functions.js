@@ -20,6 +20,7 @@ function getAll(reportId, ownerName, listOfChangedFields, callback) {
 					element["isFormulaCorrect"] = true;
 					element["needSave"] = false;
 					element["owner"] = ownerName === element.userName ? true : false;
+					element["fontSize"] = 16;
 					res.push(element)
 				}
 			}
@@ -44,6 +45,7 @@ export function loadAllFields(reportId, userName, callback) {
 				el["isFormulaCorrect"] = true;
 				el["needSave"] = false;
 				el["owner"] = userName === el.userName ? true : false;
+				el["fontSize"] = 16;
 				return el;
 			})
 

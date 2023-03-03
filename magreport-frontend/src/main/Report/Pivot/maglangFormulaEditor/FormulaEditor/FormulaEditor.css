@@ -23,3 +23,15 @@
     outline: none;
 }
 
+.FormulaEditor__fontSize {
+    display: flex;
+    margin-top: 15px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.FormulaEditor__fontSizeSelect {
+    margin-right: 12px;
+}
+
+
