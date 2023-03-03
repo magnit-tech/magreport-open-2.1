@@ -62,7 +62,8 @@ export default function UserList(props){
     const [checkedAllUsers, setCheckedAllUsers] = React.useState(false);
     const [userFilterValue, setUserFilterValue] = useState("");
     const [needUserScroll, setNeedUserScroll] = useState(Boolean(props.needUserScroll));
-    const [domainsList, setDomainsList] = useState([]);
+	const [domainsList, setDomainsList] = useState([]);
+	const [defaultDomain, setDefaultDomain] = useState("");
 	const [domain, setDomain] = useState({});
 	const [selectedUserToAdd, setSelectedUserToAdd] = useState("");
 
@@ -145,10 +146,11 @@ export default function UserList(props){
     }, [needUserScroll]); // eslint-disable-line
 
     function handleDataLoaded(data){
-		let domain = data.filter(i => i.isDefault === true).map(i => {return {value: i.id, name: i.name}})[0];
+		let dom = data.filter(i => i.isDefault === true).map(i => {return {value: i.id, name: i.name}})[0];
 		let domList = data.sort((a,b) => b.isDefault - a.isDefault).slice();
         setDomainsList(domList);
-		setDomain(domain);
+		setDomain(dom);
+		setDefaultDomain(data.filter(i=>i.isDefault).map(item=>item.name)[0]);		
 	}
 	
 	function handleOnChangeAddUserText(value){
@@ -156,7 +158,7 @@ export default function UserList(props){
     }
 
     function handleAddUserToRole(){
-        for (let u of props.users.data) {
+        for (let u of props.items) {
 
             if (u.id === selectedUserToAdd.id) {
                 enqueueSnackbar("Пользователю уже назначена эта роль!", {variant : "error"});
@@ -195,6 +197,7 @@ export default function UserList(props){
 							<AsyncAutocomplete 
 								className={classes.domainAutocomplete}
 								size = 'small'
+								defaultDomain = {defaultDomain}
                         		disabled = {false}
                         		typeOfEntity = {"user"}
                        			// filterOfEntity = {(item) => item.status !== "ARCHIVE"}
