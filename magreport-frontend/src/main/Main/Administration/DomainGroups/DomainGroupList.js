@@ -29,9 +29,10 @@ function DomainGroupList(props){
     const { enqueueSnackbar } = useSnackbar();
     const [domainGroupFilterValue, setDomainGroupFilterValue] = useState("");
     const [domainsList, setDomainsList] = useState([]);
-    const [domain, setDomain] = useState({});
-    const [leftDomain, setLeftDomain] = useState({});
+    const [domain, setDomain] = useState(null);
+    const [leftDomain, setLeftDomain] = useState(null);
     const [selectedDomainGroupToAdd, setSelectedDomainGroupToAdd] = useState("");
+    const [defaultDomain, setDefaultDomain] = useState("");
 
     const listItems=[]
 
@@ -39,7 +40,7 @@ function DomainGroupList(props){
 
         let filteredList = [];
         const filterStr = domainGroupFilterValue.toLowerCase();
-        let filteredByDomainList = props.items.filter(i=>i.domainId===domain.value);
+        let filteredByDomainList = props.items.filter(i=>i.domainId===domain);
         for (let i in filteredByDomainList) {
             if (filteredByDomainList[i].groupName.toLowerCase().indexOf(filterStr) > -1) {
                 filteredList.push(filteredByDomainList[i])
@@ -77,7 +78,7 @@ function DomainGroupList(props){
                 key={i.groupName} 
                 itemsType={props.itemsType}
                 domainGroupDesc={i} 
-                defaultDomain = {domain.value}
+                defaultDomain = {domain}
                 roleId={props.roleId}
                 isSelected={selectedDomainGroup===i}
                 setSelectedDomainGroup={setSelectedDomainGroup}
@@ -89,11 +90,12 @@ function DomainGroupList(props){
     }
 
     function handleDataLoaded(data){
-        let domain = data.filter(i => i.isDefault === true).map(i => {return {value: i.id, name: i.name}})[0];
+        let dom = data.filter(i => i.isDefault === true).map(i => {return  i.id})[0];
         let domList = data.sort((a,b) => b.isDefault - a.isDefault).slice();
+        setDefaultDomain(data.filter(i=>i.isDefault).map(item=>item.name)[0]);
         setDomainsList(domList);
-        setDomain(domain); 
-        setLeftDomain(domain);       
+        setDomain(dom);
+        setLeftDomain(dom);
     }
 
     function handleAddDomainGroupToRole(){
@@ -103,7 +105,7 @@ function DomainGroupList(props){
                 return;
             }
         }
-        dataHub.roleController.addDomainGroups(props.roleId, [{domainId: selectedDomainGroupToAdd.domainId, groupName: selectedDomainGroupToAdd.name}], handleAddDomainGroupToRoleResponse)
+        dataHub.roleController.addDomainGroups(props.roleId, [{domainId: selectedDomainGroupToAdd.id, groupName: selectedDomainGroupToAdd.name}], handleAddDomainGroupToRoleResponse)
     }
 
     function handleAddDomainGroupToRoleResponse(magrepResponse){
@@ -136,9 +138,8 @@ function DomainGroupList(props){
                                 id="outlined-select-currency"
                                 size='small'
 							    select
-							    value={leftDomain.value}
-							    name={leftDomain.name}
-							    onChange={(e)=>{setLeftDomain(e.target)}}
+							    value={leftDomain}
+							    onChange={(e)=>{setLeftDomain(e.target.value)}}
 							    variant="outlined"
 							    InputProps={{
 								    startAdornment: (
@@ -160,7 +161,8 @@ function DomainGroupList(props){
                                 size = 'small'
                                 disabled = {false}
                                 typeOfEntity = {"domainGroup"}
-                                domainName = {leftDomain.name}
+                                defaultDomain = {defaultDomain}
+                                domainName = {domainsList.filter(i=>i.id === leftDomain).map(i=>i.name)}
                                 onChange={handleOnChangeAddDomainGroupText}
                             /> 
                             <Button
@@ -181,9 +183,8 @@ function DomainGroupList(props){
                                 id="outlined-select-currency"
                                 size='small'
 							    select
-							    value={domain.value}
-							    name={domain.name}
-							    onChange={(e)=>{setDomain(e.target)}}
+                                value={domain}
+                                onChange={(e)=>{setDomain(e.target.value)}}
 							    variant="outlined"
 							    InputProps={{
 								    startAdornment: (
