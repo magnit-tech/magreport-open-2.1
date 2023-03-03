@@ -1,41 +1,21 @@
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
 import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { CircularProgress } from '@material-ui/core';
 import dataHub from '../../ajax/DataHub';
 
-function AsyncAutocomplete(props){
+export default function AsyncAutocomplete(props){
 
     const [entityToAddList, setEntityToAddList] = useState([]);
     const [openAsyncEntity, setOpenAsyncEntity] = React.useState(false);
     const [optionsAsyncEntity, setOptionsAsyncEntity] = React.useState([]);
-   // const [defaultDomain, setDefaultDomain] = React.useState('');
-    let defaultDomain = React.useRef('')
-    if (defaultDomain.current === '' && (props.typeOfEntity === "domainGroup" || props.typeOfEntity === "user")) {dataHub.userServiceController.getDomainList(handleGetDomainList)};
+    const [namePart, setNamePart] = React.useState(null);
 
-    const loadingAsync = openAsyncEntity && optionsAsyncEntity.length === 0;
+    const loadingAsync = openAsyncEntity; // && optionsAsyncEntity.length === 0;
 
     function handleOnInputChange(e, value){
-        if ((value.length >= 3) && (props.typeOfEntity === "domainGroup")) { dataHub.adController.getDomainGroups (0, [props.domainName], value, handleDomainGroups); }
-    }
-
-    function handleDomainGroups(magrepRespone){
-        if(magrepRespone.ok){
-            if (props.typeOfEntity === "domainGroup" || props.typeOfEntity === "user"){
-                setOptionsAsyncEntity(magrepRespone.data.map(i=> (i.domainName === defaultDomain.current ? '': i.domainName+'\\')+i.groupName));
-                setEntityToAddList(magrepRespone.data.map(i => {return {domainId: i.domainId, name: i.groupName}}))
-            } else {
-                setOptionsAsyncEntity(magrepRespone.data.map(i=> i.groupName));
-                setEntityToAddList(magrepRespone.data.map(i => {return {name: i.groupName}}))
-            }
-        }
-    }
-
-    function handleGetDomainList(magrepRespone){
-        if(magrepRespone.ok){
-            defaultDomain.current = magrepRespone.data.filter(i=>i.isDefault).map(item=>item.name)[0];
-        } else {
-            defaultDomain.current = null
+        if (value.length >= 3 && props.typeOfEntity === "domainGroup") {
+            setNamePart(value)
         }
     }
 
@@ -55,6 +35,7 @@ function AsyncAutocomplete(props){
                 return undefined;
             }
 
+
             (async () => {
                 let entity = [];
                 if (entityToAddList.length === 0){
@@ -65,6 +46,7 @@ function AsyncAutocomplete(props){
                         dataHub.roleController.getAll(handleRoles);
                     }
                     else if(props.typeOfEntity === "domainGroup"){
+                        dataHub.adController.getDomainGroups(0, props.domainName, namePart, handleDomainGroups);
                     }
 
                     function handleRoles(magrepResponse){
@@ -75,12 +57,32 @@ function AsyncAutocomplete(props){
                         sortEntity(magrepResponse)
                     }
 
+
+                    function handleDomainGroups(magrepResponse){
+                        sortEntity(magrepResponse)
+                    }
+
                     function sortEntity(magrepResponse){
                         if (magrepResponse.ok && active){
-                            let entityTmp = magrepResponse.data.filter(props.filterOfEntity ? props.filterOfEntity : ()=>{return true}).sort(
+                            let entityTmp = magrepResponse.data.filter(props.filterOfEntity ? props.filterOfEntity : ()=>{return true});
+                            switch  (props.typeOfEntity){
+                                case 'user':
+                                    entityTmp = entityTmp.map(i=>{return {id: i.id, domainName: i.domain?.name, name: i.name}});
+                                    break;
+                                case 'role':
+                                    entityTmp = entityTmp.map(i=>{return {id: i.id, domainName: i.domain?.name, name: i.name}});
+                                    break;
+                                case 'domainGroup':
+                                    entityTmp =  entityTmp.map(i=>{return {id: i.domainId, domainName: i.domainName, name: i.groupName}});
+                                    break;
+                                default:  
+                                    break;
+                            }
+                            
+                            entityTmp.sort(
                                 function (a, b) {
-                                    let aa = (a.domain?.name === defaultDomain.current || props.typeOfEntity === "role" ? '': a.domain?.name+'\\')+a.name,
-                                        bb = (b.domain?.name === defaultDomain.current || props.typeOfEntity === "role" ? '': b.domain?.name+'\\')+b.name;
+                                    let aa = (a.domainName === props.defaultDomain || props.typeOfEntity === "role" ? '' : a.domainName + '\\') + a.name ,
+                                        bb = (b.domainName === props.defaultDomain || props.typeOfEntity === "role" ? '' : b.domainName + '\\') + b.name ;
                                     if (aa < bb) {
                                         return -1;
                                     }
@@ -92,7 +94,7 @@ function AsyncAutocomplete(props){
                             );
 
                             for (let i of entityTmp){
-                                entity.push((i.domain?.name === defaultDomain.current || props.typeOfEntity === "role" ? '': i.domain?.name+'\\')+i.name);
+                                entity.push((i.domainName === props.defaultDomain || i.domainName === props.defaultDomain || props.typeOfEntity === "role" ? '': i.domainName +'\\')+i.name);
                             };
 
                             setEntityToAddList(entityTmp);
@@ -102,7 +104,7 @@ function AsyncAutocomplete(props){
                 }
                 else {
                     for (let i of entityToAddList){
-                        entity.push((i.domain?.name === defaultDomain.current || props.typeOfEntity === "role" ? '': i.domain?.name+'\\')+i.name);
+                        entity.push((i.domain?.name === props.defaultDomain || props.typeOfEntity === "role" ? '': i.domain?.name+'\\')+i.name);
                     };
                 };
                 setOptionsAsyncEntity(entity);
@@ -111,16 +113,20 @@ function AsyncAutocomplete(props){
             return () => {
                 active = false;
             };
-        }, [loadingAsync] // eslint-disable-line
+        }, [loadingAsync, namePart, props.domainName] // eslint-disable-line
     );
 
     React.useEffect(() => {
         if (!openAsyncEntity) {
             setOptionsAsyncEntity([]);
         }
-        }, [openAsyncEntity]
+        }, [openAsyncEntity, namePart, props.domainName]
     );
 
+    React.useEffect(() => {
+            setEntityToAddList([]);
+        }, [namePart, props.domainName]
+    );
 
     return (
         <Autocomplete
@@ -161,5 +167,3 @@ function AsyncAutocomplete(props){
         />
     );
 }
-
-export default AsyncAutocomplete;   
