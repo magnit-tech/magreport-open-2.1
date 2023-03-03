@@ -144,7 +144,8 @@ function DerivedFieldDialog(props){
             isCorrect: false,
             isFormulaCorrect: false,
             needSave: true,
-            owner: true
+            owner: true,
+            fontSize: 16
         }
 
         setActiveIndex('new')
