@@ -12,6 +12,15 @@ import { TextField } from "@material-ui/core";
 // Примеры highlight смотреть здесь:
 // https://github.com/codemirror/highlight/blob/main/src/highlight.ts 
 
+/*
+  Правила преобразования отображаемой строки формулы в сохранямую и обратно:
+  Названия полей и производных полей преобразуются в __#ID поля, где ID - числовое значение ID поля. Пример:
+    [__#115] <-> [Продажи, руб]
+  
+  Названия функций преобразуются в __F#ID, где ID - числовое значение ID функции. Пример:
+    __F#9 <-> SUBSTR
+*/
+
 /**
  * 
  * @param {*} props.height
@@ -20,6 +29,7 @@ import { TextField } from "@material-ui/core";
  * @param {*} props.functions - массив описаний функций: {functionId, functionName, functionDesc, functionSignature}
  * @param {*} props.originalFields - массив объектов исходных полей отчёта {fieldId, fieldName, fieldDesc, valueType}
  * @param {*} props.derivedFields - массив объектов производных полей отчёта {fieldId, fieldName, fieldDesc, fieldOwner, valueType}
+ * @param {*} props.fontSize - размер шрифта
  * @param {*} props.onChange - function(compilationResult) - массив объектов производных полей отчёта
  *                              compilationResult:
  *                                 success: true | false
@@ -133,39 +143,42 @@ export default function FormulaEditor(props){
     /*
       Decode input code from IDs to names
     */
+      // ---------------------------------------
+      // Orignial and derived fields
+      // ---------------------------------------
 
-      function replaceIdWithNames(codeWithId){
-        let pattern = /(\[\d+\])|(\[\[\d+\]\])/g;
+    function replaceIdWithName(code){
+        let pattern = /(\[__#\d+\])|(\[\[__#\d+\]\])/g;
   
         function replacer(match, ...arg){
           if(match[0] === '[' && match[1] === '[')
           {
-            let id = Number(match.slice(2,-2));
+            let id = Number(match.slice(5,-2));
             if(isNaN(id)){
               return match;
             }
             else{
-              return '[[' + derivedFieldIdToName.get(id) + ']]';
+              let name = derivedFieldIdToName.get(id);
+              return '[[' + (name ? name : "__#" + id) + ']]';
             }
           }
           else
           {
-            let id = Number(match.slice(1,-1));
+            let id = Number(match.slice(4,-1));
             if(isNaN(id)){
               return match;
             }
             else{
-              return '[' + originalFieldIdToName.get(id) + ']';
+              let name = originalFieldIdToName.get(id);
+              return '[' + (name ? name : ("__#" + id) ) + ']';
             }  
           }
         }
   
-        return codeWithId.replace(pattern, replacer);
-      }
-  
-      const initialCode = useMemo(() => replaceIdWithNames(props.initialCode), [props.initialCode]);
+        return code.replace(pattern, replacer);
+    }
 
-      function replaceNamesWithId(codeWithId){
+    function replaceNameWithId(code){
           let pattern = /(\[[^\[\]]+\])|(\[\[[^\[\]]+\]\])/g;
     
           function replacer(match, ...arg){
@@ -174,19 +187,61 @@ export default function FormulaEditor(props){
               let name = match.slice(2,-2);
               let id = derivedFieldNameToId.get(name);
 
-              return '[[' + (id ? id : name) + ']]';
+              return '[[' + (id ? ("__#" + id) : name) + ']]';
             }
             else
             {
               let name = match.slice(1,-1);
               let id = originalFieldNameToId.get(name);
 
-              return '[' + (id ? id : name) + ']';
+              return '[' + (id ? ("__#" + id) : name) + ']';
             }
           }
     
-          return codeWithId.replace(pattern, replacer);
-      }      
+          return code.replace(pattern, replacer);
+      }
+
+    // ----------------------------
+    // Functions
+    // ----------------------------
+
+    let functionNamePattern = useMemo (() => {
+      return new RegExp(`\\b(SUBSTR|STRLEN)\\b`);
+    }, [props.functions]);
+
+    let [functionIdToNameReplacer, functionNameToIdReplacer] = useMemo(()=>{
+
+      let functionIdToNameReplacer = (match, ...arg) => {
+        let id = Number(match.slice(4));
+
+        if(isNaN(id)){
+          return match;
+        }
+        else{
+          let name = functionIdToName.get(id);
+          return (name ? name : match);
+        }
+      };
+
+      let functionNameToIdReplacer = (match, ...arg) => {
+        let id = functionNameToId.get(match);
+        return id ? ("__F#" + id) : match;
+      };
+
+      return [functionIdToNameReplacer, functionNameToIdReplacer]
+    }, [props.functions]);
+      
+    function replaceFunctionIdWithName(code){
+      let pattern = /(__F#\d+)/g;
+
+      return code.replace(pattern, functionIdToNameReplacer);
+    }
+
+    function replaceFunctionNameWithId(code){
+      return code.replace(functionNamePattern, functionNameToIdReplacer);
+    }
+    
+    const code = useMemo(() => replaceFunctionIdWithName( replaceIdWithName(props.initialCode) ), [props.initialCode]);
   
     /*
     ********************************************************
@@ -371,19 +426,20 @@ export default function FormulaEditor(props){
         
         props.onChange({
           success : !root.isError,
-          textToSave : replaceNamesWithId(value),
+          textToSave : replaceFunctionNameWithId( replaceNameWithId(value) ),
           treeRoot : root,
           errorList : errorList
         });
 
     }, [props.onChange, createOutputTree]);
 
-      return (
+    return (
         <div className="FormulaEditor">
             <CodeMirror
               className="CodeMirror"
+              style={{fontSize:props.fontSize + "px"}}
               ref={editor}
-              value={initialCode}
+              value={code}
               height={props.height}
               theme={codeEditorTheme}
               editable={!props.disabled}
