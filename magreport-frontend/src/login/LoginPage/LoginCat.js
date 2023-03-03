@@ -11,6 +11,7 @@ function LoginCat(){
             [classes.newYearLoginCat]: isHollyday() === 0,
             [classes.newYearLoginCat1]: isHollyday() === 1,
             [classes.newYearLoginCat2]: isHollyday() === 2,
+            [classes.marthLoginCat]: isHollyday() === 3
         })}></div>
     )
 }

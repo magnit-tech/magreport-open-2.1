@@ -30,6 +30,7 @@ function DomainGroupList(props){
     const [domainGroupFilterValue, setDomainGroupFilterValue] = useState("");
     const [domainsList, setDomainsList] = useState([]);
     const [domain, setDomain] = useState({});
+    const [leftDomain, setLeftDomain] = useState({});
     const [selectedDomainGroupToAdd, setSelectedDomainGroupToAdd] = useState("");
 
     const listItems=[]
@@ -91,7 +92,8 @@ function DomainGroupList(props){
         let domain = data.filter(i => i.isDefault === true).map(i => {return {value: i.id, name: i.name}})[0];
         let domList = data.sort((a,b) => b.isDefault - a.isDefault).slice();
         setDomainsList(domList);
-		setDomain(domain);        
+        setDomain(domain); 
+        setLeftDomain(domain);       
     }
 
     function handleAddDomainGroupToRole(){
@@ -129,11 +131,36 @@ function DomainGroupList(props){
                 <div className={classes.userAddPanel}>
                     {props.showDeleteButton &&
                         <div className={classes.roleAutocompleteDiv}>
+                            <FormControl variant='outlined' size='small'/* className={classes.formControl}*/>
+						    <DomainSelect
+                                id="outlined-select-currency"
+                                size='small'
+							    select
+							    value={leftDomain.value}
+							    name={leftDomain.name}
+							    onChange={(e)=>{setLeftDomain(e.target)}}
+							    variant="outlined"
+							    InputProps={{
+								    startAdornment: (
+									    <Tooltip title='Домен' placement="top">
+										    <InputAdornment position="start" className={classes.domainTooltip}>
+											    <Icon path={mdiWeb} size={0.9}/>  
+										    </InputAdornment>
+									    </Tooltip>
+								    ),
+							    }}
+						    >
+							    {domainsList.map((i, index)=>
+								    <MenuItem key = {i.id} value={i.id} ListItemClasses = {{button: clsx({[classes.menuList]:  index===0 })}}> {i.name}</MenuItem>
+							    )}
+						    </DomainSelect>
+					    </FormControl>
                             <AsyncAutocomplete
                                 className={classes.domainAutocomplete}
                                 size = 'small'
                                 disabled = {false}
                                 typeOfEntity = {"domainGroup"}
+                                domainName = {leftDomain.name}
                                 onChange={handleOnChangeAddDomainGroupText}
                             /> 
                             <Button
