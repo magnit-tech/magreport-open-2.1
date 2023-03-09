@@ -81,7 +81,13 @@ function Header(props){
     }
 
     return(
-        <AppBar position="static" className={clsx(classes.appBar, {[classes.appBarHeight]: isHollyday() === -1, [classes.appBarHeightHollyday]: isHollyday() >= 0})}>
+        <AppBar position="static" 
+            className={clsx(classes.appBar,{
+                    [classes.appBarHeight]: isHollyday() === -1, 
+                    [classes.appBarHeightHollyday]: isHollyday() >= 0,
+                    [classes.planets]: isHollyday() === 4
+            })}
+        >
             <HollydayPanel/>
             <Menu
                 id="simple-menu"
