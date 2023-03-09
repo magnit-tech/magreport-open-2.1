@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -55,7 +56,7 @@ public class LdapService {
                         path,
                         ldapProperties.getUserSearchFilter().replace("{0}", loginName),
                         SearchControls.SUBTREE_SCOPE,
-                        (AttributesMapper<String>) attributes -> String.valueOf(attributes.get("displayName").get())
+                        (AttributesMapper<String>) attributes -> String.valueOf(attributes.get(ldapProperties.getFullNameParamName()).get())
                     )
                 )
                 .flatMap(Collection::stream)
@@ -80,7 +81,7 @@ public class LdapService {
                                     SearchControls.SUBTREE_SCOPE,
                                     (AttributesMapper<String>) attributes -> {
                                         try {
-                                            return String.valueOf(attributes.get("mail").get());
+                                            return String.valueOf(attributes.get(ldapProperties.getMailParamName()).get());
                                         } catch (Exception ex) {
                                             return "";
                                         }
@@ -99,6 +100,8 @@ public class LdapService {
         var results = new HashMap<String, Pair<String, String>>();
         users.forEach(user -> {
             final var ldapProperties = authConfig.getDomainProperties(user.getDomain().name());
+            if (Objects.isNull(ldapProperties)) return;
+
             batch.putIfAbsent(user.getDomain().name(), new ArrayList<>());
             if (batch.get(user.getDomain().name()).size() < ldapProperties.getBatchSize())
                 batch.get(user.getDomain().name()).add(user.getName());
@@ -131,13 +134,13 @@ public class LdapService {
                                 SearchControls.SUBTREE_SCOPE,
                                 (AttributesMapper<Triple<String, String, String>>) attributes -> {
                                     var result = new Triple<String, String, String>();
-                                    result.setA(domainName + "\\" + attributes.get("cn").get());
+                                    result.setA(domainName + "\\" + attributes.get(ldapProperties.getLoginParamName()).get().toString().toLowerCase());
                                     try {
-                                        result.setB(String.valueOf(attributes.get("mail").get()));
+                                        result.setB(String.valueOf(attributes.get(ldapProperties.getMailParamName()).get()));
                                     } catch (Exception ex) {
                                         result.setB("");
                                     }
-                                    result.setC(String.valueOf(attributes.get("displayName")));
+                                    result.setC(String.valueOf(attributes.get(ldapProperties.getFullNameParamName()).get()));
                                     return result;
                                 }))
                 .flatMap(Collection::stream)
