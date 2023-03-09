@@ -1,21 +1,30 @@
-import React, {useState} from 'react';
+import React, {useState, useRef} from 'react';
+import { useSnackbar } from 'notistack';
 import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { CircularProgress } from '@material-ui/core';
 import dataHub from '../../ajax/DataHub';
 
 export default function AsyncAutocomplete(props){
+    const { enqueueSnackbar } = useSnackbar();
+    const timer = useRef(0);
 
     const [entityToAddList, setEntityToAddList] = useState([]);
-    const [openAsyncEntity, setOpenAsyncEntity] = React.useState(false);
-    const [optionsAsyncEntity, setOptionsAsyncEntity] = React.useState([]);
-    const [namePart, setNamePart] = React.useState(null);
+    const [openAsyncEntity, setOpenAsyncEntity] = useState(false);
+    const [optionsAsyncEntity, setOptionsAsyncEntity] = useState([]);
+    const [namePart, setNamePart] = useState(null);
+    const [responsed, setResponsed] = useState(true);
 
-    const loadingAsync = openAsyncEntity; // && optionsAsyncEntity.length === 0;
+    let requestId = useRef('');
+
+    const loadingAsync = openAsyncEntity && !responsed; // && optionsAsyncEntity.length === 0;
 
     function handleOnInputChange(e, value){
-        if (value.length >= 3 && props.typeOfEntity === "domainGroup") {
-            setNamePart(value)
+        if (props.typeOfEntity === "domainGroup") {
+            if (timer.current > 0){
+                clearInterval(timer.current); // удаляем предыдущий таймер
+            }
+            timer.current = setTimeout(() => {setNamePart(value)}, 1000);
         }
     }
 
@@ -40,13 +49,13 @@ export default function AsyncAutocomplete(props){
                 let entity = [];
                 if (entityToAddList.length === 0){
                     if (props.typeOfEntity === "user"){
-                        dataHub.userController.users(handleUsers);
+                        requestId.current = dataHub.userController.users(handleUsers);
                     }
                     else if(props.typeOfEntity === "role"){
-                        dataHub.roleController.getAll(handleRoles);
+                        requestId.current = dataHub.roleController.getAll(handleRoles);
                     }
                     else if(props.typeOfEntity === "domainGroup"){
-                        dataHub.adController.getDomainGroups(0, props.domainName, namePart, handleDomainGroups);
+                        requestId.current = dataHub.adController.getDomainGroups(0, props.domainName, (namePart=== '' ? null : namePart), handleDomainGroups);
                     }
 
                     function handleRoles(magrepResponse){
@@ -63,9 +72,11 @@ export default function AsyncAutocomplete(props){
                     }
 
                     function sortEntity(magrepResponse){
-                        if (magrepResponse.ok && active){
-                            let entityTmp = magrepResponse.data.filter(props.filterOfEntity ? props.filterOfEntity : ()=>{return true});
-                            switch  (props.typeOfEntity){
+                        if (magrepResponse.ok ){
+                            if (active && requestId.current === magrepResponse.requestId){
+                                setResponsed(true);
+                                let entityTmp = magrepResponse.data.filter(props.filterOfEntity ? props.filterOfEntity : ()=>{return true});
+                                switch  (props.typeOfEntity){
                                 case 'user':
                                     entityTmp = entityTmp.map(i=>{return {id: i.id, domainName: i.domain?.name, name: i.name}});
                                     break;
@@ -77,27 +88,34 @@ export default function AsyncAutocomplete(props){
                                     break;
                                 default:  
                                     break;
-                            }
-                            
-                            entityTmp.sort(
-                                function (a, b) {
-                                    let aa = (a.domainName === props.defaultDomain || props.typeOfEntity === "role" ? '' : a.domainName + '\\') + a.name ,
-                                        bb = (b.domainName === props.defaultDomain || props.typeOfEntity === "role" ? '' : b.domainName + '\\') + b.name ;
-                                    if (aa < bb) {
-                                        return -1;
-                                    }
-                                    if (aa > bb) {
-                                        return 1;
-                                    }
-                                    return 0;
                                 }
-                            );
+                            
+                            
+                                entityTmp.sort(
+                                    function (a, b) {
+                                        let aa = (a.domainName === props.defaultDomain || props.typeOfEntity === "role" ? '' : a.domainName + '\\') + a.name ,
+                                            bb = (b.domainName === props.defaultDomain || props.typeOfEntity === "role" ? '' : b.domainName + '\\') + b.name ;
+                                        if (aa < bb) {
+                                            return -1;
+                                        }
+                                        if (aa > bb) {
+                                            return 1;
+                                        }
+                                        return 0;
+                                    }
+                                );
 
-                            for (let i of entityTmp){
-                                entity.push((i.domainName === props.defaultDomain || i.domainName === props.defaultDomain || props.typeOfEntity === "role" ? '': i.domainName +'\\')+i.name);
-                            };
+                                for (let i of entityTmp){
+                                    entity.push((i.domainName === props.defaultDomain || i.domainName === props.defaultDomain || props.typeOfEntity === "role" ? '': i.domainName +'\\')+i.name);
+                                };
 
-                            setEntityToAddList(entityTmp);
+                                setEntityToAddList(entityTmp);
+                            }
+                        }
+                        else {
+                            enqueueSnackbar("Ошибка: " + magrepResponse.data, {variant : "error"});
+                            setEntityToAddList([]);
+                            setOpenAsyncEntity(false);
                         }
                     };
 
@@ -115,21 +133,25 @@ export default function AsyncAutocomplete(props){
             };
         }, [loadingAsync, namePart, props.domainName] // eslint-disable-line
     );
-
-    React.useEffect(() => {
-        if (!openAsyncEntity) {
-            setOptionsAsyncEntity([]);
-        }
-        }, [openAsyncEntity, namePart, props.domainName]
-    );
-
+    
     React.useEffect(() => {
             setEntityToAddList([]);
+            setResponsed(false);
         }, [namePart, props.domainName]
     );
 
+    React.useEffect(() => {
+            if (!openAsyncEntity) {
+                setOptionsAsyncEntity([]);
+            }
+        }, [namePart, props.domainName]
+    );
+
+
+
     return (
         <Autocomplete
+            value = {namePart}
             className = {props.className}
             id="asynchronousRoleListToAdd"
             size = {props.size ?? 'medium'}
@@ -150,7 +172,7 @@ export default function AsyncAutocomplete(props){
             renderInput={params => (
                 <TextField
                     {...params}
-                    label={props.typeOfEntity === "user" ? "Пользователи": (props.typeOfEntity === "domainGroup" ? "Доменные группы" : "")}
+                    label = {props.typeOfEntity === "user" ? "Пользователи": (props.typeOfEntity === "domainGroup" ? "Доменные группы" : "")}
                     fullWidth
                     variant="outlined"
                     InputProps={{
