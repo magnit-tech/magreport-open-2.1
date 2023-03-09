@@ -2,6 +2,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import StyleConsts from '../../../StyleConsts'; 
 import CatFingerPng from '../../../images/catFinger.png';
 import RosesPng from '../../../images/roses.png';
+import PlanetsPng from '../../../images/planets.png';
 
 export const HeaderCSS = makeStyles(theme => ({
     appBar: {
@@ -52,5 +53,13 @@ export const HeaderCSS = makeStyles(theme => ({
         backgroundPosition: 'center',
         //marginTop : '48px',
         height: '100%'
+    },
+    planets: {
+        backgroundImage : 'url(' + PlanetsPng + ')',
+        backgroundSize: 'contain',
+       // backgroundRepeat: 'round',
+        backgroundPosition: 'center',
+        //marginTop : '48px',
+        //height: '100%'
     },
   }));
