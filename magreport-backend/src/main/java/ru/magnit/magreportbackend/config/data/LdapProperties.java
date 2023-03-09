@@ -20,6 +20,9 @@ public class LdapProperties {
     private Long batchSize;
     private String userDn;
     private String password;
+    private String loginParamName;
+    private String mailParamName;
+    private String fullNameParamName;
 
     public String[] getGroupPaths() {
         return groupPath.split(";");
