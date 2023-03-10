@@ -53,6 +53,11 @@ function UsersJobsMenuView(props){
         navigate(`/ui/report/starter/${reportId}?jobId=${jobId}`, {state: location.pathname})
     }
 
+    function handleCancelClick(folderItemsType, jobIndex, jobId){
+        props.actionJobCancel(folderItemsType, jobIndex, jobId);
+        setReload({needReload : true})
+    }
+
     return (
         <div  style={{display: 'flex', flex: 1}}>
             <DataLoader
@@ -75,7 +80,7 @@ function UsersJobsMenuView(props){
                     onReportRunClick = {handleReportRunClick}
                     onFilterClick = {filters => {props.actionFilterUsersJobs(folderItemsType, filters)}}
                     onRefreshClick = {handleRefreshFolder}
-                    onJobCancelClick = {(jobIndex, jobId) => {props.actionJobCancel(folderItemsType, jobIndex, jobId)}}
+                    onJobCancelClick = {(jobIndex, jobId) => {handleCancelClick(folderItemsType, jobIndex, jobId)}}
                     onShowSqlDialogClick = {props.showSqlDialog}
                     onShowHistoryStatusClick = {props.actionShowStatusHistory}
                 />
