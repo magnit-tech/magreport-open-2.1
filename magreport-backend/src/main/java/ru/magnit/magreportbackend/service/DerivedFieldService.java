@@ -290,9 +290,9 @@ public class DerivedFieldService {
 
     public List<DerivedFieldResponse> getDerivedFieldsByReport(DerivedFieldGetAvailableRequest request) {
         final var fields = domainService.getDerivedFieldsForReport(request.getReportId());
-        final var currentUser = userDomainService.getCurrentUser();
+        final var currentUserId = userDomainService.getCurrentUser().getId();
         return fields.stream()
-            .filter(field -> field.getIsPublic() || field.getUserId().equals(currentUser.getId()))
+            .filter(field -> field.getIsPublic() || field.getUserId().equals(currentUserId) || request.getAdditionalFields().contains(field.getId()))
             .toList();
     }
 
