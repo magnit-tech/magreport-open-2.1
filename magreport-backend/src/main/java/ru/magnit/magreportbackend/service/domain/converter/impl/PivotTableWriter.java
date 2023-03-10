@@ -347,10 +347,11 @@ public class PivotTableWriter implements Writer {
 
     private void initConfig(Workbook wb) {
 
-      mergeMode = config.get("mergeMode").asBoolean();
-        columnsMetricPlacement = config.get("columnsMetricPlacement").asBoolean();
+        mergeMode = config.get("mergeMode") != null && config.get("mergeMode").asBoolean();
+        columnsMetricPlacement = config.get("columnsMetricPlacement") != null && config.get("columnsMetricPlacement").asBoolean();
 
-        config.get("fieldsLists").get("metricFields").elements().forEachRemaining( f -> metricUserNames.add(f.get("newName").textValue()));
+        if (config.get("fieldsLists") != null)
+            config.get("fieldsLists").get("metricFields").elements().forEachRemaining(f -> metricUserNames.add(f.get("newName").textValue()));
 
         initValues();
         initCellStyles(wb);

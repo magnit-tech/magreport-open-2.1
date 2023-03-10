@@ -26,7 +26,7 @@ import SearchIcon from '@material-ui/icons/Search';
 
 //import CopyMoveFolderBrowser from './CopyMoveFolderBrowser';
 import DesignerFolderBrowser from 'main/Main/Development/Designer/DesignerFolderBrowser';
-import {JobStatuses} from './JobFilters/JobStatuses';
+//import {JobStatuses} from './JobFilters/JobStatuses';
 import isHollyday from 'HollydayFunctions';
 
 // styles
@@ -92,7 +92,7 @@ import SortModalWindow from './ModalWindows/SortModalWindow';
 export default function FolderContent(props){
     const classes = FolderContentCSS();
     
-    const defaultStatuses = Object.values(JobStatuses);
+   // const defaultStatuses = Object.values(JobStatuses);
     const [searchOpen, setSearchOpen] = useState(false);
     const [panelOpen, setPanelOpen] = useState(false);
 
