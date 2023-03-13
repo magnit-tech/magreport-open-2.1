@@ -344,7 +344,7 @@ public class ReportService {
     }
 
     public void changeReportParentFolder(ChangeParentFolderRequest request) {
-        permissionCheckerSystem.checkPermissionsOnAllFolders(request, reportDomainService::getFolderIds, folderPermissionsDomainService::getExcelTemplateFolderPermissionsForRoles);
+        permissionCheckerSystem.checkPermissionsOnAllFolders(request, reportDomainService::getFolderIds, folderPermissionsDomainService::getReportFolderPermissionsForRoles);
         reportDomainService.changeFilterInstanceParentFolder(request);
     }
 
