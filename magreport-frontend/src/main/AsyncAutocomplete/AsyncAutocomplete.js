@@ -31,7 +31,7 @@ export default function AsyncAutocomplete(props){
     function handleOnChange(e, value){
         let entity;
         for (let i of entityToAddList){
-            if (i.name === value || i.domain?.name + '\\' + i.name === value){
+            if (i.name === value || i.domainName + '\\' + i.name === value){
                 entity = i;
             };
         };
@@ -93,8 +93,8 @@ export default function AsyncAutocomplete(props){
                             
                                 entityTmp.sort(
                                     function (a, b) {
-                                        let aa = (a.domainName === props.defaultDomain || props.typeOfEntity === "role" ? '' : a.domainName + '\\') + a.name ,
-                                            bb = (b.domainName === props.defaultDomain || props.typeOfEntity === "role" ? '' : b.domainName + '\\') + b.name ;
+                                        let aa = (a.domainName === props.defaultDomain || props.typeOfEntity === "role" || props.typeOfEntity === "domainGroup"? '' : a.domainName + '\\') + a.name ,
+                                            bb = (b.domainName === props.defaultDomain || props.typeOfEntity === "role" || props.typeOfEntity === "domainGroup"? '' : b.domainName + '\\') + b.name ;
                                         if (aa < bb) {
                                             return -1;
                                         }
@@ -106,7 +106,7 @@ export default function AsyncAutocomplete(props){
                                 );
 
                                 for (let i of entityTmp){
-                                    entity.push((i.domainName === props.defaultDomain || i.domainName === props.defaultDomain || props.typeOfEntity === "role" ? '': i.domainName +'\\')+i.name);
+                                    entity.push((i.domainName === props.defaultDomain || props.typeOfEntity === "role" || props.typeOfEntity === "domainGroup" ? '': i.domainName +'\\')+i.name);
                                 };
 
                                 setEntityToAddList(entityTmp);
@@ -122,7 +122,7 @@ export default function AsyncAutocomplete(props){
                 }
                 else {
                     for (let i of entityToAddList){
-                        entity.push((i.domain?.name === props.defaultDomain || props.typeOfEntity === "role" ? '': i.domain?.name+'\\')+i.name);
+                        entity.push((i.domain?.name === props.defaultDomain || props.typeOfEntity === "role" || props.typeOfEntity === "domainGroup"? '': i.domain?.name+'\\')+i.name);
                     };
                 };
                 setOptionsAsyncEntity(entity);
