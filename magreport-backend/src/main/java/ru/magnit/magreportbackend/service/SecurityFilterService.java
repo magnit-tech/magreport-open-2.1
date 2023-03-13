@@ -158,7 +158,7 @@ public class SecurityFilterService {
     }
 
     public void changeSecurityFilterParentFolder(ChangeParentFolderRequest request) {
-        permissionCheckerSystem.checkPermissionsOnAllFolders(request, domainService::getFolderIds, folderPermissionsDomainService::getExcelTemplateFolderPermissionsForRoles);
+        permissionCheckerSystem.checkPermissionsOnAllFolders(request, domainService::getFolderIds, folderPermissionsDomainService::getSecurityFilterFolderPermissionsForRoles);
         domainService.changeFilterInstanceParentFolder(request);
     }
 
