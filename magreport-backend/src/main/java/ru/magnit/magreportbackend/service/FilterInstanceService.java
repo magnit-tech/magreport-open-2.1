@@ -204,7 +204,7 @@ public class FilterInstanceService {
     }
 
     public void changeFilterInstanceParentFolder(ChangeParentFolderRequest request) {
-        permissionCheckerSystem.checkPermissionsOnAllFolders(request, domainService::getFolderIds, folderPermissionsDomainService::getExcelTemplateFolderPermissionsForRoles);
+        permissionCheckerSystem.checkPermissionsOnAllFolders(request, domainService::getFolderIds, folderPermissionsDomainService::getFilterInstanceFolderPermissionsForRoles);
         domainService.changeFilterInstanceParentFolder(request);
     }
 

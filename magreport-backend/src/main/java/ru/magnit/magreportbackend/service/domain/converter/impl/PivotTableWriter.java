@@ -351,7 +351,7 @@ public class PivotTableWriter implements Writer {
         columnsMetricPlacement = config.get("columnsMetricPlacement") != null && config.get("columnsMetricPlacement").asBoolean();
 
         if (config.get("fieldsLists") != null)
-            config.get("fieldsLists").get("metricFields").elements().forEachRemaining(f -> metricUserNames.add(f.get("newName").textValue()));
+            config.get("fieldsLists").get("metricFields").elements().forEachRemaining(f -> metricUserNames.add(f.get("newName") == null ? "" : f.get("newName").textValue()));
 
         initValues();
         initCellStyles(wb);
