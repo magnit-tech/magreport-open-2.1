@@ -127,9 +127,35 @@ export default function FormulaEditor(props){
     */
     const functionsCompletionList = props.functions.map((v) => ({label: v.functionName, type: "function", detail: v.functionDesc, info: v.functionSignature}));
     const originalFieldsCompletionList = props.originalFields.map((v) => ({label: v.fieldName, type: "variable", detail: v.fieldDesc}));
-    const derivedFieldsCompletionList = props.derivedFields.map((v) => ({label: v.fieldName, type: "variable", detail: v.fieldOwner + ": " + v.fieldDesc}));
+    // const derivedFieldsCompletionList = props.derivedFields.map((v) => ({label: v.fieldName, type: "variable", detail: v.fieldOwner + ": " + v.fieldDesc}));
 
-    const completionList = functionsCompletionList.concat(originalFieldsCompletionList.concat(derivedFieldsCompletionList));
+    const derivedFieldsCompletionList = () => {
+      let result = []
+
+      props.publicFields.forEach((value, key) => {
+        result.push({label: key, type: "variable", detail: key})
+      })
+
+      props.ownFields.forEach((value, key) => {
+        if(props.publicFields.get(key)) {
+          result.push({label: `${key}(${value.userName})`, type: "variable", detail: `${key}(${value.userName})`})
+        } else {
+          result.push({label: key, type: "variable", detail: key})
+        }
+      })
+
+      props.otherFields.forEach((value, key) => {
+        if(props.publicFields.get(key) || props.ownFields.get(key)) {
+          result.push({label: `${key}(${value.userName})`, type: "variable", detail: `${key}(${value.userName})`})
+        } else {
+          result.push({label: key, type: "variable", detail: key})
+        }
+      })
+      
+      return result
+    }
+
+    const completionList = functionsCompletionList.concat(originalFieldsCompletionList.concat(derivedFieldsCompletionList()));
 
     const completion = MagreportLanguage.data.of({
       autocomplete: completeFromList(
@@ -156,11 +182,37 @@ export default function FormulaEditor(props){
       }, [props.originalFields]);
 
     const [derivedFieldIdToName, derivedFieldNameToId] = useMemo( () =>{
+
         let mIdtoName = new Map();
         let mNametoId = new Map();
-        props.derivedFields.forEach((f) => {mIdtoName.set(f.fieldId, f.fieldName); mNametoId.set(f.fieldName, f.fieldId)});
+
+        props.publicFields.forEach((value, key) => {
+          mIdtoName.set(value.id, key); 
+          mNametoId.set(key, value.id)
+        })
+
+        props.ownFields.forEach((value, key) => {
+          if(props.publicFields.get(key)) {
+            mIdtoName.set(value.id, `${key}(${value.userName})`); 
+            mNametoId.set(`${key}(${value.userName})`, value.id)
+          } else {
+            mIdtoName.set(value.id, key); 
+            mNametoId.set(key, value.id)
+          }
+        })
+
+        props.otherFields.forEach((value, key) => {
+          if(props.publicFields.get(key) || props.ownFields.get(key)) {
+            mIdtoName.set(value.id, `${key}(${value.userName})`); 
+            mNametoId.set(`${key}(${value.userName})`, value.id)
+          } else {
+            mIdtoName.set(value.id, key); 
+            mNametoId.set(key, value.id)
+          }
+        })
+
         return [mIdtoName, mNametoId];
-      }, [props.derivedFields]);       
+      }, [props.publicFields, props.ownFields, props.otherFields]);       
 
     /*
       Decode input code from IDs to names
@@ -196,7 +248,7 @@ export default function FormulaEditor(props){
             }  
           }
         }
-  
+
         return code.replace(pattern, replacer);
     }
 
@@ -229,7 +281,7 @@ export default function FormulaEditor(props){
 
     let functionNamePattern = useMemo (() => {
       return new RegExp(`\\b(SUBSTR|STRLEN)\\b`);
-    }, [props.functions]);
+    }, [props.functions]); // eslint-disable-line
 
     let [functionIdToNameReplacer, functionNameToIdReplacer] = useMemo(()=>{
 
@@ -251,19 +303,21 @@ export default function FormulaEditor(props){
       };
 
       return [functionIdToNameReplacer, functionNameToIdReplacer]
-    }, [props.functions]);
+    }, [props.functions]); // eslint-disable-line
+
       
     function replaceFunctionIdWithName(code){
       let pattern = /(__F#\d+)/g;
-
       return code.replace(pattern, functionIdToNameReplacer);
     }
+
 
     function replaceFunctionNameWithId(code){
       return code.replace(functionNamePattern, functionNameToIdReplacer);
     }
+
     
-    const code = useMemo(() => replaceFunctionIdWithName( replaceIdWithName(props.initialCode) ), [props.initialCode]);
+    const code = useMemo(() => replaceFunctionIdWithName( replaceIdWithName(props.initialCode) ), [props.initialCode]); // eslint-disable-line
   
     /*
     ********************************************************
@@ -453,7 +507,7 @@ export default function FormulaEditor(props){
           errorList : errorList
         });
 
-    }, [props.onChange, createOutputTree]);
+    }, [props.onChange, createOutputTree]); // eslint-disable-line
 
 
 
@@ -516,9 +570,9 @@ export default function FormulaEditor(props){
               }}
               rows={5}
               variant="outlined"
-              value={errorMessages ? errorMessages : props.error}
+              value={errorMessages}
               disabled={props.disabled}
-              error={ !!errorMessages || !!props.error}
+              error={!!errorMessages}
             />
 
         </div>

@@ -66,6 +66,9 @@ public class DerivedFieldService {
     }
 
     public void addDerivedField(DerivedFieldAddRequest request) {
+        if (!checkFieldName(new DerivedFieldCheckNameRequest(request.getReportId(), request.getIsPublic(), request.getName()), null)) {
+            throw new InvalidParametersException("Нарушены правила именования производного поля. Имя общего поля должно быть уникально на уровне отчета, имя приватного поля должно быть уникально на уровне отчет/пользователь.");
+        }
         checkPermission(request);
         final var fieldType = inferFieldType(request);
         domainService.addDerivedField(request, fieldType.getFieldType(), userDomainService.getCurrentUser());
@@ -76,6 +79,9 @@ public class DerivedFieldService {
     }
 
     public void updateDerivedField(DerivedFieldAddRequest request) {
+        if (!checkFieldName(new DerivedFieldCheckNameRequest(request.getReportId(), request.getIsPublic(), request.getName()), request.getId())) {
+            throw new InvalidParametersException("Нарушены правила именования производного поля. Имя общего поля должно быть уникально на уровне отчета, имя приватного поля должно быть уникально на уровне отчет/пользователь.");
+        }
         checkPermission(request);
         final var fieldType = inferFieldType(request);
         domainService.updateDerivedField(request, fieldType.getFieldType(), userDomainService.getCurrentUser());
@@ -284,9 +290,9 @@ public class DerivedFieldService {
 
     public List<DerivedFieldResponse> getDerivedFieldsByReport(DerivedFieldGetAvailableRequest request) {
         final var fields = domainService.getDerivedFieldsForReport(request.getReportId());
-        final var currentUser = userDomainService.getCurrentUser();
+        final var currentUserId = userDomainService.getCurrentUser().getId();
         return fields.stream()
-            .filter(field -> field.getIsPublic() || field.getUserId().equals(currentUser.getId()))
+            .filter(field -> field.getIsPublic() || field.getUserId().equals(currentUserId) || request.getAdditionalFields().contains(field.getId()))
             .toList();
     }
 
@@ -307,13 +313,13 @@ public class DerivedFieldService {
         return new DerivedFieldTypeResponse(expression.inferType());
     }
 
-    public boolean checkFieldName(DerivedFieldCheckNameRequest request) {
+    public boolean checkFieldName(DerivedFieldCheckNameRequest request, Long fieldId) {
         final var userId = userDomainService.getCurrentUser().getId();
         final var fieldName = Boolean.TRUE.equals(request.getIsPublic()) ?
             request.getReportId() + "_" + request.getName() :
             request.getReportId() + "_" + userId + "_" + request.getName();
 
-        return !domainService.isFieldExists(request.getReportId(), fieldName);
+        return !domainService.isFieldExists(request.getReportId(), fieldName, fieldId);
     }
 
     private void checkPermission(DerivedFieldAddRequest request) {

@@ -87,11 +87,12 @@ export default function TransferList(props) {
     };
 
     const handleCheckedRight = () => {
-        let arr = right.concat(leftChecked)
+        let toRight = checked.filter(i=>!right.find(item=>item === i));
+        let arr = right.concat(toRight);
         props.onChange(arr);
         setRight(arr);
         setLeft(not(left, leftChecked));
-        setChecked(not(checked, leftChecked));
+       // setChecked(not(checked, leftChecked));
     };
 
     const handleCheckedLeft = () => {

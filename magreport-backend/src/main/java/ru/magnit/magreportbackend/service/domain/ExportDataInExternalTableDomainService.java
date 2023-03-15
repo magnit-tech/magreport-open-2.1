@@ -65,12 +65,18 @@ public class ExportDataInExternalTableDomainService {
             queryInserts.add(getInsertReportFilter(idJob, schema, filter.code(), group.code(), jobFilter.filterType(), jobFilter.operationType()));
 
             jobFilter.fieldValues().forEach(tupleData -> {
-                queryInserts.add(getInsertReportFilterTuple(idJob, schema, idTuple.get(), filter.code()));
+                if (jobFilter.filterType() != FilterTypeEnum.TOKEN_INPUT) {
+                    queryInserts.add(getInsertReportFilterTuple(idJob, schema, idTuple.get(), filter.code()));
+                }
                 tupleData.fieldValues().forEach(fieldData -> {
                     if (controlField.add(new FieldTuple(fieldData.fieldId(), idTuple.get()))) {
                         var field = fieldsFilter.get(fieldData.fieldId());
                         queryInserts.add(getInsertReportFilterField(idJob, schema, fieldData.fieldId(), idTuple.get(), field.filterCodeFieldName(),  field.filterFieldType(), fieldData.level()));
                         queryInserts.add(getInsertReportFilterFieldValueByTypeField(idJob, schema, idTuple.get(),  field.filterFieldType(), fieldData));
+                        if (jobFilter.filterType() == FilterTypeEnum.TOKEN_INPUT) {
+                            queryInserts.add(getInsertReportFilterTuple(idJob, schema, idTuple.get(), filter.code()));
+                            idTuple.getAndIncrement();
+                        }
                     }
                 });
                 idTuple.getAndIncrement();

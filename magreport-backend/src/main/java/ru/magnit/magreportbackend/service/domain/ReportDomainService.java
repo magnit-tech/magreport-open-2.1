@@ -612,9 +612,14 @@ public class ReportDomainService {
     }
 
     private boolean isActiveJobs(Long id) {
+
         return reportRepository.getReferenceById(id).getReportJobs()
             .stream()
-            .allMatch(job -> Objects.equals(ReportJobStatusEnum.COMPLETE.getId(), job.getStatus().getId()) || Objects.equals(ReportJobStatusEnum.FAILED.getId(), job.getStatus().getId()));
+            .allMatch(job ->
+                    Objects.equals(ReportJobStatusEnum.COMPLETE.getId(), job.getStatus().getId()) ||
+                            Objects.equals(ReportJobStatusEnum.FAILED.getId(), job.getStatus().getId()) ||
+                            Objects.equals(ReportJobStatusEnum.CANCELED.getId(), job.getStatus().getId())
+                    );
     }
 
     private boolean isExistsFavReport( Long userId, Long reportId, Long folderId){

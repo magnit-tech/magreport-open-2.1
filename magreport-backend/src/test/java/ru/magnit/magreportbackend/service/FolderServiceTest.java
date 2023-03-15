@@ -17,6 +17,7 @@ import ru.magnit.magreportbackend.dto.request.folder.FolderSearchRequest;
 import ru.magnit.magreportbackend.dto.request.folderreport.FolderAddReportRequest;
 import ru.magnit.magreportbackend.dto.request.report.ReportIdRequest;
 import ru.magnit.magreportbackend.dto.response.folder.FolderNodeResponse;
+import ru.magnit.magreportbackend.dto.response.folder.FolderRoleResponse;
 import ru.magnit.magreportbackend.dto.response.folder.FolderSearchResultResponse;
 import ru.magnit.magreportbackend.dto.response.folderreport.FolderResponse;
 import ru.magnit.magreportbackend.dto.response.permission.FolderPermissionsResponse;
@@ -26,6 +27,7 @@ import ru.magnit.magreportbackend.dto.response.report.ReportResponse;
 import ru.magnit.magreportbackend.dto.response.user.DomainShortResponse;
 import ru.magnit.magreportbackend.dto.response.user.RoleResponse;
 import ru.magnit.magreportbackend.dto.response.user.UserResponse;
+import ru.magnit.magreportbackend.exception.PermissionDeniedException;
 import ru.magnit.magreportbackend.service.domain.FolderDomainService;
 import ru.magnit.magreportbackend.service.domain.FolderPermissionsDomainService;
 import ru.magnit.magreportbackend.service.domain.ReportDomainService;
@@ -39,6 +41,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -117,18 +120,20 @@ class FolderServiceTest {
         when(userDomainService.getCurrentUser()).thenReturn(getCurrentUser());
         when(folderPermissionsDomainService.getFoldersReportPermissionsForRoles(anyList(), anyList())).thenReturn(Collections.emptyList());
 
-        FolderResponse response = service.getFolder(new FolderRequest().setId(ID));
+        var request = new FolderRequest().setId(ID);
 
-        assertNull(response);
+        assertThrows(PermissionDeniedException.class,  () -> service.getFolder(request));
+
 
         verify(domainService).getFolder(any(), any());
         verifyNoMoreInteractions(domainService);
 
-        Mockito.reset(domainService);
+        Mockito.reset(domainService, folderPermissionsDomainService);
 
         when(domainService.getFolder(any(), any())).thenReturn(getFolderResponse());
+        when(folderPermissionsDomainService.getFoldersReportPermissionsForRoles(anyList(), anyList())).thenReturn(Collections.singletonList(new FolderRoleResponse(ID, FolderAuthorityEnum.WRITE)));
 
-        response = service.getFolder(new FolderRequest().setId(ID));
+       var response = service.getFolder(new FolderRequest().setId(ID));
 
         assertEquals(ID, response.getId());
         assertEquals(NAME, response.getName());
