@@ -40,7 +40,7 @@ function PaperComponent(props) {
 export default function PivotFilterModal(props){
     const classes = PivotCSS();
 
-    const [filterValues, setFilterValues] = useState(props.field?.filter ? new FilterObject(props.field?.filter) : {});
+    const [filterValues, setFilterValues] = useState(props.field?.filter ? new FilterObject({fieldId: props.field?.fieldId, ...props.field?.filter}) : {});
     const [filterType, setFilterType] = useState(props.field?.filter?.filterType ?? 'EQUAL');
     const [newName, setNewName] = useState(props.field?.newName) ;
 
@@ -50,7 +50,7 @@ export default function PivotFilterModal(props){
     }
 
     useEffect(() => {
-        setFilterValues(props.field?.filter ? new FilterObject(props.field?.filter) : {});
+        setFilterValues(props.field?.filter ? new FilterObject({fieldId: props.field?.fieldId, ...props.field?.filter}) : {});
         setFilterType(props.field?.filter?.filterType ?? 'EQUAL');
         setNewName(props.field?.newName)
     },[props.open]) // eslint-disable-line
