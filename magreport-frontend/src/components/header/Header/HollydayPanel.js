@@ -1,7 +1,10 @@
 import React from 'react';
 import isHollyday from  '../../../HollydayFunctions';
+import { HeaderCSS } from './HeaderCSS';
 
-export default function NewYearPanel(props){
+export default function HollydayPanel(props){
+    const classes = HeaderCSS();
+
     const value = isHollyday();
     switch (value){
         case 0:
@@ -148,6 +151,9 @@ export default function NewYearPanel(props){
     </div>
     </div>
     )
+        case 3: return (
+        <div className={classes.roses}></div>
+            )
         default: return (<div/>)
     }
 };

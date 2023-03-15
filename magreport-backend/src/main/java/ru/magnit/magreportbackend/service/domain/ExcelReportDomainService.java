@@ -1,5 +1,7 @@
 package ru.magnit.magreportbackend.service.domain;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -125,7 +127,7 @@ public class ExcelReportDomainService {
         log.debug("\nEncode excel report(" + jobData.id() + "): " + encodeMillis * .001);
     }
 
-    public Path getExcelPivotTable(OlapCubeResponse data, ReportJobMetadataResponse metadata, Map<String, Object> config, OlapExportPivotTableRequest request, Long code, boolean encrypt) {
+    public Path getExcelPivotTable(OlapCubeResponse data, ReportJobMetadataResponse metadata, JsonNode config, OlapExportPivotTableRequest request, Long code, boolean encrypt) {
 
         var reportPath = getPivotPath(reportFolder, request.getCubeRequest().getJobId(), code);
         var rmsInPath = getPivotPath(rmsInFolder, request.getCubeRequest().getJobId(), code);
@@ -233,7 +235,7 @@ public class ExcelReportDomainService {
         }
     }
 
-    public void savePivotToExcel(OlapCubeResponse data, ReportJobMetadataResponse metadata, Map<String, Object> config, OlapExportPivotTableRequest request, Long userId) {
+    public void savePivotToExcel(OlapCubeResponse data, ReportJobMetadataResponse metadata, JsonNode config, OlapExportPivotTableRequest request, Long userId) {
 
         try {
             var writer = writerFactory.createWriter(data, metadata, config, request, getPivotPath(reportFolder, request.getCubeRequest().getJobId(), userId));
