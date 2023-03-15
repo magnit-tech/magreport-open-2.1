@@ -12,8 +12,10 @@ import ru.magnit.magreportbackend.domain.folderreport.FolderAuthorityEnum;
 import ru.magnit.magreportbackend.domain.securityfilter.SecurityFilterFolder;
 import ru.magnit.magreportbackend.domain.user.SystemRoles;
 import ru.magnit.magreportbackend.dto.inner.RoleView;
+import ru.magnit.magreportbackend.dto.inner.folderreport.FolderRoleView;
 import ru.magnit.magreportbackend.dto.request.folder.PermissionCheckRequest;
 import ru.magnit.magreportbackend.dto.request.folderreport.FolderPermissionSetRequest;
+import ru.magnit.magreportbackend.dto.request.folderreport.RoleAddPermissionRequest;
 import ru.magnit.magreportbackend.dto.response.folder.FolderRoleResponse;
 import ru.magnit.magreportbackend.dto.response.permission.DataSetFolderPermissionsResponse;
 import ru.magnit.magreportbackend.dto.response.permission.DataSourceFolderPermissionsResponse;
@@ -37,6 +39,7 @@ import ru.magnit.magreportbackend.mapper.filtertemplate.FilterTemplateFolderPerm
 import ru.magnit.magreportbackend.mapper.filtertemplate.FilterTemplateFolderRoleMapper;
 import ru.magnit.magreportbackend.mapper.folderreport.FolderReportPermissionsResponseMapper;
 import ru.magnit.magreportbackend.mapper.folderreport.FolderRoleMapper;
+import ru.magnit.magreportbackend.mapper.folderreport.FolderRolePermissionMapper;
 import ru.magnit.magreportbackend.mapper.folderreport.FolderRoleViewMapper;
 import ru.magnit.magreportbackend.mapper.report.ReportFolderPermissionsResponseMapper;
 import ru.magnit.magreportbackend.mapper.report.ReportFolderRoleMapper;
@@ -53,6 +56,7 @@ import ru.magnit.magreportbackend.repository.FilterInstanceFolderRoleRepository;
 import ru.magnit.magreportbackend.repository.FilterTemplateFolderRepository;
 import ru.magnit.magreportbackend.repository.FilterTemplateFolderRoleRepository;
 import ru.magnit.magreportbackend.repository.FolderRepository;
+import ru.magnit.magreportbackend.repository.FolderRolePermissionRepository;
 import ru.magnit.magreportbackend.repository.FolderRoleRepository;
 import ru.magnit.magreportbackend.repository.ReportFolderRepository;
 import ru.magnit.magreportbackend.repository.ReportFolderRoleRepository;
@@ -62,6 +66,7 @@ import ru.magnit.magreportbackend.repository.SecurityFilterFolderRoleRepository;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -88,18 +93,22 @@ public class FolderPermissionsDomainService {
     private final FilterTemplateFolderRoleRepository filterTemplateFolderRoleRepository;
     private final SecurityFilterFolderRepository securityFilterFolderRepository;
     private final SecurityFilterFolderRoleRepository securityFilterFolderRoleRepository;
+    private final FolderRolePermissionRepository folderRolePermissionRepository;
 
     private final UserDomainService userDomainService;
     private final RoleDomainService roleDomainService;
     private final FolderRoleMapper folderRoleMapper;
     private final FolderRoleViewMapper folderRoleViewMapper;
     private final ReportFolderRoleMapper reportFolderRoleMapper;
+
     private final DataSetFolderRoleMapper dataSetFolderRoleMapper;
     private final DataSourceFolderRoleMapper dataSourceFolderRoleMapper;
+    private final FolderRolePermissionMapper folderRolePermissionMapper;
     private final ExcelTemplateFolderRoleMapper excelTemplateFolderRoleMapper;
     private final FilterInstanceFolderRoleMapper filterInstanceFolderRoleMapper;
     private final FilterTemplateFolderRoleMapper filterTemplateFolderRoleMapper;
     private final SecurityFilterFolderRoleMapper securityFilterFolderRoleMapper;
+
     private final ReportFolderPermissionsResponseMapper reportFolderPermissionsResponseMapper;
     private final FolderReportPermissionsResponseMapper folderReportPermissionsResponseMapper;
     private final DataSetFolderPermissionsResponseMapper dataSetFolderPermissionsResponseMapper;
@@ -119,12 +128,41 @@ public class FolderPermissionsDomainService {
     public void setFolderReportPermissions(List<Long> folders, FolderPermissionSetRequest request) {
 
         final var folderPermissions = folders
-            .stream()
-            .map(request::setFolderId)
-            .map(folderRoleViewMapper::from)
-            .map(folderRoleMapper::from)
-            .flatMap(Collection::stream)
-            .toList();
+                .stream()
+                .map(request::setFolderId)
+                .map(folderRoleViewMapper::from)
+                .map(folderRoleMapper::from)
+                .flatMap(Collection::stream)
+                .toList();
+
+        folderRoleRepository.saveAll(folderPermissions);
+    }
+
+    @Transactional
+    public void addFolderReportPermissions(List<Long> folders, RoleAddPermissionRequest request) {
+
+        final var folderPermissions = folders
+                .stream()
+                .map(f -> new FolderRoleView(f, request.getRoleId(), request.getPermissions()))
+                .map(folderRoleMapper::from)
+                .toList();
+
+        folderRoleRepository.saveAll(folderPermissions);
+    }
+
+    @Transactional
+    public void updateFolderReportPermissions(List<Long> folders, RoleAddPermissionRequest request) {
+
+        var folderPermissions = folderRoleRepository.getAllByFolderIdInAndRoleIdIn(folders, Collections.singletonList(request.getRoleId()));
+        var permissions = folderRolePermissionMapper.from(request.getPermissions());
+
+
+        folderPermissions.forEach(folderRole -> {
+            folderRolePermissionRepository.deleteAllByFolderRoleId(folderRole.getId());
+            permissions.forEach(p -> p.setFolderRole(folderRole));
+            folderRole.setPermissions(permissions);
+        });
+
 
         folderRoleRepository.saveAll(folderPermissions);
     }
@@ -152,12 +190,12 @@ public class FolderPermissionsDomainService {
     @Transactional
     public void setReportFolderPermissions(List<Long> folders, FolderPermissionSetRequest request) {
         final var folderPermissions = folders
-            .stream()
-            .map(request::setFolderId)
-            .map(folderRoleViewMapper::from)
-            .map(reportFolderRoleMapper::from)
-            .flatMap(Collection::stream)
-            .toList();
+                .stream()
+                .map(request::setFolderId)
+                .map(folderRoleViewMapper::from)
+                .map(reportFolderRoleMapper::from)
+                .flatMap(Collection::stream)
+                .toList();
 
         reportFolderRoleRepository.saveAll(folderPermissions);
     }
@@ -274,6 +312,11 @@ public class FolderPermissionsDomainService {
     }
 
     @Transactional
+    public void deleteFolderPermittedToRole(List<Long> folderIds, Long roleId) {
+        folderRoleRepository.deleteAllByFolderIdInAndRoleId(folderIds, roleId);
+    }
+
+    @Transactional
     public List<Long> getFolderReportBranch(Long rootFolderId) {
         final var result = new ArrayList<Long>();
 
@@ -364,14 +407,14 @@ public class FolderPermissionsDomainService {
     @Transactional
     public void setDataSourceFoldersPermissions(List<Long> folders, FolderPermissionSetRequest request) {
         final var folderPermissions = folders
-            .stream()
-            .map(id -> new FolderPermissionSetRequest().setFolderId(id).setRoles(request.getRoles()))
-            .map(o -> dataSourceFolderRoleMapper.from(o.getRoles())
                 .stream()
-                .map(e -> e.setFolder(new DataSourceFolder(o.getFolderId())))
-                .toList())
-            .flatMap(Collection::stream)
-            .toList();
+                .map(id -> new FolderPermissionSetRequest().setFolderId(id).setRoles(request.getRoles()))
+                .map(o -> dataSourceFolderRoleMapper.from(o.getRoles())
+                        .stream()
+                        .map(e -> e.setFolder(new DataSourceFolder(o.getFolderId())))
+                        .toList())
+                .flatMap(Collection::stream)
+                .toList();
 
         dataSourceFolderRoleRepository.saveAll(folderPermissions);
     }
@@ -379,14 +422,14 @@ public class FolderPermissionsDomainService {
     @Transactional
     public void setDataSetFoldersPermissions(List<Long> folders, FolderPermissionSetRequest request) {
         final var folderPermissions = folders
-            .stream()
-            .map(id -> new FolderPermissionSetRequest().setFolderId(id).setRoles(request.getRoles()))
-            .map(o -> dataSetFolderRoleMapper.from(o.getRoles())
                 .stream()
-                .map(e -> e.setFolder(new DataSetFolder(o.getFolderId())))
-                .toList())
-            .flatMap(Collection::stream)
-            .toList();
+                .map(id -> new FolderPermissionSetRequest().setFolderId(id).setRoles(request.getRoles()))
+                .map(o -> dataSetFolderRoleMapper.from(o.getRoles())
+                        .stream()
+                        .map(e -> e.setFolder(new DataSetFolder(o.getFolderId())))
+                        .toList())
+                .flatMap(Collection::stream)
+                .toList();
 
         dataSetFolderRoleRepository.saveAll(folderPermissions);
     }
@@ -394,14 +437,14 @@ public class FolderPermissionsDomainService {
     @Transactional
     public void setExcelTemplateFoldersPermissions(List<Long> folders, FolderPermissionSetRequest request) {
         final var folderPermissions = folders
-            .stream()
-            .map(id -> new FolderPermissionSetRequest().setFolderId(id).setRoles(request.getRoles()))
-            .map(o -> excelTemplateFolderRoleMapper.from(o.getRoles())
                 .stream()
-                .map(e -> e.setFolder(new ExcelTemplateFolder(o.getFolderId())))
-                .toList())
-            .flatMap(Collection::stream)
-            .toList();
+                .map(id -> new FolderPermissionSetRequest().setFolderId(id).setRoles(request.getRoles()))
+                .map(o -> excelTemplateFolderRoleMapper.from(o.getRoles())
+                        .stream()
+                        .map(e -> e.setFolder(new ExcelTemplateFolder(o.getFolderId())))
+                        .toList())
+                .flatMap(Collection::stream)
+                .toList();
 
         excelTemplateFolderRoleRepository.saveAll(folderPermissions);
     }
@@ -409,14 +452,14 @@ public class FolderPermissionsDomainService {
     @Transactional
     public void setFilterInstanceFoldersPermissions(List<Long> folders, FolderPermissionSetRequest request) {
         final var folderPermissions = folders
-            .stream()
-            .map(id -> new FolderPermissionSetRequest().setFolderId(id).setRoles(request.getRoles()))
-            .map(o -> filterInstanceFolderRoleMapper.from(o.getRoles())
                 .stream()
-                .map(e -> e.setFolder(new FilterInstanceFolder(o.getFolderId())))
-                .toList())
-            .flatMap(Collection::stream)
-            .toList();
+                .map(id -> new FolderPermissionSetRequest().setFolderId(id).setRoles(request.getRoles()))
+                .map(o -> filterInstanceFolderRoleMapper.from(o.getRoles())
+                        .stream()
+                        .map(e -> e.setFolder(new FilterInstanceFolder(o.getFolderId())))
+                        .toList())
+                .flatMap(Collection::stream)
+                .toList();
 
         filterInstanceFolderRoleRepository.saveAll(folderPermissions);
     }
@@ -424,14 +467,14 @@ public class FolderPermissionsDomainService {
     @Transactional
     public void setFilterTemplateFoldersPermissions(List<Long> folders, FolderPermissionSetRequest request) {
         final var folderPermissions = folders
-            .stream()
-            .map(id -> new FolderPermissionSetRequest().setFolderId(id).setRoles(request.getRoles()))
-            .map(o -> filterTemplateFolderRoleMapper.from(o.getRoles())
                 .stream()
-                .map(e -> e.setFolder(new FilterTemplateFolder(o.getFolderId())))
-                .toList())
-            .flatMap(Collection::stream)
-            .toList();
+                .map(id -> new FolderPermissionSetRequest().setFolderId(id).setRoles(request.getRoles()))
+                .map(o -> filterTemplateFolderRoleMapper.from(o.getRoles())
+                        .stream()
+                        .map(e -> e.setFolder(new FilterTemplateFolder(o.getFolderId())))
+                        .toList())
+                .flatMap(Collection::stream)
+                .toList();
 
         filterTemplateFolderRoleRepository.saveAll(folderPermissions);
     }
@@ -439,14 +482,14 @@ public class FolderPermissionsDomainService {
     @Transactional
     public void setSecurityFilterFoldersPermissions(List<Long> folders, FolderPermissionSetRequest request) {
         final var folderPermissions = folders
-            .stream()
-            .map(id -> new FolderPermissionSetRequest().setFolderId(id).setRoles(request.getRoles()))
-            .map(o -> securityFilterFolderRoleMapper.from(o.getRoles())
                 .stream()
-                .map(e -> e.setFolder(new SecurityFilterFolder(o.getFolderId())))
-                .toList())
-            .flatMap(Collection::stream)
-            .toList();
+                .map(id -> new FolderPermissionSetRequest().setFolderId(id).setRoles(request.getRoles()))
+                .map(o -> securityFilterFolderRoleMapper.from(o.getRoles())
+                        .stream()
+                        .map(e -> e.setFolder(new SecurityFilterFolder(o.getFolderId())))
+                        .toList())
+                .flatMap(Collection::stream)
+                .toList();
 
         securityFilterFolderRoleRepository.saveAll(folderPermissions);
     }
@@ -496,14 +539,14 @@ public class FolderPermissionsDomainService {
         final var allPermissions = folderRoles.stream().map(f -> new FolderRoleResponse(f.getFolder().getId(), FolderAuthorityEnum.getById(f.getPermissions().stream().map(o -> o.getAuthority().getId()).max(Long::compareTo).orElse(0L)))).toList();
 
         final var maxPermissions = allPermissions
-            .stream()
-            .collect(Collectors.groupingBy(FolderRoleResponse::getFolderId, Collectors.maxBy(Comparator.comparingInt(o -> o.getAuthority().ordinal()))));
+                .stream()
+                .collect(Collectors.groupingBy(FolderRoleResponse::getFolderId, Collectors.maxBy(Comparator.comparingInt(o -> o.getAuthority().ordinal()))));
 
         return maxPermissions.values()
-            .stream()
-            .filter(Optional::isPresent)
-            .map(folderRoleResponse -> folderRoleResponse.orElseThrow(() -> new IllegalArgumentException(ERROR_TEXT)))
-            .toList();
+                .stream()
+                .filter(Optional::isPresent)
+                .map(folderRoleResponse -> folderRoleResponse.orElseThrow(() -> new IllegalArgumentException(ERROR_TEXT)))
+                .toList();
     }
 
     @Transactional
@@ -514,19 +557,19 @@ public class FolderPermissionsDomainService {
         final var folderRoles = dataSourceFolderRoleRepository.getAllByFolderIdInAndRoleIdIn(folderIds, userRoles);
 
         final var allPermissions = folderRoles
-            .stream()
-            .map(f -> new FolderRoleResponse(f.getFolder().getId(), FolderAuthorityEnum.getById(f.getPermissions().stream().map(o -> o.getAuthority().getId()).max(Long::compareTo).orElse(0L))))
-            .toList();
+                .stream()
+                .map(f -> new FolderRoleResponse(f.getFolder().getId(), FolderAuthorityEnum.getById(f.getPermissions().stream().map(o -> o.getAuthority().getId()).max(Long::compareTo).orElse(0L))))
+                .toList();
 
         final var maxPermissions = allPermissions
-            .stream()
-            .collect(Collectors.groupingBy(FolderRoleResponse::getFolderId, Collectors.maxBy(Comparator.comparingInt(o -> o.getAuthority().ordinal()))));
+                .stream()
+                .collect(Collectors.groupingBy(FolderRoleResponse::getFolderId, Collectors.maxBy(Comparator.comparingInt(o -> o.getAuthority().ordinal()))));
 
         return maxPermissions.values()
-            .stream()
-            .filter(Optional::isPresent)
-            .map(folderRoleResponse -> folderRoleResponse.orElseThrow(() -> new IllegalArgumentException(ERROR_TEXT)))
-            .toList();
+                .stream()
+                .filter(Optional::isPresent)
+                .map(folderRoleResponse -> folderRoleResponse.orElseThrow(() -> new IllegalArgumentException(ERROR_TEXT)))
+                .toList();
     }
 
     @Transactional
@@ -537,19 +580,19 @@ public class FolderPermissionsDomainService {
         final var folderRoles = dataSetFolderRoleRepository.getAllByFolderIdInAndRoleIdIn(folderIds, userRoles);
 
         final var allPermissions = folderRoles
-            .stream()
-            .map(f -> new FolderRoleResponse(f.getFolder().getId(), FolderAuthorityEnum.getById(f.getPermissions().stream().map(o -> o.getAuthority().getId()).max(Long::compareTo).orElse(0L))))
-            .toList();
+                .stream()
+                .map(f -> new FolderRoleResponse(f.getFolder().getId(), FolderAuthorityEnum.getById(f.getPermissions().stream().map(o -> o.getAuthority().getId()).max(Long::compareTo).orElse(0L))))
+                .toList();
 
         final var maxPermissions = allPermissions
-            .stream()
-            .collect(Collectors.groupingBy(FolderRoleResponse::getFolderId, Collectors.maxBy(Comparator.comparingInt(o -> o.getAuthority().ordinal()))));
+                .stream()
+                .collect(Collectors.groupingBy(FolderRoleResponse::getFolderId, Collectors.maxBy(Comparator.comparingInt(o -> o.getAuthority().ordinal()))));
 
         return maxPermissions.values()
-            .stream()
-            .filter(Optional::isPresent)
-            .map(folderRoleResponse -> folderRoleResponse.orElseThrow(() -> new IllegalArgumentException(ERROR_TEXT)))
-            .toList();
+                .stream()
+                .filter(Optional::isPresent)
+                .map(folderRoleResponse -> folderRoleResponse.orElseThrow(() -> new IllegalArgumentException(ERROR_TEXT)))
+                .toList();
     }
 
     @Transactional
@@ -560,19 +603,19 @@ public class FolderPermissionsDomainService {
         final var folderRoles = filterTemplateFolderRoleRepository.getAllByFolderIdInAndRoleIdIn(folderIds, userRoles);
 
         final var allPermissions = folderRoles
-            .stream()
-            .map(f -> new FolderRoleResponse(f.getFolder().getId(), FolderAuthorityEnum.getById(f.getPermissions().stream().map(o -> o.getAuthority().getId()).max(Long::compareTo).orElse(0L))))
-            .toList();
+                .stream()
+                .map(f -> new FolderRoleResponse(f.getFolder().getId(), FolderAuthorityEnum.getById(f.getPermissions().stream().map(o -> o.getAuthority().getId()).max(Long::compareTo).orElse(0L))))
+                .toList();
 
         final var maxPermissions = allPermissions
-            .stream()
-            .collect(Collectors.groupingBy(FolderRoleResponse::getFolderId, Collectors.maxBy(Comparator.comparingInt(o -> o.getAuthority().ordinal()))));
+                .stream()
+                .collect(Collectors.groupingBy(FolderRoleResponse::getFolderId, Collectors.maxBy(Comparator.comparingInt(o -> o.getAuthority().ordinal()))));
 
         return maxPermissions.values()
-            .stream()
-            .filter(Optional::isPresent)
-            .map(folderRoleResponse -> folderRoleResponse.orElseThrow(() -> new IllegalArgumentException(ERROR_TEXT)))
-            .toList();
+                .stream()
+                .filter(Optional::isPresent)
+                .map(folderRoleResponse -> folderRoleResponse.orElseThrow(() -> new IllegalArgumentException(ERROR_TEXT)))
+                .toList();
     }
 
     @Transactional
@@ -583,19 +626,19 @@ public class FolderPermissionsDomainService {
         final var folderRoles = filterInstanceFolderRoleRepository.getAllByFolderIdInAndRoleIdIn(folderIds, userRoles);
 
         final var allPermissions = folderRoles
-            .stream()
-            .map(f -> new FolderRoleResponse(f.getFolder().getId(), FolderAuthorityEnum.getById(f.getPermissions().stream().map(o -> o.getAuthority().getId()).max(Long::compareTo).orElse(0L))))
-            .toList();
+                .stream()
+                .map(f -> new FolderRoleResponse(f.getFolder().getId(), FolderAuthorityEnum.getById(f.getPermissions().stream().map(o -> o.getAuthority().getId()).max(Long::compareTo).orElse(0L))))
+                .toList();
 
         final var maxPermissions = allPermissions
-            .stream()
-            .collect(Collectors.groupingBy(FolderRoleResponse::getFolderId, Collectors.maxBy(Comparator.comparingInt(o -> o.getAuthority().ordinal()))));
+                .stream()
+                .collect(Collectors.groupingBy(FolderRoleResponse::getFolderId, Collectors.maxBy(Comparator.comparingInt(o -> o.getAuthority().ordinal()))));
 
         return maxPermissions.values()
-            .stream()
-            .filter(Optional::isPresent)
-            .map(folderRoleResponse -> folderRoleResponse.orElseThrow(() -> new IllegalArgumentException(ERROR_TEXT)))
-            .toList();
+                .stream()
+                .filter(Optional::isPresent)
+                .map(folderRoleResponse -> folderRoleResponse.orElseThrow(() -> new IllegalArgumentException(ERROR_TEXT)))
+                .toList();
     }
 
     @Transactional
@@ -606,19 +649,19 @@ public class FolderPermissionsDomainService {
         final var folderRoles = excelTemplateFolderRoleRepository.getAllByFolderIdInAndRoleIdIn(folderIds, userRoles);
 
         final var allPermissions = folderRoles
-            .stream()
-            .map(f -> new FolderRoleResponse(f.getFolder().getId(), FolderAuthorityEnum.getById(f.getPermissions().stream().map(o -> o.getAuthority().getId()).max(Long::compareTo).orElse(0L))))
-            .toList();
+                .stream()
+                .map(f -> new FolderRoleResponse(f.getFolder().getId(), FolderAuthorityEnum.getById(f.getPermissions().stream().map(o -> o.getAuthority().getId()).max(Long::compareTo).orElse(0L))))
+                .toList();
 
         final var maxPermissions = allPermissions
-            .stream()
-            .collect(Collectors.groupingBy(FolderRoleResponse::getFolderId, Collectors.maxBy(Comparator.comparingInt(o -> o.getAuthority().ordinal()))));
+                .stream()
+                .collect(Collectors.groupingBy(FolderRoleResponse::getFolderId, Collectors.maxBy(Comparator.comparingInt(o -> o.getAuthority().ordinal()))));
 
         return maxPermissions.values()
-            .stream()
-            .filter(Optional::isPresent)
-            .map(folderRoleResponse -> folderRoleResponse.orElseThrow(() -> new IllegalArgumentException(ERROR_TEXT)))
-            .toList();
+                .stream()
+                .filter(Optional::isPresent)
+                .map(folderRoleResponse -> folderRoleResponse.orElseThrow(() -> new IllegalArgumentException(ERROR_TEXT)))
+                .toList();
     }
 
     @Transactional
@@ -646,7 +689,7 @@ public class FolderPermissionsDomainService {
 
     @Transactional
     public FolderPermissionCheckResponse checkFolderPermission(PermissionCheckRequest request) {
-       var rolePermissions = switch (request.getFolderType()) {
+        var rolePermissions = switch (request.getFolderType()) {
             case PUBLISHED_REPORT -> getFolderReportPermissions(request.getId()).rolePermissions();
             case REPORT_FOLDER -> getReportFolderPermissions(request.getId()).rolePermissions();
             case DATASOURCE -> getDataSourceFolderPermissions(request.getId()).rolePermissions();
@@ -662,9 +705,10 @@ public class FolderPermissionsDomainService {
 
     private FolderPermissionCheckResponse checkFolderPermissions(List<RolePermissionResponse> rolePermissions) {
         final var currentUser = userDomainService.getCurrentUser();
-        final var userRoles = userDomainService.getUserRoles(currentUser.getName(), currentUser.getDomain().name(),null).stream().map(RoleView::getId).collect(Collectors.toSet());
+        final var userRoles = userDomainService.getUserRoles(currentUser.getName(), currentUser.getDomain().name(), null).stream().map(RoleView::getId).collect(Collectors.toSet());
 
-        if(userRoles.contains(SystemRoles.ADMIN.getId()))  return new FolderPermissionCheckResponse(FolderAuthorityEnum.WRITE);
+        if (userRoles.contains(SystemRoles.ADMIN.getId()))
+            return new FolderPermissionCheckResponse(FolderAuthorityEnum.WRITE);
 
         var devRole = roleDomainService.getRoleByName(SystemRoles.DEVELOPER.name());
 
@@ -672,7 +716,8 @@ public class FolderPermissionsDomainService {
                 .filter(rolePermission -> rolePermission.permissions().contains(FolderAuthorityEnum.WRITE))
                 .anyMatch(rolePermission -> userRoles.contains(rolePermission.role().getId()));
 
-        if (userRoles.contains(devRole.getId()) && canWrite ) return new FolderPermissionCheckResponse(FolderAuthorityEnum.WRITE);
+        if (userRoles.contains(devRole.getId()) && canWrite)
+            return new FolderPermissionCheckResponse(FolderAuthorityEnum.WRITE);
 
 
         var canRead = rolePermissions.stream()

@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import ru.magnit.magreportbackend.dto.request.folder.FolderRequest;
 import ru.magnit.magreportbackend.dto.request.folder.PermissionCheckRequest;
 import ru.magnit.magreportbackend.dto.request.folderreport.FolderPermissionSetRequest;
+import ru.magnit.magreportbackend.dto.request.folderreport.RoleAddPermissionRequest;
+import ru.magnit.magreportbackend.dto.response.folder.FolderNodeResponse;
 import ru.magnit.magreportbackend.dto.response.permission.DataSetFolderPermissionsResponse;
 import ru.magnit.magreportbackend.dto.response.permission.DataSourceFolderPermissionsResponse;
 import ru.magnit.magreportbackend.dto.response.permission.ExcelTemplateFolderPermissionsResponse;
@@ -13,19 +15,23 @@ import ru.magnit.magreportbackend.dto.response.permission.FilterTemplateFolderPe
 import ru.magnit.magreportbackend.dto.response.permission.FolderPermissionCheckResponse;
 import ru.magnit.magreportbackend.dto.response.permission.FolderPermissionsResponse;
 import ru.magnit.magreportbackend.dto.response.permission.ReportFolderPermissionsResponse;
+import ru.magnit.magreportbackend.dto.response.permission.RolePermissionResponse;
 import ru.magnit.magreportbackend.dto.response.permission.SecurityFilterFolderPermissionsResponse;
+import ru.magnit.magreportbackend.service.domain.FolderDomainService;
 import ru.magnit.magreportbackend.service.domain.FolderPermissionsDomainService;
-import ru.magnit.magreportbackend.service.domain.RoleDomainService;
-import ru.magnit.magreportbackend.service.domain.UserDomainService;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class FolderPermissionsService {
 
     private final FolderPermissionsDomainService service;
-    private final UserDomainService userDomainService;
 
-    private final RoleDomainService roleDomainService;
+    private final FolderDomainService folderDomainService;
 
     public FolderPermissionsResponse getFolderReportPermissions(FolderRequest request) {
 
@@ -33,11 +39,38 @@ public class FolderPermissionsService {
     }
 
     public FolderPermissionsResponse setFolderReportPermissions(FolderPermissionSetRequest request) {
-        final var folders = service.getFolderReportBranch(request.getFolderId());
+
+        var currentFolderRolePermission = service.getFolderReportPermissions(request.getFolderId());
+        Set<Long> folders = new HashSet<>();
         folders.add(request.getFolderId());
 
-        service.clearFolderReportsPermissions(folders);
-        service.setFolderReportPermissions(folders, request);
+        request.setDownSetPermissions(true);
+        request.setUpSetPermissions(true);
+
+        if (request.isDownSetPermissions()) {
+            folders.addAll(service.getFolderReportBranch(request.getFolderId()));
+        }
+
+        if (request.isUpSetPermissions()) {
+            folders.addAll(folderDomainService.getPathToFolder(request.getFolderId()).stream().map(FolderNodeResponse::id).toList());
+        }
+
+        var mappingFolderRolePermissions = request.getRoles().stream().collect(Collectors.toMap(RoleAddPermissionRequest::getRoleId, RoleAddPermissionRequest::getPermissions));
+
+        for (RolePermissionResponse r : currentFolderRolePermission.rolePermissions()) {
+            if (mappingFolderRolePermissions.containsKey(r.role().getId())) {
+                var newPermission = mappingFolderRolePermissions.get(r.role().getId());
+                if (!newPermission.equals(r.permissions()))
+                    service.updateFolderReportPermissions(new ArrayList<>(folders), new RoleAddPermissionRequest(r.role().getId(), newPermission));
+                mappingFolderRolePermissions.remove(r.role().getId());
+            } else
+                service.deleteFolderPermittedToRole(new ArrayList<>(folders), r.role().getId());
+        }
+
+        mappingFolderRolePermissions.forEach((key, value) -> {
+            service.deleteFolderPermittedToRole(new ArrayList<>(folders), key);
+            service.addFolderReportPermissions(new ArrayList<>(folders), new RoleAddPermissionRequest(key, value));
+        });
 
         return service.getFolderReportPermissions(request.getFolderId());
     }
@@ -150,7 +183,6 @@ public class FolderPermissionsService {
     public FolderPermissionCheckResponse checkFolderPermission(PermissionCheckRequest request) {
         return service.checkFolderPermission(request);
     }
-
 
 
 }
