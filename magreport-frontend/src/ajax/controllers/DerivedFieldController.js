@@ -76,7 +76,7 @@ export default function DerivedFieldController(dataHub){
     }
 
     this.getFieldsAndExpressions = (jobId, reportId, otherDerivedFields = [], callback) => {
-        console.log('hi');
+
         const getMetadataRequest = {
             serviceUrl: GET_JOB_METADATA,
             method: METHOD,

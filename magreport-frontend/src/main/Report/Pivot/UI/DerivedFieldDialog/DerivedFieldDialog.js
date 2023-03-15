@@ -194,7 +194,7 @@ function DerivedFieldDialog(props){
     */
     // Сохранение нового поля
     function handleSaveNewField(obj) {
-        saveNewField(obj, reportId, user.current.name, listOfChangedFields.current, (ok, data, originalData, str, variant, changedList) => {
+        saveNewField(obj, reportId, user.current.name, listOfChangedFields.current, otherDerivedFields, (ok, data, originalData, str, variant, changedList) => {
             if(ok) {
                 enqueueSnackbar(str, variant)
                 setEditedDerivedFields(data)
@@ -210,7 +210,7 @@ function DerivedFieldDialog(props){
 
     // Сохранение отредактированого поля
     function handleSaveEditField(obj) {
-        saveEditField(obj, reportId, user.current.name, listOfChangedFields.current, (ok, data, originalData, str, variant, changedList) => {
+        saveEditField(obj, reportId, user.current.name, listOfChangedFields.current, otherDerivedFields, (ok, data, originalData, str, variant, changedList) => {
             if(ok) {
                 enqueueSnackbar(str, variant)
                 setEditedDerivedFields(data)
@@ -223,6 +223,7 @@ function DerivedFieldDialog(props){
         })
     }
 
+    // Сохранение всех полей
     function handleSaveAllFields() {
         saveAllFields(reportId, user.current.name, listOfChangedFields.current, otherDerivedFields, (ok, data, str, variant, originalData, changedList) => {
             if(ok) {
@@ -247,12 +248,12 @@ function DerivedFieldDialog(props){
             listOfChangedFields.current = listOfChangedFields.current.filter((item) => item.id !== 'new')
             setActiveIndex(null)
         } else {
-            deleteField(id, reportId, user.current.name, listOfChangedFields.current, (ok, data, originalData, str, variant, changedList) => {
+            deleteField(id, reportId, user.current.name, listOfChangedFields.current, otherDerivedFields, (ok, data, originalData, str, variant, changedList) => {
                 if(ok) {
                     enqueueSnackbar(str, variant)
+                    setActiveIndex(id === activeIndex ? null : activeIndex)
                     setEditedDerivedFields(data)
                     setLoadedDerivedFields(originalData)
-                    setActiveIndex(id === activeIndex ? null : activeIndex)
                     listOfChangedFields.current = changedList
                     thereHaveBeenChanges.current = true
                 } else {
@@ -303,7 +304,7 @@ function DerivedFieldDialog(props){
             <DialogActions>
 				<Button
 					color="primary"
-                    // disabled = {disabledSaveAllButton}
+                    disabled = {disabledSaveAllButton}
                     onClick={() => handleSaveAllFields()}
 				>
 					Сохранить все и выйти
