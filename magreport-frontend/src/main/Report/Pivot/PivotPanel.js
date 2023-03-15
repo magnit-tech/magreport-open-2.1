@@ -870,7 +870,7 @@ function PivotPanel(props){
     // Вызывается по подтверждению задания объекта фильтрации в модальном окне
     function handleSetFilterValue(filterObject){
 
-        if (filterObject.values.length > 0 || filterObject.filterType === "BLANK"){
+        if (filterObject.values?.length > 0 || filterObject.filterType === "BLANK"){
         oldAndNewConfiguration.current.newConfiguration.setFieldFilterByFieldIndex(oldAndNewConfiguration.current.newFieldIndex, filterObject);
         oldAndNewConfiguration.current.newConfiguration.setColumnFrom(0);
         oldAndNewConfiguration.current.newConfiguration.setRowFrom(0);
