@@ -936,7 +936,6 @@ function PivotPanel(props){
     function handleSetFilterValue(filterObject, newName){
 
         if (filterObject.values.length > 0 || filterObject.filterType === "BLANK"){
-        oldAndNewConfiguration.current.newConfiguration.setNewNameByFieldIndex('filterFields', oldAndNewConfiguration.current.newFieldIndex, newName);
         oldAndNewConfiguration.current.newConfiguration.setFieldFilterByFieldIndex(oldAndNewConfiguration.current.newFieldIndex, filterObject);
         oldAndNewConfiguration.current.newConfiguration.setColumnFrom(0);
         oldAndNewConfiguration.current.newConfiguration.setRowFrom(0);
