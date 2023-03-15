@@ -855,4 +855,9 @@ export const PivotCSS = makeStyles(theme => ({
         fontSize: '16px',
         textAlign: 'center',
     },
+    DFD_errorMessage: {
+        width: '600px',
+        fontSize: '13px',
+        color: 'red'
+    }
 }))
