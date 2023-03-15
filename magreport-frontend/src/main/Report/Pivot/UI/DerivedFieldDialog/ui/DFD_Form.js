@@ -207,6 +207,7 @@ export default function DerivedFieldDialogForm(props){
             <DialogActions style={{justifyContent: 'space-between'}}>
                 { isReportDeveloper &&
                     <FormControlLabel
+                    disabled={!currentField.owner}
                         control={<Switch checked={currentField.isPublic} onChange={(event) => handleChangePublic(event.target.checked)} name="checkedA" />}
                         label="Общего назначения"
                     />

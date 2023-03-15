@@ -4,7 +4,6 @@ import { nodeType } from "../../../maglangFormulaEditor/FormulaEditor/FormulaEdi
 
 // Вспомогательные функции
 function getAll(reportId, ownerName, listOfChangedFields, otherDerivedFields, callback) {
-	console.log('1');
 	dataHub.derivedFieldController.getAllDerivedFields(reportId, otherDerivedFields, ({ok, data}) => {
 
 		if(ok) {
@@ -72,7 +71,7 @@ export function loadFieldsAndExpressions(jobId, reportId, otherDerivedFields, ca
 	})
 }
 
-export function saveNewField(obj, reportId, ownerName, listOfChangedFields, callback) {
+export function saveNewField(obj, reportId, ownerName, listOfChangedFields, otherDerivedFields, callback) {
 	
 	let str = '';
 	let variant = '';
@@ -85,7 +84,7 @@ export function saveNewField(obj, reportId, ownerName, listOfChangedFields, call
 		
 			let changedListWithoutNew = changedList.filter(item => item.id !== 'new')
 
-			getAll(reportId, ownerName, changedListWithoutNew, (data, originalData) => {
+			getAll(reportId, ownerName, changedListWithoutNew, otherDerivedFields, (data, originalData) => {
 				return callback(true, data, originalData, str, variant, changedListWithoutNew)
 			})
 		} else {
@@ -96,7 +95,7 @@ export function saveNewField(obj, reportId, ownerName, listOfChangedFields, call
 	})
 }
 
-export function saveEditField(obj, reportId, ownerName, listOfChangedFields, callback) {
+export function saveEditField(obj, reportId, ownerName, listOfChangedFields, otherDerivedFields, callback) {
 	
 	let str = '';
 	let variant = '';
@@ -107,7 +106,7 @@ export function saveEditField(obj, reportId, ownerName, listOfChangedFields, cal
 			str = `Производное поле "${obj.name}" успешно обновлено`
 			variant = {variant: "success"}
 			
-			getAll(reportId, ownerName, changedList, (data, originalData) => {
+			getAll(reportId, ownerName, changedList, otherDerivedFields, (data, originalData) => {
 				return callback(true, data, originalData, str, variant, changedList)
 			})
 		} else {
@@ -118,7 +117,7 @@ export function saveEditField(obj, reportId, ownerName, listOfChangedFields, cal
 	})
 }
 
-export function deleteField(id, reportId, ownerName, listOfChangedFields,  callback) {
+export function deleteField(id, reportId, ownerName, listOfChangedFields, otherDerivedFields, callback) {
 	let str = '';
 	let variant = '';
 
@@ -129,7 +128,7 @@ export function deleteField(id, reportId, ownerName, listOfChangedFields,  callb
 			str = "Производное поле успешно удаленно"
 			variant = {variant: "success"}
 		
-			getAll(reportId, ownerName, changedList, (data, originalData) => {
+			getAll(reportId, ownerName, changedList, otherDerivedFields, (data, originalData) => {
 				return callback(true, data, originalData, str, variant, changedList)
 			})
 		} else {

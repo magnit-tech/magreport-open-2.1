@@ -104,7 +104,7 @@ function DerivedFieldDialogList(props){
 								}
 							/>
 
-							<ListItemSecondaryAction>
+							{field.owner && <ListItemSecondaryAction>
 								{(!field.isCorrect || !field.isFormulaCorrect || field.needSave || !!field?.errorMessage) && <IconButton edge="end">
 									<HtmlTooltip
 										title={
@@ -125,7 +125,7 @@ function DerivedFieldDialogList(props){
 										<DeleteIcon />
 									</IconButton>
                     			</Tooltip>
-							</ListItemSecondaryAction>
+							</ListItemSecondaryAction>}
 							
 						</ListItem>
 					)

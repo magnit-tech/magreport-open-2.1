@@ -138,7 +138,7 @@ export default function FormulaEditor(props){
 
       props.ownFields.forEach((value, key) => {
         if(props.publicFields.get(key)) {
-          result.push({label: `${key}; ${value.userName}`, type: "variable", detail: `${key}; ${value.userName}`})
+          result.push({label: `${key}(${value.userName})`, type: "variable", detail: `${key}(${value.userName})`})
         } else {
           result.push({label: key, type: "variable", detail: key})
         }
@@ -146,7 +146,7 @@ export default function FormulaEditor(props){
 
       props.otherFields.forEach((value, key) => {
         if(props.publicFields.get(key) || props.ownFields.get(key)) {
-          result.push({label: `${key}; ${value.userName}`, type: "variable", detail: `${key}; ${value.userName}`})
+          result.push({label: `${key}(${value.userName})`, type: "variable", detail: `${key}(${value.userName})`})
         } else {
           result.push({label: key, type: "variable", detail: key})
         }
@@ -193,8 +193,8 @@ export default function FormulaEditor(props){
 
         props.ownFields.forEach((value, key) => {
           if(props.publicFields.get(key)) {
-            mIdtoName.set(value.id, `${key}; ${value.userName}`); 
-            mNametoId.set(`${key}; ${value.userName}`, value.id)
+            mIdtoName.set(value.id, `${key}(${value.userName})`); 
+            mNametoId.set(`${key}(${value.userName})`, value.id)
           } else {
             mIdtoName.set(value.id, key); 
             mNametoId.set(key, value.id)
@@ -203,8 +203,8 @@ export default function FormulaEditor(props){
 
         props.otherFields.forEach((value, key) => {
           if(props.publicFields.get(key) || props.ownFields.get(key)) {
-            mIdtoName.set(value.id, `${key}; ${value.userName}`); 
-            mNametoId.set(`${key}; ${value.userName}`, value.id)
+            mIdtoName.set(value.id, `${key}(${value.userName})`); 
+            mNametoId.set(`${key}(${value.userName})`, value.id)
           } else {
             mIdtoName.set(value.id, key); 
             mNametoId.set(key, value.id)
@@ -232,9 +232,7 @@ export default function FormulaEditor(props){
               return match;
             }
             else{
-              console.log(id);
               let name = derivedFieldIdToName.get(id);
-              console.log(name);
               return '[[' + (name ? name : "__#" + id) + ']]';
             }
           }
