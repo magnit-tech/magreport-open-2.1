@@ -89,7 +89,7 @@ function DerivedFieldDialogList(props){
 										>
 											{field.modified ? new Date(field.modified).toLocaleString('ru', options) : ''}
 										</Typography>
-										{ field.userName &&
+										{ (!field.isPublic && field.userName) &&
 											<>
 											{" — "}
 											<Typography

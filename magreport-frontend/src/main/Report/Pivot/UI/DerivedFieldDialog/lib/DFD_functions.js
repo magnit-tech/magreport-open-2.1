@@ -3,8 +3,9 @@ import dataHub from "ajax/DataHub";
 import { nodeType } from "../../../maglangFormulaEditor/FormulaEditor/FormulaEditor";
 
 // Вспомогательные функции
-function getAll(reportId, ownerName, listOfChangedFields, callback) {
-	dataHub.derivedFieldController.getAllDerivedFields(reportId, ({ok, data}) => {
+function getAll(reportId, ownerName, listOfChangedFields, otherDerivedFields, callback) {
+	console.log('1');
+	dataHub.derivedFieldController.getAllDerivedFields(reportId, otherDerivedFields, ({ok, data}) => {
 
 		if(ok) {
 			let res = [];
@@ -36,8 +37,8 @@ function getAll(reportId, ownerName, listOfChangedFields, callback) {
 
 
 // Экспортирующиеся функции
-export function loadAllFields(reportId, userName, callback) {
-	dataHub.derivedFieldController.getAllDerivedFields(reportId, ({ok, data}) => {
+export function loadAllFields(reportId, userName, otherDerivedFields, callback) {
+	dataHub.derivedFieldController.getAllDerivedFields(reportId, otherDerivedFields, ({ok, data}) => {
 		if(ok) {
 			const editedData = data.map((el) => {
 				el["originalName"] = el.name;
@@ -54,8 +55,8 @@ export function loadAllFields(reportId, userName, callback) {
 	})
 }
 
-export function loadFieldsAndExpressions(jobId, reportId, callback) {
-	dataHub.derivedFieldController.getFieldsAndExpressions(jobId, reportId, ({ok, data}) => {
+export function loadFieldsAndExpressions(jobId, reportId, otherDerivedFields, callback) {
+	dataHub.derivedFieldController.getFieldsAndExpressions(jobId, reportId, otherDerivedFields, ({ok, data}) => {
 		if(ok) {
 			let functionsList = data.expressions.map(
 				(f) => ({functionId: f.id, functionName: f.name, functionDesc: f.description, functionSignature: ""}));
@@ -139,10 +140,10 @@ export function deleteField(id, reportId, ownerName, listOfChangedFields,  callb
 	})
 }
 
-function saveAllAfterPromise(results, reportId, ownerName, callback) {
+function saveAllAfterPromise(results, reportId, ownerName, otherDerivedFields, callback) {
 
 	if (results.length > 0) {
-		getAll(reportId, ownerName, results, (data, originalData) => {
+		getAll(reportId, ownerName, results, otherDerivedFields, (data, originalData) => {
 			return callback(false, data, originalData);
 		})
 	} else {
@@ -151,7 +152,7 @@ function saveAllAfterPromise(results, reportId, ownerName, callback) {
 
 }
 
-export function saveAllFields(reportId, ownerName, listOfChangedFields, callback) {
+export function saveAllFields(reportId, ownerName, listOfChangedFields, otherDerivedFields, callback) {
 
 	let promises = []
 	let str = '';
@@ -176,7 +177,7 @@ export function saveAllFields(reportId, ownerName, listOfChangedFields, callback
 	})
 
 	Promise.all(promises)
-		.then(results  => saveAllAfterPromise(results.filter(i => typeof i === 'object'), reportId, ownerName, (bool, data, originalData) => {
+		.then(results  => saveAllAfterPromise(results.filter(i => typeof i === 'object'), reportId, ownerName, otherDerivedFields, (bool, data, originalData) => {
 			if(bool) {
 				str = 'Все производные поля успешно сохранены'
 				variant = {variant: "success"}
@@ -214,6 +215,31 @@ export function checkForDifferenceFromOriginalField(obj, loadedDerivedFields) {
 	}
 
 	return result
+}
+
+export function fieldNamevalidation(isPublic, debouncedSearchTerm, currentField, publicFields, ownFields, callback ) {
+	let item = {}
+	let msg = ''
+
+	if (isPublic) {
+		if (publicFields.get(debouncedSearchTerm)) {
+			item = {...currentField, isCorrect: false}
+			msg = 'Название поля должно быть уникальным среди полей общего назначения!'
+		} else {
+			item = {...currentField, isCorrect: true}
+			msg = ''
+		}
+	} else {
+		if (ownFields.get(debouncedSearchTerm)) {
+			item = {...currentField, isCorrect: false}
+			msg = 'Название поля должно быть уникальным среди собственных полей!'
+		} else {
+			item = {...currentField, isCorrect: true}
+			msg = ''
+		}
+	}
+
+	return callback(item, msg)
 }
 
 // Построение семнатического дерева формулы в серверной форме 

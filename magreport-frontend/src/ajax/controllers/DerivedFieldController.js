@@ -16,9 +16,11 @@ const EXPRESSIONS_GET_ALL =  CONTROLLER_URL + '/expressions/get-all';
 
 export default function DerivedFieldController(dataHub){
 
-    this.getAllDerivedFields = (reportId, callback) => {
+    this.getAllDerivedFields = (reportId, otherDerivedFields = [], callback) => {
+        
         const body = { 
-            reportId
+            reportId,
+            additionalFields: otherDerivedFields
         }
 
         return dataHub.requestService(GET_DERIVED_FIELDS, METHOD, body, callback); 
@@ -73,8 +75,8 @@ export default function DerivedFieldController(dataHub){
         return dataHub.requestService(EXPRESSIONS_GET_ALL, METHOD, {}, callback);
     }
 
-    this.getFieldsAndExpressions = (jobId, reportId, callback) => {
-
+    this.getFieldsAndExpressions = (jobId, reportId, otherDerivedFields = [], callback) => {
+        console.log('hi');
         const getMetadataRequest = {
             serviceUrl: GET_JOB_METADATA,
             method: METHOD,
@@ -87,7 +89,8 @@ export default function DerivedFieldController(dataHub){
             serviceUrl: GET_DERIVED_FIELDS,
             method: METHOD,
             body: {
-                reportId: reportId
+                reportId: reportId,
+                additionalFields: otherDerivedFields
             }
         }
 

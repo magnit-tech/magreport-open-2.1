@@ -261,6 +261,8 @@ function PivotPanel(props){
 
     const [avaibleConfigs, setAvaibleConfigs] = useState(null);
 
+    const [otherDerivedFields, setOtherDerivedFields] = useState([])
+
     const [showConfigDialog, setShowConfigDialog] = useState(false);
     const [showConfigSaveDialog, setShowConfigSaveDialog] = useState(false);
 
@@ -300,33 +302,37 @@ function PivotPanel(props){
             const { columnFrom, columnCount, rowFrom, rowCount } = configData
 
             // Проверка на валидацию сохраненных полей конфигурации olapConfig с полями из Metadata
-            const isSaveConfigValide = !validateSaveConfig(configData.fieldsLists, newConfiguration.fieldsLists.allFields, newConfiguration.fieldsLists.derivedFields)
+            validateSaveConfig(configData.fieldsLists, newConfiguration.fieldsLists.allFields, newConfiguration.fieldsLists.derivedFields, (validate, otherDeriverdFields) => {
 
-            if (isSaveConfigValide) {
-                newConfiguration.restore(configData);
-                if (columnFrom>columnCount || rowFrom>rowCount ) {
-                    newConfiguration.setColumnFrom(0);
-                    newConfiguration.setRowFrom(0);
-                }
-                
-                let sortingValuesAreValide = true
-
-                if (!newConfiguration.sortOrder?.rowSort && !newConfiguration.sortOrder?.columnSort) {
-                    sortingValuesAreValide = false
-                }
-
-                dataProviderRef.current.loadDataForNewFieldsLists(newConfiguration.fieldsLists, newConfiguration.filterGroup, newConfiguration.metricFilterGroup, sortingValuesAreValide ? newConfiguration.sortOrder : {}, newConfiguration.columnFrom, columnCount, newConfiguration.rowFrom, rowCount);
+                if (validate) {
+                    newConfiguration.restore(configData);
+                    if (columnFrom>columnCount || rowFrom>rowCount ) {
+                        newConfiguration.setColumnFrom(0);
+                        newConfiguration.setRowFrom(0);
+                    }
+                    
+                    let sortingValuesAreValide = true
     
-                oldAndNewConfiguration.current = {
-                    oldConfiguration: new PivotConfiguration(pivotConfiguration),
-                    newConfiguration: new PivotConfiguration(newConfiguration)
+                    if (!newConfiguration.sortOrder?.rowSort && !newConfiguration.sortOrder?.columnSort) {
+                        sortingValuesAreValide = false
+                    }
+    
+                    dataProviderRef.current.loadDataForNewFieldsLists(newConfiguration.fieldsLists, newConfiguration.filterGroup, newConfiguration.metricFilterGroup, sortingValuesAreValide ? newConfiguration.sortOrder : {}, newConfiguration.columnFrom, columnCount, newConfiguration.rowFrom, rowCount);
+        
+                    oldAndNewConfiguration.current = {
+                        oldConfiguration: new PivotConfiguration(pivotConfiguration),
+                        newConfiguration: new PivotConfiguration(newConfiguration)
+                    }
+    
+                    setSortingValues(sortingValuesAreValide ? newConfiguration.sortOrder : {})
+                    setOtherDerivedFields(otherDeriverdFields)
+    
+                } else {
+                    enqueueSnackbar('Не удалось загрузить конфигурацию. Поля в конфигурации не соответсвуют отчету', {variant : "error"});
                 }
+            })
 
-                setSortingValues(sortingValuesAreValide ? newConfiguration.sortOrder : {})
 
-            } else {
-                enqueueSnackbar('Не удалось загрузить конфигурацию. Поля в конфигурации не соответсвуют отчету', {variant : "error"});
-            }
         }
 
         setSearchParams({view: 'pivot'})
@@ -366,7 +372,6 @@ function PivotPanel(props){
                 }
 
                 setSortingValues(sortingValuesAreValide ? newConfiguration.sortOrder : {})
-
                 configOlap.current.loadChosenConfig(data.olapConfig.data, (ok) => {
                     if (ok) {
                         handleSetConfigDialog('closeConfigDialog')
@@ -480,23 +485,26 @@ function PivotPanel(props){
     // При выборе определенной конфигураций и записываем olapConfigData в текущую конфигурацию => обновляем DataLoader
     function handleLoadCertainConfig({data, name, reportOlapConfigId}) {
 
-        const isCertainConfigValide = !validateSaveConfig(JSON.parse(data).fieldsLists, pivotConfiguration.fieldsLists.allFields, pivotConfiguration.fieldsLists.derivedFields)
+        validateSaveConfig(JSON.parse(data).fieldsLists, pivotConfiguration.fieldsLists.allFields, pivotConfiguration.fieldsLists.derivedFields, (validate, otherDeriverdFields) => {
+            if (validate) {
+                setTableDataLoadStatus(1);
+                setSearchParams({view: 'pivot'})
+                setOtherDerivedFields(otherDeriverdFields)
+                return configOlap.current.loadChosenConfig(data, (ok) => {
+                    if (ok) {
+                        resetDataLoader()
+                        handleSetConfigDialog('closeConfigDialog')
+                        return enqueueSnackbar('Конфигурация "' + name + '" успешно загружена' , {variant : "success"});
+                    }
+                    return enqueueSnackbar('Не удалось загрузить конфигурацию "' + name + '". Некорректные данные.', {variant : "error"});
+                })
+            }
+    
+            enqueueSnackbar('Не удалось загрузить конфигурацию. Поля в конфигурации не соответсвуют отчету', {variant : "error"})
+            return configOlap.current.loadChosenConfig(reportOlapConfigId, (ok) => {})
+        })
 
-        if (isCertainConfigValide) {
-            setTableDataLoadStatus(1);
-            setSearchParams({view: 'pivot'})
-            return configOlap.current.loadChosenConfig(data, (ok) => {
-                if (ok) {
-                    resetDataLoader()
-                    handleSetConfigDialog('closeConfigDialog')
-                    return enqueueSnackbar('Конфигурация "' + name + '" успешно загружена' , {variant : "success"});
-                }
-                return enqueueSnackbar('Не удалось загрузить конфигурацию "' + name + '". Некорректные данные.', {variant : "error"});
-            })
-        }
 
-        enqueueSnackbar('Не удалось загрузить конфигурацию. Поля в конфигурации не соответсвуют отчету', {variant : "error"})
-        return configOlap.current.loadChosenConfig(reportOlapConfigId, (ok) => {})
     }
 
     // Сохраняем по умолчанию для отчета/задания
@@ -1472,6 +1480,7 @@ function PivotPanel(props){
                     jobId = {props.jobId}
                     reportId = {props.reportId}
                     isReportDeveloper = {isReportDeveloper.current}
+                    otherDerivedFields = {otherDerivedFields}
                     onCancel = {(bool) => handleDerivedFieldCloseAndUpdate(bool)}
                 />
             }

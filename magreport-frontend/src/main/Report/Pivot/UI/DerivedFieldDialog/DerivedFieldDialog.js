@@ -41,7 +41,7 @@ function PaperComponent(props) {
 
 function DerivedFieldDialog(props){
 
-    const { open, jobId, reportId, isReportDeveloper } = props
+    const { open, jobId, reportId, isReportDeveloper, otherDerivedFields } = props
 
     const classes = PivotCSS();
     const { enqueueSnackbar } = useSnackbar();
@@ -59,9 +59,24 @@ function DerivedFieldDialog(props){
 
     const allFieldsAndExpressions = useRef([])
 
+    const publicFields = useRef(new Map())
+    const ownFields = useRef(new Map())
+    const otherFields = useRef(new Map())
+
     const thereHaveBeenChanges = useRef(false)
 
     useEffect(() => onLoadAllFields(), [open]) // eslint-disable-line
+
+    useEffect(() =>{
+        const publicFieldsArray = loadedDerivedFields.filter(item => item.isPublic)
+        const ownFieldsArray = loadedDerivedFields.filter(item => (!item.isPublic && item.userName === user.current.name))
+        const otherFieldsArray = loadedDerivedFields.filter(item => (!item.isPublic && item.userName !== user.current.name))
+
+        publicFieldsArray.forEach(field => publicFields.current.set(field.name, field))
+        ownFieldsArray.forEach(field => ownFields.current.set(field.name, field))
+        otherFieldsArray.forEach(field => otherFields.current.set(field.name, field))
+
+    }, [loadedDerivedFields, user]) 
 
     const disabledSaveAllButton = useMemo(() => {
         let result = new Set()
@@ -88,7 +103,7 @@ function DerivedFieldDialog(props){
     function onLoadAllFields() {
         setLoading(true)
 
-        loadAllFields(reportId, user.current.name, (data, editedData) => {
+        loadAllFields(reportId, user.current.name, otherDerivedFields, (data, editedData) => {
             setLoadedDerivedFields(data)
             setEditedDerivedFields(editedData)
             onLoadFieldsAndExpressions()
@@ -96,7 +111,7 @@ function DerivedFieldDialog(props){
     }
     // Загрузка всех полей и выражений
     function onLoadFieldsAndExpressions() {
-        loadFieldsAndExpressions(jobId, reportId, (obj) => {
+        loadFieldsAndExpressions(jobId, reportId, otherDerivedFields, (obj) => {
             allFieldsAndExpressions.current = obj
             setLoading(false)
         })
@@ -209,7 +224,7 @@ function DerivedFieldDialog(props){
     }
 
     function handleSaveAllFields() {
-        saveAllFields(reportId, user.current.name, listOfChangedFields.current, (ok, data, str, variant, originalData, changedList) => {
+        saveAllFields(reportId, user.current.name, listOfChangedFields.current, otherDerivedFields, (ok, data, str, variant, originalData, changedList) => {
             if(ok) {
                 enqueueSnackbar(str, variant)
                 props.onCancel(true)
@@ -275,6 +290,9 @@ function DerivedFieldDialog(props){
                             allFieldsAndExpressions = {allFieldsAndExpressions.current}
                             loadedDerivedFields = {loadedDerivedFields}
                             editedDerivedFields = {editedDerivedFields}
+                            publicFields = {publicFields.current}
+                            ownFields = {ownFields.current}
+                            otherFields = {otherFields.current}
                             onEdit = {onEditObjectToSave}
                             onSave = {(obj) => obj.id === 'new' ? handleSaveNewField(obj) : handleSaveEditField(obj)}
                         />
@@ -285,7 +303,7 @@ function DerivedFieldDialog(props){
             <DialogActions>
 				<Button
 					color="primary"
-                    disabled = {disabledSaveAllButton}
+                    // disabled = {disabledSaveAllButton}
                     onClick={() => handleSaveAllFields()}
 				>
 					Сохранить все и выйти
