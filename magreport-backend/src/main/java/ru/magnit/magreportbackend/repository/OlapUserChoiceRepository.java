@@ -9,4 +9,6 @@ public interface OlapUserChoiceRepository extends JpaRepository<OlapUserChoice, 
 
     OlapUserChoice getOlapUserChoiceByReportIdAndUserId(Long reportId, Long userId);
 
+    void deleteAllByReportId(Long reportId);
+
 }

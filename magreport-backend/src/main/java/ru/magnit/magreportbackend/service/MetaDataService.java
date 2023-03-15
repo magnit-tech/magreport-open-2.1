@@ -4,17 +4,20 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.magnit.magreportbackend.config.DatasourceCheckQueryConfig;
+import ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum;
 import ru.magnit.magreportbackend.dto.inner.datasource.DataSourceData;
 import ru.magnit.magreportbackend.dto.response.datasource.DataSourceObjectResponse;
 import ru.magnit.magreportbackend.dto.response.datasource.ObjectFieldResponse;
 import ru.magnit.magreportbackend.exception.MetaDataQueryException;
 import ru.magnit.magreportbackend.service.dao.ConnectionPoolManager;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,7 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MetaDataService {
 
-    public static final String QUERY_ERROR = "Error while trying to query datasource table types:\n";
+    public static final String QUERY_ERROR = "Error while trying to query datasource(id:%s) table types:%n %s";
     private final ConnectionPoolManager poolManager;
 
     private final DatasourceCheckQueryConfig checkQueryConfig;
@@ -40,7 +43,7 @@ public class MetaDataService {
             }
 
         } catch (SQLException ex) {
-            throw new MetaDataQueryException("Error while trying to query datasource catalogs:\n" + dataSource, ex);
+            throw new MetaDataQueryException(String.format("Error while trying to query datasource(id:%s) catalogs:%n %s", dataSource.id(), ex.getMessage()), ex);
         }
         return result;
     }
@@ -56,7 +59,7 @@ public class MetaDataService {
             }
 
         } catch (SQLException ex) {
-            throw new MetaDataQueryException("Error while trying to query datasource schemas:\n" + dataSource, ex);
+            throw new MetaDataQueryException(String.format("Error while trying to query datasource(id:%s) schemas:%n %s", dataSource.id(), ex.getMessage()), ex);
         }
         return result;
     }
@@ -79,7 +82,7 @@ public class MetaDataService {
             }
 
         } catch (SQLException ex) {
-            throw new MetaDataQueryException("Error while trying to query datasource schema objects:\n" + dataSource, ex);
+            throw new MetaDataQueryException(String.format("Error while trying to query datasource(id:%s) schema objects:%n %s", dataSource.id(), ex.getMessage()), ex);
         }
         return result;
 
@@ -97,7 +100,7 @@ public class MetaDataService {
             }
 
         } catch (SQLException ex) {
-            throw new MetaDataQueryException(QUERY_ERROR + dataSource, ex);
+            throw new MetaDataQueryException(String.format(QUERY_ERROR, dataSource.id(), ex.getMessage()), ex);
         }
         return result;
     }
@@ -130,7 +133,7 @@ public class MetaDataService {
                 result.add(fieldMetaData);
             }
         } catch (SQLException ex) {
-            throw new MetaDataQueryException(QUERY_ERROR + dataSource, ex);
+            throw new MetaDataQueryException(String.format(QUERY_ERROR, dataSource.id(), ex.getMessage()), ex);
         }
         return result;
     }
@@ -153,7 +156,7 @@ public class MetaDataService {
             }
 
         } catch (SQLException ex) {
-            throw new MetaDataQueryException("Error while trying to query datasource schema objects:\n" + dataSource, ex);
+            throw new MetaDataQueryException(String.format("Error while trying to query datasource(id:%s) schema objects:%n %s", dataSource.id(), ex.getMessage()), ex);
         }
         return result;
     }
@@ -185,58 +188,87 @@ public class MetaDataService {
                 result.add(fieldMetaData);
             }
         } catch (SQLException ex) {
-            throw new MetaDataQueryException(QUERY_ERROR + dataSource, ex);
+            throw new MetaDataQueryException(String.format(QUERY_ERROR, dataSource.id(), ex.getMessage()), ex);
         }
         return result;
     }
 
     @SuppressWarnings("unused")
     public List<ObjectFieldResponse> getProcedureFields2(DataSourceData dataSource, String catalogName, String schemaName, String objectName) {
-        var query = String.format("CALL %s.%s (null)", schemaName, objectName);
         var result = new LinkedList<ObjectFieldResponse>();
+        var query = String.format("CALL %s.%s (null)", schemaName, objectName);
+        if (dataSource.type() == DataSourceTypeEnum.POSTGRESQL) {
+            query = String.format("{? = call %s.%s(null::int)}", schemaName, objectName);
+
+            try (
+                    final var connection = poolManager.getConnection(dataSource);
+                    final var statement = connection.prepareCall(query)
+            ) {
+                connection.setAutoCommit(false);
+                statement.registerOutParameter(1, Types.OTHER);
+                statement.execute();
+
+                processResultSet(dataSource, result, statement);
+            } catch (SQLException ex) {
+                throw new MetaDataQueryException(String.format(QUERY_ERROR, dataSource.id(), ex.getMessage()), ex);
+            }
+
+            return result;
+        }
 
         try (
                 Connection connection = poolManager.getConnection(dataSource);
                 Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-                ResultSet resultSet =  statement.executeQuery(query)) {
-
-            var resultSetMD = resultSet.getMetaData();
-            int cols = resultSetMD.getColumnCount();
-            for (int i = 1; i <= cols; i++) {
-                var fieldMetaData = new ObjectFieldResponse()
-                        .setCatalogName(resultSetMD.getCatalogName(i))
-                        .setSchemaName(resultSetMD.getSchemaName(i))
-                        .setTableName(resultSetMD.getTableName(i))
-                        .setFieldName(resultSetMD.getColumnName(i))
-                        .setFieldSize(resultSetMD.getColumnDisplaySize(i))
-                        .setDataType(resultSetMD.getColumnType(i))
-                        .setDataTypeName(resultSetMD.getColumnTypeName(i))
-                        .setDecimalDigits(resultSetMD.getScale(i))
-                        .setNullable(resultSetMD.isNullable(i) == ResultSetMetaData.columnNullable)
-                        .setOrdinalPosition(i);
-
-                result.add(fieldMetaData);
-            }
+                ResultSet resultSet = statement.executeQuery(query)) {
+            processFields(result, resultSet);
         } catch (SQLException ex) {
-            throw new MetaDataQueryException(QUERY_ERROR + dataSource, ex);
+            throw new MetaDataQueryException(String.format(QUERY_ERROR, dataSource.id(), ex.getMessage()), ex);
         }
         return result;
     }
 
+    private static void processResultSet(DataSourceData dataSource, LinkedList<ObjectFieldResponse> result, CallableStatement statement) {
+        try (final var resultSet = (ResultSet) statement.getObject(1)) {
+            processFields(result, resultSet);
+        } catch (SQLException ex) {
+            throw new MetaDataQueryException(String.format(QUERY_ERROR, dataSource.id(), ex.getMessage()), ex);
+        }
+    }
+
+    private static void processFields(LinkedList<ObjectFieldResponse> result, ResultSet resultSet) throws SQLException {
+        var resultSetMD = resultSet.getMetaData();
+        int cols = resultSetMD.getColumnCount();
+        for (int i = 1; i <= cols; i++) {
+            var fieldMetaData = new ObjectFieldResponse()
+                    .setCatalogName(resultSetMD.getCatalogName(i))
+                    .setSchemaName(resultSetMD.getSchemaName(i))
+                    .setTableName(resultSetMD.getTableName(i))
+                    .setFieldName(resultSetMD.getColumnName(i))
+                    .setFieldSize(resultSetMD.getColumnDisplaySize(i))
+                    .setDataType(resultSetMD.getColumnType(i))
+                    .setDataTypeName(resultSetMD.getColumnTypeName(i))
+                    .setDecimalDigits(resultSetMD.getScale(i))
+                    .setNullable(resultSetMD.isNullable(i) == ResultSetMetaData.columnNullable)
+                    .setOrdinalPosition(i);
+
+            result.add(fieldMetaData);
+        }
+    }
+
     public void checkDataSource(DataSourceData dataSource) {
         try (
-            final var connection = poolManager.getConnection(dataSource);
-            final var preparedStatement = connection.prepareStatement(checkQueryConfig.getQueryForDatasourceType(dataSource.type()));
-            final var resultSet = preparedStatement.executeQuery()) {
+                final var connection = poolManager.getConnection(dataSource);
+                final var preparedStatement = connection.prepareStatement(checkQueryConfig.getQueryForDatasourceType(dataSource.type()));
+                final var resultSet = preparedStatement.executeQuery()) {
             while (resultSet.next()) {
                 log.debug("Connection check successful");
             }
         } catch (SQLException ex) {
-            throw new MetaDataQueryException("Error while trying to query datasource catalogs:\n" + dataSource, ex);
+            throw new MetaDataQueryException(String.format("Error while trying to query datasource(id:%s) catalogs:%n %s", dataSource.id(), ex.getMessage()), ex);
         }
     }
 
-    public boolean checkObjectExists(DataSourceData dataSource, String schema, String table){
+    public boolean checkObjectExists(DataSourceData dataSource, String schema, String table) {
         final var schemaTables = getSchemaObjects(dataSource, null, schema, null);
         final var existingTables = schemaTables.stream()
                 .map(DataSourceObjectResponse::getName)

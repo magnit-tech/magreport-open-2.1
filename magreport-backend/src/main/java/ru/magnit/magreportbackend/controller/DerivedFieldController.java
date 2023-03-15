@@ -129,7 +129,7 @@ public class DerivedFieldController {
         var response = ResponseBody.<Boolean>builder()
             .success(true)
             .message("")
-            .data(service.checkFieldName(request))
+            .data(service.checkFieldName(request, null))
             .build();
 
         LogHelper.logInfoUserMethodEnd();

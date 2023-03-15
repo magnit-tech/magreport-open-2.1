@@ -232,15 +232,15 @@ export const PivotCSS = makeStyles(theme => ({
     metricValueCell: {
         width: '100px',
         cursor : 'pointer',
+        "& .metricValueCellArrowsWrapp" :{
+            display: 'none',
+            zIndex: 999,
+        },
         "&:hover" :{
             "& .metricValueCellArrowsWrapp" :{
                 display: 'contents'
             },
         },
-    },
-    metricValueCellArrowsWrapp: {
-        display: 'none',
-        zIndex: 999,
     },
     metricValueCellArrow: {
         "& path" :{
@@ -559,13 +559,18 @@ export const PivotCSS = makeStyles(theme => ({
         display: 'flex'
     },
     CFD_item: {
+        position: 'relative',
         width: '100%',
-        height: '30px', 
+        minHeight: '30px', 
         cursor: 'pointer', 
         border: `5px solid ${theme.palette.pivotTable.grey}`,
         '&.active': {
             border: `5px solid ${theme.palette.primary.dark}`
         },
+        overflow: 'hidden',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     CFD_choiceBlock: {
         marginTop: '16px',
