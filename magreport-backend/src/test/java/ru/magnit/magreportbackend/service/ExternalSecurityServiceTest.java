@@ -11,6 +11,7 @@ import ru.magnit.magreportbackend.dto.inner.asm.ExternalAuthSecurityView;
 import ru.magnit.magreportbackend.dto.request.asm.AsmSecurityAddRequest;
 import ru.magnit.magreportbackend.dto.request.asm.AsmSecurityRequest;
 import ru.magnit.magreportbackend.dto.response.asm.AsmSecurityResponse;
+import ru.magnit.magreportbackend.dto.response.asm.AsmSecurityShortResponse;
 import ru.magnit.magreportbackend.dto.response.user.RoleTypeResponse;
 import ru.magnit.magreportbackend.service.domain.ExternalAuthRoleFilterRefreshService;
 import ru.magnit.magreportbackend.service.domain.ExternalAuthRoleRefreshService;
@@ -118,7 +119,7 @@ class ExternalSecurityServiceTest {
         Long secondId = 2L;
 
         when(domainService.getAllAsmSecurity()).thenReturn(Arrays.asList(
-                getAsmSecurityResponse(firstId), getAsmSecurityResponse(secondId)));
+                getAsmSecurityShortResponse(firstId), getAsmSecurityShortResponse(secondId)));
 
         final var result = service.getAllAsmSecurity();
 
@@ -153,7 +154,7 @@ class ExternalSecurityServiceTest {
     @Test
     void scheduledRefresher() {
 
-        when(domainService.getAllAsmSecurity()).thenReturn(Collections.singletonList(getAsmSecurityResponse(1L)));
+        when(domainService.getAllAsmSecurity()).thenReturn(Collections.singletonList(getAsmSecurityShortResponse(1L)));
         when(domainService.getAllAmsFilters(any())).thenReturn(Collections.singletonList(new ExternalAuthSecurityView()));
 
         ReflectionTestUtils.setField(service, "profile", "local");
@@ -183,6 +184,21 @@ class ExternalSecurityServiceTest {
                 ASM_SECURITY_NAME,
                 ASM_SECURITY_DESCRIPTION,
                 Collections.emptyList(),
+                "Creator",
+                new RoleTypeResponse(),
+                true,
+                ASM_SECURITY_CREATED_DATETIME,
+                ASM_SECURITY_MODIFIED_DATETIME,
+                Collections.emptyList()
+
+        );
+    }
+
+    private AsmSecurityShortResponse getAsmSecurityShortResponse(Long id) {
+        return new AsmSecurityShortResponse(
+                id,
+                ASM_SECURITY_NAME,
+                ASM_SECURITY_DESCRIPTION,
                 "Creator",
                 new RoleTypeResponse(),
                 true,

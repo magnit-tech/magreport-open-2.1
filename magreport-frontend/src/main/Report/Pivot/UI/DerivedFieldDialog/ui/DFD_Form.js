@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect, useMemo } from "react";
 
 import { PivotCSS } from '../../../PivotCSS';
 
-import dataHub from "ajax/DataHub";
 import useDebounce from "../lib/useDebounce";
 
 import { Button, DialogActions, FormControlLabel, Switch, TextField } from '@material-ui/core';
@@ -10,7 +9,7 @@ import { Button, DialogActions, FormControlLabel, Switch, TextField } from '@mat
 import FormulaEditor from "../../../maglangFormulaEditor/FormulaEditor/FormulaEditor";
 import DerivedFieldDialogModal from "./DFD_Modal";
 
-import { buildServerExression, checkForDifferenceFromOriginalField } from "../lib/DFD_functions";
+import { buildServerExression, checkForDifferenceFromOriginalField, fieldNamevalidation } from "../lib/DFD_functions";
 import clsx from "clsx";
 
 /**
@@ -26,7 +25,7 @@ import clsx from "clsx";
 
 export default function DerivedFieldDialogForm(props){
 
-    const { reportId, activeIndex, isReportDeveloper, allFieldsAndExpressions, loadedDerivedFields, editedDerivedFields } = props
+    const { reportId, activeIndex, isReportDeveloper, allFieldsAndExpressions, loadedDerivedFields, editedDerivedFields, publicFields, ownFields, otherFields } = props
 
     const classes = PivotCSS();
 
@@ -39,8 +38,10 @@ export default function DerivedFieldDialogForm(props){
         fontSize: 16
     });
 
-	const debouncedSearchTerm = useDebounce(currentField.name, 500);
+	const debouncedSearchTerm = useDebounce(currentField.name, 300);
     const timeout = useRef()
+
+    const [nameErrorMsg, setNameErrorMsg] = useState()
 
 
 	useEffect(() => {
@@ -59,16 +60,10 @@ export default function DerivedFieldDialogForm(props){
 	useEffect(
 		() => {
             if (debouncedSearchTerm && currentField.originalName !== debouncedSearchTerm) {
-                dataHub.derivedFieldController.checkName(reportId, false, debouncedSearchTerm, ({data}) => {
-                    if (data) {
-                        const correctItem = {...currentField, isCorrect: true}
-                        setCurrentField(correctItem)
-                        debouncePostObjToSave(correctItem)
-                    } else {
-                        const incorrectItem = {...currentField, isCorrect: false}
-                        setCurrentField(incorrectItem)
-                        debouncePostObjToSave(incorrectItem)
-                    }
+                fieldNamevalidation(currentField.isPublic, debouncedSearchTerm, currentField, publicFields, ownFields, (item, msg) => {
+                    setCurrentField(item)
+                    debouncePostObjToSave(item)
+                    setNameErrorMsg(msg)
                 })
             } else {
                 const correctItem = {...currentField, isCorrect: true}
@@ -172,7 +167,7 @@ export default function DerivedFieldDialogForm(props){
                     onChange={(event) => handleChangeName(event.target.value)}
                     error={ currentField.name.replace(/\s/g,"") === "" || !currentField.isCorrect}
                 />
-                {(currentField.name.replace(/\s/g,"") !== "" && !currentField.isCorrect) && <p className={classes.DFD_formErrorText}>Название поля должно быть уникальным!</p>}
+                {(currentField.name.replace(/\s/g,"") !== "" && !currentField.isCorrect) && <p className={classes.DFD_formErrorText}>{nameErrorMsg}</p>}
             </div>
 
             <TextField
@@ -192,6 +187,9 @@ export default function DerivedFieldDialogForm(props){
             />
 
             <FormulaEditor
+                publicFields = {publicFields}
+                ownFields = {ownFields}
+                otherFields = {otherFields}
                 key={currentField.id}
                 height = "200px"
                 fontSize = {currentField.fontSize}
@@ -202,12 +200,14 @@ export default function DerivedFieldDialogForm(props){
                 derivedFields = {allFieldsAndExpressions.derivedFieldsList}
                 onChange = {handleFormulaChange}
                 onChangeFontSize = {(value) => handleChangeFontSize(value)}
-                error = {currentField.errorMessage}
             />
+            
+            <p className={classes.DFD_errorMessage}> {currentField.errorMessage} </p>
 
             <DialogActions style={{justifyContent: 'space-between'}}>
                 { isReportDeveloper &&
                     <FormControlLabel
+                    disabled={!currentField.owner}
                         control={<Switch checked={currentField.isPublic} onChange={(event) => handleChangePublic(event.target.checked)} name="checkedA" />}
                         label="Общего назначения"
                     />

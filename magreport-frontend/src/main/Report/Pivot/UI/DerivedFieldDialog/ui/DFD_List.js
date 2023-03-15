@@ -89,7 +89,7 @@ function DerivedFieldDialogList(props){
 										>
 											{field.modified ? new Date(field.modified).toLocaleString('ru', options) : ''}
 										</Typography>
-										{ field.userName &&
+										{ (!field.isPublic && field.userName) &&
 											<>
 											{" — "}
 											<Typography
@@ -104,7 +104,7 @@ function DerivedFieldDialogList(props){
 								}
 							/>
 
-							<ListItemSecondaryAction>
+							{field.owner && <ListItemSecondaryAction>
 								{(!field.isCorrect || !field.isFormulaCorrect || field.needSave || !!field?.errorMessage) && <IconButton edge="end">
 									<HtmlTooltip
 										title={
@@ -125,7 +125,7 @@ function DerivedFieldDialogList(props){
 										<DeleteIcon />
 									</IconButton>
                     			</Tooltip>
-							</ListItemSecondaryAction>
+							</ListItemSecondaryAction>}
 							
 						</ListItem>
 					)

@@ -82,7 +82,7 @@ export const DomainGroupCSS = makeStyles(theme => ({
     domainAutocomplete:{
       display: 'flex',
       flexGrow: 1,
-      marginRight: '16px',
+      margin: '0px 8px',
       minWidth: '200px'
     },
     title: {

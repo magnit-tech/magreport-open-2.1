@@ -9,10 +9,9 @@ export default function isHollyday(){
             if (date%5 === 0) return 1
             return 2
         }
-   /* if (month === 3 && date<11)
+    if (month === 3 || month === 4)
     {
-        return 3
+        return month
     }
-       */  
     return -1
 }

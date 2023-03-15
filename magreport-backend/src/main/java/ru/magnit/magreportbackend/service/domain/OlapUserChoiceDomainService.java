@@ -8,6 +8,8 @@ import ru.magnit.magreportbackend.domain.report.Report;
 import ru.magnit.magreportbackend.domain.user.User;
 import ru.magnit.magreportbackend.repository.OlapUserChoiceRepository;
 
+import javax.transaction.Transactional;
+
 @Service
 @RequiredArgsConstructor
 public class OlapUserChoiceDomainService {
@@ -41,5 +43,11 @@ public class OlapUserChoiceDomainService {
             return repository.getOlapUserChoiceByReportIdAndUserId(reportId, userId).getIsLastChoice();
         else
             return defaultUserChoice;
+    }
+    @Transactional
+    public void deleteUsersChoiceForReport(Long reportId){
+
+        repository.deleteAllByReportId(reportId);
+
     }
 }

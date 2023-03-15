@@ -82,9 +82,11 @@ export default function ReportJob(props){
     }, [searchParams]) // eslint-disable-line
 
     function handleJobInfoLoaded(data){
-        let v = data.olapLastUserChoice ? 'pivot' : 'plain';
-        setViewType(v);
-        setSearchParams({...searchParams, view: v });
+        if(JobStatus[data.status] !== 7) {
+            const v = (data.olapLastUserChoice && viewType !== null) ? 'pivot' : 'plain';
+            setViewType(v);
+            setSearchParams({...searchParams, view: v });
+        }
 
         jobData.current = data;
         reportId.current = data.report.id;

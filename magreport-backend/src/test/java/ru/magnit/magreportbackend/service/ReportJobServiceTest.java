@@ -477,7 +477,9 @@ class ReportJobServiceTest {
                 true,
             0L,
                 "comment",
-                true);
+                true,
+                0,
+                Collections.emptyList());
     }
 
     private ReportJobAddRequest getReportJobAddRequest() {
