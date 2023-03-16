@@ -53,9 +53,8 @@ function ItemCardDialogViewer(props){
                 <DialogTitle id="SQL-dialog-title">{props.titleName}</DialogTitle>
                 <DialogContent className = {clsx({[classes.flx]: props.data.history})}>
                
-                    {    props.data.sqlQuery ?
-                        <DialogContentText id="SQL-dialog-description">  {props.data.sqlQuery} </DialogContentText>
-                        :
+                    {  props.data.sqlQuery && <DialogContentText id="SQL-dialog-description">  {props.data.sqlQuery} </DialogContentText> }
+                    {  props.data.history && 
 						<TableContainer>
 							<Table stickyHeader size="small">
 								<TableHead>
@@ -78,6 +77,28 @@ function ItemCardDialogViewer(props){
 								</TableBody>
 							</Table>
 						</TableContainer>
+                    }
+                    { props.data.shareList && 
+                        <TableContainer>
+                        <Table stickyHeader size="small">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>ID</TableCell>
+                                    <TableCell>Логин</TableCell>
+                                    <TableCell>Домен</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {props.data.shareList?.map((user) => (
+                                    <TableRow key={user.id}>
+                                        <TableCell component="th" scope="row"> {user.id} </TableCell>
+                                        <TableCell component="th" scope="row"> {user.name} </TableCell>
+                                        <TableCell component="th" scope="row"> {user.domain} </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
                     }
                 
                 </DialogContent>

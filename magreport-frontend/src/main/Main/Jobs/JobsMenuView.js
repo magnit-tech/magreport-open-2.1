@@ -10,7 +10,7 @@ import dataHub from 'ajax/DataHub';
 
 // redux
 import { actionFolderLoaded, actionFolderLoadFailed } from 'redux/actions/menuViews/folderActions';
-import { actionFilterJobs, actionJobCancel, showSqlDialog, actionShowStatusHistory, actionJobAddComment } from 'redux/actions/jobs/actionJobs';
+import { actionFilterJobs, actionJobCancel, showSqlDialog, actionShowStatusHistory, actionShowShareList, actionJobAddComment } from 'redux/actions/jobs/actionJobs';
 
 // components
 import DataLoader from 'main/DataLoader/DataLoader';
@@ -82,6 +82,7 @@ function JobsMenuView(props){
                     onRefreshClick = {handleRefreshFolder}
                     onShowSqlDialogClick = {props.showSqlDialog}
                     onShowHistoryStatusClick = {props.actionShowStatusHistory}
+                    onShowShareList = {props.actionShowShareList}
                     onJobAddComment = {(jobId, jobIndex, comment) => actionJobAddComment(folderItemsType, jobId, jobIndex, comment)}
                 />
 
@@ -105,6 +106,7 @@ const mapDispatchToProps = {
     actionJobCancel,
     showSqlDialog,
     actionShowStatusHistory,
+    actionShowShareList,
     actionJobAddComment
 }
 
