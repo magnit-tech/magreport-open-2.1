@@ -24,6 +24,7 @@ import InputBase from '@material-ui/core/InputBase';
 import Icon from '@mdi/react'
 import { mdiClipboardTextClockOutline } from '@mdi/js';
 import { mdiCommentEditOutline } from '@mdi/js';
+import { mdiAccountMultiple } from '@mdi/js';
 
 // local
 import { JobStatusMap, ScheduleStatusMap } from './JobFilters/JobStatuses';
@@ -53,6 +54,7 @@ import { FolderItemTypes } from './FolderItemTypes';
  * @param {eventHandler} props.onDependenciesClick - действие при нажатии кнопку получения зависимостей
  * @param {eventHandler} props.onShowSqlDialogClick - действие при нажатии на кнопку получения SQL-запроса
  * @param {eventHandler} props.onShowHistoryStatusClick - действие при нажатии на кнопку получения истории статусов задания
+ * @param {eventHandler} props.onShowShareList - действие при нажатии на кнопку показа списка пользователей с кем поделились заданием
  * @param {eventHandler} props.onContextMenu - действие при вызове контекстного меню
  * @param {eventHandler} props.onScheduleTaskSwitchClick - действие при нажатии на кнопку "Изменить статус" для отчетов на расписании
  */
@@ -212,6 +214,11 @@ function ItemCard(props){
     function handleShowStatusHistoryClick(event){
         event.stopPropagation()
         props.onShowHistoryStatusClick( props.itemType, `История статусов задания  ${props.data.id}`, props.data.id)
+    }
+
+    function handleShowShareList(event){
+        event.stopPropagation()
+        props.onShowShareList( props.itemType, `Список пользователей с кем поделились заданием №${props.data.id}`, props.data.id, props.data.shareUsers)
     }
 
     function handleTruncate(str, wordsToCut) {
@@ -389,6 +396,21 @@ function ItemCard(props){
                     onClick={handleShowStatusHistoryClick}  
                 >  
                     <Icon path={mdiClipboardTextClockOutline} size={0.9} className = {invalidSuccessDefault}/>  
+                </IconButton>
+            </Tooltip>
+        )
+    };
+
+    if (props.itemType === FolderItemTypes.job && props.data.shareUsers.length) {
+        actionBtns.push(
+            <Tooltip key={10} title="Список пользователей с кем поделились заданием">
+                <IconButton
+                    className={classes.btn} 
+                    size="small"
+                    aria-label="status-history"  
+                    onClick={handleShowShareList}  
+                >  
+                    <Icon path={mdiAccountMultiple} size={0.9} className = {invalidSuccessDefault}/>  
                 </IconButton>
             </Tooltip>
         )
