@@ -136,12 +136,13 @@ export function actionJobAddComment(itemsType, jobId, jobIndex, comment){
     })
 }
 
-export const actionShowShareList = (itemsType, titleName, id, data) => {
+export const actionShowShareList = (itemsType, titleName, id, data, count) => {
     return {
         type: JOB_SHARE_LIST_CLICK,
         itemsType,
         titleName,
         id,
-        data: data,
+        data,
+        count
     }
 }
