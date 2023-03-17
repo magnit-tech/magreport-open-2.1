@@ -51,7 +51,7 @@ export const jobDialogReducer = (state = initialState, action) => {
                 open: true,
                 itemsType: action.itemsType,
                 titleName: action.titleName,
-                data: {id: action.id, shareList: action.data}
+                data: {id: action.id, shareList: action.data, countShareUsers: action.count}
             }
             
         default:
