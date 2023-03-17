@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { connect } from 'react-redux';
 
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -35,7 +35,26 @@ function JobsMenuView(props){
     
     const [reload, setReload] = useState({needReload : false})
 
+    const [activeTab, setActiveTab] = useState(0)
+
+    const [data, setData] = useState([])
+
     let folderItemsType = SidebarItems.jobs.folderItemType;
+
+    const jobActiveTabs = {
+        value: activeTab,
+        handleChange: (value) => setActiveTab(value),
+        tabs: [
+            { key: 0, title: 'Свои задания' },
+            { key: 1, title: 'Поделившиеся задания' },
+        ]
+    }
+
+    useEffect(() => {
+        if(props.currentFolderData && props.currentFolderData.jobs) {
+            setData({'jobs': props.currentFolderData.jobs.filter(job => activeTab === 1 ? job.shareUsers.length > 0 : job.shareUsers.length === 0)})
+        }
+    }, [activeTab, props.currentFolderData])
 
 
     function handleRefreshFolder(){
@@ -66,12 +85,13 @@ function JobsMenuView(props){
             >
                 <FolderContent
                     itemsType = {folderItemsType}
-                    data = {props.currentFolderData}
+                    data = {data}
                     filters = {props.filters}
                     showAddFolder = {false}
                     showAddItem = {false}
                     showItemControls = {false}
                     pagination = {true}
+                    jobTabs = {jobActiveTabs}
                     currentUser = {user.current.name}
 
                     onItemClick = {handleItemClick}
