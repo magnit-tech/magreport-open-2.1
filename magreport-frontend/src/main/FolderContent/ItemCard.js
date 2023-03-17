@@ -218,7 +218,7 @@ function ItemCard(props){
 
     function handleShowShareList(event){
         event.stopPropagation()
-        props.onShowShareList( props.itemType, `Список пользователей с кем поделились заданием №${props.data.id}`, props.data.id, props.data.shareUsers)
+        props.onShowShareList( props.itemType, `Список пользователей с кем поделились заданием №${props.data.id}`, props.data.id, props.data.shareUsers, props.data.countShareUsers)
     }
 
     function handleTruncate(str, wordsToCut) {
