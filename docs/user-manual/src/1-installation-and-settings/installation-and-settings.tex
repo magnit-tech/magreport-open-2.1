@@ -411,4 +411,30 @@
 	
 	Для резервного копирования Магрепорта необходимо осуществлять резервное копирование БД репозитория. Если в качестве репозитория используется H2, необходимо делать резервную копию файлов \textit{db.mv.db} и \textit{db.trace.db} (если используется db в качестве имени базы, как задано в настройках по умолчанию) в каталоге размещения БД репозитория (по умолчанию ./db в домашнем каталоге Магрепорта).
 	
+	\section{Сервис мониторинга системных ресурсов}
+	
+	Сервис мониторинга системных ресурсов magreport-admin создан при помощи свободно-распространяемой библиотеки Spring Boot Admin и включен в дистрибутив системы Магрепорт. Сервис стартует отдельным java-процессом, выполняющим файл magreport-admin.jar. Исполняемый файл сервиса и соответствующий файл настроек application.properties расположены в каталоге magreport-admin домашнего каталога системы Магрепорт. По умолчанию сервис работает на 4443 порту и доступен по адресу:
+	\begin{verbatim}
+		https://имя-хоста-магрепорт:4443
+	\end{verbatim}
+	Вход в сервис осуществляется под учётной записью по умолчанию \textit{admin} с паролем \textit{admin}. Данные параметры могут быть изменены в application.properties. Также в application.properties необходимо указать хранилище сертификатов java в формате p12 и пароль к нему.
+	
+	Параметры application properties:
+	
+	\begin{itemize}
+		\item \textit{server.ssl.key-store-type} --- тип хранилища сертификатов Java (должен быть PKCS12)
+		\item \textit{server.ssl.key-store} --- файл хранилища сертификатов Java
+		\item \textit{server.ssl.key-store-password} --- пароль хранилища сертификатов Java
+		\item \textit{server.ssl.key-alias} --- алиас сертификата сервера в хранилище сертификатов Java
+		\item \textit{server.port} --- порт сервиса
+		\item \textit{spring.security.user.name} --- логин учётной записи (по умолчанию \textit{admin})
+		\item \textit{spring.security.user.password} --- пароль учётной записи (по умолчанию \textit{admin})
+	\end{itemize}
+	
+	Подробная документация по Spring Boot Admin может быть найдена здесь:
+	
+	\begin{center}
+		\href{	https://codecentric.github.io/spring-boot-admin/2.5.1/}{	https://codecentric.github.io/spring-boot-admin/2.5.1/}
+	\end{center}
+	
 \end{document}
