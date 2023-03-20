@@ -231,6 +231,8 @@ public class ReportService {
         var invalidFieldNames = new HashSet<String>();
         var invalidFilterNames = new HashSet<String>();
 
+        final var currentUser = userDomainService.getCurrentUser();
+
         request.getFields().forEach(field -> {
             var name = field.getName().toUpperCase();
             if (!uniqueNames.add(name)) duplicateNames.add(field.getName());
@@ -258,7 +260,7 @@ public class ReportService {
 
         filterReportDomainService.removeFilters(request.getId());
         reportDomainService.deleteFields(reportDomainService.getDeletedFields(request));
-        reportDomainService.editReport(request);
+        reportDomainService.editReport(request, currentUser.getId());
 
         if (request.getFilterGroup() != null)
             filterReportService.addFilters(request.getFilterGroup());
