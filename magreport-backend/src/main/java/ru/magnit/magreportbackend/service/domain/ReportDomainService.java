@@ -285,12 +285,13 @@ public class ReportDomainService {
     }
 
     @Transactional
-    public void editReport(ReportEditRequest request) {
+    public void editReport(ReportEditRequest request, Long userId) {
 
         var report = reportRepository.getReferenceById(request.getId());
 
         report = reportMerger.merge(report, request);
 
+        report.setUser(new User(userId));
         report.setModifiedDateTime(LocalDateTime.now());
         reportRepository.save(report);
     }
