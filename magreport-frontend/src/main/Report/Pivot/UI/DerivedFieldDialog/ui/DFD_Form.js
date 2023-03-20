@@ -38,10 +38,10 @@ export default function DerivedFieldDialogForm(props){
         fontSize: 16
     });
 
-	const debouncedSearchTerm = useDebounce(currentField.name, 300);
+	// const debouncedSearchTerm = useDebounce(currentField.name, 300);
     const timeout = useRef()
 
-    const [nameErrorMsg, setNameErrorMsg] = useState()
+    const [nameErrorMsg, setNameErrorMsg] = useState(null)
 
 
 	useEffect(() => {
@@ -59,8 +59,13 @@ export default function DerivedFieldDialogForm(props){
 
 	useEffect(
 		() => {
-            if (debouncedSearchTerm && currentField.originalName !== debouncedSearchTerm) {
-                fieldNamevalidation(currentField.isPublic, debouncedSearchTerm, currentField, publicFields, ownFields, (item, msg) => {
+            if(currentField.name.trim() === '') {
+                const item = {...currentField, isCorrect: false}
+                setCurrentField(item)
+                debouncePostObjToSave(item)
+                setNameErrorMsg('Введите название поля!')
+            } else if (currentField.originalName !== currentField.name) {
+                fieldNamevalidation(currentField.isPublic, currentField.name, currentField, publicFields, ownFields, (item, msg) => {
                     setCurrentField(item)
                     debouncePostObjToSave(item)
                     setNameErrorMsg(msg)
@@ -71,7 +76,7 @@ export default function DerivedFieldDialogForm(props){
                 debouncePostObjToSave(correctItem)
             }
 		},
-		[debouncedSearchTerm, reportId] // eslint-disable-line
+		[currentField.name, reportId] // eslint-disable-line
 	);
 
     const disabledSaveButton = useMemo(() => {
@@ -165,9 +170,9 @@ export default function DerivedFieldDialogForm(props){
                     value={currentField.name}
                     disabled={!currentField.owner}
                     onChange={(event) => handleChangeName(event.target.value)}
-                    error={ currentField.name.replace(/\s/g,"") === "" || !currentField.isCorrect}
+                    error={ currentField.id && !currentField.isCorrect }
                 />
-                {(currentField.name.replace(/\s/g,"") !== "" && !currentField.isCorrect) && <p className={classes.DFD_formErrorText}>{nameErrorMsg}</p>}
+                {(currentField.id && !currentField.isCorrect) && <p className={classes.DFD_formErrorText}>{nameErrorMsg}</p>}
             </div>
 
             <TextField
