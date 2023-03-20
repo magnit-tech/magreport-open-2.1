@@ -21,6 +21,7 @@ import ru.magnit.magreportbackend.repository.ScheduleTaskRepository;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -175,7 +176,7 @@ public class ScheduleTaskDomainService {
 
         task = scheduleTaskMerger.merge(task, request);
         task.setUser(new User().setId(userView.getId()));
-
+        task.setModifiedDateTime(LocalDateTime.now());
         task.setScheduleList(request.getSchedules().stream().map(s -> scheduleRepository.getReferenceById(s.getId())).collect(Collectors.toList()));// не исправлять на toList()
 
         repository.save(task);
