@@ -323,7 +323,7 @@ class ReportDomainServiceTest {
         when(reportMerger.merge(any(), any())).thenReturn(get_Report());
         when(reportRepository.getReferenceById(anyLong())).thenReturn(get_Report());
 
-        domainService.editReport(new ReportEditRequest().setId(ID));
+        domainService.editReport(new ReportEditRequest().setId(ID),ID);
 
         verify(reportMerger).merge(any(), any());
         verify(reportRepository).getReferenceById(anyLong());

@@ -37,8 +37,16 @@ import ru.magnit.magreportbackend.dto.response.report.ReportResponse;
 import ru.magnit.magreportbackend.dto.response.securityfilter.SecurityFilterFolderResponse;
 import ru.magnit.magreportbackend.dto.response.user.DomainShortResponse;
 import ru.magnit.magreportbackend.dto.response.user.RoleResponse;
+import ru.magnit.magreportbackend.service.domain.DataSetDomainService;
+import ru.magnit.magreportbackend.service.domain.DataSourceDomainService;
+import ru.magnit.magreportbackend.service.domain.ExcelTemplateDomainService;
+import ru.magnit.magreportbackend.service.domain.FilterInstanceDomainService;
+import ru.magnit.magreportbackend.service.domain.FilterTemplateDomainService;
+import ru.magnit.magreportbackend.service.domain.FolderDomainService;
 import ru.magnit.magreportbackend.service.domain.FolderPermissionsDomainService;
+import ru.magnit.magreportbackend.service.domain.ReportDomainService;
 import ru.magnit.magreportbackend.service.domain.RoleDomainService;
+import ru.magnit.magreportbackend.service.domain.SecurityFilterDomainService;
 import ru.magnit.magreportbackend.service.domain.UserDomainService;
 
 import java.time.LocalDateTime;
@@ -73,6 +81,23 @@ class FolderPermissionsServiceTest {
     private UserDomainService userDomainService;
     @Mock
     private RoleDomainService roleDomainService;
+    @Mock
+    private  FolderDomainService folderDomainService;
+    @Mock
+    private  ReportDomainService reportDomainService;
+    @Mock
+    private  DataSourceDomainService dataSourceDomainService;
+    @Mock
+    private  DataSetDomainService dataSetDomainService;
+    @Mock
+    private  ExcelTemplateDomainService excelTemplateDomainService;
+    @Mock
+    private  FilterInstanceDomainService filterInstanceDomainService;
+    @Mock
+    private  FilterTemplateDomainService filterTemplateDomainService;
+    @Mock
+    private  SecurityFilterDomainService securityFilterDomainService;
+
 
     @Test
     void getFolderReportPermissions() {
@@ -93,14 +118,13 @@ class FolderPermissionsServiceTest {
     void setFolderReportPermissions() {
         when(domainService.getFolderReportBranch(any())).thenReturn(new ArrayList<>());
         when(domainService.getFolderReportPermissions(any())).thenReturn(getFolderPermissionsResponse());
+        when(folderDomainService.getPathToFolder(any())).thenReturn(Collections.emptyList());
 
         FolderPermissionsResponse response = service.setFolderReportPermissions(getFolderPermissionsRequest());
 
         assertNotNull(response.folder());
         assertNotNull(response.rolePermissions());
 
-        verify(domainService).setFolderReportPermissions(any(), any());
-        verify(domainService).clearFolderReportsPermissions(any());
         verifyNoMoreInteractions(domainService);
     }
 
@@ -121,14 +145,14 @@ class FolderPermissionsServiceTest {
     void setReportFolderPermissions() {
         when(domainService.getReportFolderBranch(any())).thenReturn(new ArrayList<>());
         when(domainService.getReportFolderPermissions(any())).thenReturn(new ReportFolderPermissionsResponse(getReportFolderResponse(), Collections.emptyList()));
+        when(reportDomainService.getPathToFolder(any())).thenReturn(Collections.emptyList());
 
         ReportFolderPermissionsResponse response = service.setReportFolderPermissions(getFolderPermissionsRequest());
 
         assertNotNull(response.folder());
         assertNotNull(response.rolePermissions());
 
-        verify(domainService).setReportFolderPermissions(any(), any());
-        verify(domainService).clearReportFoldersPermissions(any());
+
         verifyNoMoreInteractions(domainService);
     }
 
@@ -148,6 +172,7 @@ class FolderPermissionsServiceTest {
     @Test
     void setDataSourceFolderPermissions() {
         when(domainService.getDataSourceFolderBranch(any())).thenReturn(new ArrayList<>());
+        when(dataSourceDomainService.getPathToFolder(any())).thenReturn(Collections.emptyList());
         when(domainService.getDataSourceFolderPermissions(any())).thenReturn(new DataSourceFolderPermissionsResponse(getDataSourceFolderResponse(), Collections.emptyList()));
 
         DataSourceFolderPermissionsResponse response = service.setDataSourceFolderPermissions(getFolderPermissionsRequest());
@@ -155,8 +180,7 @@ class FolderPermissionsServiceTest {
         assertNotNull(response.folder());
         assertNotNull(response.rolePermissions());
 
-        verify(domainService).setDataSourceFoldersPermissions(any(), any());
-        verify(domainService).clearDataSourceFoldersPermissions(any());
+
         verifyNoMoreInteractions(domainService);
     }
 
@@ -177,14 +201,13 @@ class FolderPermissionsServiceTest {
     void setDataSetFolderPermissions() {
         when(domainService.getDataSetFolderBranch(any())).thenReturn(new ArrayList<>());
         when(domainService.getDataSetFolderPermissions(any())).thenReturn(new DataSetFolderPermissionsResponse(getDataSetFolderResponse(), Collections.emptyList()));
+        when(dataSetDomainService.getPathToFolder(any())).thenReturn(Collections.emptyList());
 
         DataSetFolderPermissionsResponse response = service.setDataSetFolderPermissions(getFolderPermissionsRequest());
 
         assertNotNull(response.folder());
         assertNotNull(response.rolePermissions());
 
-        verify(domainService).setDataSetFoldersPermissions(any(), any());
-        verify(domainService).clearDataSetFoldersPermissions(any());
         verifyNoMoreInteractions(domainService);
     }
 
@@ -205,14 +228,13 @@ class FolderPermissionsServiceTest {
     void setExcelTemplateFolderPermissions() {
         when(domainService.getExcelTemplateFolderBranch(any())).thenReturn(new ArrayList<>());
         when(domainService.getExcelTemplateFolderPermissions(any())).thenReturn(new ExcelTemplateFolderPermissionsResponse(getExcelTemplateFolderResponse(), Collections.emptyList()));
+        when(excelTemplateDomainService.getPathToFolder(any())).thenReturn(Collections.emptyList());
 
         ExcelTemplateFolderPermissionsResponse response = service.setExcelTemplateFolderPermissions(getFolderPermissionsRequest());
 
         assertNotNull(response.folder());
         assertNotNull(response.rolePermissions());
 
-        verify(domainService).setExcelTemplateFoldersPermissions(any(), any());
-        verify(domainService).clearExcelTemplateFoldersPermissions(any());
         verifyNoMoreInteractions(domainService);
     }
 
@@ -233,14 +255,13 @@ class FolderPermissionsServiceTest {
     void setFilterInstanceFolderPermissions() {
         when(domainService.getFilterInstanceFolderBranch(any())).thenReturn(new ArrayList<>());
         when(domainService.getFilterInstanceFolderPermissions(any())).thenReturn(new FilterInstanceFolderPermissionsResponse(getFilterInstanceFolderResponse(), Collections.emptyList()));
+        when(filterInstanceDomainService.getPathToFolder(any())).thenReturn(Collections.emptyList());
 
         FilterInstanceFolderPermissionsResponse response = service.setFilterInstanceFolderPermissions(getFolderPermissionsRequest());
 
         assertNotNull(response.folder());
         assertNotNull(response.rolePermissions());
 
-        verify(domainService).setFilterInstanceFoldersPermissions(any(), any());
-        verify(domainService).clearFilterInstanceFoldersPermissions(any());
         verifyNoMoreInteractions(domainService);
     }
 
@@ -261,14 +282,13 @@ class FolderPermissionsServiceTest {
     void setFilterTemplateFolderPermissions() {
         when(domainService.getFilterTemplateFolderBranch(any())).thenReturn(new ArrayList<>());
         when(domainService.getFilterTemplateFolderPermissions(any())).thenReturn(new FilterTemplateFolderPermissionsResponse(getFilterTemplateFolderResponse(), Collections.emptyList()));
+        when(filterTemplateDomainService.getPathToFolder(any())).thenReturn(Collections.emptyList());
 
         FilterTemplateFolderPermissionsResponse response = service.setFilterTemplateFolderPermissions(getFolderPermissionsRequest());
 
         assertNotNull(response.folder());
         assertNotNull(response.rolePermissions());
 
-        verify(domainService).setFilterTemplateFoldersPermissions(any(), any());
-        verify(domainService).clearFilterTemplateFoldersPermissions(any());
         verifyNoMoreInteractions(domainService);
     }
 
@@ -289,14 +309,13 @@ class FolderPermissionsServiceTest {
     void setSecurityFilterFolderPermissions() {
         when(domainService.getSecurityFilterFolderBranch(any())).thenReturn(new ArrayList<>());
         when(domainService.getSecurityFilterFolderPermissions(any())).thenReturn(new SecurityFilterFolderPermissionsResponse(getSecurityFilterFolderResponse(), Collections.emptyList()));
+        when(securityFilterDomainService.getPathToFolder(any())).thenReturn(Collections.emptyList());
 
         SecurityFilterFolderPermissionsResponse response = service.setSecurityFilterFolderPermissions(getFolderPermissionsRequest());
 
         assertNotNull(response.folder());
         assertNotNull(response.rolePermissions());
 
-        verify(domainService).setSecurityFilterFoldersPermissions(any(), any());
-        verify(domainService).clearSecurityFilterFoldersPermissions(any());
         verifyNoMoreInteractions(domainService);
     }
 
@@ -409,7 +428,7 @@ class FolderPermissionsServiceTest {
     }
 
     private FolderPermissionSetRequest getFolderPermissionsRequest() {
-        return new FolderPermissionSetRequest(ID, Collections.emptyList());
+        return new FolderPermissionSetRequest(ID, Collections.emptyList(), true, true);
     }
 
     private PermissionCheckRequest getPermissionCheckRequest(FolderTypes type) {
