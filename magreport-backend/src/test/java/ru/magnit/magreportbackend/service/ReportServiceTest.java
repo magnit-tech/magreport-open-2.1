@@ -343,6 +343,7 @@ class ReportServiceTest {
 
         when(domainService.getDeletedFields(any())).thenReturn(Collections.emptyList());
         when(domainService.getReport(anyLong())).thenReturn(getReportResponse());
+        when(userDomainService.getCurrentUser()).thenReturn(new UserView().setId(ID));
 
         var response = service.editReport(getReportEditRequest());
         assertNotNull(response);
@@ -353,7 +354,7 @@ class ReportServiceTest {
         verify(filterReportDomainService, times(2)).removeFilters(anyLong());
         verify(domainService, times(2)).getDeletedFields(any());
         verify(domainService, times(2)).deleteFields(anyList());
-        verify(domainService, times(2)).editReport(any());
+        verify(domainService, times(2)).editReport(any(),any());
         verify(filterReportService).addFilters(any());
         verify(domainService, times(2)).getReport(anyLong());
 
