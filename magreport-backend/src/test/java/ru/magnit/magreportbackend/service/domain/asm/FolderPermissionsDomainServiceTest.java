@@ -438,13 +438,7 @@ class FolderPermissionsDomainServiceTest {
         verifyNoMoreInteractions(securityFilterFolderRoleMapper);
     }
 
-    @Test
-    void clearFolderReportPermissions() {
-        domainService.clearFolderReportsPermissions(Collections.singletonList(ID));
 
-        verify(folderRoleRepository).deleteAllByFolderIdIn(any());
-        verifyNoMoreInteractions(folderRoleRepository);
-    }
 
     @Test
     void getFolderReportBranch() {
@@ -470,13 +464,6 @@ class FolderPermissionsDomainServiceTest {
         verifyNoMoreInteractions(reportFolderRepository);
     }
 
-    @Test
-    void clearReportFolderPermissions() {
-        domainService.clearReportFoldersPermissions(Collections.singletonList(ID));
-
-        verify(reportFolderRoleRepository).deleteAllByFolderIdIn(any());
-        verifyNoMoreInteractions(reportFolderRoleRepository);
-    }
 
     @Test
     void getReportFolderPermissionsForRoles() {
@@ -639,7 +626,7 @@ class FolderPermissionsDomainServiceTest {
     }
 
     private FolderPermissionSetRequest getFolderPermissionsRequest() {
-        return new FolderPermissionSetRequest(ID, Collections.emptyList());
+        return new FolderPermissionSetRequest(ID, Collections.emptyList(), true, true);
     }
 
     private ReportFolderResponse getReportFolderResponse() {
