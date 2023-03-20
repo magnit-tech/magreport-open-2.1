@@ -45,16 +45,16 @@ function JobsMenuView(props){
         value: activeTab,
         handleChange: (value) => setActiveTab(value),
         tabs: [
-            { key: 0, title: 'Свои задания' },
-            { key: 1, title: 'Поделившиеся задания' },
+            { key: 0, title: 'Мои задания' },
+            { key: 1, title: 'Поделились со мной' },
         ]
     }
 
     useEffect(() => {
         if(props.currentFolderData && props.currentFolderData.jobs) {
-            setData({'jobs': props.currentFolderData.jobs.filter(job => activeTab === 1 ? job.shareUsers.length > 0 : job.shareUsers.length === 0)})
+            setData({'jobs': props.currentFolderData.jobs.filter(job => activeTab === 1 ? job.user.name !== user.current.name : job.user.name === user.current.name)})
         }
-    }, [activeTab, props.currentFolderData])
+    }, [activeTab, props.currentFolderData, user])
 
 
     function handleRefreshFolder(){
