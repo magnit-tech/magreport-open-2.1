@@ -75,8 +75,8 @@ public class ScheduleService {
         return scheduleTaskDomainService.addScheduleTask(request, currentUser);
     }
 
-    public ScheduleTaskResponse getScheduleTask(ScheduleTaskRequest request) {
-        var response = scheduleTaskDomainService.getScheduleTask(request.getId());
+    public ScheduleTaskResponse getScheduleTask(Long taskId) {
+        var response = scheduleTaskDomainService.getScheduleTask(taskId);
         response.setReport(reportService.getScheduleReport(new ScheduleReportRequest(response.getReport().getId(), response.getId())));
         response.setReportJobFilters(response.getReport().getLastParameters());
         response.getReport().setPath(reportDomainService.getPathReport(response.getReport().getId()));

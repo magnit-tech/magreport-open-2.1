@@ -45,6 +45,7 @@ public class ScheduleTaskResponse {
     private Boolean sendEmptyReport;
     private Long maxFailedStarts;
     private Long failedStart;
+    private boolean isActive;
     private List<ScheduleShortResponse> schedules = Collections.emptyList();
     private List<DestinationEmailResponse> destinationEmails = Collections.emptyList();
     private List<DestinationUserResponse> destinationUsers = Collections.emptyList();

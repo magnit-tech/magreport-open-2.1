@@ -228,7 +228,7 @@ class ScheduleServiceTest {
         when(reportDomainService.getPathReport(any()))
                 .thenReturn(Collections.singletonList(new FolderNodeResponse(ID, ID, NAME, DESCRIPTION,CREATED_TIME,MODIFIED_TIME)));
 
-        var response = service.getScheduleTask(getScheduleTaskRequest());
+        var response = service.getScheduleTask(getScheduleTaskRequest().getId());
 
         assertEquals(ID, response.getId());
         assertEquals(NAME, response.getName());
