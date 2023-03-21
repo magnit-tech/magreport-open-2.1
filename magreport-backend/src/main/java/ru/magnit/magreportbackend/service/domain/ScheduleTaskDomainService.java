@@ -22,9 +22,14 @@ import ru.magnit.magreportbackend.repository.ScheduleTaskRepository;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static ru.magnit.magreportbackend.domain.schedule.ScheduleTaskStatusEnum.FAILED;
+import static ru.magnit.magreportbackend.domain.schedule.ScheduleTaskStatusEnum.INACTIVE;
+import static ru.magnit.magreportbackend.domain.schedule.ScheduleTaskStatusEnum.SCHEDULED;
 
 @Slf4j
 @Service
@@ -59,7 +64,7 @@ public class ScheduleTaskDomainService {
     }
 
     @Transactional
-    public void deleteScheduleTaskByReport(Long reportId){
+    public void deleteScheduleTaskByReport(Long reportId) {
         repository.deleteByReportId(reportId);
     }
 
@@ -86,7 +91,7 @@ public class ScheduleTaskDomainService {
 
         if (task == null) return "Код активации не действителен или уже использован!";
 
-        task.setStatus(new ScheduleTaskStatus(ScheduleTaskStatusEnum.SCHEDULED.getId()));
+        task.setStatus(new ScheduleTaskStatus(SCHEDULED.getId()));
         task.setExpirationCode(null);
         task.setExpirationDate(LocalDate.now().plusDays(task.getRenewalPeriod()));
         repository.save(task);
@@ -99,40 +104,36 @@ public class ScheduleTaskDomainService {
 
         var task = repository.getReferenceById(idTask);
 
-        if (ScheduleTaskStatusEnum.getById(task.getStatus().getId()) == ScheduleTaskStatusEnum.INACTIVE && status != ScheduleTaskStatusEnum.SCHEDULED) return;
-
-
-        if (status == ScheduleTaskStatusEnum.RUNNING &&
-                ScheduleTaskStatusEnum.getById(task.getStatus().getId()) != ScheduleTaskStatusEnum.SCHEDULED &&
-                ScheduleTaskStatusEnum.getById(task.getStatus().getId()) != ScheduleTaskStatusEnum.FAILED)
+        if (status == ScheduleTaskStatusEnum.RUNNING && !Arrays.asList(SCHEDULED, FAILED, INACTIVE).contains(ScheduleTaskStatusEnum.getById(task.getStatus().getId())))
             throw new InvalidParametersException(
                     "Запуск задания с id: " + idTask + " из текущего статуса (" + ScheduleTaskStatusEnum.getById(task.getStatus().getId()) + ") невозможен");
 
 
-        if (status == ScheduleTaskStatusEnum.SCHEDULED && ScheduleTaskStatusEnum.getById(task.getStatus().getId()).equals(ScheduleTaskStatusEnum.EXPIRED)){
+        if (status == SCHEDULED && ScheduleTaskStatusEnum.getById(task.getStatus().getId()).equals(ScheduleTaskStatusEnum.EXPIRED)) {
             task.setExpirationDate(task.getExpirationDate().plusDays(task.getRenewalPeriod()));
         }
 
         switch (status) {
-            case RUNNING, COMPLETE, EXPIRED, CHANGED, INACTIVE ->
-                    task.setStatus(new ScheduleTaskStatus(status.getId()));
+            case RUNNING, COMPLETE, EXPIRED, CHANGED -> task.setStatus(new ScheduleTaskStatus(status.getId()));
             case SCHEDULED -> {
                 task.setFailedStart(0L);
                 task.setStatus(new ScheduleTaskStatus(status.getId()));
+                task.setActive(true);
             }
-
+            case INACTIVE -> {
+                task.setActive(false);
+                task.setStatus(new ScheduleTaskStatus(status.getId()));
+            }
             case FAILED -> {
                 task.setFailedStart(task.getFailedStart() + 1);
-                if (task.getFailedStart() < task.getMaxFailedStart() || task.getMaxFailedStart() == 0) {
-                    task.setStatus(new ScheduleTaskStatus(ScheduleTaskStatusEnum.SCHEDULED.getId()));
-                } else {
+                if (task.getFailedStart() < task.getMaxFailedStart() || task.getMaxFailedStart() == 0)
+                    task.setStatus(new ScheduleTaskStatus(SCHEDULED.getId()));
+                else
                     task.setStatus(new ScheduleTaskStatus(status.getId()));
-                }
             }
             default -> throw new IllegalStateException("Unknown status: " + status);
         }
         repository.save(task);
-
     }
 
     @Transactional
@@ -147,7 +148,7 @@ public class ScheduleTaskDomainService {
         tasks.addAll(repository.findByStatusId(ScheduleTaskStatusEnum.COMPLETE.getId()));
 
         tasks.forEach(t -> {
-            t.setStatus(new ScheduleTaskStatus().setId(ScheduleTaskStatusEnum.SCHEDULED.getId()));
+            t.setStatus(new ScheduleTaskStatus().setId(SCHEDULED.getId()));
             repository.save(t);
         });
 
