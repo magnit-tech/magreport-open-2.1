@@ -32,7 +32,8 @@ public class ScheduleTaskBackupMapper implements Mapper<ScheduleTaskBackupTuple,
                 source.getSendEmptyReport(),
                 source.getExpirationDate(),
                 source.getCreatedDateTime(),
-                source.getModifiedDateTime()
+                source.getModifiedDateTime(),
+                source.getActive()
         );
     }
 }

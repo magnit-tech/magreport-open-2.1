@@ -1,0 +1,20 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="ADD-ACTIVE-SCHEDULE_TASK-001" author="vyushin_aa">
+        <addColumn tableName="SCHEDULE_TASK">
+            <column name="ACTIVE" type="BOOLEAN" value="true"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="ADD-ACTIVE-SCHEDULE_TASK-002" author="vyushin_aa">
+        <update tableName="SCHEDULE_TASK" >
+            <column name="ACTIVE" value="false"/>
+                    <where>SCHEDULE_TASK_STATUS_ID = 6 </where>
+        </update>
+
+    </changeSet>
+</databaseChangeLog>

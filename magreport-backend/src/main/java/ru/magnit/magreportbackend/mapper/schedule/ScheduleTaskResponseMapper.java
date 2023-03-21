@@ -51,6 +51,7 @@ public class ScheduleTaskResponseMapper implements Mapper<ScheduleTaskResponse, 
                 .setTypeTask(ScheduleTaskTypeEnum.getById(source.getTaskType().getId()))
                 .setUser(userResponseMapper.from(source.getUser()))
                 .setSchedules(scheduleMapper.from(source.getScheduleList()))
-                .setReportJobFilters(reportJobFilterMapper.from(source.getReportJobFilters()));
+                .setReportJobFilters(reportJobFilterMapper.from(source.getReportJobFilters()))
+                .setActive(source.getActive());
     }
 }
