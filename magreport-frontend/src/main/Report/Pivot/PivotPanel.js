@@ -908,9 +908,13 @@ function PivotPanel(props){
         
     }
     // Вызывается по нажатию на значение метрики в таблице
-    function handleMetricValueFilter(fieldId, metricIndex, fieldValue){
+    function handleMetricValueFilter(fieldId, metricIndex, fieldValue, dataType){
         if (!(pivotConfiguration.fieldsLists.findFilterFieldIdByFieldIdValueFunc(fieldId, fieldValue, metricIndex))){
-            let val = fieldValue === '' ? [] : [fieldValue];
+            let val = fieldValue === '' ? [] : 
+                [dataType === 'INTEGER' ? parseInt(fieldValue.replace(/\s+/g, '').trim()):
+                 dataType === 'DOUBLE'  ? parseFloat(fieldValue.replace(/\s+/g, '').trim()):
+                 fieldValue
+                ];
 			let newConfiguration = new PivotConfiguration(pivotConfiguration);
 			let filterObject = new FilterObject({fieldId: fieldId, values: val});
 			newConfiguration.setFieldFilterByFieldIdAndFunc(fieldId, metricIndex, filterObject);
