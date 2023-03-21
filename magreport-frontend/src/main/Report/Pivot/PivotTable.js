@@ -372,8 +372,8 @@ export default function(props){
         props.onDimensionValueFilter(fieldId, fieldValue);
     }
 
-    function handleMetricValueCellClick(fieldId, index, fieldValue) {
-        props.onMetricValueFilter(fieldId, index, fieldValue);
+    function handleMetricValueCellClick(fieldId, index, fieldValue, dataType) {
+        props.onMetricValueFilter(fieldId, index, fieldValue, dataType);
     }
 
     function handleContextClick(event, type, cell){
@@ -671,7 +671,7 @@ export default function(props){
                                                 }
                                                 <div 
                                                     onClick = {cell.type === "dimensionValue" ? () => {handleDimensionValueCellClick(cell.fieldId, cell.data)}
-                                                    : cell.type === "metricValues"  ? () => {handleMetricValueCellClick(cell.fieldId, cell.index, cell.data)}
+                                                    : cell.type === "metricValues"  ? () => {handleMetricValueCellClick(cell.fieldId, cell.index, cell.data, cell.dataType)}
                                                     : () => {}}
                                                 >
                                                     <div style = { cellDataStyle(cell) }>
