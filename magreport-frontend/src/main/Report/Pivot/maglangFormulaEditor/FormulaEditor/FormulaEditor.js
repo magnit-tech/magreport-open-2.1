@@ -568,7 +568,7 @@ export default function FormulaEditor(props){
               InputLabelProps={{
                 shrink: true,
               }}
-              rows={5}
+              rows={3}
               variant="outlined"
               value={errorMessages}
               disabled={props.disabled}
