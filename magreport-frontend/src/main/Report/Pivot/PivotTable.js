@@ -599,7 +599,7 @@ export default function(props){
                 
                 
             } else if(cell.hasOwnProperty('style') && cell.style) {
-               cell.style.filter((styleObj) => (styleObj.aggFuncName === cell.aggFuncName)).map((formatting) => {
+               cell.style.filter((styleObj) => (styleObj.aggFuncName === cell.aggFuncName)).forEach((formatting) =>  {
                     styleObj = {   
                         margin: '2px',
                         height: formatting.fontSize ? `${formatting.fontSize + 5}px` : 'auto',
