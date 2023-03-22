@@ -156,7 +156,7 @@ export default function PivotConfiguration(pivotConfiguration){
 
             return (
             {...i, filter: {
-                metricId: this.fieldsLists.metricFields.findIndex(m => m.fieldId === i.filter.field.fieldId && m.aggFuncName === i.aggFuncName),
+                metricId: this.fieldsLists.metricFields.findIndex(m => m.fieldId === i.fieldId && m.aggFuncName === i.aggFuncName),
                 filterType: (i.filter.values === '' || i.filter.values === null || i.filter.values.length === 0) ? 'BLANK' : i.filter.filterType, 
                 invertResult: i.filter.invertResult, 
                 values: i.filter.values,
