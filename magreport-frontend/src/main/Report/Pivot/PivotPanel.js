@@ -995,7 +995,7 @@ function PivotPanel(props){
     }
 
     function handleMetricFieldContextClick(event, i){
-        let dataType = pivotConfiguration.fieldsLists.allFields.find(item=> item.fieldId === pivotConfiguration.fieldsLists.metricFields[i].fieldId).type;
+        let dataType = pivotConfiguration.fieldsLists.metricFields[i].type;
         props.setAggModalParams({open: true, index: i, type: 'change', dataType: dataType});
     }
     /*
