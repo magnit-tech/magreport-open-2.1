@@ -180,7 +180,7 @@ export default function DerivedFieldDialogForm(props){
                 id="newConfigDescription"
                 placeholder="Введите описание производного поля"
                 multiline
-                rows={5}
+                rows={2}
                 className={classes.CSD_descriptionField}
                 InputLabelProps={{
                     shrink: true,
@@ -196,7 +196,7 @@ export default function DerivedFieldDialogForm(props){
                 ownFields = {ownFields}
                 otherFields = {otherFields}
                 key={currentField.id}
-                height = "200px"
+                height = "100px"
                 fontSize = {currentField.fontSize}
                 disabled={!currentField.owner}
                 initialCode={currentField.expressionText}
