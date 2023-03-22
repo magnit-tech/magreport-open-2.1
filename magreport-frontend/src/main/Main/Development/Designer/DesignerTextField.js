@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { TextField } from "@material-ui/core";
 import clsx from 'clsx';
 
@@ -33,10 +33,10 @@ import {DesignerCSS} from './DesignerCSS';
  */
 export default function DesignerTextField(props){
 
-    const [designerTextValue, setDesignerTextValue] = useState(props.value === 0 || props.value ? props.value : '');
+    //const [designerTextValue, setDesignerTextValue] = useState(props.value === 0 || props.value ? props.value : '');
 
     function handleChange(value){
-        setDesignerTextValue(value);
+       // setDesignerTextValue(value);
         props.onChange(value);
     }
 
@@ -58,12 +58,12 @@ export default function DesignerTextField(props){
             error = {!!props.error}
             disabled = {props.disabled}
             size={props.size}
-            InputProps = {props.inputProps}
+          //  InputProps = {props.inputProps}
             InputLabelProps = {props.InputLabelProps}
             helperText = {props.helperText}
             onInput  = {props.onInput ? (event) => props.onInput(event):()=>{} }
             onChange = {event => {props.type === "file" ? handleChange(event) : handleChange(event.target.value)}}
-            InputProps={{
+            InputProps={{ ...props.inputProps,
                 endAdornment: (
                     props.clearable ? 
                     <InputAdornment position="end" /*className={classes.topInputAdornment}*/>      
