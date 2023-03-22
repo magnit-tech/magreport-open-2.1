@@ -824,7 +824,7 @@ export const PivotCSS = makeStyles(theme => ({
         margin: '10px 15px'
     },
     DFD_listBlock: {
-        height: '650px', 
+        height: '470px', 
         overflow: 'auto',
         borderRadius: '8px', 
         
