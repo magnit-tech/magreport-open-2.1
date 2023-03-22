@@ -6,7 +6,6 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogActions from '@material-ui/core/DialogActions';
 import Paper from '@material-ui/core/Paper';
 import Draggable from 'react-draggable';
-import TextField from '@material-ui/core/TextField';
 
 import DesignerTextField from '../../Main/Development/Designer/DesignerTextField';
 

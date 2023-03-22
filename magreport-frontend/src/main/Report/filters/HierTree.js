@@ -1,5 +1,4 @@
 import React, {useState, useRef, useEffect} from 'react';
-import { connect } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
 // components
