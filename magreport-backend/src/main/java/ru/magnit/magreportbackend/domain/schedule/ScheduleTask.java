@@ -122,6 +122,9 @@ public class ScheduleTask extends EntityWithName {
     @Column(name = "MAX_FAILED_STARTS")
     private Long maxFailedStart;
 
+    @Column(name = "ACTIVE")
+    private Boolean active;
+
     @Override
     public ScheduleTask setId(Long id) {
         this.id = id;

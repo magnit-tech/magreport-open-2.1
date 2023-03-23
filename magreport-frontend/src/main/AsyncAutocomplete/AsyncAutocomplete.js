@@ -151,7 +151,8 @@ export default function AsyncAutocomplete(props){
 
     return (
         <Autocomplete
-            value = {namePart}
+            selectOnFocus
+           //value = {namePart}
             className = {props.className}
             id="asynchronousRoleListToAdd"
             size = {props.size ?? 'medium'}
@@ -166,7 +167,9 @@ export default function AsyncAutocomplete(props){
             }}
             getOptionSelected={(option, value) => option.name === value.name}
             options={optionsAsyncEntity}
+            noOptionsText = "Нет значений"
             loading={loadingAsync}
+            loadingText = "Загрузка..."
             onChange={handleOnChange}
             onInputChange={handleOnInputChange}
             renderInput={params => (
