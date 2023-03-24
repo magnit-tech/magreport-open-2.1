@@ -2,8 +2,6 @@ import React, { useState, useRef, useEffect, useMemo } from "react";
 
 import { PivotCSS } from '../../../PivotCSS';
 
-import useDebounce from "../lib/useDebounce";
-
 import { Button, DialogActions, FormControlLabel, Switch, TextField } from '@material-ui/core';
 
 import FormulaEditor from "../../../maglangFormulaEditor/FormulaEditor/FormulaEditor";
