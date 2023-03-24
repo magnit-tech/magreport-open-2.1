@@ -253,7 +253,7 @@ export default function FormulaEditor(props){
     }
 
     function replaceNameWithId(code){
-          let pattern = /(\[[^\[\]]+\])|(\[\[[^\[\]]+\]\])/g;
+          let pattern = /(\[[^\[\]]+\])|(\[\[[^\[\]]+\]\])/g; // eslint-disable-line
     
           function replacer(match, ...arg){
             if(match[0] === '[' && match[1] === '[')
