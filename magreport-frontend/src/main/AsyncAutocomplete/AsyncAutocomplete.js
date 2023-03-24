@@ -144,7 +144,7 @@ export default function AsyncAutocomplete(props){
             if (!openAsyncEntity) {
                 setOptionsAsyncEntity([]);
             }
-        }, [namePart, props.domainName]
+        }, [namePart, props.domainName] // eslint-disable-line
     );
 
 

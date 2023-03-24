@@ -10,7 +10,7 @@ import { List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Typo
 import DeleteIcon from '@material-ui/icons/Delete';
 import HelpIcon from '@material-ui/icons/Help';
 
-import { withStyles, makeStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles';
 import Tooltip from '@material-ui/core/Tooltip'
 
 

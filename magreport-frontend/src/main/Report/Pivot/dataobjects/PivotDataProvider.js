@@ -18,7 +18,6 @@ export default function PivotDataProvider(jobId, onTableDataReady, onTableDataLo
     let metricFilterGroup = new PivotFilterGroup();
     let tableData = new TableData();
     let fieldIdToNameMapping = {};
-    let derivedFieldIdToNameMapping = {};
     let valuesToSort = {};
 
     // Id последнего запроса
@@ -60,10 +59,6 @@ export default function PivotDataProvider(jobId, onTableDataReady, onTableDataLo
 
     this.setFieldIdToNameMapping = (newFieldIdToNameMapping) => {
         fieldIdToNameMapping = newFieldIdToNameMapping;
-    }
-
-    this.setDerivedFieldIdToNameMapping = (newDerivedFieldIdToNameMapping) => {
-        derivedFieldIdToNameMapping = newDerivedFieldIdToNameMapping;
     }
 
     /*
