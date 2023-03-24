@@ -220,7 +220,6 @@ function PivotPanel(props){
             derivedFieldIdToNameMapping.set(v.id, v.name);
         }        
         dataProviderRef.current.setFieldIdToNameMapping(fieldIdToNameMapping);
-        dataProviderRef.current.setDerivedFieldIdToNameMapping(derivedFieldIdToNameMapping);
 
         let newConfiguration = new PivotConfiguration(pivotConfiguration);
         newConfiguration.create({}, data);
