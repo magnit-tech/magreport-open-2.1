@@ -26,6 +26,7 @@ import ru.magnit.magreportbackend.expression.impl.SubtractExpression;
 import ru.magnit.magreportbackend.expression.impl.ToDoubleExpression;
 import ru.magnit.magreportbackend.expression.impl.ToIntegerExpression;
 import ru.magnit.magreportbackend.expression.impl.ToStringExpression;
+import ru.magnit.magreportbackend.expression.impl.ZeroToNullExpression;
 
 import java.util.function.BiFunction;
 
@@ -52,7 +53,8 @@ public enum Expressions {
     ROW_NUMBER(RowNumberExpression::new),
     SQUARE_ROOT(SquareRootExpression::new),
     POW(PowExpression::new),
-    ABS_EXPRESSION(AbsExpression::new);
+    ABS_EXPRESSION(AbsExpression::new),
+    ZERO_TO_NULL_EXPRESSION(ZeroToNullExpression::new);
 
     private final BiFunction<FieldExpressionResponse, ExpressionCreationContext, BaseExpression> factory;
 
