@@ -10,6 +10,7 @@ import ru.magnit.magreportbackend.expression.impl.ConstantValueExpression;
 import ru.magnit.magreportbackend.expression.impl.CurrentDateExpression;
 import ru.magnit.magreportbackend.expression.impl.DerivedFieldValueExpression;
 import ru.magnit.magreportbackend.expression.impl.DivideExpression;
+import ru.magnit.magreportbackend.expression.impl.IifExpression;
 import ru.magnit.magreportbackend.expression.impl.LeftSubstrExpression;
 import ru.magnit.magreportbackend.expression.impl.ModuloExpression;
 import ru.magnit.magreportbackend.expression.impl.MultiplyExpression;
@@ -54,7 +55,8 @@ public enum Expressions {
     SQUARE_ROOT(SquareRootExpression::new),
     POW(PowExpression::new),
     ABS_EXPRESSION(AbsExpression::new),
-    ZERO_TO_NULL_EXPRESSION(ZeroToNullExpression::new);
+    ZERO_TO_NULL_EXPRESSION(ZeroToNullExpression::new),
+    IIF_EXPRESSION(IifExpression::new);
 
     private final BiFunction<FieldExpressionResponse, ExpressionCreationContext, BaseExpression> factory;
 
