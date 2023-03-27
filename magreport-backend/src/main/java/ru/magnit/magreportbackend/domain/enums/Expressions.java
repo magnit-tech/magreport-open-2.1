@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
 import ru.magnit.magreportbackend.expression.BaseExpression;
 import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
+import ru.magnit.magreportbackend.expression.impl.AbsExpression;
 import ru.magnit.magreportbackend.expression.impl.AddExpression;
 import ru.magnit.magreportbackend.expression.impl.ConstantValueExpression;
 import ru.magnit.magreportbackend.expression.impl.CurrentDateExpression;
@@ -50,7 +51,8 @@ public enum Expressions {
     CURRENT_DATE(CurrentDateExpression::new),
     ROW_NUMBER(RowNumberExpression::new),
     SQUARE_ROOT(SquareRootExpression::new),
-    POW(PowExpression::new);
+    POW(PowExpression::new),
+    ABS_EXPRESSION(AbsExpression::new);
 
     private final BiFunction<FieldExpressionResponse, ExpressionCreationContext, BaseExpression> factory;
 
