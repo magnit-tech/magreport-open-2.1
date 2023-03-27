@@ -55,4 +55,10 @@ public abstract class BaseExpression {
             throw new InvalidExpression(ExpressionExceptionUtils.getWrongParameterTypeMessage(getRootExpression().getErrorPath(parameter), derivedField, expressionName, parameterType.name()));
         }
     }
+
+    protected void checkParametersCountIsOdd(BaseExpression parameter, int parametersCount) {
+        if (parametersCount % 2 != 1) {
+            throw new InvalidExpression(ExpressionExceptionUtils.getNumberOfParametersMustBeOdd(getRootExpression().getErrorPath(parameter), derivedField, expressionName));
+        }
+    }
 }
