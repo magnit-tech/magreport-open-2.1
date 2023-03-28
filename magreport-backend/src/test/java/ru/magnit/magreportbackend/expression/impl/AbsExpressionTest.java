@@ -15,7 +15,7 @@ class AbsExpressionTest {
     @Test
     void AbsIntegerTest() {
         final var sourceExpression = new FieldExpressionResponse()
-            .setType(Expressions.ABS_EXPRESSION)
+            .setType(Expressions.ABS)
             .setParameters(List.of(
                 new FieldExpressionResponse()
                     .setType(Expressions.CONSTANT_VALUE)
@@ -33,7 +33,7 @@ class AbsExpressionTest {
     @Test
     void AbsDoubleTest() {
         final var sourceExpression = new FieldExpressionResponse()
-            .setType(Expressions.ABS_EXPRESSION)
+            .setType(Expressions.ABS)
             .setParameters(List.of(
                 new FieldExpressionResponse()
                     .setType(Expressions.CONSTANT_VALUE)

@@ -14,7 +14,7 @@ class LteqExpressionTest {
     @Test
     void LteqTest() {
         final var sourceExpression = new FieldExpressionResponse()
-            .setType(Expressions.LTEQ_EXPRESSION)
+            .setType(Expressions.LTEQ)
             .setParameters(List.of(
                 new FieldExpressionResponse()
                     .setType(Expressions.CONSTANT_VALUE)

@@ -14,7 +14,7 @@ class LtExpressionTest {
     @Test
     void LtTest() {
         final var sourceExpression = new FieldExpressionResponse()
-            .setType(Expressions.LT_EXPRESSION)
+            .setType(Expressions.LT)
             .setParameters(List.of(
                 new FieldExpressionResponse()
                     .setType(Expressions.CONSTANT_VALUE)
