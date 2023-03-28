@@ -6,6 +6,8 @@ import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionRespo
 import ru.magnit.magreportbackend.exception.InvalidExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
+import java.util.List;
+
 public abstract class BaseExpression {
     protected BaseExpression parentExpression;
     protected String expressionName;
@@ -59,6 +61,21 @@ public abstract class BaseExpression {
     protected void checkParametersCountIsOdd(BaseExpression parameter, int parametersCount) {
         if (parametersCount % 2 != 1) {
             throw new InvalidExpression(ExpressionExceptionUtils.getNumberOfParametersMustBeOdd(getRootExpression().getErrorPath(parameter), derivedField, expressionName));
+        }
+    }
+
+    protected void checkParametersHasSameTypes(BaseExpression currentExpression, List<DataTypeEnum> parameterTypes) {
+        if (parameterTypes.isEmpty()) return;
+        DataTypeEnum parameterType = null;
+
+        for (final var currentType: parameterTypes) {
+            if (parameterType == null) {
+                parameterType = currentType;
+                continue;
+            }
+            if (currentType != parameterType) {
+                throw new InvalidExpression(ExpressionExceptionUtils.getWrongParameterTypesMessage(getRootExpression().getErrorPath(currentExpression), derivedField, expressionName, currentType.name(), parameterType.name()));
+            }
         }
     }
 }
