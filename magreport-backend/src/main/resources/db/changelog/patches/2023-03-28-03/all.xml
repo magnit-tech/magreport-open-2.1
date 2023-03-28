@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="DATETIME_EXPRESSIONS-001" author="artemenko_pa">
+        <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="YEAR_FROM_DATE"/>
+            <column name="DESCRIPTION" value="возвращает год из даты"/>
+            <column name="NUM_PARAMS" value="1"/>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+        <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="MONTH_FROM_DATE"/>
+            <column name="DESCRIPTION" value="Возвращает номер месяца"/>
+            <column name="NUM_PARAMS" value="1"/>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+        <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="WEEK_FROM_DATE"/>
+            <column name="DESCRIPTION" value="Возвращает номер недели"/>
+            <column name="NUM_PARAMS" value="1"/>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+        <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="DATE"/>
+            <column name="DESCRIPTION" value="Формирует дату по числовым YEAR, MONTH, DAY"/>
+            <column name="NUM_PARAMS" value="3"/>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+        <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="DAYS_INTERVAL"/>
+            <column name="DESCRIPTION" value="Возвращает интервал в днях между двумя датами"/>
+            <column name="NUM_PARAMS" value="2"/>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+        <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="MILLSEC_INTERVAL"/>
+            <column name="DESCRIPTION" value="Возвращает интервал в миллисекундах между двумя датами"/>
+            <column name="NUM_PARAMS" value="2"/>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+        <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="ADD_DAYS"/>
+            <column name="DESCRIPTION" value="Возвращает дату, которая получается прибавлением N дней к DATE"/>
+            <column name="NUM_PARAMS" value="2"/>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+        <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="ADD_MILLSEC"/>
+            <column name="DESCRIPTION" value="Возвращает момент времени, который получается прибавлением N миллисекунд к DATETIME"/>
+            <column name="NUM_PARAMS" value="2"/>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+        <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="ADD_WEEKS"/>
+            <column name="DESCRIPTION" value="Возвращает дату, которая отстоит от данной на N недель"/>
+            <column name="NUM_PARAMS" value="2"/>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+        <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="ADD_MONTHS"/>
+            <column name="DESCRIPTION" value="Возвращает дату, которая отстоит от данной на N месяцев"/>
+            <column name="NUM_PARAMS" value="2"/>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+        <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="MONTH_FIRST_DATE"/>
+            <column name="DESCRIPTION" value="Дата первого дня того же месяца, к которому относится DATE"/>
+            <column name="NUM_PARAMS" value="1"/>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+        <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="MONTH_LAST_DATE"/>
+            <column name="DESCRIPTION" value="дата последнего дня того же месяца, к которому относится DATE"/>
+            <column name="NUM_PARAMS" value="1"/>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+        <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="TODAY"/>
+            <column name="DESCRIPTION" value="Сегодняшняя дата"/>
+            <column name="NUM_PARAMS" value="0"/>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
