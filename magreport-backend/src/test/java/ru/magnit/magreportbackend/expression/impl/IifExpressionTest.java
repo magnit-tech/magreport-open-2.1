@@ -14,7 +14,7 @@ class IifExpressionTest {
     @Test
     void IIFTest() {
         final var sourceExpression = new FieldExpressionResponse()
-            .setType(Expressions.IIF_EXPRESSION)
+            .setType(Expressions.IIF)
             .setParameters(List.of(
                 new FieldExpressionResponse()
                     .setType(Expressions.CONSTANT_VALUE)

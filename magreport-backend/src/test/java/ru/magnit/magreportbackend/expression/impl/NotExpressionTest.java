@@ -10,20 +10,16 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class EqExpressionTest {
+class NotExpressionTest {
     @Test
-    void EqTest() {
+    void NotTest() {
         final var sourceExpression = new FieldExpressionResponse()
-            .setType(Expressions.EQ)
+            .setType(Expressions.LOGIC_NOT)
             .setParameters(List.of(
                 new FieldExpressionResponse()
                     .setType(Expressions.CONSTANT_VALUE)
-                    .setConstantType(DataTypeEnum.INTEGER)
-                    .setConstantValue("2"),
-                new FieldExpressionResponse()
-                    .setType(Expressions.CONSTANT_VALUE)
-                    .setConstantType(DataTypeEnum.INTEGER)
-                    .setConstantValue("2")
+                    .setConstantType(DataTypeEnum.BOOLEAN)
+                    .setConstantValue("false")
             ));
 
         final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));

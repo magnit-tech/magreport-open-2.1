@@ -10,40 +10,26 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ZeroToNullExpressionTest {
+class XorExpressionTest {
     @Test
-    void ZeroToNullIntegerTest() {
+    void XorTest() {
         final var sourceExpression = new FieldExpressionResponse()
-            .setType(Expressions.ZERO_TO_NULL)
+            .setType(Expressions.LOGIC_XOR)
             .setParameters(List.of(
                 new FieldExpressionResponse()
                     .setType(Expressions.CONSTANT_VALUE)
-                    .setConstantType(DataTypeEnum.INTEGER)
-                    .setConstantValue("0")
+                    .setConstantType(DataTypeEnum.BOOLEAN)
+                    .setConstantValue("true"),
+                new FieldExpressionResponse()
+                    .setType(Expressions.CONSTANT_VALUE)
+                    .setConstantType(DataTypeEnum.BOOLEAN)
+                    .setConstantValue("false")
             ));
 
         final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
         final var expressionResult = expression.calculate(0);
 
-        assertNull(expressionResult.getL());
-        assertEquals(DataTypeEnum.INTEGER, expressionResult.getR());
-    }
-
-    @Test
-    void ZeroToNullDoubleTest() {
-        final var sourceExpression = new FieldExpressionResponse()
-            .setType(Expressions.ZERO_TO_NULL)
-            .setParameters(List.of(
-                new FieldExpressionResponse()
-                    .setType(Expressions.CONSTANT_VALUE)
-                    .setConstantType(DataTypeEnum.DOUBLE)
-                    .setConstantValue("0")
-            ));
-
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
-        final var expressionResult = expression.calculate(0);
-
-        assertNull(expressionResult.getL());
-        assertEquals(DataTypeEnum.DOUBLE, expressionResult.getR());
+        assertEquals("true", expressionResult.getL());
+        assertEquals(DataTypeEnum.BOOLEAN, expressionResult.getR());
     }
 }
