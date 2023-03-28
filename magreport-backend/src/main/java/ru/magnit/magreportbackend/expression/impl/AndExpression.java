@@ -6,15 +6,13 @@ import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
-import java.util.List;
-
 import static ru.magnit.magreportbackend.util.Constant.FALSE;
 import static ru.magnit.magreportbackend.util.Constant.TRUE;
 
-public class EqExpression extends ParameterizedExpression {
+public class AndExpression extends ParameterizedExpression {
     private final Pair<String, DataTypeEnum> result = new Pair<>(null, DataTypeEnum.BOOLEAN);
 
-    public EqExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
+    public AndExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
         super(fieldExpression, context);
     }
 
@@ -26,9 +24,13 @@ public class EqExpression extends ParameterizedExpression {
         final var secondParameter = parameters.get(1);
         final var secondValue = secondParameter.calculate(rowNumber);
 
-        checkParametersHasSameTypes(this, List.of(firstValue.getR(), secondValue.getR()));
+        checkParameterHasAnyType(firstParameter, firstValue, DataTypeEnum.BOOLEAN);
+        checkParameterHasAnyType(secondParameter, secondValue, DataTypeEnum.BOOLEAN);
 
-        if (firstValue.getL().equalsIgnoreCase(secondValue.getL())) {
+        final var val1 = firstValue.getL().equals(TRUE);
+        final var val2 = secondValue.getL().equals(TRUE);
+
+        if (val1 && val2) {
             result.setL(TRUE);
         } else {
             result.setL(FALSE);

@@ -14,7 +14,7 @@ class SwitchExpressionTest {
     @Test
     void IIFTest() {
         final var sourceExpression = new FieldExpressionResponse()
-            .setType(Expressions.SWITCH_EXPRESSION)
+            .setType(Expressions.SWITCH)
             .setParameters(List.of(
                 new FieldExpressionResponse()
                     .setType(Expressions.CONSTANT_VALUE)

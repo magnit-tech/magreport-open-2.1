@@ -6,6 +6,7 @@ import ru.magnit.magreportbackend.expression.BaseExpression;
 import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.expression.impl.AbsExpression;
 import ru.magnit.magreportbackend.expression.impl.AddExpression;
+import ru.magnit.magreportbackend.expression.impl.AndExpression;
 import ru.magnit.magreportbackend.expression.impl.ConstantValueExpression;
 import ru.magnit.magreportbackend.expression.impl.CurrentDateExpression;
 import ru.magnit.magreportbackend.expression.impl.DerivedFieldValueExpression;
@@ -17,7 +18,9 @@ import ru.magnit.magreportbackend.expression.impl.LtExpression;
 import ru.magnit.magreportbackend.expression.impl.LteqExpression;
 import ru.magnit.magreportbackend.expression.impl.ModuloExpression;
 import ru.magnit.magreportbackend.expression.impl.MultiplyExpression;
+import ru.magnit.magreportbackend.expression.impl.NotExpression;
 import ru.magnit.magreportbackend.expression.impl.NvlExpression;
+import ru.magnit.magreportbackend.expression.impl.OrExpression;
 import ru.magnit.magreportbackend.expression.impl.PowExpression;
 import ru.magnit.magreportbackend.expression.impl.ReplaceExpression;
 import ru.magnit.magreportbackend.expression.impl.ReportFieldValueExpression;
@@ -31,6 +34,7 @@ import ru.magnit.magreportbackend.expression.impl.SwitchExpression;
 import ru.magnit.magreportbackend.expression.impl.ToDoubleExpression;
 import ru.magnit.magreportbackend.expression.impl.ToIntegerExpression;
 import ru.magnit.magreportbackend.expression.impl.ToStringExpression;
+import ru.magnit.magreportbackend.expression.impl.XorExpression;
 import ru.magnit.magreportbackend.expression.impl.ZeroToNullExpression;
 
 import java.util.function.BiFunction;
@@ -58,13 +62,17 @@ public enum Expressions {
     ROW_NUMBER(RowNumberExpression::new),
     SQUARE_ROOT(SquareRootExpression::new),
     POW(PowExpression::new),
-    ABS_EXPRESSION(AbsExpression::new),
-    ZERO_TO_NULL_EXPRESSION(ZeroToNullExpression::new),
-    IIF_EXPRESSION(IifExpression::new),
-    SWITCH_EXPRESSION(SwitchExpression::new),
-    LT_EXPRESSION(LtExpression::new),
-    LTEQ_EXPRESSION(LteqExpression::new),
-    EQ_EXPRESSION(EqExpression::new);
+    ABS(AbsExpression::new),
+    ZERO_TO_NULL(ZeroToNullExpression::new),
+    IIF(IifExpression::new),
+    SWITCH(SwitchExpression::new),
+    LT(LtExpression::new),
+    LTEQ(LteqExpression::new),
+    EQ(EqExpression::new),
+    LOGIC_AND(AndExpression::new),
+    LOGIC_OR(OrExpression::new),
+    LOGIC_XOR(XorExpression::new),
+    LOGIC_NOT(NotExpression::new);
 
     private final BiFunction<FieldExpressionResponse, ExpressionCreationContext, BaseExpression> factory;
 
