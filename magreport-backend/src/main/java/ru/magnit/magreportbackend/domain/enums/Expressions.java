@@ -7,11 +7,14 @@ import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.expression.impl.AbsExpression;
 import ru.magnit.magreportbackend.expression.impl.AddExpression;
 import ru.magnit.magreportbackend.expression.impl.AndExpression;
+import ru.magnit.magreportbackend.expression.impl.CeilExpression;
+import ru.magnit.magreportbackend.expression.impl.ConcatExpression;
 import ru.magnit.magreportbackend.expression.impl.ConstantValueExpression;
 import ru.magnit.magreportbackend.expression.impl.CurrentDateExpression;
 import ru.magnit.magreportbackend.expression.impl.DerivedFieldValueExpression;
 import ru.magnit.magreportbackend.expression.impl.DivideExpression;
 import ru.magnit.magreportbackend.expression.impl.EqExpression;
+import ru.magnit.magreportbackend.expression.impl.FloorExpression;
 import ru.magnit.magreportbackend.expression.impl.IifExpression;
 import ru.magnit.magreportbackend.expression.impl.LeftSubstrExpression;
 import ru.magnit.magreportbackend.expression.impl.LtExpression;
@@ -25,6 +28,7 @@ import ru.magnit.magreportbackend.expression.impl.PowExpression;
 import ru.magnit.magreportbackend.expression.impl.ReplaceExpression;
 import ru.magnit.magreportbackend.expression.impl.ReportFieldValueExpression;
 import ru.magnit.magreportbackend.expression.impl.RightSubstrExpression;
+import ru.magnit.magreportbackend.expression.impl.RoundExpression;
 import ru.magnit.magreportbackend.expression.impl.RowNumberExpression;
 import ru.magnit.magreportbackend.expression.impl.SquareRootExpression;
 import ru.magnit.magreportbackend.expression.impl.StrLenExpression;
@@ -72,7 +76,11 @@ public enum Expressions {
     LOGIC_AND(AndExpression::new),
     LOGIC_OR(OrExpression::new),
     LOGIC_XOR(XorExpression::new),
-    LOGIC_NOT(NotExpression::new);
+    LOGIC_NOT(NotExpression::new),
+    ROUND(RoundExpression::new),
+    FLOOR(FloorExpression::new),
+    CEIL(CeilExpression::new),
+    CONCAT(ConcatExpression::new);
 
     private final BiFunction<FieldExpressionResponse, ExpressionCreationContext, BaseExpression> factory;
 
