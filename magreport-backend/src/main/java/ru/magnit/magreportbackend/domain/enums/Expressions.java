@@ -11,6 +11,7 @@ import ru.magnit.magreportbackend.expression.impl.CeilExpression;
 import ru.magnit.magreportbackend.expression.impl.ConcatExpression;
 import ru.magnit.magreportbackend.expression.impl.ConstantValueExpression;
 import ru.magnit.magreportbackend.expression.impl.CurrentDateExpression;
+import ru.magnit.magreportbackend.expression.impl.DayFromDateExpression;
 import ru.magnit.magreportbackend.expression.impl.DerivedFieldValueExpression;
 import ru.magnit.magreportbackend.expression.impl.DivideExpression;
 import ru.magnit.magreportbackend.expression.impl.EqExpression;
@@ -20,6 +21,7 @@ import ru.magnit.magreportbackend.expression.impl.LeftSubstrExpression;
 import ru.magnit.magreportbackend.expression.impl.LtExpression;
 import ru.magnit.magreportbackend.expression.impl.LteqExpression;
 import ru.magnit.magreportbackend.expression.impl.ModuloExpression;
+import ru.magnit.magreportbackend.expression.impl.MonthFromDateExpression;
 import ru.magnit.magreportbackend.expression.impl.MultiplyExpression;
 import ru.magnit.magreportbackend.expression.impl.NotExpression;
 import ru.magnit.magreportbackend.expression.impl.NvlExpression;
@@ -38,7 +40,9 @@ import ru.magnit.magreportbackend.expression.impl.SwitchExpression;
 import ru.magnit.magreportbackend.expression.impl.ToDoubleExpression;
 import ru.magnit.magreportbackend.expression.impl.ToIntegerExpression;
 import ru.magnit.magreportbackend.expression.impl.ToStringExpression;
+import ru.magnit.magreportbackend.expression.impl.WeekFromDateExpression;
 import ru.magnit.magreportbackend.expression.impl.XorExpression;
+import ru.magnit.magreportbackend.expression.impl.YearFromDateExpression;
 import ru.magnit.magreportbackend.expression.impl.ZeroToNullExpression;
 
 import java.util.function.BiFunction;
@@ -80,7 +84,11 @@ public enum Expressions {
     ROUND(RoundExpression::new),
     FLOOR(FloorExpression::new),
     CEIL(CeilExpression::new),
-    CONCAT(ConcatExpression::new);
+    CONCAT(ConcatExpression::new),
+    YEAR_FROM_DATE(YearFromDateExpression::new),
+    MONTH_FROM_DATE(MonthFromDateExpression::new),
+    WEEK_FROM_DATE(WeekFromDateExpression::new),
+    DAY_FROM_DATE(DayFromDateExpression::new);
 
     private final BiFunction<FieldExpressionResponse, ExpressionCreationContext, BaseExpression> factory;
 

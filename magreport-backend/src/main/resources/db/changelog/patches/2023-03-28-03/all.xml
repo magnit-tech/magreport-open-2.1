@@ -28,6 +28,13 @@
             <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
         </insert>
         <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="DAY_FROM_DATE"/>
+            <column name="DESCRIPTION" value="Возвращает номер дня месяца"/>
+            <column name="NUM_PARAMS" value="1"/>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+        <insert tableName="EXPRESSIONS">
             <column name="NAME" value="DATE"/>
             <column name="DESCRIPTION" value="Формирует дату по числовым YEAR, MONTH, DAY"/>
             <column name="NUM_PARAMS" value="3"/>
