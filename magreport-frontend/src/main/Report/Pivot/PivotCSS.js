@@ -832,7 +832,7 @@ export const PivotCSS = makeStyles(theme => ({
 		},
 	},
 	DFD_listBlock: {
-		height: '470px',
+		height: '480px',
 		overflow: 'auto',
 		borderRadius: '8px',
 	},
@@ -885,40 +885,81 @@ export const PivotCSS = makeStyles(theme => ({
 			marginRight: '5px',
 		},
 	},
-	DFD_guiedBtn: {
+	DFD_guide: {
+		position: 'fixed',
+		right: '-500px',
+		backgroundColor: theme.palette.drawerColor,
+		height: '100vh',
+		top: 0,
+		width: '300px',
+		transition: 'all 400ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
+		zIndex: 999,
+		overflow: 'auto',
+
+		'&.active': {
+			right: 0,
+		},
+	},
+	DFD_guideBtn: {
 		padding: '3px 8px',
 		display: 'flex',
 		alignItems: 'center',
-		border: `2px solid ${theme.palette.drawerColor}`,
+		border: `1px solid ${theme.palette.primary.light}`,
 		borderRadius: '8px',
 		backgroundColor: 'inherit',
 		cursor: 'pointer',
 		transition: 'all .3s ease',
+		color: theme.palette.text.primary,
 		'&:hover': {
 			backgroundColor: theme.palette.drawerColor,
 		},
 		'&:disabled': {
 			cursor: 'default',
+			opacity: 0.3,
 			'&:hover': {
 				backgroundColor: 'inherit',
 			},
 		},
 		'& svg': {
+			// fill: 'inherit',
 			padding: 0,
 			marginTop: '-2px',
 			marginRight: '5px',
 		},
 	},
-	DFD_guied: {
-		position: 'fixed',
-		right: 0,
-		background: 'white',
-		height: '100vh',
-		top: 0,
-		width: 0,
-		transition: 'width 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
-		'&.active': {
-			width: '200px',
+	DFD_closeGuide: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'flex-end',
+		marginRight: '15px',
+	},
+	DFD_titleGuide: {
+		margin: '0 0 25px 15px',
+	},
+	DFD_accGuide: {
+		width: '100%',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+	},
+	DFD_accTitleGuide: {
+		fontSize: '14px',
+	},
+	DFD_accWrapperGuide: {
+		padding: '0 8px',
+	},
+	DFD_guideOpen: {
+		'@media (max-width: 1600px)': {
+			'& .MuiDialog-scrollPaper': {
+				justifyContent: 'flex-start',
+				paddingLeft: '120px',
+			},
+		},
+		'@media (max-width: 1260px)': {
+			'& .MuiDialog-scrollPaper': {
+				justifyContent: 'flex-start',
+				paddingLeft: '60px',
+			},
 		},
 	},
 }));

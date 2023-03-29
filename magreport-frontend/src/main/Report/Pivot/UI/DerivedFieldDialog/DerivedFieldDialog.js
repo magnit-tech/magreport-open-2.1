@@ -41,6 +41,7 @@ import {
 	deleteField,
 	saveAllFields,
 } from './lib/DFD_functions';
+import clsx from 'clsx';
 
 /**
  * @param {Boolean} props.open - boolean-значение отображения модального окна
@@ -337,6 +338,7 @@ function DerivedFieldDialog(props) {
 			open={open}
 			PaperComponent={PaperComponent}
 			aria-labelledby='drag-title'
+			className={clsx({ [classes.DFD_guideOpen]: showDerivedFunctionGuied })}
 		>
 			<DialogTitle id='drag-title'> Производные поля </DialogTitle>
 
@@ -375,7 +377,13 @@ function DerivedFieldDialog(props) {
 							}
 						/>
 
-						<DerivedFieldDialogGuied open={showDerivedFunctionGuied} />
+						<DerivedFieldDialogGuied
+							open={showDerivedFunctionGuied}
+							functionsList={allFieldsAndExpressions.current.functionsList}
+							onToggleDerivedFunctionGuied={value =>
+								setShowDerivedFunctionGuied(value)
+							}
+						/>
 					</>
 				)}
 			</div>

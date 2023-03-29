@@ -1,95 +1,95 @@
 import React from 'react';
 import clsx from 'clsx';
+import { useSnackbar } from 'notistack';
 
 import { PivotCSS } from '../../../PivotCSS';
 
-// import {
-// 	Drawer,
-// 	List,
-// 	ListItem,
-// 	ListItemIcon,
-// 	ListItemText,
-// } from '@material-ui/core';
+import {
+	Accordion,
+	AccordionDetails,
+	AccordionSummary,
+	IconButton,
+	TextField,
+	Tooltip,
+	Typography,
+} from '@material-ui/core';
 
-import { makeStyles } from '@material-ui/core/styles';
-import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
-import Button from '@material-ui/core/Button';
-import List from '@material-ui/core/List';
-import Divider from '@material-ui/core/Divider';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import MailIcon from '@material-ui/icons/Mail';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
+import CloseIcon from '@material-ui/icons/Close';
 
 export default function DerivedFieldDialogGuied(props) {
 	const classes = PivotCSS();
+	const { enqueueSnackbar } = useSnackbar();
 
-	const { drawerOpen } = props;
+	const { open, functionsList } = props;
 
-	const [state, setState] = React.useState({
-		top: false,
-		left: false,
-		bottom: false,
-		right: false,
-	});
+	function handleCopyFunctionName(e, name) {
+		e.stopPropagation();
+		navigator.clipboard.writeText(name);
+		enqueueSnackbar(`Название функции успешно скопировано в буфер обмен`, {
+			variant: 'success',
+		});
+	}
 
-	const toggleDrawer = (anchor, open) => event => {
-		if (
-			event &&
-			event.type === 'keydown' &&
-			(event.key === 'Tab' || event.key === 'Shift')
-		) {
-			return;
-		}
-
-		setState({ ...state, [anchor]: open });
-	};
-
-	const list = anchor => (
-		<div
-			className={clsx(classes.list, {
-				[classes.fullList]: anchor === 'top' || anchor === 'bottom',
-			})}
-			role='presentation'
-			onClick={toggleDrawer(anchor, false)}
-			onKeyDown={toggleDrawer(anchor, false)}
-		>
-			<List>
-				{['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-					<ListItem button key={text}>
-						<ListItemIcon>
-							{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-						</ListItemIcon>
-						<ListItemText primary={text} />
-					</ListItem>
-				))}
-			</List>
-			<Divider />
-			<List>
-				{['All mail', 'Trash', 'Spam'].map((text, index) => (
-					<ListItem button key={text}>
-						<ListItemIcon>
-							{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-						</ListItemIcon>
-						<ListItemText primary={text} />
-					</ListItem>
-				))}
-			</List>
+	const list = () => (
+		<div className={classes.DFD_accWrapperGuide}>
+			{functionsList.map(item => (
+				<Accordion key={item.functionId}>
+					<AccordionSummary
+						expandIcon={<ExpandMoreIcon />}
+						aria-controls='panel1a-content'
+						id='panel1a-header'
+					>
+						<div className={classes.DFD_accGuide}>
+							<Typography className={classes.DFD_accTitleGuide}>
+								{item.functionName}
+							</Typography>
+							<Tooltip title='Скопировать название функции' placement='top'>
+								<IconButton
+									size='small'
+									edge='end'
+									aria-label='copy'
+									onClick={e => handleCopyFunctionName(e, item.functionName)}
+								>
+									<FileCopyOutlinedIcon />
+								</IconButton>
+							</Tooltip>
+						</div>
+					</AccordionSummary>
+					<AccordionDetails>
+						<TextField
+							label='Описание'
+							placeholder='Описание'
+							multiline
+							rows={2}
+							InputLabelProps={{
+								shrink: true,
+							}}
+							variant='outlined'
+							value={item.functionDesc}
+							style={{ width: '100%' }}
+						/>
+					</AccordionDetails>
+				</Accordion>
+			))}
 		</div>
 	);
 
 	return (
-		// <SwipeableDrawer open={props.open} onClose={toggleDrawer(false)}>
-		// 	{/* {list('right')} */}
-		// </SwipeableDrawer>
-		// <div>
-		// 	<div className={classes.DFD_guied}>{list('right')}</div>
-		// 	<SwipeableDrawer open={props.open} onClose={toggleDrawer(false)}>
-		// 		{list('right')}
-		// 	</SwipeableDrawer>
-		// </div>
-		<div className={clsx(classes.DFD_guied, { active: props.open })}>
+		<div className={clsx(classes.DFD_guide, { active: open })}>
+			<div className={classes.DFD_closeGuide}>
+				<Tooltip title='Закрыть справочник' placement='left'>
+					<IconButton
+						edge='end'
+						aria-label='close'
+						onClick={() => props.onToggleDerivedFunctionGuied(false)}
+					>
+						<CloseIcon />
+					</IconButton>
+				</Tooltip>
+			</div>
+			<h3 className={classes.DFD_titleGuide}>Справочник функций:</h3>
 			{list('right')}
 		</div>
 	);

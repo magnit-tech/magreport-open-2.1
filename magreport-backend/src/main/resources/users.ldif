@@ -36,12 +36,25 @@ sn: User
 uid: user
 userPassword: 1234
 
+dn: uid=data_lineage_user,ou=users,dc=magreport,dc=ru
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+mail: data_lineage_user@magreport.ru
+displayName: Пертов Петр Петрович
+cn: DataLineage User
+sn: DataLineageUser
+uid: data_lineage_user
+userPassword: qy1*Z*96
+
 dn: cn=magreport_users,ou=groups,dc=magreport,dc=ru
 objectclass: top
 objectclass: groupOfNames
 cn: magreport_users
 uniqueMember: uid=superuser,ou=users,dc=magreport,dc=ru
 uniqueMember: uid=user,ou=users,dc=magreport,dc=ru
+uniqueMember: uid=data_lineage_user,ou=users,dc=magreport,dc=ru
 
 dn: cn=magreport_admins,ou=groups,dc=magreport,dc=ru
 objectclass: top
