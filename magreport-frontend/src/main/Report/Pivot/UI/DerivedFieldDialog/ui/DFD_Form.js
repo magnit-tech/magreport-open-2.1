@@ -107,22 +107,22 @@ export default function DerivedFieldDialogForm(props) {
       let result = []
 
       props.publicFields.forEach((value, key) => {
-        result.push({label: key, type: "variable", detail: key, id: value.id})
+        result.push({fieldName: key, valueType: "variable", fieldDesc: key, fieldId: value.id})
       })
 
       props.ownFields.forEach((value, key) => {
         if(props.publicFields.get(key)) {
-          result.push({label: `${key}(${value.userName})`, type: "variable", detail: `${key}(${value.userName})`, id: value.id})
+          result.push({fieldName: `${key}(${value.userName})`, valueType: "variable", fieldDesc: `${key}(${value.userName})`, fieldId: value.id})
         } else {
-          result.push({label: key, type: "variable", detail: key, id: value.id})
+          result.push({fieldName: key, valueType: "variable", fieldDesc: key, fieldId: value.id})
         }
       })
 
       props.otherFields.forEach((value, key) => {
         if(props.publicFields.get(key) || props.ownFields.get(key)) {
-          result.push({label: `${key}(${value.userName})`, type: "variable", detail: `${key}(${value.userName})`, id: value.id})
+          result.push({fieldName: `${key}(${value.userName})`, valueType: "variable", fieldDesc: `${key}(${value.userName})`, fieldId: value.id})
         } else {
-          result.push({label: key, type: "variable", detail: key, id: value.id})
+          result.push({fieldName: key, valueType: "variable", fieldDesc: key, fieldId: value.id})
         }
       })
       
