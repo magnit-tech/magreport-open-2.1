@@ -29,7 +29,7 @@ import { TextField } from "@material-ui/core";
  * @param {*} props.initialCode - исходный текст формулы с id вместо названий
  * @param {*} props.functions - массив описаний функций: {functionId, functionName, functionDesc, functionSignature}
  * @param {*} props.originalFields - массив объектов исходных полей отчёта {fieldId, fieldName, fieldDesc, valueType}
- * @param {*} props.derivedFields - массив объектов производных полей отчёта в необходимом для редактора представление {detail, id, label, type}
+ * @param {*} props.derivedFields - массив объектов производных полей отчёта {fieldId, fieldName, fieldDesc, valueType}
  * @param {*} props.fontSize - размер шрифта
  * @param {*} props.onChange - function(compilationResult) - массив объектов производных полей отчёта
  *                              compilationResult:
@@ -106,8 +106,9 @@ export default function FormulaEditor(props){
     */
     const functionsCompletionList = props.functions.map((v) => ({label: v.functionName, type: "function", detail: v.functionDesc, info: v.functionSignature}));
     const originalFieldsCompletionList = props.originalFields.map((v) => ({label: v.fieldName, type: "variable", detail: v.fieldDesc}));
+    const derivedFieldsCompletionList = props.derivedFields.map((v) => ({label: v.fieldName, type: "variable", detail: v.fieldDesc}));
 
-    const completionList = functionsCompletionList.concat(originalFieldsCompletionList.concat(props.derivedFields));
+    const completionList = functionsCompletionList.concat(originalFieldsCompletionList.concat(derivedFieldsCompletionList));
 
     const completion = MagreportLanguage.data.of({
       autocomplete: completeFromList(
@@ -139,8 +140,8 @@ export default function FormulaEditor(props){
         let mNametoId = new Map();
 
         props.derivedFields.forEach((value) => {
-          mIdtoName.set(value.id, value.label); 
-          mNametoId.set(value.label, value.id)
+          mIdtoName.set(value.fieldId, value.fieldName); 
+          mNametoId.set(value.fieldName, value.fieldId)
         })
 
         return [mIdtoName, mNametoId];
