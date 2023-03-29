@@ -8,8 +8,7 @@ import {tags as t } from '@lezer/highlight';
 
 import "./FormulaEditor.css"
 
-import { Box, FormControl, MenuItem, Select, TextField, InputBase } from "@material-ui/core";
-import { withStyles } from '@material-ui/core/styles';
+import { TextField } from "@material-ui/core";
 
 // Примеры highlight смотреть здесь:
 // https://github.com/codemirror/highlight/blob/main/src/highlight.ts 
@@ -67,26 +66,6 @@ const tempNodeType = {
   comment : 0,
   functionName : 1
 }
-
-const SelectInput = withStyles((theme) => ({
-	root: {
-		  maxWidth: '100px',
-	},
-	input: {
-		borderRadius: 4,
-		position: 'relative',
-		backgroundColor: theme.palette.background.paper,
-		border: '1px solid #ced4da',
-		fontSize: 14,
-		padding: '5px 20px 5px 7px',
-		transition: theme.transitions.create(['border-color', 'box-shadow']),
-		'&:focus': {
-			borderRadius: 4,
-			borderColor: '#80bdff',
-			boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
-		},
-	},
-}))(InputBase);
 
 export default function FormulaEditor(props){
 
@@ -509,43 +488,8 @@ export default function FormulaEditor(props){
 
     }, [props.onChange, createOutputTree]); // eslint-disable-line
 
-
-
-    // Создание списка c MenuItems для селекта "Размер шрифта"
-    const menuItems = () => {
-      const numbers = [8, 9, 10, 12, 14, 16, 20, 24, 28, 32]
-      const arr = numbers.map(i =>  <MenuItem key={i} value={i}>{i}</MenuItem> )
-
-      return arr
-    }
-
-    const ITEM_HEIGHT = 48;
-    const ITEM_PADDING_TOP = 8;
-    const MenuProps = {
-      PaperProps: {
-        style: {
-          maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-          width: 250,
-        },
-      },
-    };
-
     return (
         <div className="FormulaEditor">
-							<Box className="FormulaEditor__fontSize">
-								<Box whiteSpace="nowrap" className="FormulaEditor__fontSizeSelect">Размер шрифта:</Box>
-								<FormControl>
-									<Select
-										id="fontSizeSelect"
-										value={props.fontSize}
-										onChange={(e) => props.onChangeFontSize(e.target.value)}
-										input={<SelectInput />}
-										MenuProps={MenuProps}
-									>
-										{menuItems()}
-									</Select>
-								</FormControl>
-							</Box>
             <CodeMirror
               className="CodeMirror"
               style={{ fontSize: props.fontSize + "px" }}
