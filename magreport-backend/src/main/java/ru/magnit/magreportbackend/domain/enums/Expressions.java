@@ -28,7 +28,9 @@ import ru.magnit.magreportbackend.expression.impl.LtExpression;
 import ru.magnit.magreportbackend.expression.impl.LteqExpression;
 import ru.magnit.magreportbackend.expression.impl.MillsecIntervalExtension;
 import ru.magnit.magreportbackend.expression.impl.ModuloExpression;
+import ru.magnit.magreportbackend.expression.impl.MonthFirstDateExpression;
 import ru.magnit.magreportbackend.expression.impl.MonthFromDateExpression;
+import ru.magnit.magreportbackend.expression.impl.MonthLastDateExpression;
 import ru.magnit.magreportbackend.expression.impl.MultiplyExpression;
 import ru.magnit.magreportbackend.expression.impl.NotExpression;
 import ru.magnit.magreportbackend.expression.impl.NvlExpression;
@@ -102,7 +104,10 @@ public enum Expressions {
     ADD_DAYS(AddDaysExpression::new),
     ADD_MILLSEC(AddMillsecExpression::new),
     ADD_WEEKS(AddWeeksExpression::new),
-    ADD_MONTHS(AddMonthsExpression::new);
+    ADD_MONTHS(AddMonthsExpression::new),
+    MONTH_FIRST_DATE(MonthFirstDateExpression::new),
+    MONTH_LAST_DATE(MonthLastDateExpression::new),
+    TODAY(CurrentDateExpression::new);
 
     private final BiFunction<FieldExpressionResponse, ExpressionCreationContext, BaseExpression> factory;
 
