@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import { PivotCSS } from '../../../PivotCSS';
 
@@ -8,8 +8,6 @@ import {
 	MenuItem,
 	Select,
 	InputBase,
-	Tooltip,
-	IconButton,
 } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 
@@ -64,7 +62,7 @@ export default function DerivedFieldDialogFontSize(props) {
 	return (
 		<Box className={classes.DFD_fontSize}>
 			<button
-				className={classes.DFD_guiedBtn}
+				className={classes.DFD_guideBtn}
 				disabled={props.showDerivedFunctionGuied}
 				onClick={() => props.onOpenDerivedFunctionGuied(true)}
 			>
