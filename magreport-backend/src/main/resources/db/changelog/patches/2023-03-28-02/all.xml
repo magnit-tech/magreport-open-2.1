@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="ROUND_CONCAT_EXPRESSIONS-001" author="artemenko_pa">
+        <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="ROUND"/>
+            <column name="DESCRIPTION" value="Стандартное округление"/>
+            <column name="NUM_PARAMS" value="1"/>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+        <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="FLOOR"/>
+            <column name="DESCRIPTION" value="Округление вниз"/>
+            <column name="NUM_PARAMS" value="1"/>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+        <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="CEIL"/>
+            <column name="DESCRIPTION" value="Округление вверх"/>
+            <column name="NUM_PARAMS" value="1"/>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+        <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="CONCAT"/>
+            <column name="DESCRIPTION" value="Конкатенация"/>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'VARARG'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

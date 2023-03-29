@@ -1,0 +1,21 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="MAGREPORT_LOCAL_USERS-001" author="artemenko_pa">
+        <insert tableName="DOMAIN_GROUP">
+            <column name="NAME" value="MAGREPORT_USERS"/>
+            <column name="DOMAIN_ID" valueComputed="SELECT DOMAIN_ID FROM ${default-schema}.DOMAINS WHERE NAME='MAGREPORT_LOCAL'"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="MAGREPORT_LOCAL_USERS-002" author="artemenko_pa">
+        <insert tableName="ROLE_DOMAIN_GROUP">
+            <column name="ROLE_ID" valueComputed="SELECT ROLE_ID FROM ${default-schema}.ROLE WHERE NAME='USER'"/>
+            <column name="DOMAIN_GROUP_ID" valueComputed="SELECT DOMAIN_GROUP_ID FROM ${default-schema}.DOMAIN_GROUP WHERE NAME='MAGREPORT_USERS' AND DOMAIN_ID=(SELECT DOMAIN_ID FROM ${default-schema}.DOMAINS WHERE NAME='MAGREPORT_LOCAL')"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
