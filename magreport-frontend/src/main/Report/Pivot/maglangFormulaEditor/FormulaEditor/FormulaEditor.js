@@ -29,7 +29,7 @@ import { TextField } from "@material-ui/core";
  * @param {*} props.initialCode - исходный текст формулы с id вместо названий
  * @param {*} props.functions - массив описаний функций: {functionId, functionName, functionDesc, functionSignature}
  * @param {*} props.originalFields - массив объектов исходных полей отчёта {fieldId, fieldName, fieldDesc, valueType}
- * @param {*} props.derivedFields - массив объектов производных полей отчёта {fieldId, fieldName, fieldDesc, fieldOwner, valueType}
+ * @param {*} props.derivedFields - массив объектов производных полей отчёта в необходимом для редактора представление {detail, id, label, type}
  * @param {*} props.fontSize - размер шрифта
  * @param {*} props.onChange - function(compilationResult) - массив объектов производных полей отчёта
  *                              compilationResult:
@@ -106,35 +106,8 @@ export default function FormulaEditor(props){
     */
     const functionsCompletionList = props.functions.map((v) => ({label: v.functionName, type: "function", detail: v.functionDesc, info: v.functionSignature}));
     const originalFieldsCompletionList = props.originalFields.map((v) => ({label: v.fieldName, type: "variable", detail: v.fieldDesc}));
-    // const derivedFieldsCompletionList = props.derivedFields.map((v) => ({label: v.fieldName, type: "variable", detail: v.fieldOwner + ": " + v.fieldDesc}));
 
-    const derivedFieldsCompletionList = () => {
-      let result = []
-
-      props.publicFields.forEach((value, key) => {
-        result.push({label: key, type: "variable", detail: key})
-      })
-
-      props.ownFields.forEach((value, key) => {
-        if(props.publicFields.get(key)) {
-          result.push({label: `${key}(${value.userName})`, type: "variable", detail: `${key}(${value.userName})`})
-        } else {
-          result.push({label: key, type: "variable", detail: key})
-        }
-      })
-
-      props.otherFields.forEach((value, key) => {
-        if(props.publicFields.get(key) || props.ownFields.get(key)) {
-          result.push({label: `${key}(${value.userName})`, type: "variable", detail: `${key}(${value.userName})`})
-        } else {
-          result.push({label: key, type: "variable", detail: key})
-        }
-      })
-      
-      return result
-    }
-
-    const completionList = functionsCompletionList.concat(originalFieldsCompletionList.concat(derivedFieldsCompletionList()));
+    const completionList = functionsCompletionList.concat(originalFieldsCompletionList.concat(props.derivedFields));
 
     const completion = MagreportLanguage.data.of({
       autocomplete: completeFromList(
@@ -153,45 +126,25 @@ export default function FormulaEditor(props){
         return [mIdtoName, mNametoId];
       }, [props.functions]);
 
-    const [originalFieldIdToName, originalFieldNameToId] = useMemo( () =>{
+    const [originalFieldIdToName, originalFieldNameToId] = useMemo( () => {
         let mIdtoName = new Map();
         let mNametoId = new Map();
         props.originalFields.forEach((f) => {mIdtoName.set(f.fieldId, f.fieldName); mNametoId.set(f.fieldName, f.fieldId)});
         return [mIdtoName, mNametoId];
       }, [props.originalFields]);
 
-    const [derivedFieldIdToName, derivedFieldNameToId] = useMemo( () =>{
+    const [derivedFieldIdToName, derivedFieldNameToId] = useMemo( () => {
 
         let mIdtoName = new Map();
         let mNametoId = new Map();
 
-        props.publicFields.forEach((value, key) => {
-          mIdtoName.set(value.id, key); 
-          mNametoId.set(key, value.id)
-        })
-
-        props.ownFields.forEach((value, key) => {
-          if(props.publicFields.get(key)) {
-            mIdtoName.set(value.id, `${key}(${value.userName})`); 
-            mNametoId.set(`${key}(${value.userName})`, value.id)
-          } else {
-            mIdtoName.set(value.id, key); 
-            mNametoId.set(key, value.id)
-          }
-        })
-
-        props.otherFields.forEach((value, key) => {
-          if(props.publicFields.get(key) || props.ownFields.get(key)) {
-            mIdtoName.set(value.id, `${key}(${value.userName})`); 
-            mNametoId.set(`${key}(${value.userName})`, value.id)
-          } else {
-            mIdtoName.set(value.id, key); 
-            mNametoId.set(key, value.id)
-          }
+        props.derivedFields.forEach((value) => {
+          mIdtoName.set(value.id, value.label); 
+          mNametoId.set(value.label, value.id)
         })
 
         return [mIdtoName, mNametoId];
-      }, [props.publicFields, props.ownFields, props.otherFields]);       
+      }, [props.derivedFields]);       
 
     /*
       Decode input code from IDs to names

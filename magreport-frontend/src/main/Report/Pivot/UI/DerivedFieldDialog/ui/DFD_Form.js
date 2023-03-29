@@ -103,6 +103,32 @@ export default function DerivedFieldDialogForm(props) {
 		[currentField.name, reportId] // eslint-disable-line
 	);
 
+	const derivedFieldsCompletionList = useMemo(() => {
+      let result = []
+
+      props.publicFields.forEach((value, key) => {
+        result.push({label: key, type: "variable", detail: key, id: value.id})
+      })
+
+      props.ownFields.forEach((value, key) => {
+        if(props.publicFields.get(key)) {
+          result.push({label: `${key}(${value.userName})`, type: "variable", detail: `${key}(${value.userName})`, id: value.id})
+        } else {
+          result.push({label: key, type: "variable", detail: key, id: value.id})
+        }
+      })
+
+      props.otherFields.forEach((value, key) => {
+        if(props.publicFields.get(key) || props.ownFields.get(key)) {
+          result.push({label: `${key}(${value.userName})`, type: "variable", detail: `${key}(${value.userName})`, id: value.id})
+        } else {
+          result.push({label: key, type: "variable", detail: key, id: value.id})
+        }
+      })
+      
+      return result
+    }, [props.publicFields, props.ownFields, props.otherFields]);
+
 	const disabledSaveButton = useMemo(() => {
 		if (currentField.needSave) {
 			return currentField.isCorrect && currentField.isFormulaCorrect
@@ -249,7 +275,7 @@ export default function DerivedFieldDialogForm(props) {
 				initialCode={currentField.expressionText}
 				functions={allFieldsAndExpressions.functionsList}
 				originalFields={allFieldsAndExpressions.originalFieldsList}
-				derivedFields={allFieldsAndExpressions.derivedFieldsList}
+				derivedFields={derivedFieldsCompletionList}
 				onChange={handleFormulaChange}
 			/>
 
