@@ -11,7 +11,9 @@ import ru.magnit.magreportbackend.expression.impl.CeilExpression;
 import ru.magnit.magreportbackend.expression.impl.ConcatExpression;
 import ru.magnit.magreportbackend.expression.impl.ConstantValueExpression;
 import ru.magnit.magreportbackend.expression.impl.CurrentDateExpression;
+import ru.magnit.magreportbackend.expression.impl.DateExpression;
 import ru.magnit.magreportbackend.expression.impl.DayFromDateExpression;
+import ru.magnit.magreportbackend.expression.impl.DaysIntervalExpression;
 import ru.magnit.magreportbackend.expression.impl.DerivedFieldValueExpression;
 import ru.magnit.magreportbackend.expression.impl.DivideExpression;
 import ru.magnit.magreportbackend.expression.impl.EqExpression;
@@ -20,6 +22,7 @@ import ru.magnit.magreportbackend.expression.impl.IifExpression;
 import ru.magnit.magreportbackend.expression.impl.LeftSubstrExpression;
 import ru.magnit.magreportbackend.expression.impl.LtExpression;
 import ru.magnit.magreportbackend.expression.impl.LteqExpression;
+import ru.magnit.magreportbackend.expression.impl.MillsecIntervalExtension;
 import ru.magnit.magreportbackend.expression.impl.ModuloExpression;
 import ru.magnit.magreportbackend.expression.impl.MonthFromDateExpression;
 import ru.magnit.magreportbackend.expression.impl.MultiplyExpression;
@@ -88,7 +91,10 @@ public enum Expressions {
     YEAR_FROM_DATE(YearFromDateExpression::new),
     MONTH_FROM_DATE(MonthFromDateExpression::new),
     WEEK_FROM_DATE(WeekFromDateExpression::new),
-    DAY_FROM_DATE(DayFromDateExpression::new);
+    DAY_FROM_DATE(DayFromDateExpression::new),
+    DATE(DateExpression::new),
+    DAYS_INTERVAL(DaysIntervalExpression::new),
+    MILLSEC_INTERVAL(MillsecIntervalExtension::new);
 
     private final BiFunction<FieldExpressionResponse, ExpressionCreationContext, BaseExpression> factory;
 
