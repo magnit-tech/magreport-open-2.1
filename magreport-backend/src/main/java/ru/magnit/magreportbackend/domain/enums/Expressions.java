@@ -5,7 +5,11 @@ import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionRespo
 import ru.magnit.magreportbackend.expression.BaseExpression;
 import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.expression.impl.AbsExpression;
+import ru.magnit.magreportbackend.expression.impl.AddDaysExpression;
 import ru.magnit.magreportbackend.expression.impl.AddExpression;
+import ru.magnit.magreportbackend.expression.impl.AddMillsecExpression;
+import ru.magnit.magreportbackend.expression.impl.AddMonthsExpression;
+import ru.magnit.magreportbackend.expression.impl.AddWeeksExpression;
 import ru.magnit.magreportbackend.expression.impl.AndExpression;
 import ru.magnit.magreportbackend.expression.impl.CeilExpression;
 import ru.magnit.magreportbackend.expression.impl.ConcatExpression;
@@ -94,7 +98,11 @@ public enum Expressions {
     DAY_FROM_DATE(DayFromDateExpression::new),
     DATE(DateExpression::new),
     DAYS_INTERVAL(DaysIntervalExpression::new),
-    MILLSEC_INTERVAL(MillsecIntervalExtension::new);
+    MILLSEC_INTERVAL(MillsecIntervalExtension::new),
+    ADD_DAYS(AddDaysExpression::new),
+    ADD_MILLSEC(AddMillsecExpression::new),
+    ADD_WEEKS(AddWeeksExpression::new),
+    ADD_MONTHS(AddMonthsExpression::new);
 
     private final BiFunction<FieldExpressionResponse, ExpressionCreationContext, BaseExpression> factory;
 

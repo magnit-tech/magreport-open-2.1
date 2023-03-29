@@ -16,6 +16,7 @@ public class DaysIntervalExpression extends ParameterizedExpression {
         super(fieldExpression, context);
     }
 
+    @SuppressWarnings("Duplicates")
     @Override
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
         final var firstDateParameter = parameters.get(0);
