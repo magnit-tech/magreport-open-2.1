@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="EXPRESSION_SIGNATURES-001" author="artemenko_pa">
+        <addColumn tableName="EXPRESSIONS">
+            <column name="SIGNATURE" type="CLOB" defaultValue=""/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="EXPRESSION_SIGNATURES-002" author="artemenko_pa">
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>STRLEN(строка)</strong><br/><strong>Возвращаемое значение:</strong> Количество символов в строке.</br>]]>
+            </column>
+            <where>NAME='STRLEN'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>SUBSTR(строка, число1, число2)</strong><br/><strong>Возвращаемое значение:</strong> Подстрока, длиной число2 символов, начиная с число1 символа исходной строки.</br>]]>
+            </column>
+            <where>NAME='SUBSTR'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>LEFT_SUBSTR(строка, число1)</strong><br/><strong>Возвращаемое значение:</strong> Первые число1 символов исходной строки.</br>]]>
+            </column>
+            <where>NAME='LEFT_SUBSTR'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>RIGHT_SUBSTR(строка, число1)</strong><br/><strong>Возвращаемое значение:</strong> Последние число1 символов исходной строки.</br>]]>
+            </column>
+            <where>NAME='RIGHT_SUBSTR'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>NVL(параметр1, параметр2)</strong><br/><strong>Возвращаемое значение:</strong> Если параметр1 содержит отличное от null значение, то возвращается оно, если параметр1 содержит null, то возвращается параметр2. Параметры должны быть одного типа.</br>]]>
+            </column>
+            <where>NAME='NVL'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>REPLACE(строка1, строка2, строка3)</strong><br/><strong>Возвращаемое значение:</strong> Строка строка1, в которой все вхождения строка2 заменены на строка3.</br>]]>
+            </column>
+            <where>NAME='REPLACE'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>TO_STRING(параметр1)</strong><br/><strong>Возвращаемое значение:</strong> Преобразует значение параметр1 в текстовую репрезентацию.</br>]]>
+            </column>
+            <where>NAME='TO_STRING'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>TO_INTEGER(строка1)</strong><br/><strong>Возвращаемое значение:</strong> Преобразует текстовую репрезентацию целого числа в целое число.</br>]]>
+            </column>
+            <where>NAME='TO_INTEGER'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>TO_DOUBLE(строка1)</strong><br/><strong>Возвращаемое значение:</strong> Преобразует текстовую репрезентацию числа c плавающей точкой в число с плавающей точкой.</br>]]>
+            </column>
+            <where>NAME='TO_DOUBLE'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>CURRENT_DATE()</strong><br/><strong>Возвращаемое значение:</strong> Текущая дата.</br>]]>
+            </column>
+            <where>NAME='CURRENT_DATE'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>ROW_NUMBER()</strong><br/><strong>Возвращаемое значение:</strong> Порядковый номер строки отчета.</br>]]>
+            </column>
+            <where>NAME='ROW_NUMBER'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>SQUARE_ROOT(число1)</strong><br/><strong>Возвращаемое значение:</strong> Квадратный корень из число1.</br>]]>
+            </column>
+            <where>NAME='SQUARE_ROOT'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>POW(число1, число2)</strong><br/><strong>Возвращаемое значение:</strong> число1 в степени число2.</br>]]>
+            </column>
+            <where>NAME='POW'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>ABS(число1)</strong><br/><strong>Возвращаемое значение:</strong> Абсолютное значение число1.</br>]]>
+            </column>
+            <where>NAME='ABS'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>ZERO_TO_NULL(выражение1, выражение2)</strong><br/><strong>Возвращаемое значение:</strong> Если выражение1 - null, то возвращается выражение2, если нет, то выражение1.</br>]]>
+            </column>
+            <where>NAME='ZERO_TO_NULL'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>IIF(условие1, выражение2, выражение3)</strong><br/><strong>Возвращаемое значение:</strong> Если условие1 истинно, то возвращается значение выражение2, если нет - выражение3.</br>]]>
+            </column>
+            <where>NAME='IIF'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>SWITCH(условие1, выражение1, ..., условиеN, выражениеN, выражениеM)</strong><br/><strong>Возвращаемое значение:</strong> Выражение, следующее за первым истинным условием, если все условия ложны - выражениеМ.</br>]]>
+            </column>
+            <where>NAME='SWITCH'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>ROUND(число1)</strong><br/><strong>Возвращаемое значение:</strong> Округленное по правилам математического округления число1.</br>]]>
+            </column>
+            <where>NAME='ROUND'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>FLOOR(число1)</strong><br/><strong>Возвращаемое значение:</strong> Округленное до ближайшего меньшего целого число1.</br>]]>
+            </column>
+            <where>NAME='FLOOR'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>CEIL(число1)</strong><br/><strong>Возвращаемое значение:</strong> Округленное до ближайшего большего целого число1.</br>]]>
+            </column>
+            <where>NAME='CEIL'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>CONCAT(выражение1, ..., выражениеN)</strong><br/><strong>Возвращаемое значение:</strong> Конкатенация текстовых значений выражений.</br>]]>
+            </column>
+            <where>NAME='CONCAT'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>YEAR_FROM_DATE(дата1)</strong><br/><strong>Возвращаемое значение:</strong> Номер года.</br>]]>
+            </column>
+            <where>NAME='YEAR_FROM_DATE'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>MONTH_FROM_DATE(дата1)</strong><br/><strong>Возвращаемое значение:</strong> Номер месяца.</br>]]>
+            </column>
+            <where>NAME='MONTH_FROM_DATE'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>WEEK_FROM_DATE(дата1)</strong><br/><strong>Возвращаемое значение:</strong> Номер недели.</br>]]>
+            </column>
+            <where>NAME='WEEK_FROM_DATE'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>DAY_FROM_DATE(дата1)</strong><br/><strong>Возвращаемое значение:</strong> Номер дня.</br>]]>
+            </column>
+            <where>NAME='DAY_FROM_DATE'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>DATE(число1, число2, число3)</strong><br/><strong>Возвращаемое значение:</strong> Создание даты число1 - год, число2 - месяц, число3 - день.</br>]]>
+            </column>
+            <where>NAME='DATE'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>DAYS_INTERVAL(дата1, дата2)</strong><br/><strong>Возвращаемое значение:</strong> Интервал в днях между дата1 и дата2.</br>]]>
+            </column>
+            <where>NAME='DAYS_INTERVAL'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>DAYS_INTERVAL(дата_время1, дата_время2)</strong><br/><strong>Возвращаемое значение:</strong> Интервал в миллисекундах между дата_время1 и дата_время2.</br>]]>
+            </column>
+            <where>NAME='DAYS_INTERVAL'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>ADD_DAYS(дата1, число1)</strong><br/><strong>Возвращаемое значение:</strong> Дата плюс число1 дней.</br>]]>
+            </column>
+            <where>NAME='ADD_DAYS'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>ADD_MILLSEC(дата1, число1)</strong><br/><strong>Возвращаемое значение:</strong> Дата плюс число1 миллисекунд.</br>]]>
+            </column>
+            <where>NAME='ADD_MILLSEC'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>ADD_WEEKS(дата1, число1)</strong><br/><strong>Возвращаемое значение:</strong> Дата плюс число1 недель по ISO.</br>]]>
+            </column>
+            <where>NAME='ADD_WEEKS'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>ADD_MONTHS(дата1, число1)</strong><br/><strong>Возвращаемое значение:</strong> Дата плюс число1 месяцев по ISO.</br>]]>
+            </column>
+            <where>NAME='ADD_MONTHS'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>MONTH_FIRST_DATE(дата1)</strong><br/><strong>Возвращаемое значение:</strong> Первое число месяца из дата1.</br>]]>
+            </column>
+            <where>NAME='MONTH_FIRST_DATE'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>MONTH_LAST_DATE(дата1)</strong><br/><strong>Возвращаемое значение:</strong> Последнее число месяца из дата1.</br>]]>
+            </column>
+            <where>NAME='MONTH_LAST_DATE'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>TODAY()</strong><br/><strong>Возвращаемое значение:</strong> Последнее число месяца из дата1.</br>]]>
+            </column>
+            <where>NAME='TODAY'</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>
