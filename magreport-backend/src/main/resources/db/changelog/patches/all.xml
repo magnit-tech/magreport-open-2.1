@@ -56,5 +56,15 @@
     <include file="classpath:/db/changelog/patches/2023-01-23/all.xml"/>
     <include file="classpath:/db/changelog/patches/2023-01-24/all.xml"/>
     <include file="classpath:/db/changelog/patches/2023-02-02/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2023-03-21/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2023-03-24/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2023-03-27-01/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2023-03-27-02/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2023-03-27-03/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2023-03-27-04/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2023-03-27-05/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2023-03-28-01/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2023-03-28-02/all.xml"/>
+    <include file="classpath:/db/changelog/patches/2023-03-28-03/all.xml"/>
 
 </databaseChangeLog>
