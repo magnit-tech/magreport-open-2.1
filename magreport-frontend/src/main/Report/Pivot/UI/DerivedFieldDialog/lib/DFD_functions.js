@@ -1,6 +1,6 @@
 
 import dataHub from "ajax/DataHub";
-import { nodeType } from "../../../maglangFormulaEditor/FormulaEditor/FormulaEditor";
+import { nodeType } from "../../../maglangFormulaEditor/FormulaEditor/createOutputNode";
 
 // Вспомогательные функции
 function getAll(reportId, ownerName, listOfChangedFields, otherDerivedFields, callback) {
