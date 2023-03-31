@@ -1170,16 +1170,73 @@ function PivotPanel(props){
     // }
 
     function handleDerivedFieldCloseAndUpdate(bool){
+
+        let derivedFields = new Map()
+        let columnFields = pivotConfiguration.fieldsLists.columnFields;
+        let rowFields = pivotConfiguration.fieldsLists.rowFields;
+        let metricFields = pivotConfiguration.fieldsLists.metricFields;
+        let filterFields = pivotConfiguration.fieldsLists.filterFields;
+
+        let newPivotConfiguration = new PivotConfiguration(pivotConfiguration);
+
         if(bool){
-            // dataHub.derivedFieldController.add(
-            //     props.reportId, 
-            //     derivedFieldObject.fieldName, 
-            //     derivedFieldObject.fieldDesc, 
-            //     derivedFieldObject.expression,
-            //     derivedFieldObject.expressionText,
-            //     ()=>{dataHub.olapController.getJobMetadataExtended(props.jobId, props.reportId, updateDerivedFieldsList)});
-            // dataHub.olapController.getJobMetadataExtended(props.jobId, props.reportId, updateDerivedFieldsList)
-            resetDataLoader()
+            dataHub.derivedFieldController.getAllDerivedFields(props.reportId, otherDerivedFields, ({ok, data}) => {
+                data.forEach(item => derivedFields.set(item.id, item.name))
+
+                if(columnFields.length > 0) {
+                    columnFields = pivotConfiguration.fieldsLists.columnFields.map(fieldData => {
+                        if(!fieldData.original) {
+                            const field = derivedFields.get(fieldData.id)
+                            return {...fieldData, fieldName: field, name: field}
+                        } else {
+                            return fieldData
+                        }
+                    })
+                    newPivotConfiguration.fieldsLists.columnFields = columnFields;
+                }
+
+                if(rowFields.length > 0) {
+                    rowFields = pivotConfiguration.fieldsLists.rowFields.map(fieldData => {
+                        if(!fieldData.original) {
+                            const field = derivedFields.get(fieldData.id)
+                            return {...fieldData, fieldName: field, name: field}
+                        } else {
+                            return fieldData
+                        }
+                    })
+                    newPivotConfiguration.fieldsLists.rowFields = rowFields;
+                }
+
+                if(metricFields.length > 0) {
+                    metricFields = pivotConfiguration.fieldsLists.metricFields.map(fieldData => {
+                        if(!fieldData.original) {
+                            const field = derivedFields.get(fieldData.id)
+                            return {...fieldData, fieldName: field, name: field}
+                        } else {
+                            return fieldData
+                        }
+                    })
+                    newPivotConfiguration.fieldsLists.metricFields = metricFields;
+                }
+
+                if(filterFields.length > 0) {
+                    filterFields = pivotConfiguration.fieldsLists.filterFields.map(fieldData => {
+                        if(!fieldData.original) {
+                            const field = derivedFields.get(fieldData.id)
+                            return {...fieldData, fieldName: field, name: field}
+                        } else {
+                            return fieldData
+                        }
+                    })
+                    newPivotConfiguration.fieldsLists.filterFields = filterFields;
+                }
+
+                configOlap.current.saveCurrentConfig(newPivotConfiguration.stringify(), ({ok}) => {
+                    if(ok) {
+                        resetDataLoader()
+                    }
+                })
+            })
         }
 
         setCreateFieldDialogOpen(false);
