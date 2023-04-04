@@ -9,7 +9,7 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import IconButton from '@material-ui/core/IconButton';
 import LogoIcon from '../LogoIcon/LogoIcon';
 import HelpIcon from '@material-ui/icons/Help';
-import { HeaderCSS } from './HeaderCSS'
+import { HeaderCSS } from './HeaderCSS';
 
 import { connect } from 'react-redux';
 
@@ -26,150 +26,171 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Paper from '@material-ui/core/Paper';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import isHollyday from  '../../../HollydayFunctions';
+import isHollyday from '../../../HollydayFunctions';
 
-import { setLightTheme, setDarkTheme } from '../../../redux/actions/admin/actionThemeDesign';
+import {
+	setLightTheme,
+	setDarkTheme,
+} from '../../../redux/actions/admin/actionThemeDesign';
 import HollydayPanel from './HollydayPanel';
+import { Link } from 'react-router-dom';
 
 function PaperComponent(props) {
-    return (
-      <Draggable handle="#draggable-dialog-title" cancel={'[class*="MuiDialogContent-root"]'}>
-        <Paper {...props} />
-      </Draggable>
-    );
+	return (
+		<Draggable
+			handle='#draggable-dialog-title'
+			cancel={'[class*="MuiDialogContent-root"]'}
+		>
+			<Paper {...props} />
+		</Draggable>
+	);
 }
 
-function Header(props){
+function Header(props) {
+	const classes = HeaderCSS();
 
-    const classes = HeaderCSS();
+	const { user, signout } = useAuth();
 
-    const {user, signout} = useAuth()
+	const themeLightness = props.themeLightness;
+	const tooltipTitle = props.themeLightness ? 'Светлый фон' : 'Тёмный фон';
 
-    const themeLightness  = props.themeLightness;
-    const tooltipTitle = props.themeLightness ? 'Светлый фон': 'Тёмный фон';
+	const [openAbout, setOpenAbout] = React.useState(false);
 
-    const [openAbout, setOpenAbout] = React.useState(false);
+	const handleClickOpenAbout = () => {
+		setOpenAbout(true);
+		handleCloseMenu();
+	};
 
-    const handleClickOpenAbout = () => {
-        setOpenAbout(true);
-        handleCloseMenu();
-      };
-    
-      const handleCloseAbout = () => {
-        setOpenAbout(false);
-      };
-    
-    const [anchorEl, setAnchorEl] = React.useState(null);
+	const handleCloseAbout = () => {
+		setOpenAbout(false);
+	};
 
-    const handleOpenMenu = (event) => {
-        setAnchorEl(event.currentTarget);
-      };
-    
-    const handleCloseMenu = () => {
-        setAnchorEl(null);
-      };
+	const [anchorEl, setAnchorEl] = React.useState(null);
 
-    function handleClick(){
-        // props.appLogout();
-        signout()
-    }
+	const handleOpenMenu = event => {
+		setAnchorEl(event.currentTarget);
+	};
 
-    function handleThemeClick(){
-        localStorage.setItem('isDarkTheme', !themeLightness)
-        if  (themeLightness ) {props.setLightTheme() }
-        else { props.setDarkTheme () }
-    }
+	const handleCloseMenu = () => {
+		setAnchorEl(null);
+	};
 
-    return(
-        <AppBar position="static" 
-            className={clsx(classes.appBar,{
-                    [classes.appBarHeight]: isHollyday() === -1, 
-                    [classes.appBarHeightHollyday]: isHollyday() >= 0,
-                    [classes.planets]: isHollyday() === 4
-            })}
-        >
-            <HollydayPanel/>
-            <Menu
-                id="simple-menu"
-                anchorEl={anchorEl}
-                keepMounted
-                open={Boolean(anchorEl)}
-                onClose={handleCloseMenu}
-            >
-                <MenuItem onClick={handleClickOpenAbout}>О программе</MenuItem>
-            </Menu>
-            <Dialog
-                open={openAbout}
-                onClose={handleCloseAbout}
-                PaperComponent={PaperComponent}
-                aria-labelledby="draggable-dialog-title"
-            >
-                <DialogTitle  style={{ cursor: 'move' }} id="draggable-dialog-title"> 
-         
-                </DialogTitle> 
-                <DialogContent>
-                    <div style={{display: 'flex', flexDirection: 'row'}}>
-                        <div className={classes.catFinger}/>
-                        <div style={{margin: '32px'}}>
-                           <Typography variant='h6'> МАГРЕПОРТ </Typography>
-                           <Typography variant='h6'> Версия: {props.version}</Typography>
-                           </div>
-                        </div>
-                    <DialogContentText>
-                        
-                        
-                    </DialogContentText>
-                </DialogContent>
-                <DialogActions>
-                    <Button autoFocus variant= 'contained' onClick={handleCloseAbout} color="primary">
-                        Понятно
-                    </Button>
-                </DialogActions>
-            </Dialog>
+	function handleClick() {
+		// props.appLogout();
+		signout();
+	}
 
-            <Toolbar variant="dense" className={classes.iconIndent}>
-                <LogoIcon/>
-                <Typography  className={classes.logoText}>МАГРЕПОРТ</Typography>
-                <Tooltip title = {'Справка'}>
-                    <IconButton onClick={handleOpenMenu}>
-                        <HelpIcon className={classes.iconButton} ></HelpIcon>
-                    </IconButton>
-                </Tooltip>
-                <Tooltip title = {tooltipTitle}>
-                    <IconButton onClick={handleThemeClick}>
-                        {
-                            themeLightness ? <Brightness5Icon className={classes.iconButton}/> : <Brightness4Icon className={classes.iconButton}/>                
-                        }
-                    </IconButton> 
-                </Tooltip>         
-                <Typography variant="overline" className={classes.userNameClass}>{user.current ? user.current.name : ''}</Typography>
-                { user.current?.name ?
-                    <Tooltip title = 'Выйти'>
-                        <IconButton 
-                            className={classes.iconButton}
-                            aria-label="logout" 
-                            onClick={handleClick}
-                        >
-                            <ExitToAppIcon />
-                        </IconButton>
-                    </Tooltip>
-                : ""}
-            </Toolbar>
-        </AppBar>
-    );
+	function handleThemeClick() {
+		localStorage.setItem('isDarkTheme', !themeLightness);
+		if (themeLightness) {
+			props.setLightTheme();
+		} else {
+			props.setDarkTheme();
+		}
+	}
+
+	return (
+		<AppBar
+			position='static'
+			className={clsx(classes.appBar, {
+				[classes.appBarHeight]: isHollyday() === -1,
+				[classes.appBarHeightHollyday]: isHollyday() >= 0,
+				[classes.planets]: isHollyday() === 4,
+			})}
+		>
+			<HollydayPanel />
+			<Menu
+				id='simple-menu'
+				anchorEl={anchorEl}
+				keepMounted
+				open={Boolean(anchorEl)}
+				onClose={handleCloseMenu}
+			>
+				<MenuItem onClick={handleClickOpenAbout}>О программе</MenuItem>
+			</Menu>
+			<Dialog
+				open={openAbout}
+				onClose={handleCloseAbout}
+				PaperComponent={PaperComponent}
+				aria-labelledby='draggable-dialog-title'
+			>
+				<DialogTitle
+					style={{ cursor: 'move' }}
+					id='draggable-dialog-title'
+				></DialogTitle>
+				<DialogContent>
+					<div style={{ display: 'flex', flexDirection: 'row' }}>
+						<div className={classes.catFinger} />
+						<div style={{ margin: '32px' }}>
+							<Typography variant='h6'> МАГРЕПОРТ </Typography>
+							<Typography variant='h6'> Версия: {props.version}</Typography>
+						</div>
+					</div>
+					<DialogContentText></DialogContentText>
+				</DialogContent>
+				<DialogActions>
+					<Button
+						autoFocus
+						variant='contained'
+						onClick={handleCloseAbout}
+						color='primary'
+					>
+						Понятно
+					</Button>
+				</DialogActions>
+			</Dialog>
+
+			<Toolbar variant='dense' className={classes.iconIndent}>
+				<Link to='/ui/reports' className={classes.logo}>
+					<LogoIcon />
+					<Typography className={classes.logoText}>МАГРЕПОРТ</Typography>
+				</Link>
+				<div>
+					<Tooltip title={'Справка'}>
+						<IconButton onClick={handleOpenMenu}>
+							<HelpIcon className={classes.iconButton}></HelpIcon>
+						</IconButton>
+					</Tooltip>
+					<Tooltip title={tooltipTitle}>
+						<IconButton onClick={handleThemeClick}>
+							{themeLightness ? (
+								<Brightness5Icon className={classes.iconButton} />
+							) : (
+								<Brightness4Icon className={classes.iconButton} />
+							)}
+						</IconButton>
+					</Tooltip>
+					<Typography variant='overline' className={classes.userNameClass}>
+						{user.current ? user.current.name : ''}
+					</Typography>
+					{user.current?.name ? (
+						<Tooltip title='Выйти'>
+							<IconButton
+								className={classes.iconButton}
+								aria-label='logout'
+								onClick={handleClick}
+							>
+								<ExitToAppIcon />
+							</IconButton>
+						</Tooltip>
+					) : (
+						''
+					)}
+				</div>
+			</Toolbar>
+		</AppBar>
+	);
 }
 
 const mapStateToProps = state => {
-    return {
-        // userName: state.login,
-        themeLightness: state.themesMenuView.darkTheme
-    }
-}
+	return {
+		themeLightness: state.themesMenuView.darkTheme,
+	};
+};
 
 const mapDispatchToProps = {
-    // appLogout,
-    setLightTheme,
-    setDarkTheme
-}
+	setLightTheme,
+	setDarkTheme,
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Header);
