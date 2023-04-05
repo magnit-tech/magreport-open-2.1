@@ -105,6 +105,7 @@ public class ReportJobController {
     }
 
 
+    @SuppressWarnings("Duplicates")
     @Operation(summary = "Получение отчета в формате Excel")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = REPORT_JOB_GET_EXCEL_REPORT_GET)
