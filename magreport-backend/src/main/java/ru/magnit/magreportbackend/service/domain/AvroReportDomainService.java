@@ -86,11 +86,12 @@ public class AvroReportDomainService {
                 var firstColumn = true;
                 for (final var entry : cacheRow.entries()) {
                     if (!firstColumn) emitBuffer.append(",");
+                    final var value = entry.value() == null ? null : entry.value().replace("\n", "").replace("\r", "").replace("\"", "\\\"");
                     emitBuffer
                             .append("\"")
                             .append(entry.fieldData().ordinal())
                             .append("\":\"")
-                            .append(entry.value())
+                            .append(value)
                             .append("\"");
                     firstColumn = false;
                 }
@@ -103,6 +104,7 @@ public class AvroReportDomainService {
             }
             emitter.send("]");
         } catch (Exception ex) {
+            log.error("Error while trying to stream report data", ex);
             throw new ReportExportException("Error while trying to stream report data", ex);
         }
     }
