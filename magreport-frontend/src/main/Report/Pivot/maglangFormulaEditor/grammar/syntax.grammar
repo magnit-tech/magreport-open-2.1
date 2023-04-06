@@ -1,8 +1,13 @@
 @precedence{
   prefix,
+  logicBooleanLiteral,
+  expressionBooleanLiteral,
   pow @right,
   times @left,
-  plus @left
+  plus @left,
+  logicAnd @left,
+  logicOr @left,
+  logicXor @left
 }
 @top Formula { expression }
 
@@ -11,12 +16,14 @@
 expression {
   String |
   Number |
+  !expressionBooleanLiteral BooleanLiteral |
   parenthesizedExpression |
   binaryExpression |
   unaryExpression |
   originalFieldNameExpression |
   derivedFieldNameExpression |
-  FunctionCallExpression
+  FunctionCallExpression |
+  IfExpression
 }
 
 originalFieldNameExpression {"[" OriginalFieldName "]"}
@@ -30,6 +37,8 @@ parenthesizedExpression { "(" expression ")" }
 binaryExpression {
   Product {expression !times "*" expression} |
   Fraction {expression !times "/" expression} |
+  IntegerDivision {expression !times "//" expression} |
+  Modulo {expression !times "%" expression} |
   Sum {expression !plus "+" expression} |
   Subtraction {expression !plus "-" expression}
 }
@@ -43,6 +52,40 @@ FunctionCallExpression {
 }
 
 FunctionName {identifier}
+
+// If expression
+
+IfExpression {
+  IfKeyword "(" booleanExpression ")" "{" expression "}" (ElifExpression)* ElseExpression
+}
+
+ElseExpression{
+  ElseKeyword "{" expression "}"
+}
+
+ElifExpression {
+  ElifKeyword "(" booleanExpression ")" "{" expression "}"
+}
+
+booleanExpression {
+  !logicBooleanLiteral BooleanLiteral |
+  CompareExpression {expression CompareOp expression} |
+  LogicAnd {booleanExpression !logicAnd AndKeyword booleanExpression} |
+  LogicOr {booleanExpression !logicOr OrKeyword booleanExpression} |
+  LogicXor {booleanExpression !logicXor XorKeyword booleanExpression} |
+  LogicNot {NotKeyword "(" booleanExpression ")"} |
+  parenthesizedBooleanExpression
+}
+
+parenthesizedBooleanExpression {
+  "(" booleanExpression ")"
+}
+
+CompareOp {
+  "=" | "!=" | "<>" | "<" | ">" | "<=" | ">="
+}
+
+// Tokens
 
 @tokens {
 
@@ -63,6 +106,27 @@ FunctionName {identifier}
   space { $[ \t\n\r]+ }
 
 }
+
+// Keywords
+
+BooleanLiteral { @specialize<identifier, "True" | "False"> }
+
+IfKeyword {@specialize<identifier, "if">}
+
+ElifKeyword {@specialize<identifier, "elif">}
+
+ElseKeyword {@specialize<identifier, "else">}
+
+OrKeyword {@specialize<identifier, "or">}
+
+AndKeyword {@specialize<identifier, "and">}
+
+NotKeyword {@specialize<identifier, "not">}
+
+XorKeyword {@specialize<identifier, "xor">}
+
+ 
+// Function arguments
 
 commaSep<content> {
   "" | content ("," content?)*
