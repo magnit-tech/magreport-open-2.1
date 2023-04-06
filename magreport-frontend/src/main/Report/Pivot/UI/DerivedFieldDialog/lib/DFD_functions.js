@@ -90,7 +90,7 @@ export function saveNewField(obj, reportId, ownerName, listOfChangedFields, othe
 		} else {
 			str = `Произошла ошибка при сохранение нового производного поля "${obj.name}"`
 			variant = {variant: "error"}
-			return callback(ok, [], str, variant)
+			return callback(ok, [], [], str, variant)
 		}
 	})
 }
@@ -134,7 +134,7 @@ export function deleteField(id, reportId, ownerName, listOfChangedFields, otherD
 		} else {
 			str = "Произошла ошибка при удаление производного поля"
 			variant = {variant: "error"}
-			return callback(ok, [], str, variant)
+			return callback(ok, [], [], str, variant)
 		}
 	})
 }
