@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportJobData;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportPageResponse;
@@ -69,4 +70,40 @@ public class AvroReportDomainService {
         return Paths.get(replaceHomeShortcut(reportFolder) + "/" + jobData.id() + ".avro");
     }
 
+    public void streamReport(ResponseBodyEmitter emitter, ReportJobData jobData) {
+        var firstRow = true;
+        var rowCount = 0;
+        try (var reader = readerFactory.createReader(jobData, getPath(jobData))) {
+            log.debug("Start data streaming for job with id: " + jobData.id());
+            emitter.send("[");
+            while (true) {
+                var cacheRow = reader.getRow();
+                final var emitBuffer = new StringBuilder();
+                if (cacheRow == null) break;
+                if (!firstRow) emitBuffer.append(",");
+                emitBuffer.append("{");
+
+                var firstColumn = true;
+                for (final var entry : cacheRow.entries()) {
+                    if (!firstColumn) emitBuffer.append(",");
+                    emitBuffer
+                            .append("\"")
+                            .append(entry.fieldData().ordinal())
+                            .append("\":\"")
+                            .append(entry.value())
+                            .append("\"");
+                    firstColumn = false;
+                }
+                rowCount++;
+                if (rowCount % 10000 == 0)
+                    log.debug(rowCount + " rows streamed out of " + jobData.rowCount() + " for job with id: " + jobData.id());
+                emitBuffer.append("}");
+                emitter.send(emitBuffer.toString());
+                firstRow = false;
+            }
+            emitter.send("]");
+        } catch (Exception ex) {
+            throw new ReportExportException("Error while trying to stream report data", ex);
+        }
+    }
 }
