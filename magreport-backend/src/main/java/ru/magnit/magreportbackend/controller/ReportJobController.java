@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -92,7 +93,9 @@ public class ReportJobController {
         });
 
         LogHelper.logInfoUserMethodEnd();
-        return new ResponseEntity<>(emitter, HttpStatus.OK);
+        final var contentType = new HttpHeaders();
+        contentType.add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE);
+        return new ResponseEntity<>(emitter, contentType, HttpStatus.OK);
     }
 
     @Operation(summary = "Получение отчета в формате Excel")
