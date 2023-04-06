@@ -6,13 +6,16 @@ import { useDispatch } from 'react-redux';
 
 import { addNavbar } from 'redux/actions/navbar/actionNavbar';
 
-// styles
-import { UsersCSS } from './UsersCSS';
+import PropTypes from 'prop-types';
+
+// styles 
+import { UsersCSS} from "./UsersCSS";
 
 // dataHub
 import dataHub from 'ajax/DataHub';
 
 // componenets
+import { useTheme } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import BlockIcon from '@material-ui/icons/Block';
 import LockIcon from '@material-ui/icons/Lock';
@@ -26,21 +29,15 @@ import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import Icon from '@mdi/react';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import { mdiWeb } from '@mdi/js';
-import {
-	Card,
-	List,
-	Toolbar,
-	Typography,
-	InputBase,
-	TextField,
-} from '@material-ui/core';
+import { Card, List, Toolbar, Typography, InputBase, TextField, TablePagination } from '@material-ui/core';
 import SearchIcon from '@material-ui/icons/Search';
-import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
-import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import AddIcon from '@material-ui/icons/Add';
-
+import FirstPageIcon from '@material-ui/icons/FirstPage';
+import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
+import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
+import LastPageIcon from '@material-ui/icons/LastPage';
 // local
 import DataLoader from '../../../DataLoader/DataLoader';
 import UserCard from './UserCard';
@@ -60,7 +57,8 @@ export default function UserList(props) {
 	}, [dispatch, props.roleId]);
 
 	const [userPage, setUserPage] = useState(0);
-	const [viewAll, setViewAll] = useState(false);
+	const [rowsPerPage, setRowsPerPage] = useState(50);
+   // const [viewAll, setViewAll] = useState(false)
 
 	const [selectedUser, setSelectedUser] = useState(
 		props.selectedUser !== -1 ? props.selectedUser : -1
@@ -73,104 +71,90 @@ export default function UserList(props) {
 	const [domainsList, setDomainsList] = useState([]);
 	const [defaultDomain, setDefaultDomain] = useState('');
 	const [domain, setDomain] = useState({});
-	const [selectedUserToAdd, setSelectedUserToAdd] = useState('');
+	const [selectedUserToAdd, setSelectedUserToAdd] = useState("");
 
-	function filterUsers() {
-		let filteredList = [];
-		const filterStr = userFilterValue.toLowerCase();
-		let filteredByDomainList = props.items.filter(
-			i => i.domain.id === domain.value
-		);
+    function filterUsers(){
+        let filteredList = []
+        const filterStr = userFilterValue.toLowerCase();
+        let filteredByDomainList = props.items.filter(i=>i.domain.id===domain.value);
+        
+        for (let i in filteredByDomainList) {
+            if (filteredByDomainList[i].name.toLowerCase().indexOf(filterStr) > -1) {
+                filteredList.push(filteredByDomainList[i])
+            }
+        }
+        
+        const countUsers = filteredList.length
+       // if (!viewAll){
+            filteredList = filteredList.splice((userPage)*rowsPerPage, rowsPerPage)
+       // }
+        return {filteredList, countUsers}
+    }
 
-		for (let i in filteredByDomainList) {
-			if (filteredByDomainList[i].name.toLowerCase().indexOf(filterStr) > -1) {
-				filteredList.push(filteredByDomainList[i]);
-			}
-		}
+    function getCheckedUserNames(){
+        let users = []
+        for (let u of props.items) {
+            if (u.blockUserCheck) users.push(u.id)
+        }
+        return users
+    }
 
-		const countUsers = filteredList.length;
-		if (!viewAll) {
-			filteredList = filteredList.splice(userPage * 50, 50);
-		}
-		return { filteredList, countUsers };
-	}
+    function handleCheckedAll(){
+        props.onAllUsersChecked(!checkedAllUsers)
+        setCheckedAllUsers(!checkedAllUsers);
+    }
 
-	function getCheckedUserNames() {
-		let users = [];
-		for (let u of props.items) {
-			if (u.blockUserCheck) users.push(u.id);
-		}
-		return users;
-	}
+    function handleFilterUser (e) {
+        setUserPage(0)
+        setUserFilterValue(e.target.value);
+    }
 
-	function handleCheckedAll() {
-		props.onAllUsersChecked(!checkedAllUsers);
-		setCheckedAllUsers(!checkedAllUsers);
-	}
+    function handleSelectUser(id, index) {
+        setNeedUserScroll(false);
+        setSelectedUser(id);
+        
+        if (props.onSelectUser) props.onSelectUser(id)
+    }
 
-	function handleFilterUser(e) {
-		setUserPage(0);
-		setUserFilterValue(e.target.value);
-	}
+    const listItems=[]
+    const {filteredList, countUsers} = filterUsers()
+ 
+    filteredList.forEach((i, index) => 
+        listItems.push(
+            <UserCard
+                id = {i.id}
+                key={i.id} 
+                index={index}
+                itemsType={props.itemsType}
+                userDesc={i} 
+                defaultDomain = {domain.value}
+                roleId={props.roleId}
+                isSelected={selectedUser===i.id}
+                onSelectedUser={handleSelectUser}
+                enableRoleReload={props.enableRoleReload}
+                showDeleteButton={props.showDeleteButton}
+                showCheckbox={props.showCheckbox ? props.showCheckbox : false}
+            />
+        )
+    )
 
-	function handleSelectUser(id, index) {
-		setNeedUserScroll(false);
-		setSelectedUser(id);
+    useEffect(() => {
+        let userIndex = props.items.findIndex(item => item.id === props.selectedUser);
 
-		if (props.onSelectUser) props.onSelectUser(id);
-	}
+        if (userIndex !==-1) {setUserPage(Math.ceil((userIndex/50)-1))};
 
-	const listItems = [];
-	const { filteredList, countUsers } = filterUsers();
+        var scrolledElement = document.getElementById(props.selectedUser);
 
-	filteredList.forEach((i, index) =>
-		listItems.push(
-			<UserCard
-				id={i.id}
-				key={i.id}
-				index={index}
-				itemsType={props.itemsType}
-				userDesc={i}
-				defaultDomain={domain.value}
-				roleId={props.roleId}
-				isSelected={selectedUser === i.id}
-				onSelectedUser={handleSelectUser}
-				enableRoleReload={props.enableRoleReload}
-				showDeleteButton={props.showDeleteButton}
-				showCheckbox={props.showCheckbox ? props.showCheckbox : false}
-			/>
-		)
-	);
+        if (props.selectedUser !== -1 && props.from === "UserDesigner" && scrolledElement){
+          scrolledElement.scrollIntoView({block: "start", behavior: "smooth"});
+        }
+        setNeedUserScroll(false);
+    }, [needUserScroll]); // eslint-disable-line
 
-	useEffect(() => {
-		let userIndex = props.items.findIndex(
-			item => item.id === props.selectedUser
-		);
-
-		if (userIndex !== -1) {
-			setUserPage(Math.ceil(userIndex / 50 - 1));
-		}
-
-		var scrolledElement = document.getElementById(props.selectedUser);
-
-		if (
-			props.selectedUser !== -1 &&
-			props.from === 'UserDesigner' &&
-			scrolledElement
-		) {
-			scrolledElement.scrollIntoView({ block: 'start', behavior: 'smooth' });
-		}
-		setNeedUserScroll(false);
-	}, [needUserScroll]); // eslint-disable-line
-
-	function handleDataLoaded(data) {
-		let dom = data
-			.filter(i => i.isDefault === true)
-			.map(i => {
-				return { value: i.id, name: i.name };
-			})[0];
-		let domList = data.sort((a, b) => b.isDefault - a.isDefault).slice();
-		setDomainsList(domList);
+    function handleDataLoaded(data){
+		let dom = data.filter(i => i.isDefault === true).map(i => {return {value: i.id, name: i.name}})[0];
+		let domList = data.sort((a,b) => b.isDefault - a.isDefault).slice();
+        setDomainsList(domList);
 		setDomain(dom);
 		setDefaultDomain(data.filter(i => i.isDefault).map(item => item.name)[0]);
 	}
@@ -194,27 +178,119 @@ export default function UserList(props) {
 			handleAddUserToRoleResponse
 		);
 	}
+	
+	function handleAddUserToRoleResponse(magrepResponse){
+        if (magrepResponse.ok) {
+            enqueueSnackbar("Пользователь добавлен!", {variant : "success"});
+            props.onNeedReload()
+        }
+        else {
+            enqueueSnackbar("Не удалось добавить пользователя", {variant : "error"});
+        }
+    }
 
-	function handleAddUserToRoleResponse(magrepResponse) {
-		if (magrepResponse.ok) {
-			enqueueSnackbar('Пользователь добавлен!', { variant: 'success' });
-			props.onNeedReload();
-		} else {
-			enqueueSnackbar('Не удалось добавить пользователя', { variant: 'error' });
-		}
-	}
 
-	return (
-		<DataLoader
-			loadFunc={dataHub.userServiceController.getDomainList}
-			loadParams={[]}
-			onDataLoaded={handleDataLoaded}
-			onDataLoadFailed={message =>
-				enqueueSnackbar(`При загрузке данных произошла ошибка: ${message}`, {
-					variant: 'error',
-				})
-			}
-		>
+	function TablePaginationActions(props) {
+
+      //  const classes = ReportDataCSS();
+        const theme = useTheme();
+        const { count, page, rowsPerPage, onPageChange} = props;
+
+        const handleFirstPageButtonClick = event => {
+            onPageChange(event, 0);
+        };
+
+        const handleBackButtonClick = event => {
+            onPageChange(event, page - 1);
+        };
+
+        const handleNextButtonClick = event => {
+            onPageChange(event, page + 1);
+        };
+
+        const handleLastPageButtonClick = event => {
+            onPageChange(event, Math.max(0, Math.ceil(count / rowsPerPage) - 1));
+        };
+
+        const handleCustomPage = e => {
+            if (e.key === 'Enter') {
+                let page_num = parseInt(e.target.value);
+                let page_count = Math.ceil(count / rowsPerPage);
+                if (!isNaN(page_num) && page_num <= page_count && page_num!==0){
+                    onPageChange(e, page_num-1);
+                }
+            }            
+        };
+
+        return (
+            <div className={classes.pagination} display="block">
+                <Tooltip title="К первой странице">
+                    <span>
+                        <IconButton className={classes.iconButton}
+                            size="small"
+                            onClick={handleFirstPageButtonClick}
+                            disabled={page === 0}
+                            aria-label="first page"
+                        >
+                            {theme.direction === 'rtl' ? <LastPageIcon /> : <FirstPageIcon />}
+                        </IconButton>
+                    </span>
+                </Tooltip>
+                <IconButton className={classes.iconButton}
+                    size="small"
+                    onClick={handleBackButtonClick}
+                    disabled={page === 0}
+                    aria-label="previous page"  
+                >
+                    {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
+                </IconButton>
+                <InputBase className={classes.pageNumber}
+                    variant="outlined"
+                    size="small"                    
+                    defaultValue={userPage+1}
+                    onKeyDown={handleCustomPage}
+                    inputProps={{ style: {textAlign: 'center'}}}              
+                />
+                <IconButton className={classes.iconButton}
+                    size="small"
+                    onClick={handleNextButtonClick}
+                    disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+                    aria-label="next page"
+                >
+                    {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
+                </IconButton>
+                <Tooltip title="К последней странице">
+                    <span>
+                        <IconButton className={classes.iconButton}
+                            size="small"
+                            onClick={handleLastPageButtonClick}
+                            disabled={page >= Math.ceil(count / rowsPerPage) - 1}
+                            aria-label="last page"
+                        >
+                            {theme.direction === 'rtl' ? <FirstPageIcon /> : <LastPageIcon />}
+                        </IconButton>
+                    </span>
+                </Tooltip>
+                
+            </div>
+        );
+        
+    }
+
+    TablePaginationActions.propTypes = {
+        count: PropTypes.number.isRequired,
+        onPageChange: PropTypes.func.isRequired,
+        page: PropTypes.number.isRequired,
+        rowsPerPage: PropTypes.number.isRequired
+	};
+	
+    return (
+        <DataLoader
+            loadFunc = {dataHub.userServiceController.getDomainList}
+            loadParams = {[]}
+            onDataLoaded = {handleDataLoaded}
+            onDataLoadFailed = {(message) => enqueueSnackbar(`При загрузке данных произошла ошибка: ${message}`, {variant: "error"})}
+        >
 			<Card elevation={3} className={classes.userListCard}>
 				<Toolbar
 					position='fixed'
@@ -431,52 +507,24 @@ export default function UserList(props) {
 					</List>
 				</div>
 				<div className={classes.bottomButtons}>
-					<Tooltip title='Предыдущая страница'>
-						<span>
-							<IconButton
-								size='medium'
-								aria-label='Предыдущие'
-								onClick={() => setUserPage(userPage - 1)}
-								disabled={userPage === 0 || viewAll}
-							>
-								<ArrowBackIosIcon />
-							</IconButton>
-						</span>
-					</Tooltip>
-					<Tooltip title='Следующая страница'>
-						<span>
-							<IconButton
-								size='medium'
-								aria-label='Следующие'
-								onClick={() => setUserPage(userPage + 1)}
-								disabled={
-									userPage ===
-										parseInt(
-											countUsers % 50 === 0
-												? countUsers / 50 - 1
-												: countUsers / 50
-										) || viewAll
-								}
-							>
-								<ArrowForwardIosIcon />
-							</IconButton>
-						</span>
-					</Tooltip>
-					{/* <Tooltip title={viewAll ? "Постранично" : "Показать всех"}>
-						<span>
-							<IconButton 
-								size='medium'
-								aria-label={viewAll ? "Постранично" : "Показать всех"} 
-								color={viewAll ? "secondary" : "default"}
-								onClick={() => setViewAll(!viewAll)}
-							>
-								<Filter9PlusIcon />
-							</IconButton>
-						</span>
-					</Tooltip> */}
-					<div className={classes.bottomPageCounter}>
-						{userPage} / {parseInt(countUsers / 50)}
-					</div>
+					<TablePagination 
+                        rowsPerPageOptions={[10, 25, 50, 100, 500, 1000]}
+                        labelRowsPerPage=""
+                        labelDisplayedRows={({ from, to, count }) => `${from}-${to} из ${count}`}
+                        component="div"
+                        count={countUsers}
+                        rowsPerPage={rowsPerPage}
+                        page={userPage}
+                        ActionsComponent={TablePaginationActions}
+                        backIconButtonProps={{
+                            'aria-label': 'previous page',
+                        }}
+                        nextIconButtonProps={{
+                            'aria-label': 'next page',
+                        }}
+                        onPageChange={(e, newPage) => setUserPage(newPage)}
+                        onRowsPerPageChange={(e)=> setRowsPerPage(e.target.value)}                   
+                    />
 				</div>
 			</Card>
 		</DataLoader>
