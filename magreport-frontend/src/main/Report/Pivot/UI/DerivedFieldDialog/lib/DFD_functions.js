@@ -1,6 +1,6 @@
 
 import dataHub from "ajax/DataHub";
-import { nodeType } from "../../../maglangFormulaEditor/FormulaEditor/FormulaEditor";
+import { nodeType } from "../../../maglangFormulaEditor/FormulaEditor/createOutputNode";
 
 // Вспомогательные функции
 function getAll(reportId, ownerName, listOfChangedFields, otherDerivedFields, callback) {
@@ -263,6 +263,7 @@ function getExpressionForNode(node){
 			return {};
 		}
 	}
+	// CONSTANTS
 	else if(node.nodeType === nodeType.numLiteral){
 		return {
 			type: "CONSTANT_VALUE",
@@ -277,6 +278,14 @@ function getExpressionForNode(node){
 			"constantType": "STRING"
 		}
 	}
+	else if(node.nodeType === nodeType.booleanLiteral){
+		return {
+			type: "CONSTANT_VALUE",
+			constantValue: node.value,
+			"constantType": "BOOLEAN"
+		}
+	}
+	// Report and derived fields
 	else if(node.nodeType === nodeType.originalField){
 		return {
 			type: "REPORT_FIELD_VALUE",
@@ -288,7 +297,8 @@ function getExpressionForNode(node){
 			type: "DERIVED_FIELD_VALUE",
 			referenceId: node.fieldId
 		}
-	}   
+	}
+	// Arithmetic
 	else if(node.nodeType === nodeType.arithmSum){
 		return {
 			type: "ADD",
@@ -312,13 +322,29 @@ function getExpressionForNode(node){
 			type: "DIVIDE",
 			parameters: [getExpressionForNode(node.children[0]), getExpressionForNode(node.children[1])]
 		}
-	}   
+	}
+	else if(node.nodeType === nodeType.arithmIntDivision){
+		return {
+			type : "FLOOR",
+			parameters : [{
+				type: "DIVIDE",
+				parameters: [getExpressionForNode(node.children[0]), getExpressionForNode(node.children[1])]
+			}]
+		}
+	}
+	else if(node.nodeType === nodeType.arithmModulo){
+		return {
+			type: "MODULO",
+			parameters: [getExpressionForNode(node.children[0]), getExpressionForNode(node.children[1])]
+		}
+	}
 	else if(node.nodeType === nodeType.unaryArithmMinus){
 		return {
 			type: "SUBTRACT",
-			parameters: [getExpressionForNode({type: "CONSTANT_VALUE", constantValue: "0", "constantType": "INTEGER"}), getExpressionForNode(node.children[0])]
+			parameters: [{type: "CONSTANT_VALUE", constantValue: "0", "constantType": "INTEGER"}, getExpressionForNode(node.children[0])]
 		}
-	}  
+	}
+	// function call  
 	else if(node.nodeType === nodeType.functionCall){
 		let type = node.functionName;
 		let parameters = [];
@@ -331,6 +357,89 @@ function getExpressionForNode(node){
 			type: type,
 			parameters: parameters
 		}
+	}
+	// If expression
+	else if(node.nodeType === nodeType.ifExpression){
+		let parameters = [];
+		for(let i = 0; i < node.children.length; i++){
+			parameters.push(getExpressionForNode(node.children[i]));
+		}
+		return{
+			type: "SWITCH",
+			parameters : parameters
+		}
+	}
+	// Compare expressions
+	else if(node.nodeType === nodeType.compareExpression){
+		if(node.operation === "="){
+			return{
+				type: "EQ",
+				parameters: [getExpressionForNode(node.children[0],node.children[1])]
+			}
+		}
+		else if(node.operation === "<"){
+			return{
+				type: "LT",
+				parameters: [getExpressionForNode(node.children[0],node.children[1])]
+			}
+		}
+		else if(node.operation === "<="){
+			return{
+				type: "LTEQ",
+				parameters: [getExpressionForNode(node.children[0],node.children[1])]
+			}
+		}
+		else if(node.operation === ">"){
+			return{
+				type: "LT",
+				parameters: [getExpressionForNode(node.children[1],node.children[0])]
+			}
+		}
+		else if(node.operation === ">="){
+			return{
+				type: "LTEQ",
+				parameters: [getExpressionForNode(node.children[1],node.children[0])]
+			}
+		}
+		else if(node.operation === "!=" || node.operation === "<>"){
+			return{
+				type: "NOT",
+				parameters: [
+					{
+						type: "EQ",
+						parameters: [getExpressionForNode(node.children[0],node.children[1])]
+					}
+				]
+			}
+		}
+	}
+	// Logic expressions
+	else if(node.nodeType === nodeType.logicOr){
+		return{
+			type: "OR",
+			parameters: [getExpressionForNode(node.children[0],node.children[1])]
+		}
+	}
+	else if(node.nodeType === nodeType.logicAnd){
+		return{
+			type: "AND",
+			parameters: [getExpressionForNode(node.children[0],node.children[1])]
+		}
+	}
+	else if(node.nodeType === nodeType.logicXor){
+		return{
+			type: "XOR",
+			parameters: [getExpressionForNode(node.children[0],node.children[1])]
+		}
+	}
+	else if(node.nodeType === nodeType.logicNot){
+		return{
+			type: "NOT",
+			parameters: [getExpressionForNode(node.children[0])]
+		}
+	}
+	else{
+		return {type: "CONSTANT_VALUE", constantValue: "UKNOWN EXPRESSION", "constantType": "STRING"}
 	}                            
 }
 
