@@ -4,14 +4,22 @@ import { createTheme } from '@uiw/codemirror-themes';
 import {completeFromList} from "@codemirror/autocomplete";
 import {LanguageSupport} from '@codemirror/language';
 import { MagreportLanguage } from "../maglang/maglang.js";
-import {tags as t } from '@lezer/highlight';
+import { highlightingStyles} from "./highlighting.js";
 
 import "./FormulaEditor.css"
 
 import { TextField } from "@material-ui/core";
 
+import {createOutputNode, processOutputChildren} from "./createOutputNode";
+
 // Примеры highlight смотреть здесь:
 // https://github.com/codemirror/highlight/blob/main/src/highlight.ts 
+
+// Грамматика Lezer:
+// https://lezer.codemirror.net/docs/guide/
+
+// Пример грамматики JavaScript:
+// https://github.com/lezer-parser/javascript/blob/main/src/javascript.grammar
 
 /*
   Правила преобразования отображаемой строки формулы в сохранямую и обратно:
@@ -47,26 +55,6 @@ import { TextField } from "@material-ui/core";
  * @returns 
  */
 
-export const nodeType = {
-  unknown : -1,
-  formulaRoot : 0,
-  numLiteral : 1,
-  stringLiteral : 2,
-  originalField : 3,
-  derivedField : 4,
-  arithmSum : 5,
-  arithmSubtraction : 6,
-  arithmProduct : 7,
-  arithmFraction : 8,
-  unaryArithmMinus : 9,
-  functionCall : 10
-}
-
-const tempNodeType = {
-  comment : 0,
-  functionName : 1
-}
-
 export default function FormulaEditor(props){
 
     const editor = useRef();
@@ -87,18 +75,7 @@ export default function FormulaEditor(props){
           gutterBackground: 'inherit',
           gutterForeground: '#8a919966',
         },
-        styles: [
-          { tag: t.comment, color: '#787b8099' },
-          { tag: t.variableName, color: props.disabled ? 'grey' : '#0080ff' , fontWeight: "bold"},
-          { tag: t.propertyName, color: '#00b300' , fontWeight: "bold"},
-          { tag: t.function(t.variableName), color: '#862d59' , fontWeight: "normal"},
-          { tag: [t.string, t.special(t.brace)], color: '#5c6166' },
-          { tag: t.number, color: '#5c6166' },
-          { tag: t.operator, color: '#5c6166' },
-          { tag: t.angleBracket, color: '#5c6166' },
-          { tag: t.tagName, color: '#5c6166' },
-          { tag: t.attributeName, color: '#5c6166' },
-        ],
+        styles: highlightingStyles,
       });
 
     /*
@@ -213,7 +190,9 @@ export default function FormulaEditor(props){
     // ----------------------------
 
     let functionNamePattern = useMemo (() => {
-      return new RegExp(`\\b(SUBSTR|STRLEN)\\b`);
+      let funcNamesString = props.functions.map(v => v.functionName).join("|");
+      console.log(funcNamesString)
+      return new RegExp(`\\b(${funcNamesString})\\b`); 
     }, [props.functions]); // eslint-disable-line
 
     let [functionIdToNameReplacer, functionNameToIdReplacer] = useMemo(()=>{
@@ -260,155 +239,11 @@ export default function FormulaEditor(props){
 
 
     let createOutNode = useCallback((syntNode, code, errorList) => {
-
-        let outNode;
-
-
-        if(syntNode.name === "Number")
-        {
-          outNode = {
-              nodeType: nodeType.numLiteral,
-              value: Number(code.substring(syntNode.from, syntNode.to))
-          }
-        }
-        else if(syntNode.name === "String"){
-          outNode = {
-            nodeType: nodeType.stringLiteral,
-            value: code.substring(syntNode.from, syntNode.to)
-          }
-        }
-        else if(syntNode.name === "UnaryMinus")
-        {
-          outNode = {
-              nodeType: nodeType.unaryArithmMinus
-          }
-        }
-        else if(syntNode.name === "Sum")
-        {
-          outNode = {
-              nodeType: nodeType.arithmSum
-          }
-        }
-        else if(syntNode.name === "Subtraction")
-        {
-          outNode = {
-              nodeType: nodeType.arithmSubtraction
-          }
-        }        
-        else if(syntNode.name === "Product")
-        {
-          outNode = {
-              nodeType: nodeType.arithmProduct
-          }
-        }        
-        else if(syntNode.name === "Fraction")
-        {
-          outNode = {
-              nodeType: nodeType.arithmFraction
-          }
-        }
-        else if(syntNode.name === "OriginalFieldName"){
-          let fieldName = code.substring(syntNode.from, syntNode.to);
-          let fieldId = originalFieldNameToId.get(fieldName);
-          outNode = {
-            nodeType: nodeType.originalField,
-            fieldName: fieldName,
-            fieldId: fieldId
-          }
-          if(fieldId === undefined){
-            outNode.isError = true;
-            outNode.errorMessage = "Неизвестное имя поля: " + fieldName;
-          }
-        }
-        else if(syntNode.name === "DerivedFieldName"){
-          let fieldName = code.substring(syntNode.from, syntNode.to);
-          let fieldId = derivedFieldNameToId.get(fieldName);
-          outNode = {
-            nodeType: nodeType.derivedField,
-            fieldName: fieldName,
-            fieldId: derivedFieldNameToId.get(fieldName)
-          }
-          if(fieldId === undefined){
-            outNode.isError = true;
-            outNode.errorMessage = "Неизвестное имя производного поля: " + fieldName;
-          }          
-        }        
-        else if(syntNode.name === "FunctionCallExpression")
-        {
-          outNode = {
-              nodeType: nodeType.functionCall
-          }
-        }
-        else if(syntNode.name === "FunctionName")
-        {
-          let functionName = code.substring(syntNode.from, syntNode.to);
-          let functionId = functionNameToId.get(functionName);
-          outNode = {
-              temp : true,
-              tempNodeType : tempNodeType.functionName,
-              functionName : functionName,
-              functionId : functionNameToId.get(functionName)
-          }
-          if(functionId === undefined){
-            outNode.isError = true;
-            outNode.errorMessage = "Неизвестное имя функции: " + functionName;
-          }
-        }
-        else if(syntNode.name === "LineComment")
-        {
-          outNode = {
-              temp : true,
-              tempNodeType : tempNodeType.comment
-          }
-        }
-        else if(syntNode.name === "Formula"){
-          outNode = {
-            nodeType: nodeType.formulaRoot
-          }
-        }
-        else {
-          outNode = {
-            nodeType: nodeType.unknown
-          }
-        }
-
-        if(!outNode.isError){
-          outNode.isError = syntNode.type.isError;
-          if(syntNode.type.isError){
-            outNode.errorMessage = "Ошибочная синтаксическая конструкция: " + code.substring(syntNode.from, syntNode.to);
-          }
-        }
-        outNode.nodeName = syntNode.name;
-
-        if(outNode.isError){
-          outNode.thisNodeError = true;
-          
-          errorList.push({
-             errorMessage : outNode.errorMessage,
-             from : syntNode.from,
-             to : syntNode.to
-          })
-        }
-
-        return outNode;
+        return createOutputNode(syntNode, code, errorList, originalFieldNameToId, derivedFieldNameToId, functionNameToId)
       }, [functionNameToId, originalFieldNameToId, derivedFieldNameToId]);
 
     let processOutChildren = useCallback((parent, children) => {
-
-      parent.children = [];
-      for(let child of children){
-        if(child.temp)
-        {
-          if(child.tempNodeType === tempNodeType.functionName){
-            parent.functionName = child.functionName;
-          }
-        } 
-        else{
-          parent.children.push(child);
-        }
-        parent.isError = parent.isError || child.isError;
-      }
-
+        return processOutputChildren(parent, children);
       }, []);
 
     let createOutputTree = useCallback((syntNode, code, errorList) => {
