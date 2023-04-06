@@ -44,9 +44,18 @@ export function createOutputNode(syntNode, code, errorList, originalFieldNameToI
     }
     else if(syntNode.name === "Number")
     {
+      let s = code.substring(syntNode.from, syntNode.to);
+      let numberType;
+      if(s.indexOf(".")>=0){
+        numberType = "DOUBLE";
+      }
+      else{
+        numberType = "INTEGER";
+      }
       outNode = {
           nodeType: nodeType.numLiteral,
-          value: Number(code.substring(syntNode.from, syntNode.to))
+          value: Number(s),
+          numberType: numberType
       }
     }
     else if(syntNode.name === "String"){
