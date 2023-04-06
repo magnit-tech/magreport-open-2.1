@@ -4,7 +4,7 @@ import { createTheme } from '@uiw/codemirror-themes';
 import {completeFromList} from "@codemirror/autocomplete";
 import {LanguageSupport} from '@codemirror/language';
 import { MagreportLanguage } from "../maglang/maglang.js";
-import {tags as t } from '@lezer/highlight';
+import { highlightingStyles} from "./highlighting.js";
 
 import "./FormulaEditor.css"
 
@@ -14,6 +14,12 @@ import {createOutputNode, processOutputChildren} from "./createOutputNode";
 
 // Примеры highlight смотреть здесь:
 // https://github.com/codemirror/highlight/blob/main/src/highlight.ts 
+
+// Грамматика Lezer:
+// https://lezer.codemirror.net/docs/guide/
+
+// Пример грамматики JavaScript:
+// https://github.com/lezer-parser/javascript/blob/main/src/javascript.grammar
 
 /*
   Правила преобразования отображаемой строки формулы в сохранямую и обратно:
@@ -69,18 +75,7 @@ export default function FormulaEditor(props){
           gutterBackground: 'inherit',
           gutterForeground: '#8a919966',
         },
-        styles: [
-          { tag: t.comment, color: '#787b8099' },
-          { tag: t.variableName, color: props.disabled ? 'grey' : '#0080ff' , fontWeight: "bold"},
-          { tag: t.propertyName, color: '#00b300' , fontWeight: "bold"},
-          { tag: t.function(t.variableName), color: '#862d59' , fontWeight: "normal"},
-          { tag: [t.string, t.special(t.brace)], color: '#5c6166' },
-          { tag: t.number, color: '#5c6166' },
-          { tag: t.operator, color: '#5c6166' },
-          { tag: t.angleBracket, color: '#5c6166' },
-          { tag: t.tagName, color: '#5c6166' },
-          { tag: t.attributeName, color: '#5c6166' },
-        ],
+        styles: highlightingStyles,
       });
 
     /*
