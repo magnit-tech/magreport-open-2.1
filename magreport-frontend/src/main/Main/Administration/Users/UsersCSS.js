@@ -233,26 +233,42 @@ export const UsersCSS = makeStyles(theme => ({
         height: theme.spacing(7),
         justifyContent: 'center'
     },*/
-	selectDiv: {
-		display: 'flex',
-		justifyContent: 'end',
-		//  margin: '16px 0px 0px 16px'
-	},
-	addButton: {
-		minWidth: '120px',
-	},
-	spanBtn: {
-		display: 'flex',
-		minWidth: '400px',
-		alignItems: 'center',
-		paddingLeft: theme.spacing(2),
-		height: '64px',
-	},
-	usersBtn: {
-		margin: theme.spacing(0, 1),
-	},
-	btnText: {
-		fontSize: 'unset',
-		fontWeight: 'unset',
-	},
+    selectDiv: {
+        display: 'flex', 
+        justifyContent: 'end', 
+      //  margin: '16px 0px 0px 16px'
+      },
+    addButton: {
+        minWidth: '120px'
+      },
+    spanBtn: {
+        display: 'flex',
+        minWidth: '400px',
+        alignItems: 'center',
+        paddingLeft: theme.spacing(2),
+       height: '64px'
+    },
+    usersBtn:{
+        margin: theme.spacing(0, 1),
+    },
+    btnText:{
+        fontSize: 'unset',
+        fontWeight: 'unset'
+    },
+    pagination: {
+        display: 'flex',
+        flexShrink: 0,
+        marginLeft: theme.spacing(2),
+       // width:'500px',
+    },
+    iconButton: {
+        marginLeft: theme.spacing(1),
+    },
+    pageNumber: {
+        width: '60px',
+        height: '29.6px',
+        backgroundColor: theme.palette.action.hover,
+        marginLeft: theme.spacing(0.5),
+        fontSize: '0.9rem'
+    },
 }));
