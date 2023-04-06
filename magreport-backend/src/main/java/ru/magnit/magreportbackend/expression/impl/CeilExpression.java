@@ -19,10 +19,14 @@ public class CeilExpression extends ParameterizedExpression {
         final var firstParameter = parameters.get(0);
         final var firstValue = firstParameter.calculate(rowNumber);
 
-        checkParameterHasAnyType(firstParameter, firstValue, DataTypeEnum.DOUBLE);
+        checkParameterHasAnyType(firstParameter, firstValue, DataTypeEnum.DOUBLE, DataTypeEnum.INTEGER);
 
-        final var value = Double.parseDouble(firstValue.getL());
-        result.setL(String.valueOf((long) Math.ceil(value)));
+        if (firstValue.getR() == DataTypeEnum.DOUBLE) {
+            final var value = Double.parseDouble(firstValue.getL());
+            result.setL(String.valueOf((long) Math.ceil(value)));
+        } else {
+            result.setL(firstValue.getL());
+        }
 
         return result;
     }
