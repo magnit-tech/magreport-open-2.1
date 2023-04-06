@@ -99,13 +99,18 @@ function DomainGroupList(props){
     }
 
     function handleAddDomainGroupToRole(){
-        for (let u of props.items /*domainGroupsData.domainGroups*/) {
-            if (u === selectedDomainGroupToAdd.name) {
-                enqueueSnackbar("Доменной группе уже назначена эта роль!", {variant : "error"});
-                return;
+        if (selectedDomainGroupToAdd){
+            for (let u of props.items /*domainGroupsData.domainGroups*/) {
+
+                if (u.groupName === selectedDomainGroupToAdd.name && u.domainName === selectedDomainGroupToAdd.domainName) {
+                    enqueueSnackbar("Доменной группе уже назначена эта роль!", {variant : "error"});
+                    return;
+                }
             }
+            dataHub.roleController.addDomainGroups(props.roleId, [{domainId: selectedDomainGroupToAdd.id, groupName: selectedDomainGroupToAdd.name}], handleAddDomainGroupToRoleResponse)
+        } else {
+            enqueueSnackbar("Доменная группа не выбрана!", {variant : "error"});
         }
-        dataHub.roleController.addDomainGroups(props.roleId, [{domainId: selectedDomainGroupToAdd.id, groupName: selectedDomainGroupToAdd.name}], handleAddDomainGroupToRoleResponse)
     }
 
     function handleAddDomainGroupToRoleResponse(magrepResponse){

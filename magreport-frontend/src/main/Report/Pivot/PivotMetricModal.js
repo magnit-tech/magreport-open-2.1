@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import Button from '@material-ui/core/Button';
-import clsx from 'clsx';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogActions from '@material-ui/core/DialogActions';
 import Paper from '@material-ui/core/Paper';
 import Draggable from 'react-draggable';
-import TextField from '@material-ui/core/TextField';
+
+import DesignerTextField from '../../Main/Development/Designer/DesignerTextField';
+
 // local
 import {AggFunc} from '../../FolderContent/JobFilters/JobStatuses';
 import {PivotCSS} from './PivotCSS';
-import PivotFilters from './PivotFilters';
-import {FilterObject} from './dataobjects/FilterObject'; 
 
 function PaperComponent(props) {
     return (
@@ -37,27 +36,17 @@ function PaperComponent(props) {
  * 
  * @returns 
  */
-export default function PivotFilterModal(props){
+export default function PivotMetricModal(props){
     const classes = PivotCSS();
-
-    const [filterValues, setFilterValues] = useState(props.field?.filter ? new FilterObject({fieldId: props.field?.fieldId, ...props.field?.filter}) : {});
-    const [filterType, setFilterType] = useState(props.field?.filter?.filterType ?? 'EQUAL');
     const [newName, setNewName] = useState(props.field?.newName) ;
 
-    function handleChangeFilterValues(value){
-        setFilterValues(value);
-        setFilterType(value.filterType);
-    }
-
     useEffect(() => {
-        setFilterValues(props.field?.filter ? new FilterObject({fieldId: props.field?.fieldId, ...props.field?.filter}) : {});
-        setFilterType(props.field?.filter?.filterType ?? 'EQUAL');
         setNewName(props.field?.newName)
     },[props.open]) // eslint-disable-line
 
 
-    function handleOk(value, newName){
-        props.onOK(value, newName);
+    function handleOk(newName){
+        props.onOK(newName);
     }
 
     function handleClose(){
@@ -71,46 +60,47 @@ export default function PivotFilterModal(props){
             PaperComponent={PaperComponent}
             aria-labelledby="draggable-dialog-title"
             maxWidth = {false}
-            PaperProps={{ classes: {root: clsx({
-                [classes.inListDialog] : filterType === 'IN_LIST'
-            })}}}
         >
             <DialogTitle style={{ cursor: 'move' }} id="draggable-dialog-title" >
-                Фильтрация
+                Метрика
             </DialogTitle>
             <DialogContent style={{display: 'flex', flex: 1, flexDirection: 'column'}}>
-            <TextField
+            <DesignerTextField
                 id="fieldName"
-                label={"по " + (props.field?.aggFuncName ? "метрике" : "измерению")}
+                label={"функция"}
                 variant="outlined"
                 size="small"
-                style={{margin: '0px 16px 8px 36px', width: '408px'}}
-                defaultValue={(props.field?.aggFuncName ? AggFunc.get(props.field?.aggFuncName) + ' ' : '') + props.field?.fieldName}
-                InputProps={{readOnly: true}}
+                margin = '0px 8px 8px'
+                minWidth = '408px'
+                value={(props.field?.aggFuncName ? AggFunc.get(props.field?.aggFuncName) + ' ' : '')}
+                disabled
             />
-            <TextField
+            <DesignerTextField
                 id="fieldName"
-                label={'описание '  + (props.field?.aggFuncName ? "метрики" : "измерения")}
+                label={"название"}
+                variant="outlined"
+                size="small"
+                margin = '0px 8px 8px'
+                minWidth = '408px'
+                value={props.field?.fieldName}
+                disabled
+            />
+            <DesignerTextField
+                id="fieldName"
+                label={'описание'}
                 variant="outlined"
                 size="small"
                 multiline
-                style={{margin: '0px 16px 8px 36px', width: '408px'}}
-                defaultValue = {newName}
-                onChange = {(e)=>setNewName(e.target.value)}
-            />
-                
-            <PivotFilters
-                jobId = {props.jobId}
-                field = {props.field}
-                fieldsLists = {props.fieldsLists}
-                filterGroup = {props.filterGroup}
-                metricFilterGroup = {props.metricFilterGroup}
-                onChangeValues={ handleChangeFilterValues}
+                margin = '0px 8px 8px'
+                minWidth = '408px'
+                value = {newName}
+                clearable
+                onChange = {(val)=>setNewName(val)}
             />
             </DialogContent>
             <DialogActions>
                 <div className={classes.btnsArea}>
-                    <Button color="primary" size="small" variant="outlined" onClick = {()=>handleOk(filterValues, newName)}> OK </Button> 
+                    <Button color="primary" size="small" variant="outlined" onClick = {()=>handleOk(newName)}> OK </Button> 
                     <Button color="primary" size="small" variant="outlined" onClick = {()=>handleClose()} className={classes.cancelBtn}> Отменить </Button>
                 </div>
             </DialogActions>

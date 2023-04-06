@@ -23,6 +23,7 @@ import PivotTools from './PivotTools'
 import {PivotCSS} from './PivotCSS'
 import TableRangeControl from './TableRangeControl'
 import PivotFilterModal from './PivotFilterModal'
+import PivotMetricModal from './PivotMetricModal'     
 
 //dataobjects
 import PivotDataProvider from './dataobjects/PivotDataProvider'
@@ -41,6 +42,7 @@ import ConditionalFormattingDialog from './UI/ConditionalFormattingDialog';
 
 //utils
 import validateSaveConfig from 'utils/validateSaveConfig';
+import DerivedFieldDialog from './UI/DerivedFieldDialog/DerivedFieldDialog';
 
 
 /**
@@ -111,10 +113,17 @@ function PivotPanel(props){
 
     // модальное окно задания фильтра
     const [filterModalOpen, setFilterModalOpen] = useState(false);
+    const [metricModalOpen, setMetricModalOpen] = useState(false);
     const [filterModalStyle, setFilterModalStyle] = useState('');
+
+    // модальное окно создания нового поля
+    const [createFieldDialogOpen, setCreateFieldDialogOpen] = useState(false);
 
     // Индекс поля для которого настраивается фильтрация в списке полей фильтрации
     const [filterFieldIndex, setFilterFieldIndex] = useState(undefined);
+
+    // Индекс редактируемой метрики
+    const [metricFieldIndex, setMetricFieldIndex] = useState(undefined);
 
     /*
         Данные и отображение данных
@@ -122,8 +131,6 @@ function PivotPanel(props){
 
     // Объект конфигурации
     const [pivotConfiguration, setPivotConfiguration] = useState(new PivotConfiguration());
-
-    const dataProvider = useRef()
 
     // Предоставление данных для таблицы - dataProvider
     const dataProviderRef = useRef(new PivotDataProvider(props.jobId, handleTableDataReady, handleTableDataLoadFailed/*, initialColumnCount, initialRowCount*/));
@@ -204,11 +211,14 @@ function PivotPanel(props){
     */
 
     function handleMetadataLoaded(data){
-        dataProvider.current = data
         let fieldIdToNameMapping = new Map();
+        let derivedFieldIdToNameMapping = new Map();
         for(let v of data.fields){
-            fieldIdToNameMapping[v.id] = v.name;
+            fieldIdToNameMapping.set(v.id, v.name);
         }
+        for(let v of data.derivedFields){
+            derivedFieldIdToNameMapping.set(v.id, v.name);
+        }        
         dataProviderRef.current.setFieldIdToNameMapping(fieldIdToNameMapping);
 
         let newConfiguration = new PivotConfiguration(pivotConfiguration);
@@ -250,6 +260,8 @@ function PivotPanel(props){
 
     const [avaibleConfigs, setAvaibleConfigs] = useState(null);
 
+    const [otherDerivedFields, setOtherDerivedFields] = useState([])
+
     const [showConfigDialog, setShowConfigDialog] = useState(false);
     const [showConfigSaveDialog, setShowConfigSaveDialog] = useState(false);
 
@@ -289,33 +301,37 @@ function PivotPanel(props){
             const { columnFrom, columnCount, rowFrom, rowCount } = configData
 
             // Проверка на валидацию сохраненных полей конфигурации olapConfig с полями из Metadata
-            const isSaveConfigValide = !validateSaveConfig(configData.fieldsLists, newConfiguration.fieldsLists.allFields)
+            validateSaveConfig(configData.fieldsLists, newConfiguration.fieldsLists.allFields, newConfiguration.fieldsLists.derivedFields, (validate, otherDeriverdFields) => {
 
-            if (isSaveConfigValide) {
-                newConfiguration.restore(configData);
-                if (columnFrom>columnCount || rowFrom>rowCount ) {
-                    newConfiguration.setColumnFrom(0);
-                    newConfiguration.setRowFrom(0);
-                }
-                
-                let sortingValuesAreValide = true
-
-                if (!newConfiguration.sortOrder?.rowSort && !newConfiguration.sortOrder?.columnSort) {
-                    sortingValuesAreValide = false
-                }
-
-                dataProviderRef.current.loadDataForNewFieldsLists(newConfiguration.fieldsLists, newConfiguration.filterGroup, newConfiguration.metricFilterGroup, sortingValuesAreValide ? newConfiguration.sortOrder : {}, newConfiguration.columnFrom, columnCount, newConfiguration.rowFrom, rowCount);
+                if (validate) {
+                    newConfiguration.restore(configData);
+                    if (columnFrom>columnCount || rowFrom>rowCount ) {
+                        newConfiguration.setColumnFrom(0);
+                        newConfiguration.setRowFrom(0);
+                    }
+                    
+                    let sortingValuesAreValide = true
     
-                oldAndNewConfiguration.current = {
-                    oldConfiguration: new PivotConfiguration(pivotConfiguration),
-                    newConfiguration: new PivotConfiguration(newConfiguration)
+                    if (!newConfiguration.sortOrder?.rowSort && !newConfiguration.sortOrder?.columnSort) {
+                        sortingValuesAreValide = false
+                    }
+    
+                    dataProviderRef.current.loadDataForNewFieldsLists(newConfiguration.fieldsLists, newConfiguration.filterGroup, newConfiguration.metricFilterGroup, sortingValuesAreValide ? newConfiguration.sortOrder : {}, newConfiguration.columnFrom, columnCount, newConfiguration.rowFrom, rowCount);
+        
+                    oldAndNewConfiguration.current = {
+                        oldConfiguration: new PivotConfiguration(pivotConfiguration),
+                        newConfiguration: new PivotConfiguration(newConfiguration)
+                    }
+    
+                    setSortingValues(sortingValuesAreValide ? newConfiguration.sortOrder : {})
+                    setOtherDerivedFields(otherDeriverdFields)
+    
+                } else {
+                    enqueueSnackbar('Не удалось загрузить конфигурацию. Поля в конфигурации не соответсвуют отчету', {variant : "error"});
                 }
+            })
 
-                setSortingValues(sortingValuesAreValide ? newConfiguration.sortOrder : {})
 
-            } else {
-                enqueueSnackbar('Не удалось загрузить конфигурацию. Поля в конфигурации не соответсвуют отчету', {variant : "error"});
-            }
         }
 
         setSearchParams({view: 'pivot'})
@@ -332,7 +348,7 @@ function PivotPanel(props){
                     { columnFrom, columnCount, rowFrom, rowCount } = configData
 
             // Проверка на валидацию сохраненных полей конфигурации olapConfig с полями из Metadata
-            const isSaveConfigValide = !validateSaveConfig(configData.fieldsLists, newConfiguration.fieldsLists.allFields)
+            const isSaveConfigValide = !validateSaveConfig(configData.fieldsLists,  newConfiguration.fieldsLists.allFields, newConfiguration.fieldsLists.derivedFields)
 
             if (isSaveConfigValide) {
                 newConfiguration.restore(configData);
@@ -355,7 +371,6 @@ function PivotPanel(props){
                 }
 
                 setSortingValues(sortingValuesAreValide ? newConfiguration.sortOrder : {})
-
                 configOlap.current.loadChosenConfig(data.olapConfig.data, (ok) => {
                     if (ok) {
                         handleSetConfigDialog('closeConfigDialog')
@@ -469,23 +484,26 @@ function PivotPanel(props){
     // При выборе определенной конфигураций и записываем olapConfigData в текущую конфигурацию => обновляем DataLoader
     function handleLoadCertainConfig({data, name, reportOlapConfigId}) {
 
-        const isCertainConfigValide = !validateSaveConfig(JSON.parse(data).fieldsLists, pivotConfiguration.fieldsLists.allFields)
+        validateSaveConfig(JSON.parse(data).fieldsLists, pivotConfiguration.fieldsLists.allFields, pivotConfiguration.fieldsLists.derivedFields, (validate, otherDeriverdFields) => {
+            if (validate) {
+                setTableDataLoadStatus(1);
+                setSearchParams({view: 'pivot'})
+                setOtherDerivedFields(otherDeriverdFields)
+                return configOlap.current.loadChosenConfig(data, (ok) => {
+                    if (ok) {
+                        resetDataLoader()
+                        handleSetConfigDialog('closeConfigDialog')
+                        return enqueueSnackbar('Конфигурация "' + name + '" успешно загружена' , {variant : "success"});
+                    }
+                    return enqueueSnackbar('Не удалось загрузить конфигурацию "' + name + '". Некорректные данные.', {variant : "error"});
+                })
+            }
+    
+            enqueueSnackbar('Не удалось загрузить конфигурацию. Поля в конфигурации не соответсвуют отчету', {variant : "error"})
+            return configOlap.current.loadChosenConfig(reportOlapConfigId, (ok) => {})
+        })
 
-        if (isCertainConfigValide) {
-            setTableDataLoadStatus(1);
-            setSearchParams({view: 'pivot'})
-            return configOlap.current.loadChosenConfig(data, (ok) => {
-                if (ok) {
-                    resetDataLoader()
-                    handleSetConfigDialog('closeConfigDialog')
-                    return enqueueSnackbar('Конфигурация "' + name + '" успешно загружена' , {variant : "success"});
-                }
-                return enqueueSnackbar('Не удалось загрузить конфигурацию "' + name + '". Некорректные данные.', {variant : "error"});
-            })
-        }
 
-        enqueueSnackbar('Не удалось загрузить конфигурацию. Поля в конфигурации не соответсвуют отчету', {variant : "error"})
-        return configOlap.current.loadChosenConfig(reportOlapConfigId, (ok) => {})
     }
 
     // Сохраняем по умолчанию для отчета/задания
@@ -817,6 +835,50 @@ function PivotPanel(props){
             setTableDataLoadStatus(1);
         }
     }
+    /*
+        ***************************************************
+        Переименование метрик
+        ***************************************************
+    */
+    
+    // Закрытие модального окна без переименования метрики
+    function handleMetricModalClose(){
+            setPivotConfiguration(oldAndNewConfiguration.current.oldConfiguration);
+            setMetricModalOpen(false);
+    }
+
+    // Вызывается при нажатии на метрику
+    function handleMetricFieldButtonClick(event, i){
+        let newPivotConfiguration = new PivotConfiguration(pivotConfiguration);
+
+        oldAndNewConfiguration.current = {
+            newFieldIndex : i,
+            oldConfiguration: new PivotConfiguration(pivotConfiguration),
+            newConfiguration: new PivotConfiguration(newPivotConfiguration)
+        }
+
+        setMetricFieldIndex(i);
+
+        setMetricModalOpen(true);
+
+        setFilterModalStyle({
+            top: event.screenY,
+            left: event.screenX,
+            transform: `translate(0%, -20%)`,
+        })
+    }
+    
+    // Задание описания метрики
+    function handleRenameMetric(newName){
+        oldAndNewConfiguration.current.newConfiguration.setNewNameByFieldIndex('metricFields', oldAndNewConfiguration.current.newFieldIndex, newName);
+        setPivotConfiguration(new PivotConfiguration(oldAndNewConfiguration.current.newConfiguration));
+
+        setMetricModalOpen(false);
+		setTableDataLoadStatus(1);
+		dataProviderRef.current.loadDataForNewFieldsLists(oldAndNewConfiguration.current.newConfiguration.fieldsLists, oldAndNewConfiguration.current.newConfiguration.filterGroup, oldAndNewConfiguration.current.newConfiguration.metricFilterGroup, {}, 0, columnCount, 0, rowCount);
+		handleSaveCurrentConfig(oldAndNewConfiguration.current.newConfiguration.stringify())
+    }
+
 
     /*
         ***************************************************
@@ -825,11 +887,11 @@ function PivotPanel(props){
     */
 
     // Вызывается по нажатию на значение измерения в таблице
-    function handleDimensionValueFilter(fieldId, fieldValue) {
+    function handleDimensionValueFilter(fieldId, fieldType, fieldValue) {
         if (!(pivotConfiguration.fieldsLists.findFilterFieldIdByFieldIdValueFunc(fieldId, fieldValue))){
             let val = fieldValue === '' ? [] : [fieldValue];
 			let newConfiguration = new PivotConfiguration(pivotConfiguration);
-			let filterObject = new FilterObject({fieldId: fieldId, values: val});
+			let filterObject = new FilterObject({field: {fieldId: fieldId, fieldType: fieldType}, values: val});
 			newConfiguration.setFieldFilterByFieldId(fieldId, filterObject);
 			newConfiguration.replaceFilter();
 			newConfiguration.changeSortOrder({});
@@ -839,8 +901,10 @@ function PivotPanel(props){
 			setTableDataLoadStatus(1);
 			dataProviderRef.current.loadDataForNewFieldsLists(newConfiguration.fieldsLists, newConfiguration.filterGroup, newConfiguration.metricFilterGroup, {}, 0, columnCount, 0, rowCount);
 			handleSaveCurrentConfig(newConfiguration.stringify())
-			setSortingValues({})
+            setSortingValues({});
         }
+
+        
     }
     // Вызывается по нажатию на значение метрики в таблице
     function handleMetricValueFilter(fieldId, metricIndex, fieldValue, dataType){
@@ -870,11 +934,11 @@ function PivotPanel(props){
         setPivotConfiguration(oldAndNewConfiguration.current.oldConfiguration);
         setFilterModalOpen(false);
     }
-    
-    // Вызывается по подтверждению задания объекта фильтрации в модальном окне
-    function handleSetFilterValue(filterObject){
 
-        if (filterObject.values?.length > 0 || filterObject.filterType === "BLANK"){
+    // Вызывается по подтверждению задания объекта фильтрации в модальном окне
+    function handleSetFilterValue(filterObject, newName){
+
+        if (filterObject.values.length > 0 || filterObject.filterType === "BLANK"){
         oldAndNewConfiguration.current.newConfiguration.setFieldFilterByFieldIndex(oldAndNewConfiguration.current.newFieldIndex, filterObject);
         oldAndNewConfiguration.current.newConfiguration.setColumnFrom(0);
         oldAndNewConfiguration.current.newConfiguration.setRowFrom(0);
@@ -933,11 +997,10 @@ function PivotPanel(props){
         handleSaveCurrentConfig(newPivotConfiguration.stringify());
     }
 
-    function handleMetricFieldButtonClick(event, i){
-        let dataType = pivotConfiguration.fieldsLists.allFields.find(item=> item.fieldId === pivotConfiguration.fieldsLists.metricFields[i].fieldId).type;
+    function handleMetricFieldContextClick(event, i){
+        let dataType = pivotConfiguration.fieldsLists.metricFields[i].type;
         props.setAggModalParams({open: true, index: i, type: 'change', dataType: dataType});
     }
-
     /*
         ***************************************************
         Context Menu
@@ -1094,6 +1157,91 @@ function PivotPanel(props){
         handleSaveCurrentConfig(newPivotConfiguration.stringify())
     }
 
+    /*
+        ***************************************************
+        Производные поля
+        ***************************************************
+    */
+
+    // function updateDerivedFieldsList(magrepResponse){
+    //     let newPivotConfiguration = new PivotConfiguration(pivotConfiguration);
+    //     newPivotConfiguration.createDerivedFields(magrepResponse.data.derivedFields);
+    //     setPivotConfiguration(newPivotConfiguration);
+    // }
+
+    function handleDerivedFieldCloseAndUpdate(bool){
+
+        let derivedFields = new Map()
+        let columnFields = pivotConfiguration.fieldsLists.columnFields;
+        let rowFields = pivotConfiguration.fieldsLists.rowFields;
+        let metricFields = pivotConfiguration.fieldsLists.metricFields;
+        let filterFields = pivotConfiguration.fieldsLists.filterFields;
+
+        let newPivotConfiguration = new PivotConfiguration(pivotConfiguration);
+
+        if(bool){
+            dataHub.derivedFieldController.getAllDerivedFields(props.reportId, otherDerivedFields, ({ok, data}) => {
+                data.forEach(item => derivedFields.set(item.id, item.name))
+
+                if(columnFields.length > 0) {
+                    columnFields = pivotConfiguration.fieldsLists.columnFields.map(fieldData => {
+                        if(!fieldData.original) {
+                            const field = derivedFields.get(fieldData.id)
+                            return {...fieldData, fieldName: field, name: field}
+                        } else {
+                            return fieldData
+                        }
+                    })
+                    newPivotConfiguration.fieldsLists.columnFields = columnFields;
+                }
+
+                if(rowFields.length > 0) {
+                    rowFields = pivotConfiguration.fieldsLists.rowFields.map(fieldData => {
+                        if(!fieldData.original) {
+                            const field = derivedFields.get(fieldData.id)
+                            return {...fieldData, fieldName: field, name: field}
+                        } else {
+                            return fieldData
+                        }
+                    })
+                    newPivotConfiguration.fieldsLists.rowFields = rowFields;
+                }
+
+                if(metricFields.length > 0) {
+                    metricFields = pivotConfiguration.fieldsLists.metricFields.map(fieldData => {
+                        if(!fieldData.original) {
+                            const field = derivedFields.get(fieldData.id)
+                            return {...fieldData, fieldName: field, name: field}
+                        } else {
+                            return fieldData
+                        }
+                    })
+                    newPivotConfiguration.fieldsLists.metricFields = metricFields;
+                }
+
+                if(filterFields.length > 0) {
+                    filterFields = pivotConfiguration.fieldsLists.filterFields.map(fieldData => {
+                        if(!fieldData.original) {
+                            const field = derivedFields.get(fieldData.id)
+                            return {...fieldData, fieldName: field, name: field}
+                        } else {
+                            return fieldData
+                        }
+                    })
+                    newPivotConfiguration.fieldsLists.filterFields = filterFields;
+                }
+
+                configOlap.current.saveCurrentConfig(newPivotConfiguration.stringify(), ({ok}) => {
+                    if(ok) {
+                        resetDataLoader()
+                    }
+                })
+            })
+        }
+
+        setCreateFieldDialogOpen(false);
+    }
+
     function result(){ 
         return (
             <DragDropContext
@@ -1108,8 +1256,8 @@ function PivotPanel(props){
                                     droppableId = "filterFields"
                                     fields = {pivotConfiguration.fieldsLists.filterFields}
                                     direction = "vertical"
-                                    onButtonClick = {(event, i) => handleFilterFieldButtonClick(event, i)}
-                                    onButtonOffClick = {(event, i) => handleFilterFieldButtonOffClick(event, i)}
+                                    onClick = {(event, i) => handleFilterFieldButtonClick(event, i)}
+                                    onContextClick = {(event, i) => handleFilterFieldButtonOffClick(event, i)}
                                 />
                             }
                         </Grid>
@@ -1131,6 +1279,7 @@ function PivotPanel(props){
                                 onSortingDialog = {handleShowSortingDialog}
                                 onClearAllOlap = {handleClearAllOlap}
                                 onExportToExcel = {handleExportToExcel}
+                                onShowCreateFieldDialogue = {(open) => setCreateFieldDialogOpen(open)}
                             />
                             {fieldsVisibility &&
                                 <PivotFieldsList
@@ -1142,6 +1291,15 @@ function PivotPanel(props){
                                     onOnlyUnusedClick = {handleOnlyUnusedClick}
                                 />
                             }
+
+                            {/* {fieldsVisibility &&
+                                <PivotFieldsList
+                                    name = "Производные поля"
+                                    droppableId = {"derivedFields"}
+                                    fields = {pivotConfiguration.fieldsLists.derivedFields}
+                                    direction = "horizontal"
+                                />
+                            } */}
 
                             {fieldsVisibility &&
                                 <PivotFieldsList
@@ -1157,7 +1315,13 @@ function PivotPanel(props){
                                     droppableId = "metricFields"
                                     fields = {pivotConfiguration.fieldsLists.metricFields}
                                     direction = "horizontal"
-                                    onButtonClick = {handleMetricFieldButtonClick}
+
+
+                                 //   onClick = {(event, i) => handleFilterFieldButtonClick(event, i)}
+                                  //  onContextClick = {(event, i) => handleFilterFieldButtonOffClick(event, i)}
+
+                                    onClick = {(event, i) => handleMetricFieldButtonClick(event, i)}
+                                    onContextClick = {(event, i) => handleMetricFieldContextClick(event, i)}
                                     onChooseAggForMetric = {(funcName, index) => handleChooseAggForMetric(funcName, index)}
                                     onCloseAggModal = {handleAggModalClose}
                                 />
@@ -1186,7 +1350,10 @@ function PivotPanel(props){
                                         droppableId = "metricFields"
                                         fields = {pivotConfiguration.fieldsLists.metricFields}
                                         direction = "vertical"
-                                        onButtonClick = {handleMetricFieldButtonClick}
+                                        onClick = {(event, i) => handleMetricFieldButtonClick(event, i)}
+                                        onContextClick = {(event, i) => handleMetricFieldContextClick(event, i)}
+                                        //onClick = {handleMetricFieldButtonClick}
+                                        //onContextClick = {handleMetricFieldContextClick}
                                         onChooseAggForMetric = {(funcName, index) => handleChooseAggForMetric(funcName, index)}
                                         onCloseAggModal = {handleAggModalClose}
                                     />
@@ -1273,8 +1440,8 @@ function PivotPanel(props){
     return (
         <div  style={{display: 'flex', flex: 1}}>
             <DataLoader
-                loadFunc = {dataHub.olapController.getJobMetadata}
-                loadParams = {[props.jobId]}
+                loadFunc = {dataHub.olapController.getJobMetadataExtended}
+                loadParams = {[props.jobId, props.reportId]}
                 onDataLoaded = {handleMetadataLoaded}
                 key = {resetComponentKey}
             >
@@ -1299,6 +1466,16 @@ function PivotPanel(props){
                 onClose = {handleFilterModalClose}
                 onOK = {handleSetFilterValue}
             />
+            <PivotMetricModal
+                open = {metricModalOpen}
+                style = {filterModalStyle}
+                jobId = {props.jobId}
+                field = {pivotConfiguration.fieldsLists.metricFields[metricFieldIndex]}
+                fieldsLists = {pivotConfiguration.fieldsLists}
+                onClose = {handleMetricModalClose}
+                onOK = {handleRenameMetric}
+            />
+            
             {formattingDialog && 
                 <FormattingDialog
                     open = {formattingDialog}
@@ -1354,6 +1531,16 @@ function PivotPanel(props){
                     usersWithAccess = {usersWithAccessForShareJobDialog}
                     onCancel = {handleShareJobDialog}
                     onSave = {handleSaveShareJob}
+                />
+            }
+            {createFieldDialogOpen &&
+                <DerivedFieldDialog
+                    open = {createFieldDialogOpen}
+                    jobId = {props.jobId}
+                    reportId = {props.reportId}
+                    isReportDeveloper = {isReportDeveloper.current}
+                    otherDerivedFields = {otherDerivedFields}
+                    onCancel = {(bool) => handleDerivedFieldCloseAndUpdate(bool)}
                 />
             }
         </div>
