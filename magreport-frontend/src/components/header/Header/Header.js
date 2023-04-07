@@ -36,6 +36,7 @@ import {
 	setDarkTheme,
 } from '../../../redux/actions/admin/actionThemeDesign';
 import HollydayPanel from './HollydayPanel';
+import { Link } from 'react-router-dom';
 
 function PaperComponent(props) {
 	return (

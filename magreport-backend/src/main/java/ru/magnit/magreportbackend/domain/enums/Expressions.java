@@ -4,55 +4,7 @@ import lombok.RequiredArgsConstructor;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
 import ru.magnit.magreportbackend.expression.BaseExpression;
 import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
-import ru.magnit.magreportbackend.expression.impl.AbsExpression;
-import ru.magnit.magreportbackend.expression.impl.AddDaysExpression;
-import ru.magnit.magreportbackend.expression.impl.AddExpression;
-import ru.magnit.magreportbackend.expression.impl.AddMillsecExpression;
-import ru.magnit.magreportbackend.expression.impl.AddMonthsExpression;
-import ru.magnit.magreportbackend.expression.impl.AddWeeksExpression;
-import ru.magnit.magreportbackend.expression.impl.AndExpression;
-import ru.magnit.magreportbackend.expression.impl.CeilExpression;
-import ru.magnit.magreportbackend.expression.impl.ConcatExpression;
-import ru.magnit.magreportbackend.expression.impl.ConstantValueExpression;
-import ru.magnit.magreportbackend.expression.impl.CurrentDateExpression;
-import ru.magnit.magreportbackend.expression.impl.DateExpression;
-import ru.magnit.magreportbackend.expression.impl.DayFromDateExpression;
-import ru.magnit.magreportbackend.expression.impl.DaysIntervalExpression;
-import ru.magnit.magreportbackend.expression.impl.DerivedFieldValueExpression;
-import ru.magnit.magreportbackend.expression.impl.DivideExpression;
-import ru.magnit.magreportbackend.expression.impl.EqExpression;
-import ru.magnit.magreportbackend.expression.impl.FloorExpression;
-import ru.magnit.magreportbackend.expression.impl.IifExpression;
-import ru.magnit.magreportbackend.expression.impl.LeftSubstrExpression;
-import ru.magnit.magreportbackend.expression.impl.LtExpression;
-import ru.magnit.magreportbackend.expression.impl.LteqExpression;
-import ru.magnit.magreportbackend.expression.impl.MillsecIntervalExtension;
-import ru.magnit.magreportbackend.expression.impl.ModuloExpression;
-import ru.magnit.magreportbackend.expression.impl.MonthFirstDateExpression;
-import ru.magnit.magreportbackend.expression.impl.MonthFromDateExpression;
-import ru.magnit.magreportbackend.expression.impl.MonthLastDateExpression;
-import ru.magnit.magreportbackend.expression.impl.MultiplyExpression;
-import ru.magnit.magreportbackend.expression.impl.NotExpression;
-import ru.magnit.magreportbackend.expression.impl.NvlExpression;
-import ru.magnit.magreportbackend.expression.impl.OrExpression;
-import ru.magnit.magreportbackend.expression.impl.PowExpression;
-import ru.magnit.magreportbackend.expression.impl.ReplaceExpression;
-import ru.magnit.magreportbackend.expression.impl.ReportFieldValueExpression;
-import ru.magnit.magreportbackend.expression.impl.RightSubstrExpression;
-import ru.magnit.magreportbackend.expression.impl.RoundExpression;
-import ru.magnit.magreportbackend.expression.impl.RowNumberExpression;
-import ru.magnit.magreportbackend.expression.impl.SquareRootExpression;
-import ru.magnit.magreportbackend.expression.impl.StrLenExpression;
-import ru.magnit.magreportbackend.expression.impl.SubstrExpression;
-import ru.magnit.magreportbackend.expression.impl.SubtractExpression;
-import ru.magnit.magreportbackend.expression.impl.SwitchExpression;
-import ru.magnit.magreportbackend.expression.impl.ToDoubleExpression;
-import ru.magnit.magreportbackend.expression.impl.ToIntegerExpression;
-import ru.magnit.magreportbackend.expression.impl.ToStringExpression;
-import ru.magnit.magreportbackend.expression.impl.WeekFromDateExpression;
-import ru.magnit.magreportbackend.expression.impl.XorExpression;
-import ru.magnit.magreportbackend.expression.impl.YearFromDateExpression;
-import ru.magnit.magreportbackend.expression.impl.ZeroToNullExpression;
+import ru.magnit.magreportbackend.expression.impl.*;
 
 import java.util.function.BiFunction;
 
@@ -107,7 +59,8 @@ public enum Expressions {
     ADD_MONTHS(AddMonthsExpression::new),
     MONTH_FIRST_DATE(MonthFirstDateExpression::new),
     MONTH_LAST_DATE(MonthLastDateExpression::new),
-    TODAY(CurrentDateExpression::new);
+    TODAY(CurrentDateExpression::new),
+    NEQ(NeqExpression::new);
 
     private final BiFunction<FieldExpressionResponse, ExpressionCreationContext, BaseExpression> factory;
 

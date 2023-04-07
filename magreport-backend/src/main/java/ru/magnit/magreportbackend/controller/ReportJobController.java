@@ -4,29 +4,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-import ru.magnit.magreportbackend.dto.request.reportjob.ExcelReportRequest;
-import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobAddRequest;
-import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobCommentRequest;
-import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobHistoryRequestFilter;
-import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobRequest;
-import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobShareRequest;
-import ru.magnit.magreportbackend.dto.request.reportjob.ReportPageRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
+import ru.magnit.magreportbackend.dto.request.reportjob.*;
 import ru.magnit.magreportbackend.dto.response.ResponseBody;
 import ru.magnit.magreportbackend.dto.response.ResponseList;
-import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobHistoryResponse;
-import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobMetadataResponse;
-import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobResponse;
-import ru.magnit.magreportbackend.dto.response.reportjob.ReportPageResponse;
-import ru.magnit.magreportbackend.dto.response.reportjob.ReportSqlQueryResponse;
-import ru.magnit.magreportbackend.dto.response.reportjob.ScheduledReportResponse;
-import ru.magnit.magreportbackend.dto.response.reportjob.TokenResponse;
+import ru.magnit.magreportbackend.dto.response.reportjob.*;
 import ru.magnit.magreportbackend.dto.response.user.UserResponse;
 import ru.magnit.magreportbackend.service.ReportJobService;
 import ru.magnit.magreportbackend.service.domain.TokenService;
@@ -35,6 +21,8 @@ import ru.magnit.magreportbackend.util.MultipartFileSender;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -46,7 +34,10 @@ public class ReportJobController {
     private final ReportJobService service;
     private final TokenService tokenService;
 
+    private final ExecutorService nonBlockingService = Executors.newCachedThreadPool();
+
     public static final String REPORT_JOB_GET_REPORT_PAGE = "/api/v1/report-job/get-data-page";
+    public static final String REPORT_JOB_REPORT_STREAM = "/api/v1/report-job/{jobId}/stream";
     public static final String REPORT_JOB_GET_EXCEL_REPORT = "/api/v1/report-job/get-excel-report";
     public static final String REPORT_JOB_GET_EXCEL_REPORT_GET = "/api/v1/report-job/excel-report/{reportToken}";
     public static final String REPORT_JOB_ADD = "/api/v1/report-job/add";
@@ -84,6 +75,29 @@ public class ReportJobController {
         return response;
     }
 
+    @Operation(summary = "Стриминг данных отчета клиенту")
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(value = REPORT_JOB_REPORT_STREAM,
+            produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity<ResponseBodyEmitter> streamReportData(@PathVariable Long jobId) {
+        LogHelper.logInfoUserMethodStart();
+
+        final var emitter = new ResponseBodyEmitter();
+        nonBlockingService.execute(() -> {
+            try {
+                service.streamReport(emitter, jobId);
+                emitter.complete();
+            } catch (Exception ex) {
+                emitter.completeWithError(ex);
+            }
+        });
+
+        LogHelper.logInfoUserMethodEnd();
+        final var contentType = new HttpHeaders();
+        contentType.add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE);
+        return new ResponseEntity<>(emitter, contentType, HttpStatus.OK);
+    }
+
     @Operation(summary = "Получение отчета в формате Excel")
     @ResponseStatus(HttpStatus.OK)
     @PostMapping(value = REPORT_JOB_GET_EXCEL_REPORT,
@@ -105,6 +119,7 @@ public class ReportJobController {
     }
 
 
+    @SuppressWarnings("Duplicates")
     @Operation(summary = "Получение отчета в формате Excel")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = REPORT_JOB_GET_EXCEL_REPORT_GET)

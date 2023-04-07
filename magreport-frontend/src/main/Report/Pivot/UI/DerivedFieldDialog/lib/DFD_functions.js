@@ -268,7 +268,7 @@ function getExpressionForNode(node){
 		return {
 			type: "CONSTANT_VALUE",
 			constantValue: node.value.toString(),
-			"constantType": "DOUBLE"
+			"constantType": node.numberType
 		}
 	}
 	else if(node.nodeType === nodeType.stringLiteral){
@@ -374,40 +374,40 @@ function getExpressionForNode(node){
 		if(node.operation === "="){
 			return{
 				type: "EQ",
-				parameters: [getExpressionForNode(node.children[0],node.children[1])]
+				parameters: [getExpressionForNode(node.children[0]), getExpressionForNode(node.children[1])]
 			}
 		}
 		else if(node.operation === "<"){
 			return{
 				type: "LT",
-				parameters: [getExpressionForNode(node.children[0],node.children[1])]
+				parameters: [getExpressionForNode(node.children[0]), getExpressionForNode(node.children[1])]
 			}
 		}
 		else if(node.operation === "<="){
 			return{
 				type: "LTEQ",
-				parameters: [getExpressionForNode(node.children[0],node.children[1])]
+				parameters: [getExpressionForNode(node.children[0]), getExpressionForNode(node.children[1])]
 			}
 		}
 		else if(node.operation === ">"){
 			return{
 				type: "LT",
-				parameters: [getExpressionForNode(node.children[1],node.children[0])]
+				parameters: [getExpressionForNode(node.children[1]), getExpressionForNode(node.children[0])]
 			}
 		}
 		else if(node.operation === ">="){
 			return{
 				type: "LTEQ",
-				parameters: [getExpressionForNode(node.children[1],node.children[0])]
+				parameters: [getExpressionForNode(node.children[1]), getExpressionForNode(node.children[0])]
 			}
 		}
 		else if(node.operation === "!=" || node.operation === "<>"){
 			return{
-				type: "NOT",
+				type: "LOGIC_NOT",
 				parameters: [
 					{
 						type: "EQ",
-						parameters: [getExpressionForNode(node.children[0],node.children[1])]
+						parameters: [getExpressionForNode(node.children[0]), getExpressionForNode(node.children[1])]
 					}
 				]
 			}
@@ -416,25 +416,25 @@ function getExpressionForNode(node){
 	// Logic expressions
 	else if(node.nodeType === nodeType.logicOr){
 		return{
-			type: "OR",
-			parameters: [getExpressionForNode(node.children[0],node.children[1])]
+			type: "LOGIC_OR",
+			parameters: [getExpressionForNode(node.children[0]), getExpressionForNode(node.children[1])]
 		}
 	}
 	else if(node.nodeType === nodeType.logicAnd){
 		return{
-			type: "AND",
-			parameters: [getExpressionForNode(node.children[0],node.children[1])]
+			type: "LOGIC_AND",
+			parameters: [getExpressionForNode(node.children[0]), getExpressionForNode(node.children[1])]
 		}
 	}
 	else if(node.nodeType === nodeType.logicXor){
 		return{
-			type: "XOR",
-			parameters: [getExpressionForNode(node.children[0],node.children[1])]
+			type: "LOGIC_XOR",
+			parameters: [getExpressionForNode(node.children[0]), getExpressionForNode(node.children[1])]
 		}
 	}
 	else if(node.nodeType === nodeType.logicNot){
 		return{
-			type: "NOT",
+			type: "LOGIC_NOT",
 			parameters: [getExpressionForNode(node.children[0])]
 		}
 	}
