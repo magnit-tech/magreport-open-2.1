@@ -948,6 +948,22 @@ export const PivotCSS = makeStyles(theme => ({
 	DFD_accWrapperGuide: {
 		padding: '0 8px',
 	},
+	DFD_accContentWrapperGuide: {
+		flexDirection: 'column',
+	},
+	DFD_accContent: {
+		marginBottom: '15px',
+	},
+	DFD_accContentLabel: {
+		display: 'inline-block',
+		padding: '4px 8px',
+		fontWeight: '600',
+	},
+	DFD_accContentText: {
+		padding: '8px',
+		border: `1.5px solid ${theme.palette.divider}`,
+		borderRadius: '8px',
+	},
 	DFD_guideOpen: {
 		'@media (max-width: 1600px)': {
 			'& .MuiDialog-scrollPaper': {
