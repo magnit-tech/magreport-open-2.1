@@ -9,14 +9,16 @@ import {
 	AccordionDetails,
 	AccordionSummary,
 	IconButton,
-	TextField,
 	Tooltip,
 	Typography,
 } from '@material-ui/core';
 
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
+
+// icons
 import CloseIcon from '@material-ui/icons/Close';
+import SearchIcon from '@material-ui/icons/Search';
 
 export default function DerivedFieldDialogGuied(props) {
 	const classes = PivotCSS();
@@ -40,49 +42,71 @@ export default function DerivedFieldDialogGuied(props) {
 
 	const derivedFieldsList = () => (
 		<div className={classes.DFD_accWrapperGuide}>
-			{list.map(item => (
-				<Accordion key={item.functionId}>
-					<AccordionSummary
-						expandIcon={<ExpandMoreIcon />}
-						aria-controls='panel1a-content'
-						id='panel1a-header'
-					>
-						<div className={classes.DFD_accGuide}>
-							<Typography className={classes.DFD_accTitleGuide}>
-								{item.functionName}
-							</Typography>
-							<Tooltip title='Скопировать название функции' placement='top'>
-								<IconButton
-									size='small'
-									edge='end'
-									aria-label='copy'
-									onClick={e => handleCopyFunctionName(e, item.functionName)}
-								>
-									<FileCopyOutlinedIcon />
-								</IconButton>
-							</Tooltip>
-						</div>
-					</AccordionSummary>
-					<AccordionDetails className={classes.DFD_accContentWrapperGuide}>
-						<div className={classes.DFD_accContent}>
-							<span className={classes.DFD_accContentLabel}>Описание:</span>
-							<div
-								className={classes.DFD_accContentText}
-								dangerouslySetInnerHTML={{ __html: item.functionDesc }}
-							/>
-						</div>
-						<div className={classes.DFD_accContent}>
-							<span className={classes.DFD_accContentLabel}>Сигнатура:</span>
-							<div
-								className={classes.DFD_accContentText}
-								dangerouslySetInnerHTML={{ __html: item.functionSignature }}
-							/>
-						</div>
-					</AccordionDetails>
-				</Accordion>
-			))}
+			{list.length > 0 ? (
+				list.map(item => (
+					<Accordion key={item.functionId}>
+						<AccordionSummary
+							expandIcon={<ExpandMoreIcon />}
+							aria-controls='panel1a-content'
+							id='panel1a-header'
+						>
+							<div className={classes.DFD_accGuide}>
+								<Typography className={classes.DFD_accTitleGuide}>
+									{item.functionName}
+								</Typography>
+								<Tooltip title='Скопировать название функции' placement='top'>
+									<IconButton
+										size='small'
+										edge='end'
+										aria-label='copy'
+										onClick={e => handleCopyFunctionName(e, item.functionName)}
+									>
+										<FileCopyOutlinedIcon />
+									</IconButton>
+								</Tooltip>
+							</div>
+						</AccordionSummary>
+						<AccordionDetails className={classes.DFD_accContentWrapperGuide}>
+							<div className={classes.DFD_accContent}>
+								<span className={classes.DFD_accContentLabel}>Описание:</span>
+								<div
+									className={classes.DFD_accContentText}
+									dangerouslySetInnerHTML={{ __html: item.functionDesc }}
+								/>
+							</div>
+							<div className={classes.DFD_accContent}>
+								<span className={classes.DFD_accContentLabel}>Сигнатура:</span>
+								<div
+									className={classes.DFD_accContentText}
+									dangerouslySetInnerHTML={{ __html: item.functionSignature }}
+								/>
+							</div>
+						</AccordionDetails>
+					</Accordion>
+				))
+			) : (
+				<p style={{ textAlign: 'center', fontSize: '16px' }}>
+					Список функций пуст!
+				</p>
+			)}
 		</div>
 	);
+
+	function handleSearchFunction(value) {
+		if (value.trim() === '') {
+			setList(
+				functionsList.filter(item => item.functionSignature.trim() !== '')
+			);
+		} else {
+			setList(
+				list.filter(
+					({ functionName, functionDesc }) =>
+						functionName.toLowerCase().search(value.toLowerCase()) !== -1 ||
+						functionDesc.search(value) !== -1
+				)
+			);
+		}
+	}
 
 	return (
 		<div className={clsx(classes.DFD_guide, { active: open })}>
@@ -98,6 +122,17 @@ export default function DerivedFieldDialogGuied(props) {
 				</Tooltip>
 			</div>
 			<h3 className={classes.DFD_titleGuide}>Справочник функций:</h3>
+			<div className={classes.DFD_searchGuide}>
+				<input
+					className={classes.DFD_searchInputGuide}
+					type='text'
+					onChange={event => handleSearchFunction(event.target.value)}
+					placeholder={'Поиск функций'}
+				/>
+				<span className={classes.DFD_searchBtnGuide}>
+					<SearchIcon />
+				</span>
+			</div>
 			{derivedFieldsList()}
 		</div>
 	);
