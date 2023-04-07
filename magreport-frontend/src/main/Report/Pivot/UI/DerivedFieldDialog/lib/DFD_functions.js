@@ -58,7 +58,7 @@ export function loadFieldsAndExpressions(jobId, reportId, otherDerivedFields, ca
 	dataHub.derivedFieldController.getFieldsAndExpressions(jobId, reportId, otherDerivedFields, ({ok, data}) => {
 		if(ok) {
 			let functionsList = data.expressions.map(
-				(f) => ({functionId: f.id, functionName: f.name, functionDesc: f.description, functionSignature: ""}));
+				(f) => ({functionId: f.id, functionName: f.name, functionDesc: f.description, functionSignature: f.signature}));
 			let originalFieldsList = data.fields.filter((f) => (f.visible)).map(
 					(f) => ({fieldId: f.id, fieldName: f.name, fieldDesc: f.description, valueType: f.type}));
 			let derivedFieldsList = data.derivedFields.map(
