@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="LOGIC_EXPRESSIONS-001" author="artemenko_pa">
+        <update tableName="EXPRESSIONS">
+            <column name="NAME" value="LOGIC_AND"/>
+            <where>NAME='AND'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="NAME" value="LOGIC_OR"/>
+            <where>NAME='OR'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="NAME" value="LOGIC_XOR"/>
+            <where>NAME='XOR'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="NAME" value="LOGIC_NOT"/>
+            <where>NAME='NOT'</where>
+        </update>
+    </changeSet>
+
+
+</databaseChangeLog>
