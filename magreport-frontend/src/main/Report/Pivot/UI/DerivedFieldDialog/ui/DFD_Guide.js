@@ -4,6 +4,8 @@ import { useSnackbar } from 'notistack';
 
 import { PivotCSS } from '../../../PivotCSS';
 
+import { filterAndSortGuideList } from '../lib/DFD_functions';
+
 import {
 	Accordion,
 	AccordionDetails,
@@ -35,15 +37,7 @@ export default function DerivedFieldDialogGuied(props) {
 	const [list, setList] = useState([]);
 
 	useEffect(() => {
-		let list = functionsList.filter(item => item.functionSignature.trim() !== '')
-
-		function SortArray(x, y){
-			if (x.functionName < y.functionName) {return -1;}
-			if (x.functionName > y.functionName) {return 1;}
-			return 0;
-		}
-
-		setList(list.sort(SortArray))
+		setList(filterAndSortGuideList(functionsList))
 	}, [functionsList]);
 
 	function handleCopyFunctionName(e, name) {
@@ -108,15 +102,13 @@ export default function DerivedFieldDialogGuied(props) {
 
 	function handleSearchFunction(value) {
 		if (value.trim() === '') {
-			setList(
-				functionsList.filter(item => item.functionSignature.trim() !== '')
-			);
+			setList( filterAndSortGuideList(functionsList));
 		} else {
 			setList(
-				list.filter(
+				functionsList.filter(
 					({ functionName, functionDesc }) =>
 						functionName.toLowerCase().search(value.toLowerCase()) !== -1 ||
-						functionDesc.search(value) !== -1
+						functionDesc.split(' ').filter(i => i.toLowerCase().search(value.toLowerCase()) !== -1).length > 0
 				)
 			);
 		}
