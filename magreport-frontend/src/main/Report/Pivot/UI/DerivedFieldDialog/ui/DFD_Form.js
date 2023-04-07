@@ -18,7 +18,7 @@ import DerivedFieldDialogFontSize from './DFD_FontSize';
 import {
 	buildServerExression,
 	checkForDifferenceFromOriginalField,
-	fieldNamevalidation,
+	fieldNameValidation,
 } from '../lib/DFD_functions';
 
 /**
@@ -82,7 +82,7 @@ export default function DerivedFieldDialogForm(props) {
 				debouncePostObjToSave(item);
 				setNameErrorMsg('Введите название поля!');
 			} else if (currentField.originalName !== currentField.name) {
-				fieldNamevalidation(
+				fieldNameValidation(
 					currentField.isPublic,
 					currentField.name,
 					currentField,
