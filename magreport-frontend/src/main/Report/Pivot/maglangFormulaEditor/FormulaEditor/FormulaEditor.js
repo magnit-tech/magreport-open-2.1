@@ -32,7 +32,6 @@ import {createOutputNode, processOutputChildren} from "./createOutputNode";
 
 /**
  * 
- * @param {*} props.height
  * @param {*} props.disabled
  * @param {*} props.initialCode - исходный текст формулы с id вместо названий
  * @param {*} props.functions - массив описаний функций: {functionId, functionName, functionDesc, functionSignature}
@@ -191,7 +190,6 @@ export default function FormulaEditor(props){
 
     let functionNamePattern = useMemo (() => {
       let funcNamesString = props.functions.map(v => v.functionName).join("|");
-      console.log(funcNamesString)
       return new RegExp(`\\b(${funcNamesString})\\b`); 
     }, [props.functions]); // eslint-disable-line
 
@@ -284,7 +282,6 @@ export default function FormulaEditor(props){
               style={{ fontSize: props.fontSize + "px" }}
               ref={editor}
               value={code}
-              height={props.height}
               theme={codeEditorTheme}
               editable={!props.disabled}
               extensions={[new LanguageSupport(MagreportLanguage, [completion])]}

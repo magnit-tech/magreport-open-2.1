@@ -10,6 +10,7 @@
 	border-color: rgba(0, 0, 0, 0.23);
 	margin: 15px 0;
 	overflow: hidden;
+	height: 200px;
 }
 
 .errorViewer {
@@ -19,4 +20,10 @@
 
 .ͼ1.cm-editor.cm-focused {
 	outline: none;
+}
+
+@media screen and (max-height: 800px) {
+	.CodeMirror {
+		height: 100px;
+	}
 }

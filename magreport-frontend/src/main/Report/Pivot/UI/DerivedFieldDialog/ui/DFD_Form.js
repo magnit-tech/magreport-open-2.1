@@ -104,30 +104,55 @@ export default function DerivedFieldDialogForm(props) {
 	);
 
 	const derivedFieldsCompletionList = useMemo(() => {
-      let result = []
+		let result = [];
 
-      props.publicFields.forEach((value, key) => {
-        result.push({fieldName: key, valueType: "variable", fieldDesc: key, fieldId: value.id})
-      })
+		props.publicFields.forEach((value, key) => {
+			result.push({
+				fieldName: key,
+				valueType: 'variable',
+				fieldDesc: key,
+				fieldId: value.id,
+			});
+		});
 
-      props.ownFields.forEach((value, key) => {
-        if(props.publicFields.get(key)) {
-          result.push({fieldName: `${key}(${value.userName})`, valueType: "variable", fieldDesc: `${key}(${value.userName})`, fieldId: value.id})
-        } else {
-          result.push({fieldName: key, valueType: "variable", fieldDesc: key, fieldId: value.id})
-        }
-      })
+		props.ownFields.forEach((value, key) => {
+			if (props.publicFields.get(key)) {
+				result.push({
+					fieldName: `${key}(${value.userName})`,
+					valueType: 'variable',
+					fieldDesc: `${key}(${value.userName})`,
+					fieldId: value.id,
+				});
+			} else {
+				result.push({
+					fieldName: key,
+					valueType: 'variable',
+					fieldDesc: key,
+					fieldId: value.id,
+				});
+			}
+		});
 
-      props.otherFields.forEach((value, key) => {
-        if(props.publicFields.get(key) || props.ownFields.get(key)) {
-          result.push({fieldName: `${key}(${value.userName})`, valueType: "variable", fieldDesc: `${key}(${value.userName})`, fieldId: value.id})
-        } else {
-          result.push({fieldName: key, valueType: "variable", fieldDesc: key, fieldId: value.id})
-        }
-      })
-      
-      return result
-    }, [props.publicFields, props.ownFields, props.otherFields]);
+		props.otherFields.forEach((value, key) => {
+			if (props.publicFields.get(key) || props.ownFields.get(key)) {
+				result.push({
+					fieldName: `${key}(${value.userName})`,
+					valueType: 'variable',
+					fieldDesc: `${key}(${value.userName})`,
+					fieldId: value.id,
+				});
+			} else {
+				result.push({
+					fieldName: key,
+					valueType: 'variable',
+					fieldDesc: key,
+					fieldId: value.id,
+				});
+			}
+		});
+
+		return result;
+	}, [props.publicFields, props.ownFields, props.otherFields]);
 
 	const disabledSaveButton = useMemo(() => {
 		if (currentField.needSave) {
@@ -269,7 +294,6 @@ export default function DerivedFieldDialogForm(props) {
 				ownFields={ownFields}
 				otherFields={otherFields}
 				key={currentField.id}
-				height='100px'
 				fontSize={currentField.fontSize}
 				disabled={!currentField.owner}
 				initialCode={currentField.expressionText}
