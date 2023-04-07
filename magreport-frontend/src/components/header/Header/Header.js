@@ -13,6 +13,9 @@ import { HeaderCSS } from './HeaderCSS'
 
 import { connect } from 'react-redux';
 
+import ConfigLocal from "../../../ajax/config/Config-local";
+import ConfigProd from "../../../ajax/config/Config-prod";
+
 import Brightness5Icon from '@material-ui/icons/Brightness5';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -45,6 +48,8 @@ function Header(props){
 
     const {user, signout} = useAuth()
 
+    const config = (process.env.NODE_ENV === 'production' ? new ConfigProd().HOST : new ConfigLocal().HOST) + '/user-manual.pdf';
+
     const themeLightness  = props.themeLightness;
     const tooltipTitle = props.themeLightness ? 'Светлый фон': 'Тёмный фон';
 
@@ -74,6 +79,10 @@ function Header(props){
         signout()
     }
 
+    function handleShowManual(event){
+         window.open(config);
+    }
+
     function handleThemeClick(){
         localStorage.setItem('isDarkTheme', !themeLightness)
         if  (themeLightness ) {props.setLightTheme() }
@@ -97,6 +106,7 @@ function Header(props){
                 onClose={handleCloseMenu}
             >
                 <MenuItem onClick={handleClickOpenAbout}>О программе</MenuItem>
+                <MenuItem onClick={() => {window.open(`https://${config}`)}}>Руководство пользователя</MenuItem>
             </Menu>
             <Dialog
                 open={openAbout}
@@ -113,9 +123,9 @@ function Header(props){
                         <div style={{margin: '32px'}}>
                            <Typography variant='h6'> МАГРЕПОРТ </Typography>
                            <Typography variant='h6'> Версия: {props.version}</Typography>
-                           </div>
                         </div>
-                    <DialogContentText>
+                    </div>
+                <DialogContentText>
                         
                         
                     </DialogContentText>
