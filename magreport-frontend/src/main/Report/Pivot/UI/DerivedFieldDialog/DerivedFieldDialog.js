@@ -63,8 +63,7 @@ function PaperComponent(props) {
 }
 
 function DerivedFieldDialog(props) {
-	const { open, jobId, reportId, isReportDeveloper, otherDerivedFields } =
-		props;
+	const { open, jobId, reportId, isReportDeveloper, otherDerivedFields } = props;
 
 	const classes = PivotCSS();
 	const { enqueueSnackbar } = useSnackbar();
@@ -339,6 +338,7 @@ function DerivedFieldDialog(props) {
 			PaperComponent={PaperComponent}
 			aria-labelledby='drag-title'
 			className={clsx({ [classes.DFD_guideOpen]: showDerivedFunctionGuied })}
+			onClick={e => e.target.className === "MuiDialog-container MuiDialog-scrollPaper" && onClose()}
 		>
 			<DialogTitle id='drag-title'> Производные поля </DialogTitle>
 
