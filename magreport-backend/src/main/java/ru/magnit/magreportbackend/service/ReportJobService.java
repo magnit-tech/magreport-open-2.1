@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import ru.magnit.magreportbackend.domain.filtertemplate.FilterTypeEnum;
 import ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum;
@@ -417,5 +418,13 @@ public class ReportJobService {
 
     public List<ScheduledReportResponse> getAllScheduledReports() {
         return jobDomainService.getAllScheduledReports();
+    }
+
+    public void streamReport(ResponseBodyEmitter emitter, Long jobId) {
+        var jobData = jobDomainService.getJobData(jobId);
+
+        if (jobData.isReportReadyToDisplay()) {
+            avroReportDomainService.streamReport(emitter, jobData);
+        }
     }
 }
