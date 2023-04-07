@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import { useSnackbar } from 'notistack';
 
@@ -24,6 +24,12 @@ export default function DerivedFieldDialogGuied(props) {
 
 	const { open, functionsList } = props;
 
+	const [list, setList] = useState([]);
+
+	useEffect(() => {
+		setList(functionsList.filter(item => item.functionSignature.trim() !== ''));
+	}, [functionsList]);
+
 	function handleCopyFunctionName(e, name) {
 		e.stopPropagation();
 		navigator.clipboard.writeText(name);
@@ -32,9 +38,9 @@ export default function DerivedFieldDialogGuied(props) {
 		});
 	}
 
-	const list = () => (
+	const derivedFieldsList = () => (
 		<div className={classes.DFD_accWrapperGuide}>
-			{functionsList.map(item => (
+			{list.map(item => (
 				<Accordion key={item.functionId}>
 					<AccordionSummary
 						expandIcon={<ExpandMoreIcon />}
@@ -57,19 +63,21 @@ export default function DerivedFieldDialogGuied(props) {
 							</Tooltip>
 						</div>
 					</AccordionSummary>
-					<AccordionDetails>
-						<TextField
-							label='Описание'
-							placeholder='Описание'
-							multiline
-							rows={2}
-							InputLabelProps={{
-								shrink: true,
-							}}
-							variant='outlined'
-							value={item.functionDesc}
-							style={{ width: '100%' }}
-						/>
+					<AccordionDetails className={classes.DFD_accContentWrapperGuide}>
+						<div className={classes.DFD_accContent}>
+							<span className={classes.DFD_accContentLabel}>Описание:</span>
+							<div
+								className={classes.DFD_accContentText}
+								dangerouslySetInnerHTML={{ __html: item.functionDesc }}
+							/>
+						</div>
+						<div className={classes.DFD_accContent}>
+							<span className={classes.DFD_accContentLabel}>Сигнатура:</span>
+							<div
+								className={classes.DFD_accContentText}
+								dangerouslySetInnerHTML={{ __html: item.functionSignature }}
+							/>
+						</div>
 					</AccordionDetails>
 				</Accordion>
 			))}
@@ -90,7 +98,7 @@ export default function DerivedFieldDialogGuied(props) {
 				</Tooltip>
 			</div>
 			<h3 className={classes.DFD_titleGuide}>Справочник функций:</h3>
-			{list('right')}
+			{derivedFieldsList()}
 		</div>
 	);
 }
