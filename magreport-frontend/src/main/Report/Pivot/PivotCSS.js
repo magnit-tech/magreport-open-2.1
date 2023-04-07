@@ -832,9 +832,12 @@ export const PivotCSS = makeStyles(theme => ({
 		},
 	},
 	DFD_listBlock: {
-		height: '480px',
+		height: '580px',
 		overflow: 'auto',
 		borderRadius: '8px',
+		'@media (max-height: 800px)': {
+			height: '480px',
+		},
 	},
 	DFD_listBtn: {
 		width: '100%',
@@ -900,6 +903,20 @@ export const PivotCSS = makeStyles(theme => ({
 			right: 0,
 		},
 	},
+	DFD_guideOpen: {
+		'@media (max-width: 1600px)': {
+			'& .MuiDialog-scrollPaper': {
+				justifyContent: 'flex-start',
+				paddingLeft: '120px',
+			},
+		},
+		'@media (max-width: 1260px)': {
+			'& .MuiDialog-scrollPaper': {
+				justifyContent: 'flex-start',
+				paddingLeft: '60px',
+			},
+		},
+	},
 	DFD_guideBtn: {
 		padding: '3px 8px',
 		display: 'flex',
@@ -921,7 +938,6 @@ export const PivotCSS = makeStyles(theme => ({
 			},
 		},
 		'& svg': {
-			// fill: 'inherit',
 			padding: 0,
 			marginTop: '-2px',
 			marginRight: '5px',
@@ -934,7 +950,29 @@ export const PivotCSS = makeStyles(theme => ({
 		marginRight: '15px',
 	},
 	DFD_titleGuide: {
-		margin: '0 0 25px 15px',
+		margin: '0 0 5px 15px',
+	},
+	DFD_searchGuide: {
+		position: 'relative',
+		display: 'flex',
+		margin: '15px 12px 20px',
+	},
+	DFD_searchInputGuide: {
+		width: '100%',
+		padding: '8px 5px 8px 30px',
+		border: `2px solid ${theme.palette.primary.light}`,
+		borderRadius: '5px',
+		outline: 'none',
+	},
+	DFD_searchBtnGuide: {
+		position: 'absolute',
+		top: '7px',
+		left: '7px',
+		'& svg': {
+			opacity: 0.5,
+			width: '22px',
+			height: '22px',
+		},
 	},
 	DFD_accGuide: {
 		width: '100%',
@@ -948,18 +986,20 @@ export const PivotCSS = makeStyles(theme => ({
 	DFD_accWrapperGuide: {
 		padding: '0 8px',
 	},
-	DFD_guideOpen: {
-		'@media (max-width: 1600px)': {
-			'& .MuiDialog-scrollPaper': {
-				justifyContent: 'flex-start',
-				paddingLeft: '120px',
-			},
-		},
-		'@media (max-width: 1260px)': {
-			'& .MuiDialog-scrollPaper': {
-				justifyContent: 'flex-start',
-				paddingLeft: '60px',
-			},
-		},
+	DFD_accContentWrapperGuide: {
+		flexDirection: 'column',
+	},
+	DFD_accContent: {
+		marginBottom: '15px',
+	},
+	DFD_accContentLabel: {
+		display: 'inline-block',
+		padding: '4px 8px',
+		fontWeight: '600',
+	},
+	DFD_accContentText: {
+		padding: '8px',
+		border: `1.5px solid ${theme.palette.divider}`,
+		borderRadius: '8px',
 	},
 }));

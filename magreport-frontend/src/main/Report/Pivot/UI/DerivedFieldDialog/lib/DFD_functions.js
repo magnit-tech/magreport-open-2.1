@@ -58,7 +58,7 @@ export function loadFieldsAndExpressions(jobId, reportId, otherDerivedFields, ca
 	dataHub.derivedFieldController.getFieldsAndExpressions(jobId, reportId, otherDerivedFields, ({ok, data}) => {
 		if(ok) {
 			let functionsList = data.expressions.map(
-				(f) => ({functionId: f.id, functionName: f.name, functionDesc: f.description, functionSignature: ""}));
+				(f) => ({functionId: f.id, functionName: f.name, functionDesc: f.description, functionSignature: f.signature}));
 			let originalFieldsList = data.fields.filter((f) => (f.visible)).map(
 					(f) => ({fieldId: f.id, fieldName: f.name, fieldDesc: f.description, valueType: f.type}));
 			let derivedFieldsList = data.derivedFields.map(
@@ -90,7 +90,7 @@ export function saveNewField(obj, reportId, ownerName, listOfChangedFields, othe
 		} else {
 			str = `Произошла ошибка при сохранение нового производного поля "${obj.name}"`
 			variant = {variant: "error"}
-			return callback(ok, [], str, variant)
+			return callback(ok, [], [], str, variant)
 		}
 	})
 }
@@ -134,7 +134,7 @@ export function deleteField(id, reportId, ownerName, listOfChangedFields, otherD
 		} else {
 			str = "Произошла ошибка при удаление производного поля"
 			variant = {variant: "error"}
-			return callback(ok, [], str, variant)
+			return callback(ok, [], [], str, variant)
 		}
 	})
 }
