@@ -36,7 +36,6 @@ import {
 	setDarkTheme,
 } from '../../../redux/actions/admin/actionThemeDesign';
 import HollydayPanel from './HollydayPanel';
-import { Link } from 'react-router-dom';
 
 function PaperComponent(props) {
 	return (
@@ -56,8 +55,8 @@ function Header(props) {
 
 	const config =
 		(process.env.NODE_ENV === 'production'
-			? new ConfigProd().HOST
-			: new ConfigLocal().HOST) + '/user-manual.pdf';
+			? new ConfigProd().HOST_BASE_URL
+			: new ConfigLocal().HOST_BASE_URL) + '/user-manual.pdf';
 
 	const themeLightness = props.themeLightness;
 	const tooltipTitle = props.themeLightness ? 'Светлый фон' : 'Тёмный фон';
@@ -117,7 +116,7 @@ function Header(props) {
 				<MenuItem onClick={handleClickOpenAbout}>О программе</MenuItem>
 				<MenuItem
 					onClick={() => {
-						window.open(`https://${config}`);
+						window.open(`${config}`);
 					}}
 				>
 					Руководство пользователя
