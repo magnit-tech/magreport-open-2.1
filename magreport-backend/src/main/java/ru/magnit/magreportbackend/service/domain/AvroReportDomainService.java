@@ -1,5 +1,6 @@
 package ru.magnit.magreportbackend.service.domain;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +27,11 @@ import static ru.magnit.magreportbackend.util.FileUtils.replaceHomeShortcut;
 public class AvroReportDomainService {
 
     private final ReaderFactory readerFactory;
+    private final ObjectMapper objectMapper;
+
+    private static final int BUFFER_CAPACITY = 65_536;
+    private static final int LOG_ROW_INTERVAL = 100_000;
+    private static final int BATCH_SIZE = 100;
 
     @Value("${magreport.reports.folder}")
     private String reportFolder;
@@ -75,34 +81,30 @@ public class AvroReportDomainService {
         var rowCount = 0;
         try (var reader = readerFactory.createReader(jobData, getPath(jobData))) {
             log.debug("Start data streaming for job with id: " + jobData.id());
-            emitter.send("[");
+            var emitBuffer = new StringBuilder(BUFFER_CAPACITY);
+            emitBuffer.append("[");
             while (true) {
                 var cacheRow = reader.getRow();
-                final var emitBuffer = new StringBuilder();
                 if (cacheRow == null) break;
                 if (!firstRow) emitBuffer.append(",");
-                emitBuffer.append("{");
+                final var rowMap = new LinkedHashMap<Integer, String>(cacheRow.entries().size());
 
-                var firstColumn = true;
                 for (final var entry : cacheRow.entries()) {
-                    if (!firstColumn) emitBuffer.append(",");
-                    final var value = entry.value() == null ? null : entry.value().replace("\n", "").replace("\r", "").replace("\"", "\\\"");
-                    emitBuffer
-                            .append("\"")
-                            .append(entry.fieldData().ordinal())
-                            .append("\":\"")
-                            .append(value)
-                            .append("\"");
-                    firstColumn = false;
+                    rowMap.put(entry.fieldData().ordinal(), entry.value());
                 }
+                emitBuffer.append(objectMapper.writeValueAsString(rowMap));
                 rowCount++;
-                if (rowCount % 10000 == 0)
+                if (rowCount % LOG_ROW_INTERVAL == 0)
                     log.debug(rowCount + " rows streamed out of " + jobData.rowCount() + " for job with id: " + jobData.id());
-                emitBuffer.append("}");
-                emitter.send(emitBuffer.toString());
+                if (rowCount % BATCH_SIZE == 0) {
+                    emitter.send(emitBuffer.toString());
+                    emitBuffer = new StringBuilder(BUFFER_CAPACITY);
+                }
                 firstRow = false;
             }
-            emitter.send("]");
+            emitBuffer.append("]");
+            emitter.send(emitBuffer.toString());
+            log.debug(rowCount + " rows streamed out of " + jobData.rowCount() + " for job with id: " + jobData.id());
         } catch (Exception ex) {
             log.error("Error while trying to stream report data", ex);
             throw new ReportExportException("Error while trying to stream report data", ex);
