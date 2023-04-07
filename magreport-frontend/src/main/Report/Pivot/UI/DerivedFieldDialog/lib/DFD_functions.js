@@ -194,6 +194,18 @@ export function saveAllFields(reportId, ownerName, listOfChangedFields, otherDer
 		})
 }
 
+export function filterAndSortGuideList(functionsList) {
+	let list = functionsList.filter(item => item.functionSignature.trim() !== '')
+
+		function SortArray(x, y){
+			if (x.functionName < y.functionName) {return -1;}
+			if (x.functionName > y.functionName) {return 1;}
+			return 0;
+		}
+
+	return list.sort(SortArray)
+}
+
 
 // DFD_form
 export function checkForDifferenceFromOriginalField(obj, loadedDerivedFields) {
@@ -216,7 +228,7 @@ export function checkForDifferenceFromOriginalField(obj, loadedDerivedFields) {
 	return result
 }
 
-export function fieldNamevalidation(isPublic, debouncedSearchTerm, currentField, publicFields, ownFields, callback ) {
+export function fieldNameValidation(isPublic, debouncedSearchTerm, currentField, publicFields, ownFields, callback ) {
 	let item = {}
 	let msg = ''
 
