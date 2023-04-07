@@ -40,8 +40,9 @@ function PaperComponent(props) {
 export default function PivotFilterModal(props){
     const classes = PivotCSS();
 
-    const [filterValues, setFilterValues] = useState(props.field?.filter ? new FilterObject(props.field?.filter) : {});
+    const [filterValues, setFilterValues] = useState(props.field?.filter ? new FilterObject({fieldId: props.field?.fieldId, ...props.field?.filter}) : {});
     const [filterType, setFilterType] = useState(props.field?.filter?.filterType ?? 'EQUAL');
+    const [newName, setNewName] = useState(props.field?.newName) ;
 
     function handleChangeFilterValues(value){
         setFilterValues(value);
@@ -49,13 +50,14 @@ export default function PivotFilterModal(props){
     }
 
     useEffect(() => {
-        setFilterValues(props.field?.filter ? new FilterObject(props.field?.filter) : {});
+        setFilterValues(props.field?.filter ? new FilterObject({fieldId: props.field?.fieldId, ...props.field?.filter}) : {});
         setFilterType(props.field?.filter?.filterType ?? 'EQUAL');
-    },[props.field])
+        setNewName(props.field?.newName)
+    },[props.open]) // eslint-disable-line
 
 
-    function handleOk(value){
-        props.onOK(value);
+    function handleOk(value, newName){
+        props.onOK(value, newName);
     }
 
     function handleClose(){
@@ -77,15 +79,24 @@ export default function PivotFilterModal(props){
                 Фильтрация
             </DialogTitle>
             <DialogContent style={{display: 'flex', flex: 1, flexDirection: 'column'}}>
-
             <TextField
                 id="fieldName"
-                label={"для " + (props.field?.aggFuncName ? "метрики" : "измерения")}
+                label={"по " + (props.field?.aggFuncName ? "метрике" : "измерению")}
                 variant="outlined"
                 size="small"
                 style={{margin: '0px 16px 8px 36px', width: '408px'}}
                 defaultValue={(props.field?.aggFuncName ? AggFunc.get(props.field?.aggFuncName) + ' ' : '') + props.field?.fieldName}
                 InputProps={{readOnly: true}}
+            />
+            <TextField
+                id="fieldName"
+                label={'описание '  + (props.field?.aggFuncName ? "метрики" : "измерения")}
+                variant="outlined"
+                size="small"
+                multiline
+                style={{margin: '0px 16px 8px 36px', width: '408px'}}
+                defaultValue = {newName}
+                onChange = {(e)=>setNewName(e.target.value)}
             />
                 
             <PivotFilters
@@ -99,7 +110,7 @@ export default function PivotFilterModal(props){
             </DialogContent>
             <DialogActions>
                 <div className={classes.btnsArea}>
-                    <Button color="primary" size="small" variant="outlined" onClick = {()=>handleOk(filterValues)}> OK </Button> 
+                    <Button color="primary" size="small" variant="outlined" onClick = {()=>handleOk(filterValues, newName)}> OK </Button> 
                     <Button color="primary" size="small" variant="outlined" onClick = {()=>handleClose()} className={classes.cancelBtn}> Отменить </Button>
                 </div>
             </DialogActions>

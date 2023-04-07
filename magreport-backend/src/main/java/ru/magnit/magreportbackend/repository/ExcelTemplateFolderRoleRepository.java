@@ -2,7 +2,6 @@ package ru.magnit.magreportbackend.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import ru.magnit.magreportbackend.domain.dataset.DataSetFolderRole;
 import ru.magnit.magreportbackend.domain.excel.ExcelTemplateFolderRole;
 
 import java.util.List;
@@ -17,5 +16,5 @@ public interface ExcelTemplateFolderRoleRepository extends JpaRepository<ExcelTe
 
     List<ExcelTemplateFolderRole> getAllByRoleId(Long roleId);
 
-    List<DataSetFolderRole> getAllByFolderIdInAndRoleIdIn(List<Long> folderIds, List<Long> userRoles);
+    List<ExcelTemplateFolderRole> getAllByFolderIdInAndRoleIdIn(List<Long> folderIds, List<Long> userRoles);
 }

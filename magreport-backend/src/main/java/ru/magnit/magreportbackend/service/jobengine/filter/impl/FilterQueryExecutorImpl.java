@@ -16,7 +16,6 @@ import ru.magnit.magreportbackend.exception.QueryExecutionException;
 import ru.magnit.magreportbackend.service.dao.ConnectionPoolManager;
 import ru.magnit.magreportbackend.service.jobengine.filter.FilterQueryBuilder;
 import ru.magnit.magreportbackend.service.jobengine.filter.FilterQueryExecutor;
-import ru.magnit.magreportbackend.service.jobengine.impl.ClickHouseQueryBuilder;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -84,8 +83,9 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
             }
             return tuples;
         } catch (Exception ex) {
-            throw new QueryExecutionException(
-                    QUERY_FAILED + filterInstanceValuesQuery, ex);
+            log.debug(QUERY_FAILED + filterInstanceValuesQuery);
+            throw new QueryExecutionException(ex.getMessage(), ex);
+
         }
     }
 
@@ -113,7 +113,8 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
 
             return result;
         } catch (Exception ex) {
-            throw new QueryExecutionException(QUERY_FAILED + childNodesQuery, ex);
+            log.debug(QUERY_FAILED + childNodesQuery);
+            throw new QueryExecutionException(ex.getMessage(), ex);
         }
     }
 
@@ -144,7 +145,8 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
             }
             return tuples;
         } catch (Exception ex) {
-            throw new QueryExecutionException(QUERY_FAILED + fieldsValuesQuery, ex);
+            log.debug(QUERY_FAILED + fieldsValuesQuery);
+            throw new QueryExecutionException(ex.getMessage(), ex);
         }
     }
 
@@ -165,7 +167,9 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
                 result.add(row);
             }
         } catch (SQLException ex) {
-            throw new QueryExecutionException("Error trying to execute query:\n" + query);
+
+            log.debug(QUERY_FAILED + query);
+            throw new QueryExecutionException(ex.getMessage(), ex);
         }
 
         return result;

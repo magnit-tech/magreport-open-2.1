@@ -2,7 +2,7 @@ export function FilterObject(filterObject){
 
     const numOfDecPlaces = x => x==null ? 0 : ( (x.toString().includes('.')) ? (x.toString().split('.').pop().length) : (0) );
 
-    this.fieldId = filterObject.fieldId;
+    this.field = filterObject.field;
     this.values  = filterObject.values ?? [];
     this.filterType = filterObject.filterType ?? (this.values.length > 0 ? 'EQUALS' : 'BLANK');
     this.invertResult = filterObject.invertResult ?? false;

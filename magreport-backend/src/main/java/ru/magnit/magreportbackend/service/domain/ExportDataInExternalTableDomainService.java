@@ -2,6 +2,7 @@ package ru.magnit.magreportbackend.service.domain;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.domain.filtertemplate.FilterOperationTypeEnum;
@@ -30,6 +31,9 @@ public class ExportDataInExternalTableDomainService {
     private final FilterQueryExecutor filterQueryService;
 
 
+    @Value("${magreport.query-templates.size-batch-queries}")
+    int batchSize;
+
     public void exportData(ReportJobData reportJobData) {
         var reportFilterGroupData = reportJobData.reportData().filterGroup();
         if (reportFilterGroupData == null)
@@ -45,9 +49,16 @@ public class ExportDataInExternalTableDomainService {
         reportJobData.parameters().forEach(param -> jobFilters.put(param.filterId(), param));
 
         getReportFilterGroup(reportFilterGroupData, reportJobData.id(), jobFilters, queryInserts, schema, idTuple, controlField);
-        var query = String.join("", queryInserts);
 
-        filterQueryService.executeSql(reportJobData.dataSource(), query);
+        var batch = new ArrayList<String>();
+        queryInserts.forEach(query -> {
+            if (batch.size() < batchSize) batch.add(query);
+            else {
+                filterQueryService.executeSql(reportJobData.dataSource(), String.join("", batch));
+                batch.clear();
+            }
+        });
+        if (!batch.isEmpty()) filterQueryService.executeSql(reportJobData.dataSource(), String.join("", batch));
     }
 
     private void getReportFilterGroup(ReportFilterGroupData group, Long idJob, HashMap<Long, ReportJobFilterData> jobFilters, List<String> queryInserts, String schema, AtomicLong idTuple, Set<FieldTuple> controlField) {
