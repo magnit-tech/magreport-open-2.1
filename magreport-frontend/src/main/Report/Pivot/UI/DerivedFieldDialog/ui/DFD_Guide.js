@@ -20,6 +20,12 @@ import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
 import CloseIcon from '@material-ui/icons/Close';
 import SearchIcon from '@material-ui/icons/Search';
 
+
+/**
+ * @param {Boolean} props.open - отображение справочника
+ * @param {Array} props.allFieldsAndExpressions - список всех доступных функций производных полей
+**/
+
 export default function DerivedFieldDialogGuied(props) {
 	const classes = PivotCSS();
 	const { enqueueSnackbar } = useSnackbar();
@@ -29,7 +35,15 @@ export default function DerivedFieldDialogGuied(props) {
 	const [list, setList] = useState([]);
 
 	useEffect(() => {
-		setList(functionsList.filter(item => item.functionSignature.trim() !== ''));
+		let list = functionsList.filter(item => item.functionSignature.trim() !== '')
+
+		function SortArray(x, y){
+			if (x.functionName < y.functionName) {return -1;}
+			if (x.functionName > y.functionName) {return 1;}
+			return 0;
+		}
+
+		setList(list.sort(SortArray))
 	}, [functionsList]);
 
 	function handleCopyFunctionName(e, name) {
