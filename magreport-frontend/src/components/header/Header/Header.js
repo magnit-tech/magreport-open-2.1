@@ -13,6 +13,9 @@ import { HeaderCSS } from './HeaderCSS';
 
 import { connect } from 'react-redux';
 
+import ConfigLocal from '../../../ajax/config/Config-local';
+import ConfigProd from '../../../ajax/config/Config-prod';
+
 import Brightness5Icon from '@material-ui/icons/Brightness5';
 import Brightness4Icon from '@material-ui/icons/Brightness4';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -50,6 +53,11 @@ function Header(props) {
 	const classes = HeaderCSS();
 
 	const { user, signout } = useAuth();
+
+	const config =
+		(process.env.NODE_ENV === 'production'
+			? new ConfigProd().HOST
+			: new ConfigLocal().HOST) + '/user-manual.pdf';
 
 	const themeLightness = props.themeLightness;
 	const tooltipTitle = props.themeLightness ? 'Светлый фон' : 'Тёмный фон';
@@ -107,6 +115,13 @@ function Header(props) {
 				onClose={handleCloseMenu}
 			>
 				<MenuItem onClick={handleClickOpenAbout}>О программе</MenuItem>
+				<MenuItem
+					onClick={() => {
+						window.open(`https://${config}`);
+					}}
+				>
+					Руководство пользователя
+				</MenuItem>
 			</Menu>
 			<Dialog
 				open={openAbout}
@@ -141,42 +156,38 @@ function Header(props) {
 			</Dialog>
 
 			<Toolbar variant='dense' className={classes.iconIndent}>
-				<Link to='/ui/reports' className={classes.logo}>
-					<LogoIcon />
-					<Typography className={classes.logoText}>МАГРЕПОРТ</Typography>
-				</Link>
-				<div>
-					<Tooltip title={'Справка'}>
-						<IconButton onClick={handleOpenMenu}>
-							<HelpIcon className={classes.iconButton}></HelpIcon>
+				<LogoIcon />
+				<Typography className={classes.logoText}>МАГРЕПОРТ</Typography>
+				<Tooltip title={'Справка'}>
+					<IconButton onClick={handleOpenMenu}>
+						<HelpIcon className={classes.iconButton}></HelpIcon>
+					</IconButton>
+				</Tooltip>
+				<Tooltip title={tooltipTitle}>
+					<IconButton onClick={handleThemeClick}>
+						{themeLightness ? (
+							<Brightness5Icon className={classes.iconButton} />
+						) : (
+							<Brightness4Icon className={classes.iconButton} />
+						)}
+					</IconButton>
+				</Tooltip>
+				<Typography variant='overline' className={classes.userNameClass}>
+					{user.current ? user.current.name : ''}
+				</Typography>
+				{user.current?.name ? (
+					<Tooltip title='Выйти'>
+						<IconButton
+							className={classes.iconButton}
+							aria-label='logout'
+							onClick={handleClick}
+						>
+							<ExitToAppIcon />
 						</IconButton>
 					</Tooltip>
-					<Tooltip title={tooltipTitle}>
-						<IconButton onClick={handleThemeClick}>
-							{themeLightness ? (
-								<Brightness5Icon className={classes.iconButton} />
-							) : (
-								<Brightness4Icon className={classes.iconButton} />
-							)}
-						</IconButton>
-					</Tooltip>
-					<Typography variant='overline' className={classes.userNameClass}>
-						{user.current ? user.current.name : ''}
-					</Typography>
-					{user.current?.name ? (
-						<Tooltip title='Выйти'>
-							<IconButton
-								className={classes.iconButton}
-								aria-label='logout'
-								onClick={handleClick}
-							>
-								<ExitToAppIcon />
-							</IconButton>
-						</Tooltip>
-					) : (
-						''
-					)}
-				</div>
+				) : (
+					''
+				)}
 			</Toolbar>
 		</AppBar>
 	);
@@ -184,11 +195,13 @@ function Header(props) {
 
 const mapStateToProps = state => {
 	return {
+		// userName: state.login,
 		themeLightness: state.themesMenuView.darkTheme,
 	};
 };
 
 const mapDispatchToProps = {
+	// appLogout,
 	setLightTheme,
 	setDarkTheme,
 };
