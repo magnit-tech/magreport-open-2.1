@@ -963,6 +963,8 @@ export const PivotCSS = makeStyles(theme => ({
 		border: `2px solid ${theme.palette.primary.light}`,
 		borderRadius: '5px',
 		outline: 'none',
+		background: 'inherit',
+    	color: 'inherit',
 	},
 	DFD_searchBtnGuide: {
 		position: 'absolute',
