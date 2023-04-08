@@ -92,16 +92,15 @@ public class DerivedFieldService {
             .collect(Collectors.toMap(ReportFieldData::id, ReportFieldData::dataType));
 
         // Получаем набор производных полей, на которые есть прямые ссылки в запросе
-        final var reqDerivedFieldSet = request.getAllFields()
+        final var requestDerivedFields = request.getAllFields()
             .stream()
             .filter(field -> field.getFieldType() == OlapFieldTypes.DERIVED_FIELD)
             .collect(Collectors.toCollection(LinkedHashSet::new));
-        final var requestDerivedFields = new LinkedHashSet<>(reqDerivedFieldSet);
 
         // Добавляем все поля, от которых зависят производные поля
         var callDepth = maxCallDepth;
-        var prevStepFields = new LinkedHashSet<>(reqDerivedFieldSet);
-        List<FieldDefinition> usedDerivedFields = new ArrayList<>(reqDerivedFieldSet);
+        var prevStepFields = new LinkedHashSet<>(requestDerivedFields);
+        List<FieldDefinition> usedDerivedFields = new ArrayList<>(requestDerivedFields);
         while (callDepth-- > 0) {
             final var currentStepFields = prevStepFields.stream()
                 .map(field -> derivedFields.get(field.getFieldId()))
