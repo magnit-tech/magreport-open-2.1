@@ -39,13 +39,7 @@ import ru.magnit.magreportbackend.service.domain.ReportDomainService;
 import ru.magnit.magreportbackend.service.domain.UserDomainService;
 import ru.magnit.magreportbackend.util.Pair;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -98,15 +92,15 @@ public class DerivedFieldService {
             .collect(Collectors.toMap(ReportFieldData::id, ReportFieldData::dataType));
 
         // Получаем набор производных полей, на которые есть прямые ссылки в запросе
-        final var reqDerivedFieldSet = request.getAllFields()
+        final var requestDerivedFields = request.getAllFields()
             .stream()
             .filter(field -> field.getFieldType() == OlapFieldTypes.DERIVED_FIELD)
             .collect(Collectors.toCollection(LinkedHashSet::new));
-        final var requestDerivedFields = new LinkedHashSet<>(reqDerivedFieldSet);
 
         // Добавляем все поля, от которых зависят производные поля
         var callDepth = maxCallDepth;
-        var prevStepFields = new LinkedHashSet<>(reqDerivedFieldSet);
+        var prevStepFields = new LinkedHashSet<>(requestDerivedFields);
+        List<FieldDefinition> usedDerivedFields = new ArrayList<>(requestDerivedFields);
         while (callDepth-- > 0) {
             final var currentStepFields = prevStepFields.stream()
                 .map(field -> derivedFields.get(field.getFieldId()))
@@ -117,16 +111,13 @@ public class DerivedFieldService {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
             if (currentStepFields.isEmpty()) break;
-            reqDerivedFieldSet.addAll(currentStepFields);
+            usedDerivedFields.addAll(currentStepFields);
             prevStepFields = currentStepFields;
         }
 
         checkCallDepth(prevStepFields, derivedFields);
 
-        var usedDerivedFields = new ArrayList<>(reqDerivedFieldSet);
-        Collections.reverse(usedDerivedFields);
-        reqDerivedFieldSet.clear();
-        reqDerivedFieldSet.addAll(usedDerivedFields);
+        usedDerivedFields = sortByUsage(usedDerivedFields);
 
         final var fieldIndexes = sourceCube.fieldIndexes().entrySet()
             .stream()
@@ -183,6 +174,18 @@ public class DerivedFieldService {
             resultFieldIndexes,
             resultCube
         ), processedRequest);
+    }
+
+    private List<FieldDefinition> sortByUsage(List<FieldDefinition> sourceFields) {
+        final var result = new ArrayList<FieldDefinition>();
+        final var existingFields = new HashSet<FieldDefinition>();
+        for (var index = sourceFields.size()-1; index >= 0; index--) {
+            if (!existingFields.contains(sourceFields.get(index))) {
+                result.add(sourceFields.get(index));
+                existingFields.add(sourceFields.get(index));
+            }
+        }
+        return result;
     }
 
     private void checkCallDepth(Collection<FieldDefinition> prevStepFields, Map<Long, DerivedFieldResponse> derivedFields) {

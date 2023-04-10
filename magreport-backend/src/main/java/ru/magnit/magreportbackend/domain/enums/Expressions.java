@@ -60,7 +60,8 @@ public enum Expressions {
     MONTH_FIRST_DATE(MonthFirstDateExpression::new),
     MONTH_LAST_DATE(MonthLastDateExpression::new),
     TODAY(CurrentDateExpression::new),
-    NEQ(NeqExpression::new);
+    NEQ(NeqExpression::new),
+    INTEGER_DIVISION(IntegerDivisionExpression::new);
 
     private final BiFunction<FieldExpressionResponse, ExpressionCreationContext, BaseExpression> factory;
 
