@@ -292,6 +292,7 @@ export function processOutputChildren (parent, children){
         // Если узел - это просто унарный минус преобразуем его в литерал с противоположным знаком
         parent.nodeType = nodeType.numLiteral;
         parent.nodeName = parent.children[0].nodeName;
+        parent.numberType = parent.children[0].numberType;
         parent.value = -parent.children[0].value;
         parent.children = [];
       }
