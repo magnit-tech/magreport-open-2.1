@@ -40,6 +40,7 @@ public class ReportWriterImpl implements ReportWriter {
         } catch (Exception ex) {
             status = WriterStatus.FAILED;
             errorDescription = ex.getMessage() + "\n" + ex;
+            log.error(ERROR_MESSAGE, ex);
             throw new ReportExportException(ERROR_MESSAGE, ex);
         }
     }
@@ -85,6 +86,7 @@ public class ReportWriterImpl implements ReportWriter {
         } catch (Exception ex) {
             status = WriterStatus.FAILED;
             errorDescription = ex.getMessage();
+            log.error(ERROR_MESSAGE, ex);
             throw new ReportExportException(ERROR_MESSAGE, ex);
         }
     }
