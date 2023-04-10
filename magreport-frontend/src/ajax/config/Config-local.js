@@ -4,5 +4,6 @@ export default function Config(){
     this.API_BASE_URL = '/api/v1';
 
     this.BASE_URL = this.PROTOCOL + "//" + this.HOST + (this.PORT ? ":" + this.PORT : "") + this.API_BASE_URL;
+    this.HOST_BASE_URL = this.PROTOCOL + "//" + this.HOST + (this.PORT ? ":" + this.PORT : "");
     this.LOGIN_URL = this.PROTOCOL + "//" + this.HOST + (this.PORT ? ":" + this.PORT : "") + "/login";
 }
