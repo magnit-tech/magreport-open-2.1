@@ -957,6 +957,11 @@ export const PivotCSS = makeStyles(theme => ({
 		display: 'flex',
 		margin: '15px 12px 20px',
 	},
+	DFD_searchGuideInList: {
+		position: 'relative',
+		display: 'flex',
+		margin: '0 0 12px 0',
+	},
 	DFD_searchInputGuide: {
 		width: '100%',
 		padding: '8px 5px 8px 30px',
