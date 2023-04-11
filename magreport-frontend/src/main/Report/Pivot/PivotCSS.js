@@ -832,11 +832,11 @@ export const PivotCSS = makeStyles(theme => ({
 		},
 	},
 	DFD_listBlock: {
-		height: '580px',
+		height: '530px',
 		overflow: 'auto',
 		borderRadius: '8px',
 		'@media (max-height: 800px)': {
-			height: '480px',
+			height: '430px',
 		},
 	},
 	DFD_listBtn: {
