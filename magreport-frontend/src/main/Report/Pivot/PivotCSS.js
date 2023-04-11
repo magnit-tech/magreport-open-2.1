@@ -897,7 +897,7 @@ export const PivotCSS = makeStyles(theme => ({
 		width: '300px',
 		transition: 'all 400ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
 		zIndex: 999,
-		overflow: 'auto',
+		paddingBottom: '50px',
 
 		'&.active': {
 			right: 0,
@@ -986,7 +986,9 @@ export const PivotCSS = makeStyles(theme => ({
 		fontSize: '14px',
 	},
 	DFD_accWrapperGuide: {
-		padding: '0 8px',
+		padding: '0 8px 20px',
+		height: '90%',
+    	overflow: 'auto',
 	},
 	DFD_accContentWrapperGuide: {
 		flexDirection: 'column',
