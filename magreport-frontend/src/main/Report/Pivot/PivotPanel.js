@@ -1163,11 +1163,7 @@ function PivotPanel(props){
         ***************************************************
     */
 
-    // function updateDerivedFieldsList(magrepResponse){
-    //     let newPivotConfiguration = new PivotConfiguration(pivotConfiguration);
-    //     newPivotConfiguration.createDerivedFields(magrepResponse.data.derivedFields);
-    //     setPivotConfiguration(newPivotConfiguration);
-    // }
+
 
     function handleDerivedFieldCloseAndUpdate(bool){
 
@@ -1179,56 +1175,39 @@ function PivotPanel(props){
 
         let newPivotConfiguration = new PivotConfiguration(pivotConfiguration);
 
+        function checkFieldsInConfig(fieldArr, derivedFields) {
+            let arr = []
+
+            fieldArr.forEach(fieldData => {
+                if(!fieldData.original) {
+                    const field = derivedFields.get(fieldData.id)
+                    if(field) arr.push({...fieldData, fieldName: field, name: field})
+                } else {
+                    arr.push(fieldData)
+                }
+            })
+
+            return arr
+        }
+
         if(bool){
             dataHub.derivedFieldController.getAllDerivedFields(props.reportId, otherDerivedFields, ({ok, data}) => {
                 data.forEach(item => derivedFields.set(item.id, item.name))
 
                 if(columnFields.length > 0) {
-                    columnFields = pivotConfiguration.fieldsLists.columnFields.map(fieldData => {
-                        if(!fieldData.original) {
-                            const field = derivedFields.get(fieldData.id)
-                            return {...fieldData, fieldName: field, name: field}
-                        } else {
-                            return fieldData
-                        }
-                    })
-                    newPivotConfiguration.fieldsLists.columnFields = columnFields;
+                    newPivotConfiguration.fieldsLists.columnFields = checkFieldsInConfig(pivotConfiguration.fieldsLists.columnFields, derivedFields);
                 }
 
                 if(rowFields.length > 0) {
-                    rowFields = pivotConfiguration.fieldsLists.rowFields.map(fieldData => {
-                        if(!fieldData.original) {
-                            const field = derivedFields.get(fieldData.id)
-                            return {...fieldData, fieldName: field, name: field}
-                        } else {
-                            return fieldData
-                        }
-                    })
-                    newPivotConfiguration.fieldsLists.rowFields = rowFields;
+                    newPivotConfiguration.fieldsLists.rowFields = checkFieldsInConfig(pivotConfiguration.fieldsLists.rowFields, derivedFields);
                 }
 
                 if(metricFields.length > 0) {
-                    metricFields = pivotConfiguration.fieldsLists.metricFields.map(fieldData => {
-                        if(!fieldData.original) {
-                            const field = derivedFields.get(fieldData.id)
-                            return {...fieldData, fieldName: field, name: field}
-                        } else {
-                            return fieldData
-                        }
-                    })
-                    newPivotConfiguration.fieldsLists.metricFields = metricFields;
+                    newPivotConfiguration.fieldsLists.metricFields = checkFieldsInConfig(pivotConfiguration.fieldsLists.metricFields, derivedFields);
                 }
 
                 if(filterFields.length > 0) {
-                    filterFields = pivotConfiguration.fieldsLists.filterFields.map(fieldData => {
-                        if(!fieldData.original) {
-                            const field = derivedFields.get(fieldData.id)
-                            return {...fieldData, fieldName: field, name: field}
-                        } else {
-                            return fieldData
-                        }
-                    })
-                    newPivotConfiguration.fieldsLists.filterFields = filterFields;
+                    newPivotConfiguration.fieldsLists.filterFields = checkFieldsInConfig(pivotConfiguration.fieldsLists.filterFields, derivedFields);
                 }
 
                 configOlap.current.saveCurrentConfig(newPivotConfiguration.stringify(), ({ok}) => {
