@@ -36,7 +36,7 @@ public class ReportMerger implements Merger<Report, ReportEditRequest> {
     private void addNewFields(Report target, ReportEditRequest source, ReportFieldMapper fieldMapper) {
         final var newFieldRequests = source.getFields().stream().filter(field -> field.getId() == null).collect(Collectors.toList());
         final var newFields = fieldMapper.from(newFieldRequests);
-        newFields.forEach(field -> field.setReport(target));
+        newFields.forEach(field -> field.setReport(target).setOrdinal(field.getOrdinal() + 1));
         target.getFields().addAll(newFields);
     }
 
