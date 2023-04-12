@@ -18,17 +18,23 @@ public class LtExpression extends ParameterizedExpression {
         super(fieldExpression, context);
     }
 
-    @SuppressWarnings("Duplicates")
+    @SuppressWarnings({"Duplicates", "java:S131"})
     @Override
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
         final var firstParameter = parameters.get(0);
         final var firstValue = firstParameter.calculate(rowNumber);
+        final var firstType = firstValue.getR();
         final var secondParameter = parameters.get(1);
         final var secondValue = secondParameter.calculate(rowNumber);
+        final var secondType = secondValue.getR();
 
-        checkParametersHasSameTypes(this, List.of(firstValue.getR(), secondValue.getR()));
+        checkParametersComparable(this, List.of(firstType, secondType));
 
-        switch (firstValue.getR()) {
+        final var resultType = firstType.in(DataTypeEnum.INTEGER, DataTypeEnum.DOUBLE) ?
+                firstType.widerNumeric(secondType) :
+                firstType;
+
+        switch (resultType) {
             case INTEGER -> {
                 final var value1 = Integer.parseInt(firstValue.getL());
                 final var value2 = Integer.parseInt(secondValue.getL());
@@ -70,6 +76,10 @@ public class LtExpression extends ParameterizedExpression {
 
     @Override
     public DataTypeEnum inferType() {
-        return parameters.get(0).inferType();
+        final var firstParameterType = parameters.get(0).inferType();
+        final var secondParameterType = parameters.get(1).inferType();
+        checkParametersComparable(this, List.of(firstParameterType, secondParameterType));
+
+        return result.getR();
     }
 }
