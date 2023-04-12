@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import clsx from "clsx";
 
 import { PivotCSS } from '../../../PivotCSS';
@@ -6,12 +6,14 @@ import { PivotCSS } from '../../../PivotCSS';
 import { connect } from 'react-redux';
 import {showAlertDialog, hideAlertDialog} from 'redux/actions/UI/actionsAlertDialog';
 
-import { List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Typography, Button } from '@material-ui/core';
+import { List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, Typography, Button, Tooltip } from '@material-ui/core';
+import { withStyles } from '@material-ui/core/styles';
+
+// icons
 import DeleteIcon from '@material-ui/icons/Delete';
 import HelpIcon from '@material-ui/icons/Help';
+import SearchIcon from '@material-ui/icons/Search';
 
-import { withStyles } from '@material-ui/core/styles';
-import Tooltip from '@material-ui/core/Tooltip'
 
 
 /**
@@ -22,23 +24,29 @@ import Tooltip from '@material-ui/core/Tooltip'
 	* @param {*} props.onDelete - function - callback удаления поля
 **/
 
+const HtmlTooltip = withStyles((theme) => ({
+	tooltip: {
+		backgroundColor: '#f5f5f9',
+		color: 'rgba(0, 0, 0, 0.87)',
+		maxWidth: 'auto',
+		fontSize: theme.typography.pxToRem(12),
+		border: '1px solid #dadde9',
+	},
+}))(Tooltip);
+
 function DerivedFieldDialogList(props){
 
 	const { editedDerivedFields, activeIndex } = props
 
 	const classes = PivotCSS();
 
+	const [list, setList] = useState([]);
+
 	const disabledNewFieldButton = useMemo(() => editedDerivedFields.some(o => o.id === 'new'), [editedDerivedFields]);
 
-	const HtmlTooltip = withStyles((theme) => ({
-		tooltip: {
-		  backgroundColor: '#f5f5f9',
-		  color: 'rgba(0, 0, 0, 0.87)',
-		  maxWidth: 'auto',
-		  fontSize: theme.typography.pxToRem(12),
-		  border: '1px solid #dadde9',
-		},
-	}))(Tooltip);
+	useEffect(() => {
+		setList(editedDerivedFields)
+	}, [editedDerivedFields]);
 
 	// Вопрос при нажатие на "удалить"
 	function handleAskToDelete(field) {
@@ -63,13 +71,35 @@ function DerivedFieldDialogList(props){
 		}, 500)
 	} 
 
+    // Поиск производных полей
+	function handleSearchFields(value) {
+		if (value.trim() === '') {
+			setList(editedDerivedFields);
+		} else {
+			setList(
+				editedDerivedFields.filter(item => item.name.toLowerCase().search(value.toLowerCase()) !== -1)
+			);
+		}
+	}
+
 	return (
 		<div className={classes.DFD_list}>	
+			<div className={classes.DFD_searchGuideInList}>
+				<input
+					className={classes.DFD_searchInputGuide}
+					type='text'
+					onChange={event => handleSearchFields(event.target.value)}
+					placeholder={'Поиск производных полей'}
+				/>
+				<span className={classes.DFD_searchBtnGuide}>
+					<SearchIcon />
+				</span>
+			</div>
 			<List id="block" className={clsx(classes.DFD_listBlock, 'MuiPaper-root')}>
-				{editedDerivedFields.length === 0 && 
+				{list.length === 0 && 
 					<p style={{textAlign: 'center', fontSize: '16px'}}>Список полей пуст</p>
 				}
-				{editedDerivedFields.map((field) => {
+				{list.map((field) => {
 
 					const options = { year: 'numeric', month: 'numeric', day: 'numeric' };
 
