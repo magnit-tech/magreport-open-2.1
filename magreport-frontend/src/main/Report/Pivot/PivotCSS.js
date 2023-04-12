@@ -832,11 +832,11 @@ export const PivotCSS = makeStyles(theme => ({
 		},
 	},
 	DFD_listBlock: {
-		height: '580px',
+		height: '530px',
 		overflow: 'auto',
 		borderRadius: '8px',
 		'@media (max-height: 800px)': {
-			height: '480px',
+			height: '430px',
 		},
 	},
 	DFD_listBtn: {
@@ -897,7 +897,7 @@ export const PivotCSS = makeStyles(theme => ({
 		width: '300px',
 		transition: 'all 400ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
 		zIndex: 999,
-		overflow: 'auto',
+		paddingBottom: '50px',
 
 		'&.active': {
 			right: 0,
@@ -957,6 +957,11 @@ export const PivotCSS = makeStyles(theme => ({
 		display: 'flex',
 		margin: '15px 12px 20px',
 	},
+	DFD_searchGuideInList: {
+		position: 'relative',
+		display: 'flex',
+		margin: '0 0 12px 0',
+	},
 	DFD_searchInputGuide: {
 		width: '100%',
 		padding: '8px 5px 8px 30px',
@@ -986,7 +991,9 @@ export const PivotCSS = makeStyles(theme => ({
 		fontSize: '14px',
 	},
 	DFD_accWrapperGuide: {
-		padding: '0 8px',
+		padding: '0 8px 20px',
+		height: '90%',
+    	overflow: 'auto',
 	},
 	DFD_accContentWrapperGuide: {
 		flexDirection: 'column',

@@ -56,7 +56,6 @@ export default function DerivedFieldDialogForm(props) {
 		fontSize: 16,
 	});
 
-	// const debouncedSearchTerm = useDebounce(currentField.name, 300);
 	const timeout = useRef();
 
 	const [nameErrorMsg, setNameErrorMsg] = useState(null);
@@ -103,56 +102,61 @@ export default function DerivedFieldDialogForm(props) {
 		[currentField.name, reportId] // eslint-disable-line
 	);
 
+
 	const derivedFieldsCompletionList = useMemo(() => {
+
 		let result = [];
 
-		props.publicFields.forEach((value, key) => {
-			result.push({
-				fieldName: key,
-				valueType: 'variable',
-				fieldDesc: key,
-				fieldId: value.id,
+		if(activeIndex) {
+			publicFields.forEach((value, key) => {
+				result.push({
+					fieldName: key,
+					valueType: 'variable',
+					fieldDesc: key,
+					fieldId: value.id,
+				});
 			});
-		});
 
-		props.ownFields.forEach((value, key) => {
-			if (props.publicFields.get(key)) {
-				result.push({
-					fieldName: `${key}(${value.userName})`,
-					valueType: 'variable',
-					fieldDesc: `${key}(${value.userName})`,
-					fieldId: value.id,
-				});
-			} else {
-				result.push({
-					fieldName: key,
-					valueType: 'variable',
-					fieldDesc: key,
-					fieldId: value.id,
-				});
-			}
-		});
+			ownFields.forEach((value, key) => {
+				if (publicFields.get(key)) {
+					result.push({
+						fieldName: `${key}(${value.userName})`,
+						valueType: 'variable',
+						fieldDesc: `${key}(${value.userName})`,
+						fieldId: value.id,
+					});
+				} else {
+					result.push({
+						fieldName: key,
+						valueType: 'variable',
+						fieldDesc: key,
+						fieldId: value.id,
+					});
+				}
+			});
 
-		props.otherFields.forEach((value, key) => {
-			if (props.publicFields.get(key) || props.ownFields.get(key)) {
-				result.push({
-					fieldName: `${key}(${value.userName})`,
-					valueType: 'variable',
-					fieldDesc: `${key}(${value.userName})`,
-					fieldId: value.id,
-				});
-			} else {
-				result.push({
-					fieldName: key,
-					valueType: 'variable',
-					fieldDesc: key,
-					fieldId: value.id,
-				});
-			}
-		});
+			otherFields.forEach((value, key) => {
+				if (publicFields.get(key) || ownFields.get(key)) {
+					result.push({
+						fieldName: `${key}(${value.userName})`,
+						valueType: 'variable',
+						fieldDesc: `${key}(${value.userName})`,
+						fieldId: value.id,
+					});
+				} else {
+					result.push({
+						fieldName: key,
+						valueType: 'variable',
+						fieldDesc: key,
+						fieldId: value.id,
+					});
+				}
+			});
+		}
 
 		return result;
-	}, [props.publicFields, props.ownFields, props.otherFields]);
+	}, [publicFields, ownFields, otherFields, activeIndex]);
+
 
 	const disabledSaveButton = useMemo(() => {
 		if (currentField.needSave) {
