@@ -6,6 +6,8 @@ import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
+import java.util.List;
+
 public class IifExpression  extends ParameterizedExpression {
     public IifExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
         super(fieldExpression, context);
@@ -28,8 +30,15 @@ public class IifExpression  extends ParameterizedExpression {
 
     @Override
     public DataTypeEnum inferType() {
-        final var parameter = parameters.get(1);
+        final var firstParameter = parameters.get(0);
+        final var firstParameterType = firstParameter.inferType();
+        checkParameterHasAnyType(firstParameter, firstParameterType, DataTypeEnum.BOOLEAN);
+        final var secondParameter = parameters.get(0);
+        final var secondParameterType = secondParameter.inferType();
+        final var thirdParameter = parameters.get(0);
+        final var thirdParameterType = thirdParameter.inferType();
+        checkParametersHasSameTypes(this, List.of(secondParameterType, thirdParameterType));
 
-        return parameter.inferType();
+        return secondParameterType;
     }
 }
