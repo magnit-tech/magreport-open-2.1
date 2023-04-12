@@ -46,14 +46,14 @@ public abstract class BaseExpression {
         }
     }
 
-    protected void checkParameterHasAnyType(BaseExpression parameter, Pair<String, DataTypeEnum> parameterValue, DataTypeEnum... types){
-        if (parameterValue.getR().notIn(types)){
+    protected void checkParameterHasAnyType(BaseExpression parameter, Pair<String, DataTypeEnum> parameterValue, DataTypeEnum... types) {
+        if (parameterValue.getR().notIn(types)) {
             throw new InvalidExpression(ExpressionExceptionUtils.getWrongParameterTypeMessage(getRootExpression().getErrorPath(parameter), derivedField, expressionName, parameterValue.getR().name()));
         }
     }
 
-    protected void checkParameterHasAnyType(BaseExpression parameter, DataTypeEnum parameterType, DataTypeEnum... types){
-        if (parameterType.notIn(types)){
+    protected void checkParameterHasAnyType(BaseExpression parameter, DataTypeEnum parameterType, DataTypeEnum... types) {
+        if (parameterType.notIn(types)) {
             throw new InvalidExpression(ExpressionExceptionUtils.getWrongParameterTypeMessage(getRootExpression().getErrorPath(parameter), derivedField, expressionName, parameterType.name()));
         }
     }
@@ -68,12 +68,29 @@ public abstract class BaseExpression {
         if (parameterTypes.isEmpty()) return;
         DataTypeEnum parameterType = null;
 
-        for (final var currentType: parameterTypes) {
+        for (final var currentType : parameterTypes) {
             if (parameterType == null) {
                 parameterType = currentType;
                 continue;
             }
             if (currentType != parameterType) {
+                throw new InvalidExpression(ExpressionExceptionUtils.getWrongParameterTypesMessage(getRootExpression().getErrorPath(currentExpression), derivedField, expressionName, currentType.name(), parameterType.name()));
+            }
+        }
+    }
+
+    protected void checkParametersComparable(BaseExpression currentExpression, List<DataTypeEnum> parameterTypes) {
+        if (parameterTypes.isEmpty()) return;
+        DataTypeEnum parameterType = null;
+
+        for (final var currentType : parameterTypes) {
+            if (parameterType == null) {
+                parameterType = currentType;
+                continue;
+            }
+            if (currentType != parameterType &&
+                    currentType.notIn(DataTypeEnum.INTEGER, DataTypeEnum.DOUBLE) &&
+                    parameterType.notIn(DataTypeEnum.INTEGER, DataTypeEnum.DOUBLE)) {
                 throw new InvalidExpression(ExpressionExceptionUtils.getWrongParameterTypesMessage(getRootExpression().getErrorPath(currentExpression), derivedField, expressionName, currentType.name(), parameterType.name()));
             }
         }

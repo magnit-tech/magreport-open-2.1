@@ -32,4 +32,26 @@ class LtExpressionTest {
         assertEquals("true", expressionResult.getL());
         assertEquals(DataTypeEnum.BOOLEAN, expressionResult.getR());
     }
+
+    @Test
+    void LtIntDoubleTest() {
+        final var sourceExpression = new FieldExpressionResponse()
+                .setType(Expressions.LT)
+                .setParameters(List.of(
+                        new FieldExpressionResponse()
+                                .setType(Expressions.CONSTANT_VALUE)
+                                .setConstantType(DataTypeEnum.INTEGER)
+                                .setConstantValue("3"),
+                        new FieldExpressionResponse()
+                                .setType(Expressions.CONSTANT_VALUE)
+                                .setConstantType(DataTypeEnum.DOUBLE)
+                                .setConstantValue("3.1")
+                ));
+
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expressionResult = expression.calculate(0);
+
+        assertEquals("true", expressionResult.getL());
+        assertEquals(DataTypeEnum.BOOLEAN, expressionResult.getR());
+    }
 }
