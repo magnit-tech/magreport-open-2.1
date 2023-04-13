@@ -130,10 +130,12 @@ export default function DatasetController(dataHub){
         return dataHub.requestService(DATASET_GET_PERMISSIONS_URL, METHOD, body, callback);
     }
 
-    this.setPermissions = function (folderId, roles, callback){
+    this.setPermissions = function (folderId, roles, downSetPermissions, upSetPermissions, callback){
         const body = {
             folderId,
             roles,
+            downSetPermissions,
+            upSetPermissions
         };
         return dataHub.requestService(DATASET_SET_PERMISSIONS_URL, METHOD, body, callback);
     }

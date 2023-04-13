@@ -10,6 +10,8 @@ export const rolesReducer = (state = initialState, action) => {
     let rights = []
     let filteredArr = []
     let newState
+    let actualType = '';
+    let newType='';
     switch (action.type){
         case ROLE_LIST_LOADED:
             for (let r of action.data){
@@ -45,14 +47,22 @@ export const rolesReducer = (state = initialState, action) => {
             if (state.filteredData){
                 filteredArr = [...state.filteredData]
                 let roleId = filteredArr[action.index].roleId
-                let changedRole = {...filteredArr[action.index], permissions: rights}
+                actualType = filteredArr[action.index].type
+                newType = actualType === 'U' ? '':
+                          actualType === 'I' ? 'I' : 'U';
+                let changedRole = {...filteredArr[action.index], permissions: rights, type: newType}
                 filteredArr.splice(action.index, 1, changedRole)
+
+
                 let index = arr.findIndex(item => item.roleId === roleId)
                 arr.splice(index, 1, changedRole)
                 newState = {...state, data: arr, filteredData: filteredArr}
             }
             else {
-                arr.splice(action.index, 1, {...arr[action.index], permissions: rights})
+                actualType = arr[action.index].type
+                newType = actualType === 'U' ? '':
+                          actualType === 'I' ? 'I' : 'U';
+                arr.splice(action.index, 1, {...arr[action.index], permissions: rights, type: newType})
                 newState = {...state, data: arr}
             }
             
@@ -70,16 +80,25 @@ export const rolesReducer = (state = initialState, action) => {
             return newState
 
         case ROLE_DELETE:
-            arr = [...state.data]
+            arr = [...state.data];
+            let deletedRoleIndex = arr.findIndex(item => item.roleId === action.roleId);
+            actualType = arr[deletedRoleIndex].type;
+            newType = actualType === 'U' ? 'UD':
+                      actualType === 'I' ? 'ID' : 
+                      actualType === 'D' ? '':
+                      actualType === 'ID'? 'I':
+                      actualType === 'UD' ? 'U' : 'D';
+
+            arr[deletedRoleIndex].type = newType;
+
             if (state.filteredData){
-                filteredArr = [...state.filteredData]
-                let roleId = filteredArr[action.index].roleId
-                filteredArr.splice(action.index, 1)
-                arr = arr.filter(item => item.roleId !== roleId)
-                newState = {...state, data: arr, filteredData: filteredArr}
+                filteredArr = [...state.filteredData];
+                deletedRoleIndex = filteredArr.findIndex(item => item.roleId === action.roleId);
+                filteredArr[deletedRoleIndex].type = newType;
+
+                newState = {...state, data: arr, filteredData: filteredArr};
             }
             else{
-                arr = arr.filter(item => item.roleId !== action.roleId)
                 newState = {...state, data: arr}
             }
             return newState

@@ -143,5 +143,8 @@ export const RolesCSS = makeStyles(theme => ({
         display: 'flex', 
         flex: 1, 
         flexDirection: 'column'
+    },
+    rwLabelChanged: {
+        color: 'red'
     }
 }));
