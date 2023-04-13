@@ -437,7 +437,15 @@ function PivotPanel(props){
 
                     if(isReportDeveloper.current === true) {
                         for (let itemKey in data) {
-                            data[itemKey].map(item => configsArr.push(item))
+                            if(itemKey === 'sharedJobConfig') {
+                                let res = []
+
+                                configsArr.forEach(element => res.push(element.olapConfig.name));
+
+                                data[itemKey].forEach(item => !res.includes(item.olapConfig.name) && configsArr.push(item))
+                            } else {
+                                data[itemKey].forEach(item => configsArr.push(item))
+                            }
                         }
                         setAvaibleConfigs(configsArr)
                     } else {
