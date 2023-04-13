@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { connect } from 'react-redux';
 
 import { PivotCSS } from '../PivotCSS';
@@ -38,6 +38,18 @@ function ConfigDialog(props){
 	const classes = PivotCSS();
 
 	const availableConfigs = props.configs
+
+	useEffect(() => {
+		let res = []
+
+		availableConfigs.myJobConfig.forEach(element => {
+			res.push(element.olapConfig.name)
+		});
+
+		setSharedJobConfigs(availableConfigs.sharedJobConfig.filter( shareItem => !res.includes(shareItem.olapConfig.name)))
+	}, [availableConfigs] )
+
+	const [sharedJobConfigs, setSharedJobConfigs] = useState([])
 
 	const isHaveAvailableConfigs = useRef(availableConfigs.myJobConfig.length !== 0 || availableConfigs.myReportConfigs.length !== 0 || availableConfigs.sharedJobConfig.length !== 0 || availableConfigs.commonReportConfigs.length !== 0);
 
@@ -124,14 +136,14 @@ function ConfigDialog(props){
 								</Box>
 							}
 							{
-								(availableConfigs.sharedJobConfig.length !== 0 || availableConfigs.commonReportConfigs.length !== 0) &&
+								(sharedJobConfigs.length !== 0 || availableConfigs.commonReportConfigs.length !== 0) &&
 								<Box className={classes.CD_wrapper}>
 									<Typography className={classes.CD_subtitle}>Общедоступные конфигурации:</Typography>
 									<Box style={{ height: availableConfigs.myReportConfigs.length < 4 ? 'auto' : '220px', overflowY: 'auto'}}>
-										{ availableConfigs.sharedJobConfig.length !== 0 && 
+										{ sharedJobConfigs.length !== 0 && 
 											<CustomList 
 												sharedJobs = {true}
-												items = {availableConfigs.sharedJobConfig}
+												items = {sharedJobConfigs}
 												confirmDelete = {(event, id, name) => handleClickDelete(event, id, name)}
 												chooseConfig = {(event, item) => handleClickChooseConfig(event, item)}
 												chooseDefault = {(item) => props.onMakeDefault(item)}
