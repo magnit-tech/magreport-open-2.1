@@ -13,9 +13,15 @@ import InputBase from '@material-ui/core/InputBase';
 import SearchIcon from '@material-ui/icons/Search';
 import AddIcon from '@material-ui/icons/Add';
 
+import FormLabel from '@material-ui/core/FormLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
+
 // local
 import DataLoader from '../../DataLoader/DataLoader';
-import Rolelist from '../../Main/Administration/Roles/RoleList'
+import RoleList from '../../Main/Administration/Roles/RoleList'
 import AsyncAutocomplete from 'main/AsyncAutocomplete/AsyncAutocomplete';
 
 import {dataHubRightsController} from 'main/FolderContent/FolderItemTypes';
@@ -25,7 +31,7 @@ import { RoleUserListWindowCSS } from './ModalWindowsCSS'
 import { UsersCSS } from "main/Main/Administration/Users/UsersCSS";
 
 // actions
-import { actionRolesLoaded, actionRolesLoadFailed, actionRoleAdd, actionRoleDelete, actionFilterRoles } from 'redux/actions/admin/actionRoles'
+import { actionRolesLoaded, actionRolesLoadFailed, actionRoleAdd, actionRoleDelete, actionFilterRoles, actionRolesChangeWriteRights } from 'redux/actions/admin/actionRoles'
 
 function GrantsModalWindow(props){
     const classes = RoleUserListWindowCSS()
@@ -35,6 +41,7 @@ function GrantsModalWindow(props){
 
     const [addedRole, setAddedRole] = useState(null)
     const [resetAutocomplete, setResetAutocomplete] = useState(false)
+    const [recoursive, setRecoursive] = useState({down: false, up: false})
 
     let controller = dataHubRightsController(props.itemsType)
     let loadFunc = controller.getPermissions
@@ -45,12 +52,12 @@ function GrantsModalWindow(props){
 
     const handleSaveRoles = () => {
         let roles = []
-        for (let r of props.items){
+        for (let r of props.items.filter(i =>!(i.type || '').includes('D'))){
             let item = {...r}
             delete item.role
             roles.push(item)
         }
-        controller.setPermissions(props.folderId, roles, handleSaveResponse)
+        controller.setPermissions(props.folderId, roles, recoursive.down, recoursive.up, handleSaveResponse)
     }
 
     const handleSaveResponse = magrepResponse => {
@@ -74,9 +81,17 @@ function GrantsModalWindow(props){
         }
     }
 
+    function handleRoleDelete(id){
+        props.actionRoleDelete(id)
+    }
+
+    function handleChangeRW(index, value){
+        props.actionRolesChangeWriteRights(index, value)
+    }
+
     function handleAutocomplete(role) {
         if(role) {
-            setAddedRole({...role, roleId: role.id, permissions: ["READ"]})
+            setAddedRole({...role, roleId: role.id, permissions: ["READ"], type: 'I'})
         }
         return false
     }
@@ -135,18 +150,43 @@ function GrantsModalWindow(props){
                         onDataLoaded = {data => props.actionRolesLoaded(data)}
                         onDataLoadFailed = {data => props.actionRolesLoadFailed(data)}
                     >
-                        <Rolelist 
+                        <RoleList 
                             itemsType={props.itemsType}
                             items={props.filteredItems ? props.filteredItems : props.items}
                             showDeleteButton={true}
                             hideSearh={true}
                             showCheckboxRW={true}
-                            onDelete={props.actionRoleDelete}
+                            onDelete={handleRoleDelete}
+                            onChangeRW={handleChangeRW}
                             topElems = {asyncElem}
                         />
                     </DataLoader>
                 }
             </DialogContent>
+
+            <div className={classes.recursiveDiv}>
+                <FormControl component="fieldset">
+                    <FormLabel component="legend">Выдать права рекурсивно:</FormLabel>
+                    <FormGroup className={classes.recursiveGroup}>
+                        <FormControlLabel
+                            control={
+                                <Checkbox 
+                                    checked = {recoursive.down}
+                                    onChange={(e)=>setRecoursive({...recoursive, down: e.target.checked})} name="down" />
+                            }
+                            label="Вниз"
+                        />
+                        <FormControlLabel
+                            className={classes.recursiveDown}
+                            control={
+                                <Checkbox checked = {recoursive.up}
+                                    onChange={(e)=>setRecoursive({...recoursive, up: e.target.checked})} name="up" 
+                                />}
+                            label="Вверх"
+                        />
+                    </FormGroup>
+                </FormControl>
+            </div>
             <DialogActions className={classes.indent}> 
                 <Button
                     type="submit"
@@ -181,7 +221,8 @@ const mapDispatchToProps = {
     actionRolesLoadFailed,
     actionRoleAdd,
     actionRoleDelete,
-    actionFilterRoles
+    actionFilterRoles,
+    actionRolesChangeWriteRights
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(GrantsModalWindow);
