@@ -40,6 +40,10 @@ function RoleList(props){
     function handleDelete(id) {
         if (props.onDelete) props.onDelete(id)
     }
+
+    function handleChangeRW(index, value){
+        if (props.onChangeRW) props.onChangeRW(index, value)
+    }
     
     let parentsKey = props.parentsKey ? props.parentsKey : -1 // если одна роль есть у нескольких пользователей, при переключении между ними не нужно ее подсвечиывать
 
@@ -56,7 +60,8 @@ function RoleList(props){
                 showDeleteButton={props.showDeleteButton}
                 showEditButton = {props.showEditButton}
                 showViewButton = {props.showViewButton}
-                onChangeSelectedRole={handleSelectRole}
+                onChangeRW = {handleChangeRW}
+                onChangeSelectedRole = {handleSelectRole}
                 onDelete={handleDelete}
             />
         )

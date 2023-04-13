@@ -99,10 +99,12 @@ export default function ExcelTemplateController(dataHub){
         return dataHub.requestService(EXCEL_TEMPLATE_GET_PERMISSIONS_URL, METHOD, body, callback);
     }
 
-    this.setPermissions = function (folderId, roles, callback){
+    this.setPermissions = function (folderId, roles, downSetPermissions, upSetPermissions, callback){
         const body = {
             folderId,
             roles,
+            downSetPermissions,
+            upSetPermissions
         };
         return dataHub.requestService(EXCEL_TEMPLATE_SET_PERMISSIONS_URL, METHOD, body, callback);
     }
