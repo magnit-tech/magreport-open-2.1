@@ -11,6 +11,7 @@ import ru.magnit.magreportbackend.domain.olap.AggregationType;
 import ru.magnit.magreportbackend.domain.olap.SortDirection;
 import ru.magnit.magreportbackend.domain.olap.SortingOrder;
 import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
+import ru.magnit.magreportbackend.dto.inner.olap.ExportPivotConfiguration;
 import ru.magnit.magreportbackend.dto.inner.olap.MeasureData;
 import ru.magnit.magreportbackend.dto.inner.olap.MetricResult;
 import ru.magnit.magreportbackend.dto.inner.olap.Sorting;
@@ -32,8 +33,10 @@ import ru.magnit.magreportbackend.dto.response.olap.OlapFieldItemsResponse;
 import ru.magnit.magreportbackend.dto.response.olap.OlapInfoCubesResponse;
 import ru.magnit.magreportbackend.dto.response.olap.OlapMetricResponse;
 import ru.magnit.magreportbackend.dto.response.olap.OlapMetricResponse2;
+import ru.magnit.magreportbackend.dto.response.report.ReportFieldMetadataResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.TokenResponse;
 import ru.magnit.magreportbackend.exception.OlapMaxDataVolumeExceeded;
+import ru.magnit.magreportbackend.mapper.report.ReportFieldMetadataMapper;
 import ru.magnit.magreportbackend.metrics_function.MetricsFunction;
 import ru.magnit.magreportbackend.service.domain.ExcelReportDomainService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
@@ -61,7 +64,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -84,6 +86,9 @@ public class OlapService {
     private final ObjectMapper objectMapper;
     private final TokenService tokenService;
     private final OlapUserChoiceDomainService olapUserChoiceDomainService;
+
+    private final ReportFieldMetadataMapper fieldMapper;
+
     public OlapCubeResponse getCube(OlapCubeRequest request) {
         var currentUser = userDomainService.getCurrentUser();
         jobDomainService.checkAccessForJob(request.getJobId());
@@ -263,18 +268,37 @@ public class OlapService {
         request.getCubeRequest().getRowsInterval().setFrom(0).setCount(Integer.MAX_VALUE);
         request.getCubeRequest().getColumnsInterval().setFrom(0).setCount(Integer.MAX_VALUE);
 
-        var resultCube = getCube(request.getCubeRequest());
-        var metadata = jobDomainService.getJobMetaData(request.getCubeRequest().getJobId());
+        var resultCube = getCubeNew(request.getCubeRequest());
+        List<ReportFieldMetadataResponse> metadata;
+        OlapCubeRequest cubeRequest;
+        if (request.getCubeRequest().hasDerivedFields()) {
+
+            final var jobData = jobDomainService.getJobData(request.getCubeRequest().getJobId());
+            var sourceCube = olapDomainService.getCubeData(jobData);
+            final var result = derivedFieldService.preProcessCube(sourceCube, request.getCubeRequest());
+            metadata = fieldMapper.from(result.getL().reportMetaData().fields());
+            cubeRequest = result.getR();
+
+        } else {
+            metadata = jobDomainService.getJobMetaData(request.getCubeRequest().getJobId()).fields();
+            cubeRequest = getCubeRequest(request.getCubeRequest());
+        }
         var config = olapConfigurationDomainService.getReportOlapConfiguration(request.getConfiguration());
         var encrypt = jobDomainService.getJobData(request.getCubeRequest().getJobId()).reportData().encryptFile();
 
         var code = (long) (Math.random() * 1000000);
 
         excelReportDomainService.getExcelPivotTable(
-                resultCube,
-                metadata,
-                objectMapper.readTree(config.getOlapConfig().getData()),
-                request, code, encrypt);
+                new ExportPivotConfiguration(
+                        cubeRequest,
+                        resultCube,
+                        code,
+                        request.isStylePivotTable(),
+                        encrypt,
+                        objectMapper.readTree(config.getOlapConfig().getData()),
+                        metadata
+                )
+        );
 
         return new TokenResponse(tokenService.getToken(request.getCubeRequest().getJobId(), code));
     }
@@ -778,19 +802,7 @@ public class OlapService {
             endTime = System.currentTimeMillis() - startTime;
             log.debug("Derived fields calculated: " + endTime);
         } else {
-            cubeRequest = new OlapCubeRequest()
-                    .setJobId(request.getJobId())
-                    .setColumnsInterval(request.getColumnsInterval())
-                    .setRowsInterval(request.getRowsInterval())
-                    .setColumnSort(request.getColumnSort())
-                    .setRowSort(request.getRowSort())
-                    .setMetricPlacement(request.getMetricPlacement())
-                    .setColumnFields(columnsFromNew(request))
-                    .setRowFields(rowsFromNew(request))
-                    .setMetrics(fromNew(request.getMetrics()))
-                    .setFilterGroup(request.getFilterGroup() == null ? null : fromNew(request.getFilterGroup()))
-                    .setMetricFilterGroup(request.getMetricFilterGroup());
-
+            cubeRequest = getCubeRequest(request);
         }
 
         startTime = System.currentTimeMillis();
@@ -878,5 +890,20 @@ public class OlapService {
 
     private LinkedHashSet<Long> columnsFromNew(OlapCubeRequestNew request) {
         return request.getColumnFields().stream().map(FieldDefinition::getFieldId).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    private OlapCubeRequest getCubeRequest(OlapCubeRequestNew request) {
+        return new OlapCubeRequest()
+                .setJobId(request.getJobId())
+                .setColumnsInterval(request.getColumnsInterval())
+                .setRowsInterval(request.getRowsInterval())
+                .setColumnSort(request.getColumnSort())
+                .setRowSort(request.getRowSort())
+                .setMetricPlacement(request.getMetricPlacement())
+                .setColumnFields(columnsFromNew(request))
+                .setRowFields(rowsFromNew(request))
+                .setMetrics(fromNew(request.getMetrics()))
+                .setFilterGroup(request.getFilterGroup() == null ? null : fromNew(request.getFilterGroup()))
+                .setMetricFilterGroup(request.getMetricFilterGroup());
     }
 }
