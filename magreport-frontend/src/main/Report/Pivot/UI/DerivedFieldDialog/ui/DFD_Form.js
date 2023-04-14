@@ -102,12 +102,10 @@ export default function DerivedFieldDialogForm(props) {
 		[currentField.name, reportId] // eslint-disable-line
 	);
 
-
 	const derivedFieldsCompletionList = useMemo(() => {
-
 		let result = [];
 
-		if(activeIndex) {
+		if (activeIndex) {
 			publicFields.forEach((value, key) => {
 				result.push({
 					fieldName: key,
@@ -156,7 +154,6 @@ export default function DerivedFieldDialogForm(props) {
 
 		return result;
 	}, [publicFields, ownFields, otherFields, activeIndex]);
-
 
 	const disabledSaveButton = useMemo(() => {
 		if (currentField.needSave) {
@@ -288,9 +285,10 @@ export default function DerivedFieldDialogForm(props) {
 				fontSize={currentField.fontSize}
 				showDerivedFunctionGuied={props.showDerivedFunctionGuied}
 				onChangeFontSize={value => handleChangeFontSize(value)}
-				onOpenDerivedFunctionGuied={() =>
-					props.onToggleDerivedFunctionGuied(true)
-				}
+				// onOpenDerivedFunctionGuide={() =>
+				// 	props.onToggleDerivedFunctionGuide(true)
+				// }
+				onToogleShowPanels={type => props.onToogleShowPanels(type, true)}
 			/>
 
 			<FormulaEditor

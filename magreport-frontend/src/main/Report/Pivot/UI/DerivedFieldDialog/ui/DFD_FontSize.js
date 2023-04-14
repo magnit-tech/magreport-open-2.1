@@ -8,10 +8,13 @@ import {
 	MenuItem,
 	Select,
 	InputBase,
+	Tooltip,
+	IconButton,
 } from '@material-ui/core';
 import { withStyles } from '@material-ui/core/styles';
 
 import MenuBookIcon from '@material-ui/icons/MenuBook';
+import CodeIcon from '@material-ui/icons/Code';
 
 const SelectInput = withStyles(theme => ({
 	root: {
@@ -61,14 +64,26 @@ export default function DerivedFieldDialogFontSize(props) {
 
 	return (
 		<Box className={classes.DFD_fontSize}>
-			<button
-				className={classes.DFD_guideBtn}
-				disabled={props.showDerivedFunctionGuied}
-				onClick={() => props.onOpenDerivedFunctionGuied(true)}
-			>
-				<MenuBookIcon />
-				<span>Справочник функций</span>
-			</button>
+			<div style={{ display: 'flex' }}>
+				{/* <button
+					className={classes.DFD_guideBtn}
+					disabled={props.showDerivedFunctionGuied}
+					onClick={() => props.onOpenDerivedFunctionGuied(true)}
+				>
+					<MenuBookIcon />
+					<span>Справочник функций</span>
+				</button> */}
+				<Tooltip title={'Справочник функций'} placement='top'>
+					<IconButton onClick={() => props.onToogleShowPanels('guide', true)}>
+						<MenuBookIcon />
+					</IconButton>
+				</Tooltip>
+				<Tooltip title={'Синтаксис языка'} placement='top'>
+					<IconButton onClick={() => props.onToogleShowPanels('syntax', true)}>
+						<CodeIcon />
+					</IconButton>
+				</Tooltip>
+			</div>
 			<Box whiteSpace='nowrap' className={classes.DFD_fontSizeSelect}>
 				<span>Размер шрифта:</span>
 				<FormControl>
