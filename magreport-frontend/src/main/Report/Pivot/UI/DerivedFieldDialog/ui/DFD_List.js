@@ -42,11 +42,21 @@ function DerivedFieldDialogList(props){
 
 	const [list, setList] = useState([]);
 
+	const [searchValue, setSearchValue] = useState('');
+
 	const disabledNewFieldButton = useMemo(() => editedDerivedFields.some(o => o.id === 'new'), [editedDerivedFields]);
 
+	// Поиск производных полей
 	useEffect(() => {
 		setList(editedDerivedFields)
-	}, [editedDerivedFields]);
+		if (searchValue.trim() === '') {
+			setList(editedDerivedFields);
+		} else {
+			setList(
+				editedDerivedFields.filter(item => item.name.toLowerCase().search(searchValue.toLowerCase()) !== -1)
+			);
+		}
+	}, [searchValue, editedDerivedFields]);
 
 	// Вопрос при нажатие на "удалить"
 	function handleAskToDelete(field) {
@@ -71,24 +81,14 @@ function DerivedFieldDialogList(props){
 		}, 500)
 	} 
 
-    // Поиск производных полей
-	function handleSearchFields(value) {
-		if (value.trim() === '') {
-			setList(editedDerivedFields);
-		} else {
-			setList(
-				editedDerivedFields.filter(item => item.name.toLowerCase().search(value.toLowerCase()) !== -1)
-			);
-		}
-	}
-
 	return (
 		<div className={classes.DFD_list}>	
 			<div className={classes.DFD_searchGuideInList}>
 				<input
 					className={classes.DFD_searchInputGuide}
 					type='text'
-					onChange={event => handleSearchFields(event.target.value)}
+					value={searchValue}
+					onChange={event => setSearchValue(event.target.value)}
 					placeholder={'Поиск производных полей'}
 				/>
 				<span className={classes.DFD_searchBtnGuide}>
