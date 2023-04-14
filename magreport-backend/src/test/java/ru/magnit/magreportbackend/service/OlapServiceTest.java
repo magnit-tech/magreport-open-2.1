@@ -37,6 +37,7 @@ import ru.magnit.magreportbackend.dto.request.olap.OlapFieldTypes;
 import ru.magnit.magreportbackend.dto.request.olap.SortingParams;
 import ru.magnit.magreportbackend.dto.response.olap.OlapConfigResponse;
 import ru.magnit.magreportbackend.dto.response.olap.ReportOlapConfigResponse;
+import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobMetadataResponse;
 import ru.magnit.magreportbackend.service.domain.ExcelReportDomainService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
 import ru.magnit.magreportbackend.service.domain.OlapConfigurationDomainService;
@@ -233,6 +234,7 @@ class OlapServiceTest {
         when(tokenService.getToken(anyLong(), anyLong())).thenReturn("123456");
         when(domainService.filterMetricResult(any(),any(),any())).thenReturn(getTrueStatusMetricValue());
         when(userDomainService.getCurrentUser()).thenReturn(new UserView());
+        when(jobDomainService.getJobMetaData(any())).thenReturn(new ReportJobMetadataResponse(0L,0L,Collections.emptyList()));
 
 
         var result = service.exportPivotTableExcel(getOlapExportPivotTableRequest());
@@ -248,7 +250,7 @@ class OlapServiceTest {
         verify(tokenService).getToken(anyLong(), anyLong());
         verify(domainService).filterMetricResult(any(),any(),any());
         verify(jobDomainService).checkAccessForJob(any());
-        verify(excelReportDomainService).getExcelPivotTable(any(),any(),any(),any(),anyLong(),anyBoolean());
+        verify(excelReportDomainService).getExcelPivotTable(any());
         verifyNoMoreInteractions(jobDomainService,domainService,derivedFieldService,tokenService,excelReportDomainService);
 
     }
@@ -540,7 +542,7 @@ class OlapServiceTest {
 
     private OlapExportPivotTableRequest getOlapExportPivotTableRequest() {
         return new OlapExportPivotTableRequest()
-                .setCubeRequest(getOlapRequest())
+                .setCubeRequest(getOlapCubeRequestNew(REPORT_FIELD))
                 .setStylePivotTable(true)
                 .setConfiguration(1L);
     }
