@@ -552,9 +552,10 @@ function PivotPanel(props){
         const payload = {
             cubeRequest: {
               jobId: props.jobId,
-              columnFields: pivotConfiguration.fieldsLists.columnFields.map( (v) => (v.fieldId)),
-              rowFields: pivotConfiguration.fieldsLists.rowFields.map( (v) => (v.fieldId)),
-              metrics: tableData.metrics.map( (v) => ({fieldId: v.fieldId, aggregationType : v.aggregationType}) ),
+              columnFields: pivotConfiguration.fieldsLists.columnFields.map( (v) => ({fieldId: v.fieldId, fieldType: dataHub.olapController.getFieldType(v.original)})),
+              rowFields: pivotConfiguration.fieldsLists.rowFields.map( (v) => ({fieldId: v.fieldId, fieldType: dataHub.olapController.getFieldType(v.original)})),
+              metrics: pivotConfiguration.fieldsLists.metricFields.map( (v) => ({ "field": {fieldId: v.fieldId, fieldType: dataHub.olapController.getFieldType(v.original)}, 
+                                                                                    aggregationType : v.aggFuncName }) ),
               metricPlacement: pivotConfiguration.columnsMetricPlacement === true ? "COLUMNS" : "ROWS",
               filterGroup: pivotConfiguration.filterGroup,
               metricFilterGroup: pivotConfiguration.metricFilterGroup,
