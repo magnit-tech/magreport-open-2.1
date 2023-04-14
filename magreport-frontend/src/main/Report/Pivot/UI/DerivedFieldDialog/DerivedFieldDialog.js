@@ -42,6 +42,7 @@ import {
 	saveAllFields,
 } from './lib/DFD_functions';
 import clsx from 'clsx';
+import DerivedFieldDialogSyntax from './ui/DFD_Syntax';
 
 /**
  * @param {Boolean} props.open - boolean-значение отображения модального окна
@@ -63,7 +64,8 @@ function PaperComponent(props) {
 }
 
 function DerivedFieldDialog(props) {
-	const { open, jobId, reportId, isReportDeveloper, otherDerivedFields } = props;
+	const { open, jobId, reportId, isReportDeveloper, otherDerivedFields } =
+		props;
 
 	const classes = PivotCSS();
 	const { enqueueSnackbar } = useSnackbar();
@@ -77,8 +79,8 @@ function DerivedFieldDialog(props) {
 
 	const [activeIndex, setActiveIndex] = useState(null);
 
-	const [showDerivedFunctionGuied, setShowDerivedFunctionGuied] =
-		useState(false);
+	const [showGuide, setShowGuide] = useState(false);
+	const [showSyntax, setShowSyntax] = useState(false);
 
 	const listOfChangedFields = useRef([]);
 
@@ -332,13 +334,26 @@ function DerivedFieldDialog(props) {
 		}
 	}
 
+	function handleToogleShowPanels(type, value) {
+		if (type === 'guide') {
+			setShowGuide(value);
+			setShowSyntax(false);
+		} else {
+			setShowSyntax(value);
+			setShowGuide(false);
+		}
+	}
+
 	return (
 		<Dialog
 			open={open}
 			PaperComponent={PaperComponent}
 			aria-labelledby='drag-title'
-			className={clsx({ [classes.DFD_guideOpen]: showDerivedFunctionGuied })}
-			onClick={e => e.target.className === "MuiDialog-container MuiDialog-scrollPaper" && onClose()}
+			className={clsx({ [classes.DFD_guideOpen]: showGuide || showSyntax })}
+			onClick={e =>
+				e.target.className === 'MuiDialog-container MuiDialog-scrollPaper' &&
+				onClose()
+			}
 		>
 			<DialogTitle id='drag-title'> Производные поля </DialogTitle>
 
@@ -366,9 +381,9 @@ function DerivedFieldDialog(props) {
 							ownFields={ownFields.current}
 							otherFields={otherFields.current}
 							onEdit={onEditObjectToSave}
-							showDerivedFunctionGuied={showDerivedFunctionGuied}
-							onToggleDerivedFunctionGuied={value =>
-								setShowDerivedFunctionGuied(value)
+							// showDerivedFunctionGuied={showGuide}
+							onToogleShowPanels={(type, value) =>
+								handleToogleShowPanels(type, value)
 							}
 							onSave={obj =>
 								obj.id === 'new'
@@ -378,10 +393,18 @@ function DerivedFieldDialog(props) {
 						/>
 
 						<DerivedFieldDialogGuied
-							open={showDerivedFunctionGuied}
+							open={showGuide}
 							functionsList={allFieldsAndExpressions.current.functionsList}
 							onToggleDerivedFunctionGuied={value =>
-								setShowDerivedFunctionGuied(value)
+								handleToogleShowPanels('guide', value)
+							}
+						/>
+
+						<DerivedFieldDialogSyntax
+							open={showSyntax}
+							functionsList={allFieldsAndExpressions.current.functionsList}
+							onToggleDerivedFunctionGuied={value =>
+								handleToogleShowPanels('syntax', value)
 							}
 						/>
 					</>
