@@ -1,9 +1,9 @@
 import React from 'react';
 import isHollyday from  '../../../HollydayFunctions';
-import { HeaderCSS } from './HeaderCSS';
+//import { HeaderCSS } from './HeaderCSS';
 
 export default function HollydayPanel(props){
-    const classes = HeaderCSS();
+    //const classes = HeaderCSS();
 
     const value = isHollyday();
     switch (value){
