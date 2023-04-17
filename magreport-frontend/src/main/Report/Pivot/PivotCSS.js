@@ -129,12 +129,12 @@ export const PivotCSS = makeStyles(theme => ({
 		textAlign: 'center',
 		color: theme.palette.text.disabled,
 	},
-	divFilterButton: {
+	/*divCloseButton: {
 		position: 'absolute',
 		top: '-2px',
 		right: '-12px',
 		borderRadius: '50%',
-		backgroundColor: 'cadetblue',
+		backgroundColor: theme.palette.primary.light,
 		height: '16px',
 		width: '16px',
 	},
@@ -146,13 +146,14 @@ export const PivotCSS = makeStyles(theme => ({
 		backgroundColor: 'cadetblue',
 		height: '16px',
 		width: '16px',
-	},
-	filterButton: {
+	},*/
+	closeButton: {
 		borderRadius: '50%',
-		height: '14px',
-		width: '14px',
-		padding: '1px',
+		height: '16px',
+		width: '16px',
+		padding: '0px',
 		display: 'block',
+		color: theme.palette.text.primary
 	},
 	draggingField: {
 		borderWidth: '2px',
