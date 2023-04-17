@@ -151,9 +151,9 @@ export default function HollydayPanel(props){
     </div>
     </div>
     )
-        case 3: return (
+      /*  case 3: return (
         <div className={classes.roses}></div>
-            )
+            )*/
         default: return (<div/>)
     }
 };
