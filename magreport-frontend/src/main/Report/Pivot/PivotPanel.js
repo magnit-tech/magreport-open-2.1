@@ -770,6 +770,13 @@ function PivotPanel(props){
         }
     }
 
+    function onRemoveFieldClick(droppableId, index) {
+        handleDragEnd({
+            destination: {droppableId: 'unusedFields', index: 0},
+            source : {droppableId: droppableId, index: index}
+        })
+    }
+
     /*
         ***********************************************
         Модальное окно выбора агрегирующей функции
@@ -1246,6 +1253,7 @@ function PivotPanel(props){
                                     direction = "vertical"
                                     onClick = {(event, i) => handleFilterFieldButtonClick(event, i)}
                                     onContextClick = {(event, i) => handleFilterFieldButtonOffClick(event, i)}
+                                    onRemoveFieldClick = {(i) => onRemoveFieldClick("filterFields", i)}
                                 />
                             }
                         </Grid>
@@ -1295,6 +1303,7 @@ function PivotPanel(props){
                                     droppableId = "columnFields"
                                     fields = {pivotConfiguration.fieldsLists.columnFields}
                                     direction = "horizontal"
+                                    onRemoveFieldClick = {(i) => onRemoveFieldClick("columnFields", i)}
                                 />
                             }
                             {pivotConfiguration.columnsMetricPlacement && fieldsVisibility &&
@@ -1303,15 +1312,11 @@ function PivotPanel(props){
                                     droppableId = "metricFields"
                                     fields = {pivotConfiguration.fieldsLists.metricFields}
                                     direction = "horizontal"
-
-
-                                 //   onClick = {(event, i) => handleFilterFieldButtonClick(event, i)}
-                                  //  onContextClick = {(event, i) => handleFilterFieldButtonOffClick(event, i)}
-
                                     onClick = {(event, i) => handleMetricFieldButtonClick(event, i)}
                                     onContextClick = {(event, i) => handleMetricFieldContextClick(event, i)}
                                     onChooseAggForMetric = {(funcName, index) => handleChooseAggForMetric(funcName, index)}
                                     onCloseAggModal = {handleAggModalClose}
+                                    onRemoveFieldClick = {(i) => onRemoveFieldClick("metricFields", i)}
                                 />
                             }
                             <TableRangeControl
@@ -1330,6 +1335,7 @@ function PivotPanel(props){
                                         droppableId = "rowFields"
                                         fields = {pivotConfiguration.fieldsLists.rowFields}
                                         direction = "vertical"
+                                        onRemoveFieldClick = {(i) => onRemoveFieldClick("rowFields", i)}
                                     />
                                 }
                                 {!pivotConfiguration.columnsMetricPlacement && fieldsVisibility &&
@@ -1340,10 +1346,9 @@ function PivotPanel(props){
                                         direction = "vertical"
                                         onClick = {(event, i) => handleMetricFieldButtonClick(event, i)}
                                         onContextClick = {(event, i) => handleMetricFieldContextClick(event, i)}
-                                        //onClick = {handleMetricFieldButtonClick}
-                                        //onContextClick = {handleMetricFieldContextClick}
                                         onChooseAggForMetric = {(funcName, index) => handleChooseAggForMetric(funcName, index)}
                                         onCloseAggModal = {handleAggModalClose}
+                                        onRemoveFieldClick = {(i) => onRemoveFieldClick("metricFields", i)}
                                     />
                                 }
                                 <TableRangeControl
