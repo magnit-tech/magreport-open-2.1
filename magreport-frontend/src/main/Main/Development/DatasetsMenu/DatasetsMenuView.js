@@ -61,10 +61,20 @@ function DatasetsMenuView(props){
         navigate(`/ui/dataset/${folderId}`)
     }
     function handleItemClick(datasetId) {
-        navigate(`/ui/dataset/${id}/view/${datasetId}`, {state: location.pathname})
+        if (id){
+            navigate(`/ui/dataset/${id}/view/${datasetId}`, {state: location.pathname})
+        } else {
+            let path = props.state.filteredFolderData ? props.state.filteredFolderData.dataSets.find(i => i.id === datasetId).path : props.state.currentFolderData.dataSets.find(i => i.id === datasetId).path;
+            navigate(`/ui/dataset/${path[path.length - 1].id}/view/${datasetId}`, {state: location.pathname})
+        }
     }
     function handleEditItemClick(datasetId) {
-        navigate(`/ui/dataset/${id}/edit/${datasetId}`, {state: location.pathname})
+        if (id) {
+            navigate(`/ui/dataset/${id}/edit/${datasetId}`, {state: location.pathname})
+        } else {
+            let path = props.state.filteredFolderData ? props.state.filteredFolderData.dataSets.find(i => i.id === datasetId).path : props.state.currentFolderData.dataSets.find(i => i.id === datasetId).path;
+            navigate(`/ui/dataset/${path[path.length - 1].id}/edit/${datasetId}`, {state: location.pathname})
+        }
     }
     function handleAddItemClick() {
         navigate(`/ui/dataset/${id}/add`, {state: location.pathname})
