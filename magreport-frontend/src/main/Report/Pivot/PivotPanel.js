@@ -159,10 +159,10 @@ function PivotPanel(props){
             height: 0,
             left: 0
         }
-     })
+    })
     
     function handleChangeInnerTableSize(value){
-    
+
         if (value.dimensions.width >0 && value.dimensions.height >0 ){
             let cc = columnCount; 
             let rc = rowCount;
@@ -238,6 +238,7 @@ function PivotPanel(props){
     function handleTableDataReady(newTableData){
         setTableDataLoadStatus(0);
         setTableData(newTableData);
+        setTableDataLoadErrorMessage(null);
     }
 
     function handleTableDataLoadFailed(message){
@@ -1379,9 +1380,9 @@ function PivotPanel(props){
                                 if ((cc !== columnCount || rc !== rowCount) && tableDataLoadStatus !==1){
                                     setColumnCount(cc);
                                     setRowCount(rc);
-                                    if(!dataProviderRef.current.changeWindow(pivotConfiguration.columnFrom, cc, pivotConfiguration.rowFrom, rc)){
-                                        setTableDataLoadStatus(1);
-                                    }
+                                    // if(!dataProviderRef.current.changeWindow(pivotConfiguration.columnFrom, cc, pivotConfiguration.rowFrom, rc)){
+                                    //     setTableDataLoadStatus(1);
+                                    // }
                                 
                                 }
                                 
