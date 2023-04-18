@@ -59,10 +59,20 @@ function FilterInstancesMenuView(props){
         navigate(`/ui/filterInstance/${folderId}`)
     }
     function handleItemClick(filterInstanceId) {
-        navigate(`/ui/filterInstance/${id}/view/${filterInstanceId}`, {state: location.pathname})
+        if (id){
+            navigate(`/ui/filterInstance/${id}/view/${filterInstanceId}`, {state: location.pathname})
+        } else {
+            let path = props.state.filteredFolderData ? props.state.filteredFolderData.filterInstances.find(i => i.id === filterInstanceId).path : props.state.currentFolderData.filterInstances.find(i => i.id === filterInstanceId).path;
+            navigate(`/ui/filterInstance/${path[path.length - 1].id}/view/${filterInstanceId}`, {state: location.pathname})
+        }
     }
     function handleEditItemClick(filterInstanceId) {
-        navigate(`/ui/filterInstance/${id}/edit/${filterInstanceId}`, {state: location.pathname})
+        if (id) {
+            navigate(`/ui/filterInstance/${id}/edit/${filterInstanceId}`, {state: location.pathname})
+        } else {
+            let path = props.state.filteredFolderData ? props.state.filteredFolderData.filterInstances.find(i => i.id === filterInstanceId).path : props.state.currentFolderData.filterInstances.find(i => i.id === filterInstanceId).path;
+            navigate(`/ui/filterInstance/${path[path.length - 1].id}/edit/${filterInstanceId}`, {state: location.pathname})
+        }
     }
     function handleAddItemClick(folderItemsType) {
         navigate(`/ui/filterInstance/${id}/add`, {state: location.pathname})
