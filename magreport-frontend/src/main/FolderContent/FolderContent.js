@@ -649,10 +649,9 @@ export default function FolderContent(props){
                 (canCreateFolder || canCreateItem) && 
                 (props.showAddFolder  || props.showAddItem) && 
                 (props.itemsType !== FolderItemTypes.roles || props.data.id !== null) &&
-                
                 <AddButton
                     showCreateFolder = {canCreateFolder && props.showAddFolder}
-                    showCreateItem = {canCreateItem && props.showAddItem && props.data.id !== null}
+                    showCreateItem = {canCreateItem && props.showAddItem && (props.data.id && props.data.id !== null)}
                     itemName = {itemName}
                     onAddFolder = {handleAddFolder}
                     onAddItemClick = {handleAddItemClick}
