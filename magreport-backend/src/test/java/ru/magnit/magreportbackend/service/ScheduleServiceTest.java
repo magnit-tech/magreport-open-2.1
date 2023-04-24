@@ -226,7 +226,7 @@ class ScheduleServiceTest {
         when(scheduleTaskDomainService.getScheduleTask(any())).thenReturn(getScheduleTaskResponse());
         when(reportService.getScheduleReport(any())).thenReturn(new ReportResponse().setId(REPORT));
         when(reportDomainService.getPathReport(any()))
-                .thenReturn(Collections.singletonList(new FolderNodeResponse(ID, ID, NAME, DESCRIPTION,CREATED_TIME,MODIFIED_TIME)));
+                .thenReturn(Collections.singletonList(new FolderNodeResponse(ID, ID, NAME, DESCRIPTION, CREATED_TIME, MODIFIED_TIME)));
 
         var response = service.getScheduleTask(getScheduleTaskRequest().getId());
 
@@ -640,7 +640,7 @@ class ScheduleServiceTest {
                 null,
                 FilterFieldTypeEnum.CODE_FIELD,
                 null,
-                null, null, null, "", null, null, null);
+                null, null, null, "", null, null, null, null);
     }
 
 }
