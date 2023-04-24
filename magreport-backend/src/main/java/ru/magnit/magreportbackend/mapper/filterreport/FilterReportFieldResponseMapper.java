@@ -15,17 +15,18 @@ public class FilterReportFieldResponseMapper implements Mapper<FilterReportField
     public FilterReportFieldResponse from(FilterReportField source) {
 
         return new FilterReportFieldResponse(
-            source.getId(),
-            source.getName(),
-            source.getDescription(),
-            FilterFieldTypeEnum.getByOrdinal(source.getFilterInstanceField().getTemplateField().getType().getId()),
-            source.getFilterInstanceField().getLevel(),
-            source.getOrdinal(),
-            source.getFilterInstanceField().getId(),
-            source.getReportField() == null ? null : source.getReportField().getId(),
-            source.getReportField() == null ? null : source.getReportField().getName(),
-            source.getCreatedDateTime(),
-            source.getModifiedDateTime(),
-            source.isExpand());
+                source.getId(),
+                source.getName(),
+                source.getDescription(),
+                FilterFieldTypeEnum.getByOrdinal(source.getFilterInstanceField().getTemplateField().getType().getId()),
+                source.getFilterInstanceField().getLevel(),
+                source.getOrdinal(),
+                source.getFilterInstanceField().getId(),
+                source.getReportField() == null ? null : source.getReportField().getId(),
+                source.getReportField() == null ? null : source.getReportField().getName(),
+                source.getCreatedDateTime(),
+                source.getModifiedDateTime(),
+                source.isExpand(),
+                source.getReportField() == null || source.getReportField().getDataSetField().getIsSync());
     }
 }
