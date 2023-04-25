@@ -43,6 +43,7 @@ import {
 } from './lib/DFD_functions';
 import clsx from 'clsx';
 import DerivedFieldDialogSyntax from './ui/DFD_Syntax';
+import DerivedFieldDialogActionBtns from './ui/DFD_ActionBtns';
 
 /**
  * @param {Boolean} props.open - boolean-значение отображения модального окна
@@ -81,6 +82,8 @@ function DerivedFieldDialog(props) {
 
 	const [showGuide, setShowGuide] = useState(false);
 	const [showSyntax, setShowSyntax] = useState(false);
+
+	const [fontSize, setFontSize] = useState(14);
 
 	const listOfChangedFields = useRef([]);
 
@@ -355,7 +358,16 @@ function DerivedFieldDialog(props) {
 				onClose()
 			}
 		>
-			<DialogTitle id='drag-title'> Производные поля </DialogTitle>
+			<DialogTitle id='drag-title' className={classes.DFD_title}> 
+				Производные поля 
+				<DerivedFieldDialogActionBtns
+					fontSize={fontSize}
+					isGuideVisible={showGuide}
+					isSyntaxVisible={showSyntax}
+					onChangeFontSize={value => setFontSize(value)}
+					onToogleShowPanels={type => handleToogleShowPanels(type, true)}
+				/>
+			</DialogTitle>
 
 			<div className={classes.DFD_main}>
 				{loading ? (
@@ -373,6 +385,7 @@ function DerivedFieldDialog(props) {
 						<DerivedFieldDialogForm
 							reportId={reportId}
 							activeIndex={activeIndex}
+							fontSize={fontSize}
 							isReportDeveloper={isReportDeveloper}
 							allFieldsAndExpressions={allFieldsAndExpressions.current}
 							loadedDerivedFields={loadedDerivedFields}
@@ -381,7 +394,6 @@ function DerivedFieldDialog(props) {
 							ownFields={ownFields.current}
 							otherFields={otherFields.current}
 							onEdit={onEditObjectToSave}
-							// showDerivedFunctionGuied={showGuide}
 							onToogleShowPanels={(type, value) =>
 								handleToogleShowPanels(type, value)
 							}

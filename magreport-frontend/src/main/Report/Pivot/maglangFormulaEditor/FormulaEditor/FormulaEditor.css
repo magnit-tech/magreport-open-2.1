@@ -18,12 +18,16 @@
 	margin-top: 5px !important;
 }
 
+.errorViewer textarea {
+	font-size: 14px;
+}
+
 .ͼ1.cm-editor.cm-focused {
 	outline: none;
 }
 
-@media screen and (max-height: 800px) {
+@media screen and (max-height: 700px) {
 	.CodeMirror {
-		height: 100px;
+		height: 150px;
 	}
 }
