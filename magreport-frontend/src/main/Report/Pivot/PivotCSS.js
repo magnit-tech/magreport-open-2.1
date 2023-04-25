@@ -795,6 +795,13 @@ export const PivotCSS = makeStyles(theme => ({
 		padding: '10px',
 		backgroundColor: theme.palette.drawerColor,
 	},
+	DFD_title: {
+		'& h2': {
+			display: 'flex',
+    		alignItems: 'center',
+			justifyContent: 'space-between'
+		}
+	},
 	DFD_form: {
 		width: '600px',
 		position: 'relative',
@@ -833,11 +840,11 @@ export const PivotCSS = makeStyles(theme => ({
 		},
 	},
 	DFD_listBlock: {
-		height: '530px',
+		height: '408px',
 		overflow: 'auto',
 		borderRadius: '8px',
-		'@media (max-height: 800px)': {
-			height: '430px',
+		'@media (max-height: 700px)': {
+			height: '360px',
 		},
 	},
 	DFD_listBtn: {
@@ -876,17 +883,17 @@ export const PivotCSS = makeStyles(theme => ({
 		fontSize: '13px',
 		color: 'red',
 	},
-	DFD_fontSize: {
+	DFD_actionBtns: {
 		display: 'flex',
-		marginTop: '25px',
 		alignItems: 'center',
-		justifyContent: 'space-between',
+		justifyContent: 'flex-end',
 	},
 	DFD_fontSizeSelect: {
 		display: 'flex',
 		alignItems: 'center',
 		'& span': {
 			marginRight: '5px',
+			fontSize: '14px'
 		},
 	},
 	DFD_guide: {
