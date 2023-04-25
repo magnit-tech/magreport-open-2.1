@@ -291,6 +291,7 @@ export default function FormulaEditor(props){
             <TextField
               label="Поле ошибок"
               className="errorViewer"
+              size="small"
               multiline
               InputProps={{
                 readOnly: true,
@@ -298,7 +299,7 @@ export default function FormulaEditor(props){
               InputLabelProps={{
                 shrink: true,
               }}
-              rows={3}
+              rows={2}
               variant="outlined"
               value={errorMessages}
               disabled={props.disabled}
