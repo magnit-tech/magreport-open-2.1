@@ -106,7 +106,7 @@ export function createOutputNode(syntNode, code, errorList, originalFieldNameToI
           nodeType: nodeType.arithmIntDivision
       }
     }
-    else if(syntNode.name === "IntegerModulo")
+    else if(syntNode.name === "Modulo")
     {
       outNode = {
           nodeType: nodeType.arithmModulo
