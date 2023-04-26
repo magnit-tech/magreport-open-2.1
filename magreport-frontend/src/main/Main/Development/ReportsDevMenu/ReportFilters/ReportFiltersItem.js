@@ -67,7 +67,8 @@ export default function ReportFilterItem({index, disabled, filterItem, reportFie
             level: item.level,
             reportFieldId: value,
             ordinal: item.ordinal,
-            type: item.type
+            type: item.type,
+            valid: true
         }
         let arr = [...filterItem.fields]
         arr.splice(itemIndex, 1, fieldObj)
@@ -93,7 +94,7 @@ export default function ReportFilterItem({index, disabled, filterItem, reportFie
         onChange({...filterItem, [field]: value})
     }
 
-    let isValid = !!filterItem.code && !!filterItem.name && !filterItem.errors
+    let isValid = !!filterItem.code && !!filterItem.name && !filterItem.errors && filterItem.valid
     for (let f of filterItem.fields){
         if (f.error){
             isValid = false
@@ -228,7 +229,7 @@ export default function ReportFilterItem({index, disabled, filterItem, reportFie
                                         size="small"
                                         value={filterItem.fields[itemIndex] && datasetType === 0 ? filterItem.fields[itemIndex].reportFieldId : null}
                                         onChange = {value => handleChange(itemIndex, field, value)}
-                                        error={field.error}
+                                        error={field.error || !field.valid}
                                        // disabled={Boolean(datasetType)}
                                     />
                                 }
