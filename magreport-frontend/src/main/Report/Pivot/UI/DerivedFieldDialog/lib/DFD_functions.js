@@ -451,7 +451,7 @@ function getExpressionForNode(node){
 		}
 	}
 	else{
-		return {type: "CONSTANT_VALUE", constantValue: "UKNOWN EXPRESSION", "constantType": "STRING"}
+		return {type: "CONSTANT_VALUE", constantValue: "UNKNOWN EXPRESSION", "constantType": "STRING"}
 	}                            
 }
 
