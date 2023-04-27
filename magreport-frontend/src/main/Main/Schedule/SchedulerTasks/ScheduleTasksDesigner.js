@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {useSnackbar} from "notistack";
 import {CopyToClipboard} from 'react-copy-to-clipboard';
-
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 
 import { useDispatch } from "react-redux";
@@ -57,11 +56,13 @@ import {DesignerCSS} from '../../Development/Designer/DesignerCSS';
 export default function ScheduleTasksDesigner(props) {
     const classes = DesignerCSS();
     
-    const {id} = useParams()
+    const {id} = useParams();
     const navigate = useNavigate();
     const location = useLocation();
+    const dispatch = useDispatch();
 
-    const dispatch = useDispatch()
+    const timer = useRef(0);
+    const requestId = useRef("");
 
     useEffect(() => {
         if(!id) {
@@ -73,7 +74,8 @@ export default function ScheduleTasksDesigner(props) {
 
     const [uploading, setUploading] = useState(false);
     const [errorField, setErrorField] = useState({});
-
+    const [invalidValues, setInvalidValues] = useState([]);
+    const [invalidFailedValues, setInvalidFailedValues] = useState([]);
     let maxDate = new Date();
     maxDate.setMonth(maxDate.getMonth() + 6);
 
@@ -333,12 +335,42 @@ export default function ScheduleTasksDesigner(props) {
         }
     }
 
-    function handleChangeEmails(key, value, status, source){
+    function handleChangeEmails(key, value, status){
+
+        if (status === 'waiting'){
+            if (timer.current > 0){
+                clearInterval(timer.current); // удаляем предыдущий таймер
+            }
+
+            timer.current = setTimeout(() => {
+                requestId.current = dataHub.emailController.check(value, m => handleCheckValues(key, value, m))
+            }, 3000);
+        }
+
         handleChange(key, value);
-        if (source === 'destinationEmails'){
+        if (key === 'destinationEmails'){
             setEmailStatus(status);
         } else {
             setEmailErrorStatus(status);
+        }
+    }
+
+    function handleCheckValues(key, values, resp){
+        if (requestId.current === resp.requestId){
+            let validation = "error"
+            if (resp.ok){
+                if (resp.data.emails.length){
+                    if (key === 'destinationEmails'){
+                        setInvalidValues(resp.data.emails)
+                    } else {
+                        setInvalidFailedValues(resp.data.emails)
+                    }
+                }
+                else {
+                    validation = "success"
+                }
+            }
+            handleChangeEmails(key, values, validation);
         }
     }
 
@@ -614,6 +646,8 @@ export default function ScheduleTasksDesigner(props) {
                     label = "Адреса"
                     source = "destinationEmails"
                     value = {data.destinationEmails}
+                    invalidValues = {invalidValues}
+                    status = {emailStatus}
                     onChange = {handleChangeEmails}
                     mandatory = {taskTypeId === '0'}
                     displayblock 
@@ -624,7 +658,6 @@ export default function ScheduleTasksDesigner(props) {
             }
 
             <DesignerMultipleSelectField
-                    // minWidth = {StyleConsts.designerTextFieldMinWidth}
                     label = "Пользователи"
                     value = {usersList.filter(item => data.destinationUsers.indexOf(item.id)>=0 )}
                     data = {usersList}
@@ -635,7 +668,6 @@ export default function ScheduleTasksDesigner(props) {
                     error = {errorField.destinationUsers}
                 />
             <DesignerMultipleSelectField
-                    // minWidth = {StyleConsts.designerTextFieldMinWidth}
                     label = "Роли"
                     value = {rolesList.filter(item => data.destinationRoles.map(item => item.id).indexOf(item.id)>=0 )}
                     data = {rolesList}
@@ -692,20 +724,21 @@ export default function ScheduleTasksDesigner(props) {
                 onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/scheduleTasks`)}
             >
                 <DesignerTextFieldWithSeparator
-                        label = "Адреса"
-                        source = "errEmails"
-                        value = {data.errEmails}
-                        onChange = {handleChangeEmails}
-                        displayblock 
-                        fullWidth
-                        multiline
-                        error = {errorField.errEmails}
+                    label = "Адреса"
+                    source = "errEmails"
+                    value = {data.errEmails}
+                    invalidValues = {invalidFailedValues}
+                    status = {emailErrorStatus}
+                    onChange = {handleChangeEmails}
+                    displayblock 
+                    fullWidth
+                    multiline
+                    error = {errorField.errEmails}
                 />  
                 <DesignerMultipleSelectField
                     label = "Пользователи"
                     value = {usersList.filter(item => data.errUsers.indexOf(item.id)>=0 )}
                     data = {usersList}
-                    //needName = {true}
                     onChange = {data => {handleChange('errUsers', data)}}
                     displayBlock
                     fullWidth
@@ -722,22 +755,22 @@ export default function ScheduleTasksDesigner(props) {
                     error = {errorField.errRoles}
             />
                 <DesignerTextField
-                        label="Тема письма"
-                        value={data.errorTitleMail}
-                        onChange={data => {handleChange('errorTitleMail', data)}}
-                        multiline
-                        displayBlock
-                        fullWidth
-                        error = {errorField.errorTitleMail}
+                    label="Тема письма"
+                    value={data.errorTitleMail}
+                    onChange={data => {handleChange('errorTitleMail', data)}}
+                    multiline
+                    displayBlock
+                    fullWidth
+                    error = {errorField.errorTitleMail}
                 />
                 <DesignerTextField
-                        label="Тело письма"
-                        value={data.errorBodyMail}
-                        onChange={data => {handleChange('errorBodyMail', data)}}
-                        multiline
-                        displayBlock
-                        fullWidth
-                        error = {errorField.errorBodyMail}
+                    label="Тело письма"
+                    value={data.errorBodyMail}
+                    onChange={data => {handleChange('errorBodyMail', data)}}
+                    multiline
+                    displayBlock
+                    fullWidth
+                    error = {errorField.errorBodyMail}
                 />
                 <div style={{display: 'flex'}}> 
                     <DesignerTextField
@@ -760,7 +793,6 @@ export default function ScheduleTasksDesigner(props) {
                         error = {errorField.failedStart}
                     />
                 </div>
-
             </DesignerPage>
     })
 
