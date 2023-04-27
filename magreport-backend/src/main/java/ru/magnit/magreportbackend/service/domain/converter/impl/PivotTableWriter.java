@@ -21,11 +21,10 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.domain.olap.AggregationType;
+import ru.magnit.magreportbackend.dto.inner.olap.ExportPivotConfiguration;
 import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequest;
-import ru.magnit.magreportbackend.dto.request.olap.OlapExportPivotTableRequest;
 import ru.magnit.magreportbackend.dto.response.olap.OlapCubeResponse;
 import ru.magnit.magreportbackend.dto.response.report.ReportFieldMetadataResponse;
-import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobMetadataResponse;
 import ru.magnit.magreportbackend.exception.ReportExportException;
 import ru.magnit.magreportbackend.service.domain.converter.Writer;
 import ru.magnit.magreportbackend.service.telemetry.TelemetryService;
@@ -49,14 +48,15 @@ import java.util.stream.Collectors;
 public class PivotTableWriter implements Writer {
 
 
-    private final OlapCubeResponse cubeData;
-    private final OlapExportPivotTableRequest request;
-    private final ReportJobMetadataResponse metadata;
-    private final JsonNode config;
+    private final ExportPivotConfiguration configuration;
     private final TelemetryService telemetryService;
     private final Path exportPath;
     private final String nameDataList;
 
+    private OlapCubeRequest cubeRequest;
+    private OlapCubeResponse cubeData;
+    private List<ReportFieldMetadataResponse> fields;
+    private JsonNode config;
     private int shiftRowCount;
     private int shiftColCount;
     private boolean mergeMode = false;
@@ -113,8 +113,8 @@ public class PivotTableWriter implements Writer {
             var mergeCol = getMergeObjects(sheet, cubeData.getRowValues().get(0).isEmpty() ? shiftColCount - 1 : shiftColCount, false);
             var mergeRow = getMergeObjects(sheet, cubeData.getColumnValues().get(0).isEmpty() ? shiftRowCount - 1 : shiftRowCount, true);
 
-            var typesRow = request.getCubeRequest().getRowFields().stream().map(f -> typeFields.get(f)).map(DataTypeEnum::valueOf).toList();
-            var typesCol = request.getCubeRequest().getColumnFields().stream().map(f -> typeFields.get(f)).map(DataTypeEnum::valueOf).toList();
+            var typesRow = cubeRequest.getRowFields().stream().map(f -> typeFields.get(f)).map(DataTypeEnum::valueOf).toList();
+            var typesCol = cubeRequest.getColumnFields().stream().map(f -> typeFields.get(f)).map(DataTypeEnum::valueOf).toList();
 
             telemetryService.setState(telemetryId, ExcelExportTelemetry.ROWS_WRITING);
 
@@ -347,6 +347,12 @@ public class PivotTableWriter implements Writer {
 
     private void initConfig(Workbook wb) {
 
+        config = configuration.getConfig();
+        fields = configuration.getMetadataFields();
+        cubeRequest = configuration.getCubeRequest();
+        cubeData = configuration.getData();
+
+
         mergeMode = config.get("mergeMode") != null && config.get("mergeMode").asBoolean();
         columnsMetricPlacement = config.get("columnsMetricPlacement") != null && config.get("columnsMetricPlacement").asBoolean();
 
@@ -356,10 +362,10 @@ public class PivotTableWriter implements Writer {
         initValues();
         initCellStyles(wb);
 
-        mappingFields = metadata.fields().stream().collect(Collectors.toMap(ReportFieldMetadataResponse::id, ReportFieldMetadataResponse::name));
-        typeFields = metadata.fields().stream().collect(Collectors.toMap(ReportFieldMetadataResponse::id, ReportFieldMetadataResponse::type));
+        mappingFields = fields.stream().collect(Collectors.toMap(ReportFieldMetadataResponse::id, ReportFieldMetadataResponse::name));
+        typeFields = fields.stream().collect(Collectors.toMap(ReportFieldMetadataResponse::id, ReportFieldMetadataResponse::type));
 
-        OlapCubeRequest cubeRequest = request.getCubeRequest();
+        cubeRequest = configuration.getCubeRequest();
 
         rowMetaNames = cubeRequest.getRowFields().stream().filter(mappingFields::containsKey).map(mappingFields::get).toList();
         columnMetaNames = cubeRequest.getColumnFields().stream().filter(mappingFields::containsKey).map(mappingFields::get).toList();

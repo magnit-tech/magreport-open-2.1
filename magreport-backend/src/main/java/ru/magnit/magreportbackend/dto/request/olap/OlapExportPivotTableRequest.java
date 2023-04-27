@@ -13,7 +13,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class OlapExportPivotTableRequest {
 
-    private OlapCubeRequest  cubeRequest;
+    private OlapCubeRequestNew  cubeRequest;
     private Long configuration;
     private boolean stylePivotTable;
 

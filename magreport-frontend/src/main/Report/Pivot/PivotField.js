@@ -5,7 +5,8 @@ import { Draggable} from 'react-beautiful-dnd';
 
 // icons
 import Icon from '@mdi/react';
-import { mdiFilter}  from '@mdi/js';
+import IconButton from '@material-ui/core/IconButton';
+import { mdiClose } from '@mdi/js';
 
 import clsx from 'clsx';
 
@@ -30,6 +31,7 @@ import { List, Modal } from '@material-ui/core';
  * @param {*} props.isOff - признак включения/выключения поля
  * @param {*} props.onClick - функция вызывается при начатии на кнопку
  * @param {*} props.onContextClick - функция вызывается при начатии на правую кнопку мыши
+ * @param {*} props.onRemoveFieldClick - функция для перемещения полей обратно в неиспользуемые
  * @returns 
  */
 
@@ -64,6 +66,11 @@ function PivotField(props){
         e.preventDefault(); 
         e.stopPropagation();
         props.onContextClick(e, props.index);
+    }
+
+    const handleRemoveFieldClick=(e) => {
+        e.stopPropagation();
+        props.onRemoveFieldClick(props.index);
     }
 
     // Закрытие модального окна без выбора метрики
@@ -170,14 +177,24 @@ function PivotField(props){
                         >
                             <div className={styles.popoverDiv}>
                                 <div className={styles.fieldTextHover}>
-                                    {props.filtered &&
+                                    {/*props.filtered &&
                                         <Icon path={mdiFilter} size={0.5}/> 
-                                    }
+                                    */}
                                     {props.newfieldName !== '' && props.listName === 'metricFields' ? props.newfieldName :
                                     (props.aggFuncName ? AggFunc.get(props.aggFuncName) + ' ' : '') + props.fieldName} 
                                 </div>
                             </div>
                         </Popover>
+                        {(props.listName !== 'allFields' && props.listName !== 'unusedFields' &&
+                            <IconButton
+                                size='small'
+                                className={styles.closeButton}
+                                onClick={handleRemoveFieldClick}
+                            >   
+                                <Icon path={mdiClose} size={0.5}/>
+                            </IconButton>
+                        )}
+
             
                         <ListItemText className={clsx({
                                 [styles.listItemOffText]: props.isOff,
@@ -190,8 +207,8 @@ function PivotField(props){
                             ref={parentRef}
                         >                      
                             <div className={styles.fieldText}>
-                                {props.filtered && props.listName !== 'filterFields' &&
-                                    <Icon path={mdiFilter} size={0.8}/>
+                                {/*props.filtered && props.listName !== 'filterFields' &&
+                                    <Icon path={mdiFilter} size={0.8}/>*/
                                 }
                                 {props.newfieldName !== '' && props.listName === 'metricFields' ? props.newfieldName :
                                 (props.aggFuncName ? AggFunc.get(props.aggFuncName) + ' ' : '') + props.fieldName}

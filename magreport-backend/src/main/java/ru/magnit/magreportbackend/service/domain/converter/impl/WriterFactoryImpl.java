@@ -1,13 +1,10 @@
 package ru.magnit.magreportbackend.service.domain.converter.impl;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.magnit.magreportbackend.dto.inner.olap.ExportPivotConfiguration;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportData;
-import ru.magnit.magreportbackend.dto.request.olap.OlapExportPivotTableRequest;
-import ru.magnit.magreportbackend.dto.response.olap.OlapCubeResponse;
-import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobMetadataResponse;
 import ru.magnit.magreportbackend.service.domain.converter.Reader;
 import ru.magnit.magreportbackend.service.domain.converter.Writer;
 import ru.magnit.magreportbackend.service.domain.converter.WriterFactory;
@@ -29,7 +26,7 @@ public class WriterFactoryImpl implements WriterFactory {
     }
 
     @Override
-    public Writer createWriter(OlapCubeResponse data, ReportJobMetadataResponse metadata, JsonNode config, OlapExportPivotTableRequest request, Path exportPath) {
-        return new PivotTableWriter(data, request, metadata, config, telemetryService, exportPath, nameDataList);
+    public Writer createWriter(ExportPivotConfiguration configuration, Path exportPath) {
+        return new PivotTableWriter(configuration, telemetryService, exportPath, nameDataList);
     }
 }

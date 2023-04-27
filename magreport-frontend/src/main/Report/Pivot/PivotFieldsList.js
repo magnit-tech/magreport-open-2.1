@@ -24,6 +24,7 @@ import { IconButton } from '@material-ui/core';
  * @param {*} props.onClick - функция при нажатии на кнопку поля
  * @param {*} props.onContextClick - функция при нажатии на кнопку выключения поля
  * @param {*} props.onOnlyUnusedClick - функция для выбора отображения всех полей или только неиспользуемых
+ * @param {*} props.onRemoveFieldClick - функция для перемещения полей обратно в неиспользуемые
  * @param {boolean} props.onlyUnused - показывать только неиспользуемые/все поля
  */
 
@@ -116,13 +117,14 @@ export default function PivotFieldsList(props){
                                                     newfieldName = {v.newName}
                                                     aggFuncName = {v.aggFuncName}
                                                     filter = {v.filter}
-                                                    filtered = {v.filtered}
+                                                    //filtered = {v.filtered}
                                                     isOff = {v.isOff}
                                                     original = {v.original}
                                                     onClick = {props.onClick}
                                                     onContextClick = {props.onContextClick}
                                                     onChooseAggForMetric = {(funcName, index) => props.onChooseAggForMetric(funcName, index)}
                                                     onCloseAggModal = {props.onCloseAggModal}
+                                                    onRemoveFieldClick = {props.onRemoveFieldClick}
                                                 />
                                             )
                                         }) :

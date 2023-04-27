@@ -159,10 +159,10 @@ function PivotPanel(props){
             height: 0,
             left: 0
         }
-     })
+    })
     
     function handleChangeInnerTableSize(value){
-    
+
         if (value.dimensions.width >0 && value.dimensions.height >0 ){
             let cc = columnCount; 
             let rc = rowCount;
@@ -238,6 +238,7 @@ function PivotPanel(props){
     function handleTableDataReady(newTableData){
         setTableDataLoadStatus(0);
         setTableData(newTableData);
+        setTableDataLoadErrorMessage(null);
     }
 
     function handleTableDataLoadFailed(message){
@@ -437,7 +438,15 @@ function PivotPanel(props){
 
                     if(isReportDeveloper.current === true) {
                         for (let itemKey in data) {
-                            data[itemKey].map(item => configsArr.push(item))
+                            if(itemKey === 'sharedJobConfig') {
+                                let res = []
+
+                                configsArr.forEach(element => res.push(element.olapConfig.name));
+
+                                data[itemKey].forEach(item => !res.includes(item.olapConfig.name) && configsArr.push(item))
+                            } else {
+                                data[itemKey].forEach(item => configsArr.push(item))
+                            }
                         }
                         setAvaibleConfigs(configsArr)
                     } else {
@@ -544,9 +553,10 @@ function PivotPanel(props){
         const payload = {
             cubeRequest: {
               jobId: props.jobId,
-              columnFields: pivotConfiguration.fieldsLists.columnFields.map( (v) => (v.fieldId)),
-              rowFields: pivotConfiguration.fieldsLists.rowFields.map( (v) => (v.fieldId)),
-              metrics: tableData.metrics.map( (v) => ({fieldId: v.fieldId, aggregationType : v.aggregationType}) ),
+              columnFields: pivotConfiguration.fieldsLists.columnFields.map( (v) => ({fieldId: v.fieldId, fieldType: dataHub.olapController.getFieldType(v.original)})),
+              rowFields: pivotConfiguration.fieldsLists.rowFields.map( (v) => ({fieldId: v.fieldId, fieldType: dataHub.olapController.getFieldType(v.original)})),
+              metrics: pivotConfiguration.fieldsLists.metricFields.map( (v) => ({ "field": {fieldId: v.fieldId, fieldType: dataHub.olapController.getFieldType(v.original)}, 
+                                                                                    aggregationType : v.aggFuncName }) ),
               metricPlacement: pivotConfiguration.columnsMetricPlacement === true ? "COLUMNS" : "ROWS",
               filterGroup: pivotConfiguration.filterGroup,
               metricFilterGroup: pivotConfiguration.metricFilterGroup,
@@ -759,6 +769,13 @@ function PivotPanel(props){
                 setPivotConfiguration(newPivotConfiguration);
             }  
         }
+    }
+
+    function onRemoveFieldClick(droppableId, index) {
+        handleDragEnd({
+            destination: {droppableId: 'unusedFields', index: 0},
+            source : {droppableId: droppableId, index: index}
+        })
     }
 
     /*
@@ -1237,6 +1254,7 @@ function PivotPanel(props){
                                     direction = "vertical"
                                     onClick = {(event, i) => handleFilterFieldButtonClick(event, i)}
                                     onContextClick = {(event, i) => handleFilterFieldButtonOffClick(event, i)}
+                                    onRemoveFieldClick = {(i) => onRemoveFieldClick("filterFields", i)}
                                 />
                             }
                         </Grid>
@@ -1286,6 +1304,7 @@ function PivotPanel(props){
                                     droppableId = "columnFields"
                                     fields = {pivotConfiguration.fieldsLists.columnFields}
                                     direction = "horizontal"
+                                    onRemoveFieldClick = {(i) => onRemoveFieldClick("columnFields", i)}
                                 />
                             }
                             {pivotConfiguration.columnsMetricPlacement && fieldsVisibility &&
@@ -1294,15 +1313,11 @@ function PivotPanel(props){
                                     droppableId = "metricFields"
                                     fields = {pivotConfiguration.fieldsLists.metricFields}
                                     direction = "horizontal"
-
-
-                                 //   onClick = {(event, i) => handleFilterFieldButtonClick(event, i)}
-                                  //  onContextClick = {(event, i) => handleFilterFieldButtonOffClick(event, i)}
-
                                     onClick = {(event, i) => handleMetricFieldButtonClick(event, i)}
                                     onContextClick = {(event, i) => handleMetricFieldContextClick(event, i)}
                                     onChooseAggForMetric = {(funcName, index) => handleChooseAggForMetric(funcName, index)}
                                     onCloseAggModal = {handleAggModalClose}
+                                    onRemoveFieldClick = {(i) => onRemoveFieldClick("metricFields", i)}
                                 />
                             }
                             <TableRangeControl
@@ -1321,6 +1336,7 @@ function PivotPanel(props){
                                         droppableId = "rowFields"
                                         fields = {pivotConfiguration.fieldsLists.rowFields}
                                         direction = "vertical"
+                                        onRemoveFieldClick = {(i) => onRemoveFieldClick("rowFields", i)}
                                     />
                                 }
                                 {!pivotConfiguration.columnsMetricPlacement && fieldsVisibility &&
@@ -1331,10 +1347,9 @@ function PivotPanel(props){
                                         direction = "vertical"
                                         onClick = {(event, i) => handleMetricFieldButtonClick(event, i)}
                                         onContextClick = {(event, i) => handleMetricFieldContextClick(event, i)}
-                                        //onClick = {handleMetricFieldButtonClick}
-                                        //onContextClick = {handleMetricFieldContextClick}
                                         onChooseAggForMetric = {(funcName, index) => handleChooseAggForMetric(funcName, index)}
                                         onCloseAggModal = {handleAggModalClose}
+                                        onRemoveFieldClick = {(i) => onRemoveFieldClick("metricFields", i)}
                                     />
                                 }
                                 <TableRangeControl
@@ -1365,9 +1380,9 @@ function PivotPanel(props){
                                 if ((cc !== columnCount || rc !== rowCount) && tableDataLoadStatus !==1){
                                     setColumnCount(cc);
                                     setRowCount(rc);
-                                    if(!dataProviderRef.current.changeWindow(pivotConfiguration.columnFrom, cc, pivotConfiguration.rowFrom, rc)){
-                                        setTableDataLoadStatus(1);
-                                    }
+                                    // if(!dataProviderRef.current.changeWindow(pivotConfiguration.columnFrom, cc, pivotConfiguration.rowFrom, rc)){
+                                    //     setTableDataLoadStatus(1);
+                                    // }
                                 
                                 }
                                 

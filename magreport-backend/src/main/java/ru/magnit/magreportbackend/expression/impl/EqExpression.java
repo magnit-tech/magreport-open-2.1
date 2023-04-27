@@ -23,15 +23,45 @@ public class EqExpression extends ParameterizedExpression {
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
         final var firstParameter = parameters.get(0);
         final var firstValue = firstParameter.calculate(rowNumber);
+        final var firstType = firstValue.getR();
         final var secondParameter = parameters.get(1);
         final var secondValue = secondParameter.calculate(rowNumber);
+        final var secondType = secondValue.getR();
 
-        checkParametersHasSameTypes(this, List.of(firstValue.getR(), secondValue.getR()));
+        checkParametersComparable(this, List.of(firstType, secondType));
 
-        if (firstValue.getL().equalsIgnoreCase(secondValue.getL())) {
-            result.setL(TRUE);
-        } else {
-            result.setL(FALSE);
+        final var resultType = firstType.in(DataTypeEnum.INTEGER, DataTypeEnum.DOUBLE) ?
+                firstType.widerNumeric(secondType) :
+                firstType;
+
+        switch (resultType) {
+            case INTEGER -> {
+                final var value1 = Integer.parseInt(firstValue.getL());
+                final var value2 = Integer.parseInt(secondValue.getL());
+
+                if (value1 == value2) {
+                    result.setL(TRUE);
+                } else {
+                    result.setL(FALSE);
+                }
+            }
+            case STRING, TIMESTAMP, DATE, BOOLEAN -> {
+                if (firstValue.getL().equalsIgnoreCase(secondValue.getL())) {
+                    result.setL(TRUE);
+                } else {
+                    result.setL(FALSE);
+                }
+            }
+            case DOUBLE -> {
+                final var value1 = Double.parseDouble(firstValue.getL());
+                final var value2 = Double.parseDouble(secondValue.getL());
+
+                if (value1 == value2) {
+                    result.setL(TRUE);
+                } else {
+                    result.setL(FALSE);
+                }
+            }
         }
 
         return result;
@@ -39,6 +69,10 @@ public class EqExpression extends ParameterizedExpression {
 
     @Override
     public DataTypeEnum inferType() {
-        return parameters.get(0).inferType();
+        final var firstParameterType = parameters.get(0).inferType();
+        final var secondParameterType = parameters.get(1).inferType();
+        checkParametersComparable(this, List.of(firstParameterType, secondParameterType));
+
+        return result.getR();
     }
 }
