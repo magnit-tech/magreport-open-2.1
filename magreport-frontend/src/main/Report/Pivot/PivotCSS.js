@@ -906,7 +906,9 @@ export const PivotCSS = makeStyles(theme => ({
 		transition: 'all 400ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
 		zIndex: 999,
 		paddingBottom: '50px',
-
+		'&.syntax': {
+			width: '400px'
+		},
 		'&.active': {
 			right: 0,
 		},
@@ -1019,4 +1021,74 @@ export const PivotCSS = makeStyles(theme => ({
 		border: `1.5px solid ${theme.palette.divider}`,
 		borderRadius: '8px',
 	},
+	DFD_syntaxWrapp: {
+		overflow: 'auto',
+    	height: '100%',
+		padding: '0 8px 60px 15px'
+	},
+	DFD_syntaxSubTitle: {
+		borderBottom: `2px solid ${theme.palette.divider}`,
+    	paddingBottom: '4px',
+		textAlign: 'center'
+	},
+	DFD_syntaxList: {
+		padding: '0 0 0 15px',
+		fontSize: '13px',
+		'& li': {
+			marginBottom: '8px'
+		}
+	},
+	DFD_syntaxTextCode: {
+		width: '100%',
+		padding: '8px',
+		margin: '8px 0 0',
+		fontSize: '12px',
+		borderRadius: '4px'
+	},
+	DFD_syntaxCodeDescr: {
+		margin: '0',
+		fontSize: '13px'
+	},
+	DFD_syntaxExampleCode: {
+		width: '100%',
+		padding: '8px',
+		margin: '0',
+		fontSize: '12px',
+		border: `1px solid ${theme.palette.divider}`,
+		borderRadius: '4px'
+	},
+	DFD_syntaxExampleCodeWrapp: {
+		margin: '12px 0',
+	},
+	DFD_syntaxAccTitle: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		cursor: 'pointer',
+		padding: '0 14px 0 0',
+		borderBottom: `2px solid ${theme.palette.divider}`,
+	},
+	DFD_syntaxAccArrow: {
+		fontSize: '23px',
+    	fontWeight: '700',
+		transition: 'all .3s ease-in',
+		'&.active': {
+			transform: 'rotate(180deg)',
+			transition: 'all .3s ease-in'
+		}
+	},
+	DFD_syntaxAccContent: {
+		maxHeight: '0',
+		overflow: 'hidden',
+  		transition: 'all .5s ease-in',
+
+		'&.active': {
+			maxHeight: '3000px',
+			transition: 'all .5s ease-in',
+			marginBottom: '15px'
+		}
+	},
+	DFD_syntaxAccGuideWrapp: {
+		marginTop: '12px'
+	}
 }));
