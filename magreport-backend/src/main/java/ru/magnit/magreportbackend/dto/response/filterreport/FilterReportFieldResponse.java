@@ -43,6 +43,9 @@ public record FilterReportFieldResponse(
         LocalDateTime modified,
 
         @JsonFormat(shape = JsonFormat.Shape.BOOLEAN)
-        Boolean expand
+        Boolean expand,
+
+        @JsonFormat(shape = JsonFormat.Shape.BOOLEAN)
+        Boolean valid
 ) {
 }

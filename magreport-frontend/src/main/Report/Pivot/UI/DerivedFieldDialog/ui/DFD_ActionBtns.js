@@ -36,7 +36,7 @@ const SelectInput = withStyles(theme => ({
 	},
 }))(InputBase);
 
-export default function DerivedFieldDialogFontSize(props) {
+export default function DerivedFieldDialogActionBtns(props) {
 	const classes = PivotCSS();
 
 	// Создание списка c MenuItems для селекта "Размер шрифта"
@@ -63,29 +63,10 @@ export default function DerivedFieldDialogFontSize(props) {
 	};
 
 	return (
-		<Box className={classes.DFD_fontSize}>
-			<div style={{ display: 'flex' }}>
-				{/* <button
-					className={classes.DFD_guideBtn}
-					disabled={props.showDerivedFunctionGuied}
-					onClick={() => props.onOpenDerivedFunctionGuied(true)}
-				>
-					<MenuBookIcon />
-					<span>Справочник функций</span>
-				</button> */}
-				<Tooltip title={'Справочник функций'} placement='top'>
-					<IconButton onClick={() => props.onToogleShowPanels('guide', true)}>
-						<MenuBookIcon />
-					</IconButton>
-				</Tooltip>
-				<Tooltip title={'Синтаксис языка'} placement='top'>
-					<IconButton onClick={() => props.onToogleShowPanels('syntax', true)}>
-						<CodeIcon />
-					</IconButton>
-				</Tooltip>
-			</div>
+		<Box className={classes.DFD_actionBtns}>
 			<Box whiteSpace='nowrap' className={classes.DFD_fontSizeSelect}>
-				<span>Размер шрифта:</span>
+				<span>Размер шрифта редактора:</span>
+
 				<FormControl>
 					<Select
 						id='fontSizeSelect'
@@ -98,6 +79,16 @@ export default function DerivedFieldDialogFontSize(props) {
 					</Select>
 				</FormControl>
 			</Box>
+			<Tooltip title='Справочник функций' placement='top'>
+				<IconButton onClick={() => props.onToogleShowPanels('guide', true)} disabled={props.isGuideVisible}>
+					<MenuBookIcon />
+				</IconButton>
+			</Tooltip>
+			<Tooltip title='Синтаксис языка' placement='top'>
+				<IconButton onClick={() => props.onToogleShowPanels('syntax', true)} disabled={props.isSyntaxVisible}>
+					<CodeIcon />
+				</IconButton>
+			</Tooltip>
 		</Box>
 	);
 }

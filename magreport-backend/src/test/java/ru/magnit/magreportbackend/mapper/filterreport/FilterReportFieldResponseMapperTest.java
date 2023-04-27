@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.magnit.magreportbackend.domain.dataset.DataSetField;
 import ru.magnit.magreportbackend.domain.filterinstance.FilterInstanceField;
 import ru.magnit.magreportbackend.domain.filterreport.FilterReportField;
 import ru.magnit.magreportbackend.domain.filtertemplate.FilterFieldType;
@@ -50,7 +51,7 @@ class FilterReportFieldResponseMapperTest {
                 .setName(NAME)
                 .setDescription(DESCRIPTION)
                 .setFilterInstanceField(new FilterInstanceField(FILTER_INSTANCE_FIELD_ID).setTemplateField(new FilterTemplateField(ID).setType(new FilterFieldType(FilterFieldTypeEnum.CODE_FIELD))))
-                .setReportField(new ReportField(REPORT_FIELD_ID))
+                .setReportField(new ReportField(REPORT_FIELD_ID).setDataSetField(new DataSetField().setIsSync(true)))
                 .setCreatedDateTime(CREATED_DATE_TIME)
                 .setModifiedDateTime(MODIFIED_DATE_TIME);
     }

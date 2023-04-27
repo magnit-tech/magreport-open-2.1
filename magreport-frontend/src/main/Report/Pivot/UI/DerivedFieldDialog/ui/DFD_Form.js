@@ -13,7 +13,6 @@ import {
 
 import FormulaEditor from '../../../maglangFormulaEditor/FormulaEditor/FormulaEditor';
 import DerivedFieldDialogModal from './DFD_Modal';
-import DerivedFieldDialogFontSize from './DFD_FontSize';
 
 import {
 	buildServerExression,
@@ -36,6 +35,7 @@ export default function DerivedFieldDialogForm(props) {
 	const {
 		reportId,
 		activeIndex,
+		fontSize,
 		isReportDeveloper,
 		allFieldsAndExpressions,
 		loadedDerivedFields,
@@ -102,12 +102,10 @@ export default function DerivedFieldDialogForm(props) {
 		[currentField.name, reportId] // eslint-disable-line
 	);
 
-
 	const derivedFieldsCompletionList = useMemo(() => {
-
 		let result = [];
 
-		if(activeIndex) {
+		if (activeIndex) {
 			publicFields.forEach((value, key) => {
 				result.push({
 					fieldName: key,
@@ -156,7 +154,6 @@ export default function DerivedFieldDialogForm(props) {
 
 		return result;
 	}, [publicFields, ownFields, otherFields, activeIndex]);
-
 
 	const disabledSaveButton = useMemo(() => {
 		if (currentField.needSave) {
@@ -235,14 +232,6 @@ export default function DerivedFieldDialogForm(props) {
 		}
 	}
 
-	function handleChangeFontSize(value) {
-		let item = { ...currentField };
-		item['fontSize'] = value;
-
-		setCurrentField(item);
-		debouncePostObjToSave(item);
-	}
-
 	return (
 		<div className={clsx(classes.DFD_form, 'MuiPaper-root')}>
 			{activeIndex === null && <DerivedFieldDialogModal />}
@@ -253,6 +242,7 @@ export default function DerivedFieldDialogForm(props) {
 					label='Название'
 					id='newFieldName'
 					placeholder='Введите название производного поля'
+					size="small"
 					className={classes.CSD_nameField}
 					InputLabelProps={{
 						shrink: true,
@@ -272,6 +262,7 @@ export default function DerivedFieldDialogForm(props) {
 				label='Описание'
 				id='newConfigDescription'
 				placeholder='Введите описание производного поля'
+				size="small"
 				multiline
 				rows={2}
 				className={classes.CSD_descriptionField}
@@ -284,21 +275,12 @@ export default function DerivedFieldDialogForm(props) {
 				onChange={event => handleChangeDesc(event.target.value)}
 			/>
 
-			<DerivedFieldDialogFontSize
-				fontSize={currentField.fontSize}
-				showDerivedFunctionGuied={props.showDerivedFunctionGuied}
-				onChangeFontSize={value => handleChangeFontSize(value)}
-				onOpenDerivedFunctionGuied={() =>
-					props.onToggleDerivedFunctionGuied(true)
-				}
-			/>
-
 			<FormulaEditor
 				publicFields={publicFields}
 				ownFields={ownFields}
 				otherFields={otherFields}
 				key={currentField.id}
-				fontSize={currentField.fontSize}
+				fontSize={fontSize}
 				disabled={!currentField.owner}
 				initialCode={currentField.expressionText}
 				functions={allFieldsAndExpressions.functionsList}

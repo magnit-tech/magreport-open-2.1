@@ -1,6 +1,5 @@
 import React from 'react';
-import { connect } from 'react-redux';
-
+import clsx from 'clsx';
 import { Link } from "react-router-dom";
 
 // components
@@ -11,30 +10,20 @@ import DeviceHubIcon from '@material-ui/icons/DeviceHub';
 import PageviewIcon from '@material-ui/icons/Pageview';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
+import ReplayIcon from '@material-ui/icons/Replay';
 import EditIcon from '@material-ui/icons/Edit';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-
-//actions
-import { showAlertDialog, hideAlertDialog } from 'redux/actions/UI/actionsAlertDialog'
-import { actionRolesChangeWriteRights } from 'redux/actions/admin/actionRoles'
-import { foldersLoading } from 'redux/actions/sidebar/actionFolderTree';
+import { RolesCSS } from "./RolesCSS";
 
 function RoleCard(props){
+    const classes = RolesCSS();
 
     const canWrite = props.showCheckboxRW ? props.data.permissions.indexOf("WRITE") > -1 : false
 
     const handleClickDelete = event => {
-        
         event.stopPropagation();
-        props.showAlertDialog('Исключить роль?', null, null, handleDelete)
-    }
-
-    function handleDelete(answer){
-        if (answer){
-            props.onDelete(props.data.id)
-        }
-        props.hideAlertDialog()
+        props.onDelete(props.data.id);
     }
 
     function handleClick(event){
@@ -44,7 +33,7 @@ function RoleCard(props){
 
     function handleChangeWriteRights(event){
         event.stopPropagation();
-        props.actionRolesChangeWriteRights(props.index, !canWrite)
+        props.onChangeRW(props.index, !canWrite);
     }    
 
     return (
@@ -56,17 +45,23 @@ function RoleCard(props){
         <ListItemIcon>
             <DeviceHubIcon/>
         </ListItemIcon>
-        <ListItemText 
+        <ListItemText
+            primaryTypographyProps = {
+                props.data.type === 'I' ? {color: 'error'}: 
+                (props.data.type || '').includes('D') ? {color: 'textSecondary'}:
+                {color: 'initial'}
+            }
             primary={props.data.name }
             secondary= {props.data.description ? props.data.description : props.data.role?.description }
         />
         {
-            props.showCheckboxRW &&
+            props.showCheckboxRW && !(props.data.type || '').includes('D') &&
             <FormControlLabel
+                className = {clsx({[classes.rwLabelChanged]: props.data.type === 'U'})}
                 value="start"
                 control={
                     <Checkbox 
-                        color="primary" 
+                        color="primary"
                         checked={canWrite}
                         onClick={handleChangeWriteRights}
                     />}
@@ -115,11 +110,11 @@ function RoleCard(props){
             props.showDeleteButton ?
             <ListItemIcon>
                 <IconButton 
-                    aria-label="Удалить" 
+                    aria-label= { !(props.data.type || '').includes('D') ? "Удалить" : "Вернуть"}
                     color="primary" 
                     onClick={handleClickDelete}
                 >
-                    <DeleteIcon />
+                    { !(props.data.type || '').includes('D') ? <DeleteIcon /> : <ReplayIcon />}
                 </IconButton>
             </ListItemIcon>
             : ""
@@ -131,11 +126,4 @@ function RoleCard(props){
     )
 }
 
-const mapDispatchToProps = {
-    showAlertDialog, 
-    hideAlertDialog,
-    actionRolesChangeWriteRights,
-    foldersLoading,
-}
-
-export default connect(null, mapDispatchToProps)(RoleCard);
+export default RoleCard;
