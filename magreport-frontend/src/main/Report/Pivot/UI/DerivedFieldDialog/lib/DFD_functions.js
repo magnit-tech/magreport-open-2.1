@@ -337,11 +337,8 @@ function getExpressionForNode(node){
 	}
 	else if(node.nodeType === nodeType.arithmIntDivision){
 		return {
-			type : "FLOOR",
-			parameters : [{
-				type: "DIVIDE",
-				parameters: [getExpressionForNode(node.children[0]), getExpressionForNode(node.children[1])]
-			}]
+			type: "INTEGER_DIVISION",
+			parameters: [getExpressionForNode(node.children[0]), getExpressionForNode(node.children[1])]
 		}
 	}
 	else if(node.nodeType === nodeType.arithmModulo){
@@ -415,13 +412,8 @@ function getExpressionForNode(node){
 		}
 		else if(node.operation === "!=" || node.operation === "<>"){
 			return{
-				type: "LOGIC_NOT",
-				parameters: [
-					{
-						type: "EQ",
-						parameters: [getExpressionForNode(node.children[0]), getExpressionForNode(node.children[1])]
-					}
-				]
+				type: "NEQ",
+				parameters: [getExpressionForNode(node.children[0]), getExpressionForNode(node.children[1])]
 			}
 		}
 	}
