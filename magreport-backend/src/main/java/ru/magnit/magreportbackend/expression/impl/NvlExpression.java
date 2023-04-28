@@ -24,8 +24,8 @@ public class NvlExpression extends ParameterizedExpression {
         checkParameterNotNull(parameters.get(1), targetValue);
 
         return result
-            .setL(sourceValue.getL() == null ? targetValue.getL() : sourceValue.getL())
-            .setR(sourceValue.getR());
+                .setR(sourceValue.getL() == null ? targetValue.getR() : sourceValue.getR())
+                .setL(sourceValue.getL() == null ? targetValue.getL() : sourceValue.getL());
     }
 
     @Override
