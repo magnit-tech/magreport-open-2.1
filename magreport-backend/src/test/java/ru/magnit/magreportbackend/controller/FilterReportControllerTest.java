@@ -233,7 +233,8 @@ class FilterReportControllerTest {
                         USER_NAME,
                         CREATED_DATE,
                         MODIFIED_DATE,
-                        true
+                        true,
+                        0L
                 ),
                 Collections.singletonList(new Tuple())
         );
@@ -285,7 +286,8 @@ class FilterReportControllerTest {
                         USER_NAME,
                         CREATED_DATE,
                         MODIFIED_DATE,
-                        true
+                        true,
+                        0L
                 ),
                 ID,
                 new FilterNodeResponse(ID, 1L, "ID", NAME, Collections.emptyList())
