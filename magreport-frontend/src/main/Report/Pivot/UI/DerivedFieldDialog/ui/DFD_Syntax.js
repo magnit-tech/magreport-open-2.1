@@ -52,12 +52,26 @@ export default function DerivedFieldDialogSyntax(props) {
 						</div>
 					</AccordionSummary>
 					<AccordionDetails className={classes.DFD_accContentWrapperGuide} >
-						<p className={classes.DFD_syntaxCodeDescr} dangerouslySetInnerHTML={{__html: item.descr}}/>
+						<p 
+							className={classes.DFD_syntaxCodeDescr} 
+							dangerouslySetInnerHTML={{__html: item.descr}}
+						/>
 						<div className={classes.DFD_syntaxExampleCodeWrapp}>
 							<span><i>Конструкция:</i></span>
 							<pre className={classes.DFD_syntaxExampleCode}>{item.code}</pre>
 						</div>	
-						{ item.addition && <p className={classes.DFD_syntaxCodeDescr} dangerouslySetInnerHTML={{__html: item.addition}}/>}
+						{ item.addition && 
+							<p 
+								className={classes.DFD_syntaxCodeDescr} 
+								dangerouslySetInnerHTML={{__html: item.addition}}
+							/>
+						}
+						{ item.additionalСode && 
+							<div className={classes.DFD_syntaxExampleCodeWrapp}>
+								<span><i>Конструкция:</i></span>
+								<pre className={classes.DFD_syntaxExampleCode}>{item.code}</pre>
+							</div>	
+						}
 					</AccordionDetails>
 				</Accordion>
 			))}
