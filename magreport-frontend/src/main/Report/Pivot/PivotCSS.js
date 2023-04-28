@@ -1055,7 +1055,8 @@ export const PivotCSS = makeStyles(theme => ({
 		margin: '0',
 		fontSize: '12px',
 		border: `1px solid ${theme.palette.divider}`,
-		borderRadius: '4px'
+		borderRadius: '4px',
+		overflow: 'auto'
 	},
 	DFD_syntaxExampleCodeWrapp: {
 		margin: '12px 0',
