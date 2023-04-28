@@ -65,8 +65,13 @@ function PaperComponent(props) {
 }
 
 function DerivedFieldDialog(props) {
-	const { open, jobId, reportId, isReportDeveloper, otherDerivedFields } =
-		props;
+	const { 
+		open, 
+		jobId, 
+		reportId, 
+		isReportDeveloper, 
+		otherDerivedFields 
+	} = props;
 
 	const classes = PivotCSS();
 	const { enqueueSnackbar } = useSnackbar();
@@ -386,6 +391,7 @@ function DerivedFieldDialog(props) {
 							reportId={reportId}
 							activeIndex={activeIndex}
 							fontSize={fontSize}
+							isAdmin = {user.current.isAdmin}
 							isReportDeveloper={isReportDeveloper}
 							allFieldsAndExpressions={allFieldsAndExpressions.current}
 							loadedDerivedFields={loadedDerivedFields}
