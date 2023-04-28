@@ -12,24 +12,24 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class MillsecIntervalExtensionTest {
     @Test
-    void DaysIntervalTest() {
+    void MillsecIntervalTest() {
         final var sourceExpression = new FieldExpressionResponse()
             .setType(Expressions.MILLSEC_INTERVAL)
             .setParameters(List.of(
                 new FieldExpressionResponse()
                     .setType(Expressions.CONSTANT_VALUE)
-                    .setConstantType(DataTypeEnum.DATE)
-                    .setConstantValue("2023-03-28"),
+                    .setConstantType(DataTypeEnum.TIMESTAMP)
+                    .setConstantValue("2023-03-28 09:27:01.512"),
                 new FieldExpressionResponse()
                     .setType(Expressions.CONSTANT_VALUE)
-                    .setConstantType(DataTypeEnum.DATE)
-                    .setConstantValue("2023-03-29")
+                    .setConstantType(DataTypeEnum.TIMESTAMP)
+                    .setConstantValue("2023-03-28 09:27:02.513")
             ));
 
         final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
         final var expressionResult = expression.calculate(0);
 
-        assertEquals("86400000", expressionResult.getL());
+        assertEquals("1001", expressionResult.getL());
         assertEquals(DataTypeEnum.INTEGER, expressionResult.getR());
     }
 }
