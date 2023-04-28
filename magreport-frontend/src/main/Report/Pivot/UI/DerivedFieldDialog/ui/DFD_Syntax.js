@@ -69,7 +69,7 @@ export default function DerivedFieldDialogSyntax(props) {
 						{ item.additionalСode && 
 							<div className={classes.DFD_syntaxExampleCodeWrapp}>
 								<span><i>Конструкция:</i></span>
-								<pre className={classes.DFD_syntaxExampleCode}>{item.code}</pre>
+								<pre className={classes.DFD_syntaxExampleCode}>{item.additionalСode}</pre>
 							</div>	
 						}
 					</AccordionDetails>
