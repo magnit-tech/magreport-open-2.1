@@ -33,11 +33,11 @@ public class MillsecIntervalExtension extends ParameterizedExpression {
         checkParameterHasAnyType(secondDateParameter, secondDateResult, DataTypeEnum.DATE, DataTypeEnum.TIMESTAMP);
 
         final var firstDate = firstDateResult.getR() == DataTypeEnum.TIMESTAMP ?
-            LocalDateTime.parse(firstDateResult.getL()) :
+            LocalDateTime.parse(firstDateResult.getL().replace(" ", "T")) :
             LocalDate.parse(firstDateResult.getL()).atStartOfDay();
 
         final var secondDate = secondDateResult.getR() == DataTypeEnum.TIMESTAMP ?
-            LocalDateTime.parse(secondDateResult.getL()) :
+            LocalDateTime.parse(secondDateResult.getL().replace(" ", "T")) :
             LocalDate.parse(secondDateResult.getL()).atStartOfDay();
 
         return result.setL(String.valueOf(firstDate.until(secondDate, ChronoUnit.MILLIS)));
