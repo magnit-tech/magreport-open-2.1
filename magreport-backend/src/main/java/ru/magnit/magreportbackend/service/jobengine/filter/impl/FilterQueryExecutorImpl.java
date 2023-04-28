@@ -187,7 +187,7 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
         ) {
             statement.execute(query);
         } catch (SQLException ex) {
-            log.error("SqlExecQueryImpl.executeSql(): Error trying to execute pre- or post- sql.", ex);
+            log.debug("SqlExecQueryImpl.executeSql(): Error trying to execute pre- or post- sql.", ex);
             throw new QueryExecutionException("Error trying to execute query:\n" + query);
         }
 
