@@ -65,7 +65,8 @@ public enum Expressions {
     WEEK_DAY_NUMBER(WeekdayNumberExpression::new),
     NOW(NowExpression::new),
     TO_DATE(ToDateExpression::new),
-    TO_DATETIME(ToDatetimeExpression::new);
+    TO_DATETIME(ToDatetimeExpression::new),
+    IS_NULL(IsNullExpression::new);
 
     private final BiFunction<FieldExpressionResponse, ExpressionCreationContext, BaseExpression> factory;
 
