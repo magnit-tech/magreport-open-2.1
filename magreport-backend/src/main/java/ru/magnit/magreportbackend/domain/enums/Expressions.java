@@ -67,7 +67,8 @@ public enum Expressions {
     TO_DATE(ToDateExpression::new),
     TO_DATETIME(ToDatetimeExpression::new),
     IS_NULL(IsNullExpression::new),
-    GET_TYPE(GetTypeExpression::new);
+    GET_TYPE(GetTypeExpression::new),
+    NULL_VALUE(NullValueExpression::new);
 
     private final BiFunction<FieldExpressionResponse, ExpressionCreationContext, BaseExpression> factory;
 
