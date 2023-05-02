@@ -670,7 +670,7 @@ export default function(props){
                                                     </div>
                                                 }
                                                 <div 
-                                                    onClick = {cell.type === "dimensionValue" ? () => {handleDimensionValueCellClick(cell.fieldId, cell.data)}
+                                                    onClick = {cell.type === "dimensionValue" ? () => {handleDimensionValueCellClick(cell.fieldId, cell.original, cell.data)}
                                                     : cell.type === "metricValues"  ? () => {handleMetricValueCellClick(cell.fieldId, cell.index, cell.data, cell.dataType)}
                                                     : () => {}}
                                                 >
