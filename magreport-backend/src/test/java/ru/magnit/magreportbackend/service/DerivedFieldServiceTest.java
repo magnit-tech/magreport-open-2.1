@@ -334,8 +334,8 @@ class DerivedFieldServiceTest {
                                 new FieldExpressionResponse(
                                     Expressions.CONSTANT_VALUE,
                                     null,
-                                    "null",
-                                    DataTypeEnum.STRING,
+                                    "2022-01-01",
+                                    DataTypeEnum.DATE,
                                     Collections.emptyList()
                                 )
                             )
