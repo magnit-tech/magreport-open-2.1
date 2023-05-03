@@ -41,7 +41,9 @@ export const RolesCSS = makeStyles(theme => ({
         display: 'flex', 
         flex: 1, 
         flexDirection: 'column',
-        position: 'relative'
+        position: 'relative',
+		borderColor: theme.palette.divider,
+		borderBottom: `1px solid ${theme.palette.divider}`,
     },
     titlebar: {
         backgroundColor: theme.palette.primary.main,
@@ -146,5 +148,26 @@ export const RolesCSS = makeStyles(theme => ({
     },
     rwLabelChanged: {
         color: 'red'
-    }
+    },
+    bottomButtons: {
+		display: 'flex',
+		alignItems: 'center',
+		margin: '4px 16px',
+    },
+    pagination: {
+        display: 'flex',
+        flexShrink: 0,
+        marginLeft: theme.spacing(2),
+       // width:'500px',
+    },
+    iconButton: {
+        marginLeft: theme.spacing(1),
+    },
+    pageNumber: {
+        width: '60px',
+        height: '29.6px',
+        backgroundColor: theme.palette.action.hover,
+        marginLeft: theme.spacing(0.5),
+        fontSize: '0.9rem'
+    },
 }));
