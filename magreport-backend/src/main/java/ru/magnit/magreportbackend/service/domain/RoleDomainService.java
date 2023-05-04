@@ -68,10 +68,10 @@ public class RoleDomainService {
 
     @Transactional
     public Long saveRole(RoleAddRequest request) {
-        if (repository.existsByName(request.getName())) return null;
+        if (repository.existsByName(request.getName()))
+            throw new InvalidParametersException("Role already exists: " + request.getName());
 
         var role = roleMapper.from(request);
-
         role = repository.save(role);
 
         return role.getId();
