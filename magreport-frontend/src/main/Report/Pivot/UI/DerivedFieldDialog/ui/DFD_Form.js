@@ -36,6 +36,7 @@ export default function DerivedFieldDialogForm(props) {
 		reportId,
 		activeIndex,
 		fontSize,
+		isAdmin,
 		isReportDeveloper,
 		allFieldsAndExpressions,
 		loadedDerivedFields,
@@ -249,7 +250,7 @@ export default function DerivedFieldDialogForm(props) {
 					}}
 					variant='outlined'
 					value={currentField.name}
-					disabled={!currentField.owner}
+					disabled={!isAdmin && !currentField.owner}
 					onChange={event => handleChangeName(event.target.value)}
 					error={currentField.id && !currentField.isCorrect}
 				/>
@@ -271,7 +272,7 @@ export default function DerivedFieldDialogForm(props) {
 				}}
 				variant='outlined'
 				value={currentField.description}
-				disabled={!currentField.owner}
+				disabled={!isAdmin && !currentField.owner}
 				onChange={event => handleChangeDesc(event.target.value)}
 			/>
 
@@ -281,7 +282,7 @@ export default function DerivedFieldDialogForm(props) {
 				otherFields={otherFields}
 				key={currentField.id}
 				fontSize={fontSize}
-				disabled={!currentField.owner}
+				disabled={!isAdmin && !currentField.owner}
 				initialCode={currentField.expressionText}
 				functions={allFieldsAndExpressions.functionsList}
 				originalFields={allFieldsAndExpressions.originalFieldsList}
@@ -291,10 +292,11 @@ export default function DerivedFieldDialogForm(props) {
 
 			<p className={classes.DFD_errorMessage}> {currentField.errorMessage} </p>
 
-			<DialogActions style={{ justifyContent: 'space-between' }}>
+			<DialogActions style={{ justifyContent: isReportDeveloper ? 'space-between' : 'flex-end' }}>
 				{isReportDeveloper && (
 					<FormControlLabel
-						disabled={!currentField.owner}
+						label='Общего назначения'
+						disabled={!isAdmin && !currentField.owner}
 						control={
 							<Switch
 								checked={currentField.isPublic}
@@ -302,7 +304,6 @@ export default function DerivedFieldDialogForm(props) {
 								name='checkedA'
 							/>
 						}
-						label='Общего назначения'
 					/>
 				)}
 

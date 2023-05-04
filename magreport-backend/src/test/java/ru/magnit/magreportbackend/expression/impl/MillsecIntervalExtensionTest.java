@@ -32,4 +32,40 @@ class MillsecIntervalExtensionTest {
         assertEquals("1001", expressionResult.getL());
         assertEquals(DataTypeEnum.INTEGER, expressionResult.getR());
     }
+
+    @Test
+    void MillsecIntervalNvlTest() {
+        final var sourceExpression = new FieldExpressionResponse()
+                .setType(Expressions.MILLSEC_INTERVAL)
+                .setParameters(List.of(
+                        new FieldExpressionResponse()
+                                .setType(Expressions.NVL)
+                                .setParameters(List.of(
+                                        new FieldExpressionResponse()
+                                                .setType(Expressions.CONSTANT_VALUE)
+                                                .setConstantType(DataTypeEnum.TIMESTAMP)
+                                                .setConstantValue(null),
+                                        new FieldExpressionResponse()
+                                                .setType(Expressions.TODAY)
+
+                                )),
+                        new FieldExpressionResponse()
+                                .setType(Expressions.NVL)
+                                .setParameters(List.of(
+                                        new FieldExpressionResponse()
+                                                .setType(Expressions.CONSTANT_VALUE)
+                                                .setConstantType(DataTypeEnum.TIMESTAMP)
+                                                .setConstantValue(null),
+                                        new FieldExpressionResponse()
+                                                .setType(Expressions.TODAY)
+
+                                ))
+                ));
+
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expressionResult = expression.calculate(0);
+
+        assertEquals("0", expressionResult.getL());
+        assertEquals(DataTypeEnum.INTEGER, expressionResult.getR());
+    }
 }

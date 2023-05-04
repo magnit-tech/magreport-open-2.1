@@ -34,4 +34,48 @@ class NvlExpressionTest {
         assertEquals(DataTypeEnum.INTEGER, expressionResult.getR());
 
     }
+
+    @Test
+    void nvlExpressionDateTest(){
+        final var sourceExpression = new FieldExpressionResponse()
+                .setType(Expressions.NVL)
+                .setParameters(List.of(
+                        new FieldExpressionResponse()
+                                .setType(Expressions.CONSTANT_VALUE)
+                                .setConstantType(DataTypeEnum.TIMESTAMP)
+                                .setConstantValue(null),
+                        new FieldExpressionResponse()
+                                .setType(Expressions.CONSTANT_VALUE)
+                                .setConstantType(DataTypeEnum.DATE)
+                                .setConstantValue("2023-04-29")
+                ));
+
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expressionResult = expression.calculate(0);
+
+        assertEquals("2023-04-29 00:00", expressionResult.getL());
+        assertEquals(DataTypeEnum.TIMESTAMP, expressionResult.getR());
+    }
+
+    @Test
+    void nvlExpressionDateTimeTest(){
+        final var sourceExpression = new FieldExpressionResponse()
+                .setType(Expressions.NVL)
+                .setParameters(List.of(
+                        new FieldExpressionResponse()
+                                .setType(Expressions.CONSTANT_VALUE)
+                                .setConstantType(DataTypeEnum.DATE)
+                                .setConstantValue("2023-04-29"),
+                        new FieldExpressionResponse()
+                                .setType(Expressions.CONSTANT_VALUE)
+                                .setConstantType(DataTypeEnum.TIMESTAMP)
+                                .setConstantValue("2023-04-29 00:00:00")
+                ));
+
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expressionResult = expression.calculate(0);
+
+        assertEquals("2023-04-29 00:00", expressionResult.getL());
+        assertEquals(DataTypeEnum.TIMESTAMP, expressionResult.getR());
+    }
 }

@@ -629,6 +629,7 @@ class ScheduleServiceTest {
                 null,
                 null,
                 null,
+                null,
                 null
         );
     }
