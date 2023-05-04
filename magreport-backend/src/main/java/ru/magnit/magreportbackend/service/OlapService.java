@@ -27,6 +27,7 @@ import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequestNew;
 import ru.magnit.magreportbackend.dto.request.olap.OlapExportPivotTableRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldItemsRequest;
+import ru.magnit.magreportbackend.dto.request.olap.OlapFieldItemsRequestNew;
 import ru.magnit.magreportbackend.dto.request.olap.SortingParams;
 import ru.magnit.magreportbackend.dto.response.olap.OlapCubeResponse;
 import ru.magnit.magreportbackend.dto.response.olap.OlapFieldItemsResponse;
@@ -36,6 +37,8 @@ import ru.magnit.magreportbackend.dto.response.olap.OlapMetricResponse2;
 import ru.magnit.magreportbackend.dto.response.report.ReportFieldMetadataResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.TokenResponse;
 import ru.magnit.magreportbackend.exception.OlapMaxDataVolumeExceeded;
+import ru.magnit.magreportbackend.mapper.olap.OlapCubeRequestMapper;
+import ru.magnit.magreportbackend.mapper.olap.OlapFieldItemsRequestMerger;
 import ru.magnit.magreportbackend.mapper.report.ReportFieldMetadataMapper;
 import ru.magnit.magreportbackend.metrics_function.MetricsFunction;
 import ru.magnit.magreportbackend.service.domain.ExcelReportDomainService;
@@ -88,6 +91,8 @@ public class OlapService {
     private final OlapUserChoiceDomainService olapUserChoiceDomainService;
 
     private final ReportFieldMetadataMapper fieldMapper;
+    private final OlapCubeRequestMapper olapCubeRequestMapper;
+    private final OlapFieldItemsRequestMerger olapFieldItemsRequestMerger;
 
     public OlapCubeResponse getCube(OlapCubeRequest request) {
         var currentUser = userDomainService.getCurrentUser();
@@ -183,11 +188,11 @@ public class OlapService {
         }
     }
 
-    public OlapFieldItemsResponse getFieldValues(OlapFieldItemsRequest request) {
+    public OlapFieldItemsResponse getFieldValues(OlapFieldItemsRequestNew fieldItemsRequest) {
 
         log.debug("Start processing cube");
         var startTime = System.currentTimeMillis();
-        var jobData = jobDomainService.getJobData(request.getJobId());
+        var jobData = jobDomainService.getJobData(fieldItemsRequest.getJobId());
         var endTime = System.currentTimeMillis() - startTime;
         log.debug("Job data acquired: " + endTime);
 
@@ -195,6 +200,22 @@ public class OlapService {
         var sourceCube = olapDomainService.getCubeData(jobData);
         endTime = System.currentTimeMillis() - startTime;
         log.debug("Report data acquired: " + endTime);
+
+        OlapCubeRequest cubeRequest;
+        var cubeRequestNew = olapCubeRequestMapper.from(fieldItemsRequest);
+
+        if (fieldItemsRequest.hasDerivedFields()) {
+            startTime = System.currentTimeMillis();
+            final var result = derivedFieldService.preProcessCube(sourceCube, cubeRequestNew);
+            sourceCube = result.getL();
+            cubeRequest = result.getR();
+            endTime = System.currentTimeMillis() - startTime;
+            log.debug("Derived fields calculated: " + endTime);
+        } else {
+            cubeRequest = getCubeRequest(cubeRequestNew);
+        }
+
+        var request = olapFieldItemsRequestMerger.merge(fieldItemsRequest, cubeRequest);
 
         startTime = System.currentTimeMillis();
         var checkedFilterRows = olapDomainService.filterCubeData(sourceCube, request.getFilterGroup());
