@@ -19,7 +19,7 @@ public class OlapFieldItemsOutRequest {
 
     private Long jobId;
     private Long fieldId;
-    private FilterGroup filterGroup;
+    private FilterGroupNew filterGroup;
     private Long from;
     private Long count;
     private Long cubeSize;
