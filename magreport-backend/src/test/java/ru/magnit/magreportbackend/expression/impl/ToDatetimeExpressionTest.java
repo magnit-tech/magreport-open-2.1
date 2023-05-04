@@ -10,48 +10,44 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class LeftSubstrExpressionTest {
+class ToDatetimeExpressionTest {
     @Test
-    void leftSubstrTest() {
+    void toDateTimeTest() {
         final var sourceExpression = new FieldExpressionResponse()
-            .setType(Expressions.LEFT_SUBSTR)
-            .setParameters(List.of(
-                new FieldExpressionResponse()
-                    .setType(Expressions.CONSTANT_VALUE)
-                    .setConstantType(DataTypeEnum.STRING)
-                    .setConstantValue("Test string"),
-                new FieldExpressionResponse()
-                    .setType(Expressions.CONSTANT_VALUE)
-                    .setConstantType(DataTypeEnum.INTEGER)
-                    .setConstantValue("4")
-            ));
-
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
-        final var expressionResult = expression.calculate(0);
-
-        assertEquals("Test", expressionResult.getL());
-        assertEquals(DataTypeEnum.STRING, expressionResult.getR());
-    }
-
-    @Test
-    void OverflowLeftSubstrTest() {
-        final var sourceExpression = new FieldExpressionResponse()
-                .setType(Expressions.LEFT_SUBSTR)
+                .setType(Expressions.TO_DATETIME)
                 .setParameters(List.of(
                         new FieldExpressionResponse()
                                 .setType(Expressions.CONSTANT_VALUE)
-                                .setConstantType(DataTypeEnum.STRING)
-                                .setConstantValue("Test string"),
-                        new FieldExpressionResponse()
-                                .setType(Expressions.CONSTANT_VALUE)
-                                .setConstantType(DataTypeEnum.INTEGER)
-                                .setConstantValue("15")
+                                .setConstantType(DataTypeEnum.DATE)
+                                .setConstantValue("2023-04-29")
                 ));
 
         final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
         final var expressionResult = expression.calculate(0);
 
-        assertEquals("Test string", expressionResult.getL());
-        assertEquals(DataTypeEnum.STRING, expressionResult.getR());
+        assertEquals("2023-04-29 00:00:00", expressionResult.getL());
+        assertEquals(DataTypeEnum.TIMESTAMP, expressionResult.getR());
+    }
+
+    @Test
+    void toDateTimeWithTimeTest() {
+        final var sourceExpression = new FieldExpressionResponse()
+                .setType(Expressions.TO_DATETIME)
+                .setParameters(List.of(
+                        new FieldExpressionResponse()
+                                .setType(Expressions.CONSTANT_VALUE)
+                                .setConstantType(DataTypeEnum.TIMESTAMP)
+                                .setConstantValue("2023-04-29 01:00:00"),
+                        new FieldExpressionResponse()
+                                .setType(Expressions.CONSTANT_VALUE)
+                                .setConstantType(DataTypeEnum.STRING)
+                                .setConstantValue("07:00:00")
+                ));
+
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expressionResult = expression.calculate(0);
+
+        assertEquals("2023-04-29 07:00:00", expressionResult.getL());
+        assertEquals(DataTypeEnum.TIMESTAMP, expressionResult.getR());
     }
 }

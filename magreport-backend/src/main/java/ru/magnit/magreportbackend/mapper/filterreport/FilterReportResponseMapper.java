@@ -30,6 +30,7 @@ public class FilterReportResponseMapper implements Mapper<FilterReportResponse, 
                 source.getUser().getName(),
                 source.getCreatedDateTime(),
                 source.getModifiedDateTime(),
-                source.getFields().stream().filter(f -> f.getReportField() != null).allMatch(f -> f.getReportField().getDataSetField().getIsSync()));
+                source.getFields().stream().filter(f -> f.getReportField() != null).allMatch(f -> f.getReportField().getDataSetField().getIsSync()),
+                source.getMaxCountItems());
     }
 }

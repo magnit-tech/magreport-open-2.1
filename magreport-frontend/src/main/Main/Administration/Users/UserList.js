@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from 'react';
-
 import { useSnackbar } from 'notistack';
-
 import { useDispatch } from 'react-redux';
-
 import { addNavbar } from 'redux/actions/navbar/actionNavbar';
-
 import PropTypes from 'prop-types';
 
 // styles 
@@ -65,9 +61,10 @@ export default function UserList(props) {
 	);
 	const [checkedAllUsers, setCheckedAllUsers] = React.useState(false);
 	const [userFilterValue, setUserFilterValue] = useState('');
-	const [needUserScroll, setNeedUserScroll] = useState(
+/*  const [needUserScroll, setNeedUserScroll] = useState(
 		Boolean(props.needUserScroll)
 	);
+*/
 	const [domainsList, setDomainsList] = useState([]);
 	const [defaultDomain, setDefaultDomain] = useState('');
 	const [domain, setDomain] = useState({});
@@ -110,7 +107,7 @@ export default function UserList(props) {
     }
 
     function handleSelectUser(id, index) {
-        setNeedUserScroll(false);
+        //setNeedUserScroll(false);
         setSelectedUser(id);
         
         if (props.onSelectUser) props.onSelectUser(id)
@@ -137,7 +134,7 @@ export default function UserList(props) {
             />
         )
     )
-
+/*
     useEffect(() => {
         let userIndex = props.items.findIndex(item => item.id === props.selectedUser);
 
@@ -149,7 +146,8 @@ export default function UserList(props) {
           scrolledElement.scrollIntoView({block: "start", behavior: "smooth"});
         }
         setNeedUserScroll(false);
-    }, [needUserScroll]); // eslint-disable-line
+	}, [needUserScroll]); // eslint-disable-line
+*/
 
     function handleDataLoaded(data){
 		let dom = data.filter(i => i.isDefault === true).map(i => {return {value: i.id, name: i.name}})[0];

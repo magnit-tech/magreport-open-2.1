@@ -61,7 +61,14 @@ public enum Expressions {
     MONTH_LAST_DATE(MonthLastDateExpression::new),
     TODAY(CurrentDateExpression::new),
     NEQ(NeqExpression::new),
-    INTEGER_DIVISION(IntegerDivisionExpression::new);
+    INTEGER_DIVISION(IntegerDivisionExpression::new),
+    WEEK_DAY_NUMBER(WeekdayNumberExpression::new),
+    NOW(NowExpression::new),
+    TO_DATE(ToDateExpression::new),
+    TO_DATETIME(ToDatetimeExpression::new),
+    IS_NULL(IsNullExpression::new),
+    GET_TYPE(GetTypeExpression::new),
+    NULL_VALUE(NullValueExpression::new);
 
     private final BiFunction<FieldExpressionResponse, ExpressionCreationContext, BaseExpression> factory;
 
