@@ -9,11 +9,18 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-
+// components
+import { Tooltip } from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
+import MenuBookIcon from '@material-ui/icons/MenuBook';
+import CreateIcon from '@material-ui/icons/Create';
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import MenuItem from '@material-ui/core/MenuItem';
+import { Card } from '@material-ui/core';
 //actions
 import { showAlertDialog, hideAlertDialog } from 'redux/actions/UI/actionsAlertDialog';
-import { actionRoleDelete } from 'redux/actions/admin/actionRoles';
-
+import { actionRoleSelectFolderType, actionRoleDelete } from 'redux/actions/admin/actionRoles';
 // styles 
 import { RolesCSS } from "./RolesCSS";
 
@@ -41,7 +48,12 @@ function PermittedFoldersList(props){
             props.onDelete(deletedItem);
         }
         props.hideAlertDialog();
-    }  
+    }
+
+    const handleChangeSelectedPermittedFolder = (event) => {
+        props.onChangeSelectedPermittedFolder(event.target.value);
+        props.actionRoleSelectFolderType(event.target.value)
+    };
 
     if (props.selectedItem === 'all'){
         
@@ -129,17 +141,68 @@ function PermittedFoldersList(props){
     }
 
     return (
-        <div className={classes.permittedFoldersListRel}> 
-            <List className={classes.permittedFoldersListAbs}>
-                {listItemsArr}
-            </List>
-        </div>
+        <Card elevation={3} className={classes.roleList}>
+            <div className={classes.userAddPanel}>
+                <div className={classes.roleAutocompleteDiv}>
+                    <TextField
+                        fullWidth
+                        size = "small"
+                        id="permitted-folders-names-list"
+                        select
+                        label="Объекты"
+                        value={props.selectedItem}
+                        onChange={handleChangeSelectedPermittedFolder}
+                        variant="outlined"
+                    >
+                        {props.items.namesList.sort((a,b) => a.value.localeCompare(b.value)).map((item) => (
+                            <MenuItem key={item.id} value={item.id}>
+                                {item.value}
+                            </MenuItem>
+                         ))}
+                    </TextField> 
+                </div>
+                {props.onAddFolderRead &&
+                <div className={classes.addButtonsRW}>
+                    <Tooltip title={'Выдать права на чтение'}>
+                        <Button
+                            size ='small'
+                            color="primary"
+                            variant="outlined"
+                            disabled = {false}
+                            onClick={props.onAddFolderRead}
+                        >
+                            <MenuBookIcon/>
+                            <AddIcon/>
+                        </Button>
+                    </Tooltip>
+                    <Tooltip title={'Выдать права на запись'}>
+                        <Button
+                            size ='small'
+                            color="primary"
+                            variant="outlined"
+                            disabled = {false}
+                            onClick={props.onAddFolderWrite}
+                        >
+                            <CreateIcon/>
+                            <AddIcon/>
+                        </Button>
+                    </Tooltip>
+                </div>
+                }
+            </div>
+            <div className={classes.permittedFoldersListRel}> 
+                <List className={classes.permittedFoldersListAbs}>
+                    {listItemsArr}
+                </List>
+            </div>
+        </Card>
     )
 }
 
 const mapDispatchToProps = {
     showAlertDialog, 
     hideAlertDialog,
+    actionRoleSelectFolderType,
     actionRoleDelete
 }
 
