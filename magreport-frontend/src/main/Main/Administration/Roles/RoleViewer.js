@@ -17,8 +17,6 @@ import {FolderItemTypes} from "main/FolderContent/FolderItemTypes";
 import ViewerPage from "main/Main/Development/Viewer/ViewerPage";
 import {ViewerCSS} from "main/Main/Development/Viewer/ViewerCSS";
 import UserList from "main/Main/Administration/Users/UserList";
-import TextField from '@material-ui/core/TextField';
-import MenuItem from '@material-ui/core/MenuItem';
 
 import DomainGroupList from "main/Main/Administration/DomainGroups/DomainGroupList";
 import PermittedFoldersList from './PermittedFoldersList';
@@ -174,7 +172,6 @@ export default function RoleViewer() {
         tablabel:"Права",
         tabcontent:
             <div style={{display: 'flex', flex: 1, flexDirection: 'column'}}>
-
                 <Paper elevation={3} className={classes.permittedListPaper}>
                     <DataLoader
                         loadFunc = {dataHub.roleController.getPertmittedFolders}
