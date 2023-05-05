@@ -296,7 +296,7 @@ export const PivotCSS = makeStyles(theme => ({
 	},
 	thumb: {
 		marginTop: '-4px',
-		'&:focus, &:hover, &$active': {
+		'&:focus, &:hover, &:active': {
 			boxShadow: 'inherit',
 		},
 	},
