@@ -2,9 +2,10 @@ import React from 'react';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import AccessibilityIcon from '@material-ui/icons/Accessibility';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
+import Icon from '@mdi/react';
+import { mdiDomain } from '@mdi/js';
 // local
 import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
 // styles
@@ -42,9 +43,10 @@ function DomainGroupCard(props){
             onClick={handleClick}
             selected={props.isSelected}
         >
-            <ListItemIcon>
-                <AccessibilityIcon/>
+           <ListItemIcon>
+                <Icon path={mdiDomain} size={1} />
             </ListItemIcon>
+
             <ListItemText 
                 primary={(props.domainGroupDesc.domainId === props.defaultDomain ? '' : props.domainGroupDesc.domainName + '/' ) + props.domainGroupDesc.groupName }
             />
