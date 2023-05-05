@@ -56,10 +56,15 @@ export default function SearchField(props){
                             id="searchfield"
                             placeholder = 'Поиск'
                             value={searchParams.searchString || ''}
-                            onChange={event => handleChange("searchString", event.target.value)}
                             classes={{
                                 root: classes.inputRoot,
                                 input: classes.inputInput,
+                            }}
+                            onChange={event => handleChange("searchString", event.target.value)}
+                            onKeyDown={(event) => {
+                                if (event.keyCode === 13) {
+                                    handleClickSearch()
+                                }
                             }}
                             endAdornment={
                                 <InputAdornment position="end">
