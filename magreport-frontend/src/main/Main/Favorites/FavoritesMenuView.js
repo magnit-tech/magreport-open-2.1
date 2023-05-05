@@ -37,6 +37,10 @@ function FavoritesMenuView(props){
         navigate(`/ui/report/starter/${reportId}`, {state: location.pathname})
     }
 
+    function handleItemFolderPathClick(folderId) {
+        navigate(`/ui/reports/${folderId}`, {state: location.pathname})
+    }
+
     return(
         <div style={{display: 'flex', flex: 1}}>
             <DataLoader
@@ -55,8 +59,8 @@ function FavoritesMenuView(props){
                     showItemControls = {false}
                     pagination = {false}
 
-                    onFolderClick = {false}
                     onItemClick = {handleItemClick}
+                    onFolderClick = {handleItemFolderPathClick}
 
                     onJobCancelClick = {(jobIndex, jobId) => props.actionJobCancel(folderItemsType, jobIndex, jobId)}
                     onAddDeleteFavorites = {(index, folderId, reportId, isFavorite) => props.actionAddDeleteFavorites(folderItemsType, index, folderId, reportId, isFavorite, enqueueSnackbar)}
