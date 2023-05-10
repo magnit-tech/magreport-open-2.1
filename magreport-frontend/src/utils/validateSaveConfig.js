@@ -4,21 +4,22 @@
  * @param {array} allFields - объект c полями, загруженных из Metadata
  */
 
-export default function validateSaveConfig(responseConfigData, allFields) {
+export default function validateSaveConfig(responseConfigData, allFields, derivedFields, callback) {
+	const allFieldsWithDerived = [...derivedFields, ...allFields]
 	let configsIdsArr = []
-	
-	for (var key in responseConfigData) {
+	let otherDerivedFields = []
 
-		if(responseConfigData[key].length !== 0 && Array.isArray(responseConfigData[key])) {
-			responseConfigData[key].map( item => configsIdsArr.push(item.id) )
+	for (var key in responseConfigData) {
+		if(key !== 'derivedFields' && responseConfigData[key].length !== 0 && Array.isArray(responseConfigData[key])) {
+			responseConfigData[key].map( item => item.original ? configsIdsArr.push(item.id) : otherDerivedFields.push(item.id))
 		}
 	}
 
 	const resultArray = configsIdsArr.map( (id) => {
-		return allFields.some( (fieldData) => {
+		return allFieldsWithDerived.some( (fieldData) => {
 			return fieldData.id === id
 		})
 	})
 
-	return resultArray.includes(false) // если ответ false значит в responseConfigData нет отличающих значений с allFields
+	return callback(!resultArray.includes(false), otherDerivedFields) // если ответ false значит в responseConfigData нет отличающих значений с allFieldsWithDerived
 }

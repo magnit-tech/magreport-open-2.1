@@ -35,13 +35,14 @@ import {ReportStarterCSS} from "./ReportCSS";
 export default function ReportStarter(props){
     const classes = ReportStarterCSS();
 
-    const id = useParams()?.id || props.reportId;
+    const useParamsId = useParams()?.id
+    const id = props.onDataLoadFunction ? props.reportId : useParamsId;
+
     const navigate = useNavigate();
     const location = useLocation();
+    const dispatch = useDispatch();
+
     const [searchParams, setSearchParams] = useSearchParams(); // eslint-disable-line
-
-    const dispatch = useDispatch()
-
     const [flowState, setFlowState] = useState("filters");
     const [reportMetadata, setReportMetadata] = useState({});
     const [reloadReportMetadata, setReloadReportMetadata] = useState({needReload:false}); // управление перезагрузкой метаданных
@@ -57,7 +58,6 @@ export default function ReportStarter(props){
     const lastFilterValues = useRef(new FilterValues()); // Значения параметров предыдущего запуска отчёта
 
     const filterValues = useRef(new FilterValues()); // Текущий выбор в фильтре
-    
 
     const addJobParameters = useRef([]);
     const { enqueueSnackbar } = useSnackbar();
@@ -67,7 +67,6 @@ export default function ReportStarter(props){
     const [excelTemplates, setExcelTemplates] = useState([])
     const [disabledSaveBtn, setDisabledSaveBtn] = useState(false)
     
-
     function handleReportMetadataLoaded(data){
         setExcelTemplates(data.excelTemplates)
         if((!data.filterGroup || data.filterGroup === null || data.filterGroup.id === null)&& !props.woStartButton){
@@ -254,7 +253,7 @@ export default function ReportStarter(props){
     return (
         flowState === "filters" ? 
             <DataLoader
-                loadFunc = {dataHub.reportController.get}
+                loadFunc = {props.onDataLoadFunction || dataHub.reportController.get}
                 loadParams = {[Number(id), props.scheduleTaskId !== undefined ? props.scheduleTaskId : lastParamJobId]}
                 reload = {reloadReportMetadata}
                 onDataLoaded = {handleReportMetadataLoaded}

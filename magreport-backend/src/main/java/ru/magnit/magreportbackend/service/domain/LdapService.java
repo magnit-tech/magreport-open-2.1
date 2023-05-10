@@ -51,18 +51,19 @@ public class LdapService {
 
         try {
             Arrays.stream(ldapProperties.getUserPaths())
-                .map(path ->
-                    ldapTemplate.search(
-                        path,
-                        ldapProperties.getUserSearchFilter().replace("{0}", loginName),
-                        SearchControls.SUBTREE_SCOPE,
-                        (AttributesMapper<String>) attributes -> String.valueOf(attributes.get(ldapProperties.getFullNameParamName()).get())
+                    .map(path ->
+                            ldapTemplate.search(
+                                    path,
+                                    ldapProperties.getUserSearchFilter().replace("{0}", loginName),
+                                    SearchControls.SUBTREE_SCOPE,
+                                    (AttributesMapper<String>) attributes -> String.valueOf(attributes.get(ldapProperties.getFullNameParamName()).get())
+                            )
                     )
-                )
-                .flatMap(Collection::stream)
-                .filter(Predicate.not(String::isBlank))
-                .forEach(displayNames::add);
-        } catch (Exception ignored) {}
+                    .flatMap(Collection::stream)
+                    .filter(Predicate.not(String::isBlank))
+                    .forEach(displayNames::add);
+        } catch (Exception ignored) {
+        }
 
         return displayNames.isEmpty() ? "" : displayNames.get(0);
     }
@@ -123,7 +124,7 @@ public class LdapService {
         if (ldapProperties.getType() == LdapTypes.LDAP) return Collections.emptyMap();
 
         var filter = "(|" + logins.stream()
-                .map(login -> "(" + ldapProperties.getUserSearchFilter().replace("{0}", login) + ")")
+                .map(login -> String.format("(%s)", ldapProperties.getUserSearchFilter().replace("{0}", login)))
                 .collect(Collectors.joining()) + ")";
 
         return Arrays.stream(ldapProperties.getUserPaths())

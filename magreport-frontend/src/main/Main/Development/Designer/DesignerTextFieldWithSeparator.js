@@ -1,5 +1,5 @@
 
-import React , {useState , useRef} from 'react';
+import React , {useState} from 'react';
 
 // components
 import TextField from '@material-ui/core/TextField';
@@ -13,7 +13,6 @@ import ReorderIcon from '@material-ui/icons/Reorder';
 import InvalidValuesView from '../../../Report/filters/InvalidValuesView';
 import FilterStatus from '../../../Report/filters/FilterStatus';
 import SeparatorMenu from '../../../Report/filters/SeparatorMenu';
-import dataHub from 'ajax/DataHub';
 
 // styles
 import {DesignerCSS} from './DesignerCSS';
@@ -27,6 +26,8 @@ import {DesignerCSS} from './DesignerCSS';
  * Текстовое поле с выбором разделителя
  * @param {Object} props - component properties
  * @param {Array} props.value - text field value
+ * @param {Array} props.invalidValues - array of invalid values
+ * @param {String} props.status - status
  * @param {String} props.label - text field label
  * @param {String} props.source - the source
  * @param {Boolean} [props.mandatory=false] - if true, the vakue is mandatory
@@ -43,9 +44,6 @@ export default function DesignerTextFieldWithSeparator(props){
 
     const classes = DesignerCSS(); 
 
-    const timer = useRef(0);
-    const requestId = useRef("");
-
     const separatorsArray = [
         {name: 'Точка с запятой',  value: ';', checked: true},
         {name: 'Запятая',  value: ',', checked: true},
@@ -55,14 +53,12 @@ export default function DesignerTextFieldWithSeparator(props){
     ];
 
     const [textValue, setTextValue] = useState(buildTextFromLastValues(props.value));
-    const [checkStatus, setCheckStatus] = useState('success')
     const [separators, setSeparators] = useState(separatorsArray);
     const [showInvalidValues, setShowInvalidValues] = useState(false);
-    const [invalidValues, setInvalidValues] = useState([]);
+    
 
     function handleChangeSeparators(sArr) {
         setSeparators(sArr);
-        handleTextChanged(textValue);
     }
 
     /*
@@ -110,66 +106,35 @@ export default function DesignerTextFieldWithSeparator(props){
     }
 
     function handleTextChanged(newText){   
+        setTextValue(newText);
+
         if (newText === ""){
-            setCheckStatus("success")
-        }
-        else {
-            setCheckStatus("waiting")
-        }
-    
-        let re1 = getRegexp()
-
-        let emailList = newText.split(re1).map(elem => elem.trim().replace(/"/g,""));
-
-        for( let i = emailList.length; i--;){
-            if ( emailList[i].trim().length === 0) emailList.splice(i, 1); /* удаление пустых значений */
-        }
-
-        let values = [];
-        for(let code of emailList){
-            values.push(code);
-        }
-
-        let isSelected = (emailList.length > 0) ? true : false; 
-
-        if (isSelected) {
-            props.onChange(props.source, values, "waiting");
-            
-            if (timer.current > 0){
-                clearInterval(timer.current); // удаляем предыдущий таймер
-            }
-
-            timer.current = setTimeout(() => {
-                requestId.current = dataHub.emailController.check(values, m => handleCheckValues(values, m))
-            }, 3000);
-
-           // timer.current = setTimeout(1000);
-        }
-        else {
             props.onChange(props.source, [], "success");
         }
-        setTextValue(newText)
-    }
+        else {
 
-    function handleCheckValues(values, resp){
-        if (requestId.current === resp.requestId){
-            let validation = "error"
-            if (resp.ok){
-                if (resp.data.emails.length){
-                    setInvalidValues(resp.data.emails)
-                }
-                else {
-                    validation = "success"
-                }
+            let re1 = getRegexp()
+
+            let emailList = newText.split(re1).map(elem => elem.trim().replace(/"/g,""));
+
+            for( let i = emailList.length; i--;){
+                if ( emailList[i].trim().length === 0) emailList.splice(i, 1); /* удаление пустых значений */
             }
-            props.onChange(props.source, values, validation);
-            setCheckStatus(validation);
-        }
-    }
 
-    function handleClearClick(){
-        setTextValue("");
-        handleTextChanged("");
+            let values = [];
+            for(let code of emailList){
+                values.push(code);
+            }
+
+            let isSelected = (emailList.length > 0) ? true : false; 
+
+            if (isSelected) {
+                props.onChange(props.source, values, "waiting");
+            }
+            else {
+                props.onChange(props.source, [], "success");
+            }   
+        }
     }
 
     return (
@@ -201,16 +166,16 @@ export default function DesignerTextFieldWithSeparator(props){
                                     aria-label="clear"
                                     color='primary'
                                     size='small'
-                                    onClick={handleClearClick}
+                                    onClick={()=> handleTextChanged("")}
                                 >
                                     <ClearIcon fontSize='small' />
                                 </IconButton>
                             </Tooltip>
 
-                            <FilterStatus status={checkStatus} />
+                            <FilterStatus status={props.status} />
                           
                             {
-                                checkStatus === 'error' && !!invalidValues.length &&
+                                props.status === 'error' && !!props.invalidValues.length &&
                                
                                     <Tooltip title="Показать некорректные значения" placement="top">
                                         <IconButton 
@@ -230,8 +195,8 @@ export default function DesignerTextFieldWithSeparator(props){
             {
                 showInvalidValues &&
                 <InvalidValuesView 
-                    values={invalidValues}
-                    onClose={() => {setShowInvalidValues(false); /*setInvalidValues([]);*/}}
+                    values={props.invalidValues}
+                    onClose={() => {setShowInvalidValues(false)}}
                 />
             }
         </div>

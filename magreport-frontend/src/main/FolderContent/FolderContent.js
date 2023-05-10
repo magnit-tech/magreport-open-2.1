@@ -19,7 +19,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 // material-ui
 //import { makeStyles} from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
-import { Grid } from '@material-ui/core';
+import { AppBar, Grid, Tab, Tabs } from '@material-ui/core';
 import Pagination from '@material-ui/lab/Pagination';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
@@ -67,6 +67,7 @@ import SortModalWindow from './ModalWindows/SortModalWindow';
  * @param {boolean}          props.showItemControls - показывать ли элементы редактирования и удаления элемента (по умолчанию true)
  * @param {boolean}          props.showFolderControls - показывать ли элементы управления каталогом (по умолчанию true)
  * @param {boolean}          props.pagination - показывать ли постраничную навигацию
+ * @param {Object}           props.jobTabs - объект табов для отображения своих\чужих заданий
  * @param {boolean}          props.searchParams - параметры поиска
  * @param {onFolderClick}    props.onFolderClick - function(folderId) - действие при нажатии на папку
  * @param {itemCallback}     props.onItemClick - function(itemId) - действие при нажатии на объект
@@ -84,6 +85,7 @@ import SortModalWindow from './ModalWindows/SortModalWindow';
  * @param {onAddToFavorites} props.onRefresh - function() - обновить отображение содержимого каталога
  * @param {Boolean}          props.onShowSqlDialogClick - показать диалоговое окно с SQL - запросом
  * @param {Boolean}          props.onShowHistoryStatusClick - показать диалоговое окно с историей статусов
+ * @param {Boolean}          props.onShowShareList - показать диалоговое окно со списком пользователей с кем поделились заданием
  * @param {Boolean}          props.contextAllowed - разрешено показывать контекстное меню (сортировка)
  * @param {Boolean}          props.copyAndMoveAllowed - разрешено показывать контекстное меню для каталогов и объектов
  * @param {Boolean}          props.notAllowedForItems - запрешено показывать контекстное меню для объектов
@@ -419,6 +421,7 @@ export default function FolderContent(props){
                         onDependenciesClick = {() => props.onDependenciesClick(i.id)}
                         onShowSqlDialogClick = {props.onShowSqlDialogClick}
                         onShowHistoryStatusClick = {props.onShowHistoryStatusClick}
+                        onShowShareList = {props.onShowShareList}
                         onContextMenu={handleContextClickObject}
                         onJobAddComment={(comment) => props.onJobAddComment(i.id, index, comment)}   
                     />
@@ -575,6 +578,19 @@ export default function FolderContent(props){
                 />
             }
 
+            { props.jobTabs && 
+                <AppBar position="static">
+                    <Tabs 
+                        value={props.jobTabs.value}
+                        onChange={(event, newValue) => props.jobTabs.handleChange(newValue)}
+                    >
+                        { props.jobTabs.tabs.map(tab => (
+                            <Tab key={tab.key} label={tab.title} />
+                        ))}
+                    </Tabs>
+                </AppBar>
+            }
+
             { props.pagination && cntPages > 0 &&
                 <div elevation={0} className={classes.divPagination}>
                     <Pagination
@@ -592,14 +608,15 @@ export default function FolderContent(props){
             }
 
             <div style={{display: 'block'}}>
-            <ItemWindow 
-                isOpen={openWindow}
-                type={windowType}
-                data={windowData}
-                onClose={handleCloseFolderWindow}
-                onSave={handleSaveFolderWindow}
-            />
+                <ItemWindow 
+                    isOpen={openWindow}
+                    type={windowType}
+                    data={windowData}
+                    onClose={handleCloseFolderWindow}
+                    onSave={handleSaveFolderWindow}
+                />
             </div>
+
             <div className={classes.gridContentRelative}>
                 <div className={classes.gridContentAbsolute} 
                     onScroll={handleScroll} 
@@ -632,10 +649,9 @@ export default function FolderContent(props){
                 (canCreateFolder || canCreateItem) && 
                 (props.showAddFolder  || props.showAddItem) && 
                 (props.itemsType !== FolderItemTypes.roles || props.data.id !== null) &&
-                
                 <AddButton
                     showCreateFolder = {canCreateFolder && props.showAddFolder}
-                    showCreateItem = {canCreateItem && props.showAddItem && props.data.id !== null}
+                    showCreateItem = {canCreateItem && props.showAddItem && (props.data.id && props.data.id !== null)}
                     itemName = {itemName}
                     onAddFolder = {handleAddFolder}
                     onAddItemClick = {handleAddItemClick}

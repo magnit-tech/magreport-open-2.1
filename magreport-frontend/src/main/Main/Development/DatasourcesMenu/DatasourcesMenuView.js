@@ -59,10 +59,20 @@ function DatasourcesMenuView(props){
         navigate(`/ui/datasource/${folderId}`)
     }
     function handleItemClick(datasourceId) {
-        navigate(`/ui/datasource/${id}/view/${datasourceId}`, {state: location.pathname})
+        if (id){
+            navigate(`/ui/datasource/${id}/view/${datasourceId}`, {state: location.pathname})
+        } else {
+            let path = props.state.filteredFolderData ? props.state.filteredFolderData.dataSources.find(i => i.id === datasourceId).path : props.state.currentFolderData.dataSources.find(i => i.id === datasourceId).path;
+            navigate(`/ui/datasource/${path[path.length - 1].id}/view/${datasourceId}`, {state: location.pathname})
+        }
     }
     function handleEditItemClick(datasourceId) {
-        navigate(`/ui/datasource/${id}/edit/${datasourceId}`, {state: location.pathname})
+        if (id) {
+            navigate(`/ui/datasource/${id}/edit/${datasourceId}`, {state: location.pathname})
+        } else {
+            let path = props.state.filteredFolderData ? props.state.filteredFolderData.dataSources.find(i => i.id === datasourceId).path : props.state.currentFolderData.dataSources.find(i => i.id === datasourceId).path;
+            navigate(`/ui/datasource/${path[path.length - 1].id}/edit/${datasourceId}`, {state: location.pathname})
+        }
     }
 
     function handleAddItemClick(folderItemsType) {

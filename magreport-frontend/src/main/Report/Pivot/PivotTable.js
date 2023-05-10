@@ -73,6 +73,7 @@ export default function(props){
             tableRow.push({
                 data : props.tableData.columnDimensionsValues[j][dimNum],
                 fieldId : props.tableData.columnDimensionsFields[dimNum].fieldId,
+                original: props.tableData.columnDimensionsFields[dimNum].original,
                 type : "dimensionValue",
                 colSpan : colsMetricFactor,
                 rowSpan : 1
@@ -98,6 +99,7 @@ export default function(props){
             tableRow.push({
                 data : props.tableData.rowDimensionsValues[rowNum][j],
                 fieldId : props.tableData.rowDimensionsFields[j].fieldId,
+                original: props.tableData.rowDimensionsFields[j].original,
                 type : "dimensionValue",
                 colSpan : 1,
                 rowSpan : rowsMetricFactor
@@ -111,7 +113,7 @@ export default function(props){
                 let m = props.tableData.metrics[mIndex];
                 tableRow.push({
                     fieldIndex : mIndex,
-                    data : AggFunc.get(m.aggregationType) + " " + m.metricName,
+                    data : m.metricNewName !== '' ? m.metricNewName : AggFunc.get(m.aggregationType) + " " + m.metricName,
                     type : "metricName",
                     colSpan : 1,
                     rowSpan : 1
@@ -123,7 +125,7 @@ export default function(props){
     function printMetricInRow(tableRow, metricNum, rowNum) {
         tableRow.push({
             fieldIndex : metricNum,
-            data : AggFunc.get(props.tableData.metrics[metricNum].aggregationType) + " " + props.tableData.metrics[metricNum].metricName,
+            data : props.tableData.metrics[metricNum].metricNewName !=='' ? props.tableData.metrics[metricNum].metricNewName : AggFunc.get(props.tableData.metrics[metricNum].aggregationType) + " " + props.tableData.metrics[metricNum].metricName,
             type : "metricName",
             style: props.pivotConfiguration.fieldsLists.metricFields[metricNum]?.formatting || '',
             colSpan : 1,
@@ -368,12 +370,12 @@ export default function(props){
         Обработчики
     ******************
     */
-    function handleDimensionValueCellClick(fieldId, fieldValue) {
-        props.onDimensionValueFilter(fieldId, fieldValue);
+    function handleDimensionValueCellClick(fieldId, original, fieldValue) {
+        props.onDimensionValueFilter(fieldId, original ? 'REPORT_FIELD' : 'DERIVED_FIELD', fieldValue);
     }
 
-    function handleMetricValueCellClick(fieldId, index, fieldValue) {
-        props.onMetricValueFilter(fieldId, index, fieldValue);
+    function handleMetricValueCellClick(fieldId, index, fieldValue, dataType) {
+        props.onMetricValueFilter(fieldId, index, fieldValue, dataType);
     }
 
     function handleContextClick(event, type, cell){
@@ -597,7 +599,7 @@ export default function(props){
                 
                 
             } else if(cell.hasOwnProperty('style') && cell.style) {
-               cell.style.filter((styleObj) => (styleObj.aggFuncName === cell.aggFuncName)).map((formatting) => {
+               cell.style.filter((styleObj) => (styleObj.aggFuncName === cell.aggFuncName)).forEach((formatting) =>  {
                     styleObj = {   
                         margin: '2px',
                         height: formatting.fontSize ? `${formatting.fontSize + 5}px` : 'auto',
@@ -615,7 +617,6 @@ export default function(props){
 
         return styleObj
     }
-
 
     return(
         <div className={clsx(styles.pivotTable)}>
@@ -641,7 +642,6 @@ export default function(props){
                                 return (
                                 <tr key = {ind}>
                                     {r.filter((cell) => (cell.colSpan > 0 && cell.rowSpan > 0)).map( (cell, i) => {
-
                                         const id = Math.random()
                                         return (
                                             <td key = {i} colSpan = {cell.colSpan} rowSpan = {cell.rowSpan}
@@ -670,8 +670,8 @@ export default function(props){
                                                     </div>
                                                 }
                                                 <div 
-                                                    onClick = {cell.type === "dimensionValue" ? () => {handleDimensionValueCellClick(cell.fieldId, cell.data)}
-                                                    : cell.type === "metricValues"  ? () => {handleMetricValueCellClick(cell.fieldId, cell.index, cell.data)}
+                                                    onClick = {cell.type === "dimensionValue" ? () => {handleDimensionValueCellClick(cell.fieldId, cell.original, cell.data)}
+                                                    : cell.type === "metricValues"  ? () => {handleMetricValueCellClick(cell.fieldId, cell.index, cell.data, cell.dataType)}
                                                     : () => {}}
                                                 >
                                                     <div style = { cellDataStyle(cell) }>
@@ -721,7 +721,7 @@ function mergeCells(tableRows, columnDimensionsNum, nHeaderRows, colsMetricFacto
     }
 
     // merge rows
-    let rowSpan = new Array();
+    let rowSpan = new Array(); // eslint-disable-line
     for(let i = tableRows.length - rowsMetricFactor; i >= nHeaderRows; i -= rowsMetricFactor){
         for(let j = 0; j < tableRows[i].length; j++){
             if(tableRows[i][j].type === "dimensionValue"){

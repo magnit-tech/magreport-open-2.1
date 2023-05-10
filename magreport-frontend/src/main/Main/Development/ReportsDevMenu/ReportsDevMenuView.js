@@ -62,10 +62,20 @@ function ReportsDevMenuView(props){
         navigate(`/ui/report/starter/${reportId}`, {state: location.pathname})
     }
     function handleViewItemClick(reportId) {
-        navigate(`/ui/reportsDev/${id}/view/${reportId}`, {state: location.pathname})
+        if (id) {
+            navigate(`/ui/reportsDev/${id}/view/${reportId}`, {state: location.pathname})
+        } else {
+            let reportFolderPath = props.state.filteredFolderData.reports.find(i => i.id === reportId).path;
+            navigate(`/ui/reportsDev/${reportFolderPath[reportFolderPath.length - 1].id}/view/${reportId}`, {state: location.pathname})    
+        }
     }
     function handleEditItemClick(reportId) {
-        navigate(`/ui/reportsDev/${id}/edit/${reportId}`, {state: location.pathname})
+        if (id) {
+            navigate(`/ui/reportsDev/${id}/edit/${reportId}`, {state: location.pathname})
+        } else {
+            let reportFolderPath = props.state.filteredFolderData ? props.state.filteredFolderData.reports.find(i => i.id === reportId).path : props.state.currentFolderData.reports.find(i => i.id === reportId).path;
+            navigate(`/ui/reportsDev/${reportFolderPath[reportFolderPath.length - 1].id}/edit/${reportId}`, {state: location.pathname})
+        }
     }
     function handleAddItemClick() {
         navigate(`/ui/reportsDev/${id}/add`, {state: location.pathname})

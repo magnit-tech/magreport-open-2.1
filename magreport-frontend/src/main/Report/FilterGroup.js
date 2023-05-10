@@ -41,6 +41,7 @@ export default function FilterGroup(props){
             isInvalid = true
         }
     }
+    let prevAndOrType = false;
 
     return (  
         <Accordion defaultExpanded elevation={0}>
@@ -61,7 +62,10 @@ export default function FilterGroup(props){
             </AccordionSummary>
             <AccordionDetails>
                 <div className={classes.allChildrenBox}> {
-                    allChildren.map( (v) => {
+                    allChildren.map( (v, i, arr) => {
+                        if (i !== 0){
+                            prevAndOrType = arr[i-1].hasOwnProperty('hidden') ? arr[i-1].hidden : false;
+                        }
                         if(v._elementType === 'group') {
                             return <div key = {v.id} className = {clsx(classes.andOrType, andOrType)} >
                                 <FilterGroup
@@ -74,7 +78,7 @@ export default function FilterGroup(props){
                             </div>
                         }
                         else {
-                            return <div key = {v.id} className = {clsx(classes.andOrType, andOrType)}>        
+                            return <div key = {v.id} className = {clsx(classes.andOrType, {[andOrType]: !prevAndOrType && !v.hidden})}>        
                                 <FilterWrapper
                                     filterData = {v}
                                     lastFilterValue = {props.lastFilterValues.getFilterValue(v.id)}
@@ -82,7 +86,7 @@ export default function FilterGroup(props){
                                     toggleClearFilters = {props.toggleClearFilters}
                                 />
                             </div>
-                        }                            
+                        }
                     })
                 }
                 </div>
