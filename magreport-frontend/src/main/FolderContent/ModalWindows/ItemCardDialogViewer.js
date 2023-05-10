@@ -40,6 +40,28 @@ function ItemCardDialogViewer(props){
         props.hideJobDialog(props.itemsType)
     }
 
+    const shareUsersExpressions = (value) => {
+        const expressions = ['пользователь', 'пользователя', 'пользователей']
+        let result = ''
+        let count = value % 100
+ 
+        if (count >= 5 && count <= 20) {
+            result = expressions['2']
+        } else {
+            count = count % 10
+
+            if (count === 1) {
+                result = expressions['0']
+            } else if (count >= 2 && count <= 4) {
+                result = expressions['1']
+            } else {
+                result = expressions['2']
+            }
+        }
+
+        return `${value} ${result}`
+    }
+
     return (
         <div>
         {(props.itemsType === FolderItemTypes.job || props.itemsType === FolderItemTypes.userJobs) &&
@@ -53,9 +75,8 @@ function ItemCardDialogViewer(props){
                 <DialogTitle id="SQL-dialog-title">{props.titleName}</DialogTitle>
                 <DialogContent className = {clsx({[classes.flx]: props.data.history})}>
                
-                    {    props.data.sqlQuery ?
-                        <DialogContentText id="SQL-dialog-description">  {props.data.sqlQuery} </DialogContentText>
-                        :
+                    {  props.data.sqlQuery && <DialogContentText id="SQL-dialog-description">  {props.data.sqlQuery} </DialogContentText> }
+                    {  props.data.history && 
 						<TableContainer>
 							<Table stickyHeader size="small">
 								<TableHead>
@@ -78,6 +99,32 @@ function ItemCardDialogViewer(props){
 								</TableBody>
 							</Table>
 						</TableContainer>
+                    }
+                    { props.data.shareList && 
+                        <TableContainer>
+                            <Table stickyHeader size="small">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>ID</TableCell>
+                                        <TableCell>Логин</TableCell>
+                                        <TableCell>Домен</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {props.data.shareList?.map((user) => (
+                                        <TableRow key={user.id}>
+                                            <TableCell component="th" scope="row"> {user.id} </TableCell>
+                                            <TableCell component="th" scope="row"> {user.name} </TableCell>
+                                            <TableCell component="th" scope="row"> {user.domain} </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                                
+                            </Table>
+                            {props.data.countShareUsers > 10 &&
+                                <h3 style={{textAlign: 'right'}}>... и ещё {shareUsersExpressions(props.data.countShareUsers - 10)}</h3>
+                            }
+                        </TableContainer>
                     }
                 
                 </DialogContent>

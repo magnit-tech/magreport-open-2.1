@@ -9,14 +9,7 @@ import ru.magnit.magreportbackend.domain.EntityWithName;
 import ru.magnit.magreportbackend.domain.enums.Expressions;
 import ru.magnit.magreportbackend.domain.user.User;
 
-import javax.persistence.AttributeOverride;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.io.Serial;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -45,6 +38,10 @@ public class Expression extends EntityWithName {
 
     @Column(name = "NUM_PARAMS")
     private Long numParams;
+
+    @Lob
+    @Column(name = "SIGNATURE")
+    private String signature;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "NUM_PARAM_TYPE_ID")

@@ -209,7 +209,7 @@ public class ScheduleController {
 
         LogHelper.logInfoUserMethodStart();
 
-        var result = service.getScheduleTask(request);
+        var result = service.getScheduleTask(request.getId());
 
         var response = ResponseBody.<ScheduleTaskResponse>builder()
                 .success(true)

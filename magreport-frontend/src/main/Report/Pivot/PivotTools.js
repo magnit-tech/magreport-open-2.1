@@ -1,7 +1,8 @@
 import React from 'react';
-import Icon from '@mdi/react'
+import Icon from '@mdi/react';
 import { mdiDeleteForever, mdiPlay, mdiTable, mdiTableMergeCells, mdiTableSplitCell, mdiTableColumn, 
-        mdiTableRow, mdiTableHeadersEyeOff, mdiTableHeadersEye, mdiCog, mdiContentSaveCogOutline, mdiShareAll, mdiSort, mdiMicrosoftExcel } from '@mdi/js';
+        mdiTableRow, mdiTableHeadersEyeOff, mdiTableHeadersEye, mdiCog, mdiContentSaveCogOutline, mdiShareAll, mdiSort, mdiMicrosoftExcel,
+        mdiApplicationArrayOutline  } from '@mdi/js';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Tooltip from '@material-ui/core/Tooltip/Tooltip';
@@ -22,6 +23,7 @@ import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
  * @param {*} props.onShareJobDialog - открытие диалогового окна для ShareJob
  * @param {*} props.showShareToolBtn - отображение кнопки 'Поделиться заданием' (true/false)
  * @param {*} props.onExportToExcel - function() - callback экспорт в Excel
+ * @param {*} props.onShowCreateFieldDialogue - function(true | false) действие по нажатию кнопки "Добавить поле"
  * @returns 
  */
 export default function PivotTools(props){
@@ -198,6 +200,21 @@ export default function PivotTools(props){
                                 onClick={() => {props.onExportToExcel(true)} }
                             >
                                 <Icon path={mdiMicrosoftExcel}
+                                    size={1}
+                                />
+                            </IconButton>
+                        }
+                    />
+                </Tooltip>
+                <Tooltip title="Производные поля"  placement='top'>
+                    <FormControlLabel
+                        control={
+                            <IconButton
+                                size="small"
+                                aria-label="sortingDialog"
+                                onClick={() => {props.onShowCreateFieldDialogue(true)} }
+                            >
+                                <Icon path={mdiApplicationArrayOutline }
                                     size={1}
                                 />
                             </IconButton>

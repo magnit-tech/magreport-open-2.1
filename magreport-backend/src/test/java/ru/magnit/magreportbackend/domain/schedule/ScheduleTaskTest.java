@@ -30,7 +30,7 @@ class ScheduleTaskTest extends BaseEntityTest {
 
     @BeforeAll
     void init() throws ClassNotFoundException {
-        checkNumberOfFields(26);
+        checkNumberOfFields(27);
     }
 
     @Test

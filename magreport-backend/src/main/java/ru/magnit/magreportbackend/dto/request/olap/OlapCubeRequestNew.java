@@ -41,13 +41,13 @@ public class OlapCubeRequestNew {
 
     private List<SortingParams> rowSort = Collections.emptyList();
 
-    public Set<FieldDefinition> getAllFields(){
+    public Set<FieldDefinition> getAllFields() {
         final var result = new HashSet<FieldDefinition>();
 
         result.addAll(columnFields);
         result.addAll(rowFields);
         result.addAll(metrics.stream().map(MetricDefinitionNew::getField).toList());
-
+        if (filterGroup != null) result.addAll(filterGroup.getAllFields());
         return result;
     }
 

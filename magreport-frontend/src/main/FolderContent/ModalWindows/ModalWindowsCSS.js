@@ -89,6 +89,18 @@ export const RoleUserListWindowCSS = makeStyles(theme => ({
     addRoleBtnDiv: {
         display: "flex",
         justifyContent: "end"
+    },
+    recursiveDiv: {
+        margin: '0px 32px', 
+        display: 'flex', 
+        justifyContent: 'end'
+    },
+    recursiveGroup: {
+        justifyContent: 'end', 
+        flexDirection: 'row'
+    },
+    recursiveDown: {
+        marginRight: 0
     }
 })); 
 
