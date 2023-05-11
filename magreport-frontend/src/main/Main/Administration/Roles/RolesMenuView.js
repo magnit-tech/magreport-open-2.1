@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 
-import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 
 // dataHub
 import dataHub from 'ajax/DataHub';
@@ -19,17 +19,27 @@ import SidebarItems from '../../Sidebar/SidebarItems'
 
 function RolesMenuView(props){
 
-    const {id} = useParams()
+    const { id } = useParams()
     const navigate = useNavigate()
     const location = useLocation()
 
-
     let state = props.state;
+
+    console.log(location);
 
     let reload = {needReload : state.needReload};
     let folderItemsType = SidebarItems.admin.subItems.roles.folderItemType;
     let sidebarItemType = SidebarItems.admin.subItems.roles.key;
     let isSortingAvailable = true;
+
+    let searchParams = location.search ? location.search.replace('?search=', '') : ''
+
+
+    // useEffect(() => {
+    //     if(location.search) {
+    //         props.actionSearchClick(folderItemsType, state.currentFolderId, {searchString: location.search.replace('?search=', '')})
+    //     }
+    // }, [location])
 
     function handleFolderClick(folderId) {
         navigate(`/ui/roles/${folderId}`)
@@ -62,6 +72,13 @@ function RolesMenuView(props){
         navigate(`/ui/roles/${id}/add`, {state: location.pathname})
     }
 
+    function handleSearchItems(params) {
+        // searchParams => {props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)}
+        // console.log(searchString);
+        navigate(`${location.pathname}?search=${params.searchString}`)
+        // props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)
+    }
+
     
     return(
         <div  style={{display: 'flex', flex: 1}}>
@@ -90,7 +107,7 @@ function RolesMenuView(props){
                     onDeleteFolderClick = {(folderId) => {props.actionDeleteFolderClick(folderItemsType, state.currentFolderData.id, folderId)}}
                     onDeleteItemClick = {(roleId) => {props.actionDeleteItemClick(folderItemsType, state.currentFolderId, roleId)}}
                     onEditFolder = {(folderId, name, description) => {props.actionEditFolder(sidebarItemType, folderItemsType, state.currentFolderData.id, folderId, name, description)}}
-                    onSearchClick ={searchParams => {props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)}}
+                    onSearchClick = {handleSearchItems}
                     onSortClick ={sortParams => {props.actionSortClick(folderItemsType, state.currentFolderId, sortParams)}}
                     contextAllowed
                 />
