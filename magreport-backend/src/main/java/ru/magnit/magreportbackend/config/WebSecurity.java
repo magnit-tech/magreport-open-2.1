@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ru.magnit.magreportbackend.controller.AdminController.DATA_LINEAGE_PATH;
+import static ru.magnit.magreportbackend.controller.DerivedFieldController.DERIVED_FIELD_EXPRESSIONS_GET_ALL;
+import static ru.magnit.magreportbackend.controller.DerivedFieldController.DERIVED_FIELD_GET_ALL_BY_REPORT;
 import static ru.magnit.magreportbackend.controller.EventController.EVENT_REGISTER;
 import static ru.magnit.magreportbackend.controller.FilterInstanceController.FILTER_INSTANCE_GET_CHILD_NODES;
 import static ru.magnit.magreportbackend.controller.FilterInstanceController.FILTER_INSTANCE_GET_VALUES;
@@ -28,6 +30,7 @@ import static ru.magnit.magreportbackend.controller.FilterReportController.REPOR
 import static ru.magnit.magreportbackend.controller.FilterReportController.REPORT_FILTER_GET_CHILD_NODES;
 import static ru.magnit.magreportbackend.controller.FolderController.FOLDER_GET;
 import static ru.magnit.magreportbackend.controller.FolderController.FOLDER_SEARCH;
+import static ru.magnit.magreportbackend.controller.FolderPermissionsController.FOLDER_PERMISSION_CHECK;
 import static ru.magnit.magreportbackend.controller.OlapController.OLAP_GET_EXTERNAL_SERVICES;
 import static ru.magnit.magreportbackend.controller.OlapController.OLAP_GET_PIVOT_TABLE_EXCEL_GET;
 import static ru.magnit.magreportbackend.controller.OlapController.OLAP_REGISTER_EXTERNAL_SERVICE;
@@ -88,6 +91,7 @@ public class WebSecurity {
                 .antMatchers("/api/v1/olap/**").hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
                 .antMatchers(FOLDER_GET).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
                 .antMatchers(FOLDER_SEARCH).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
+                .antMatchers(FOLDER_PERMISSION_CHECK).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
                 .antMatchers("/api/v1/folder/**").hasAnyAuthority(ADMIN.name(), DEVELOPER.name())
                 .antMatchers(REPORT_ADD_FAVORITES).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
                 .antMatchers(REPORT_DELETE_FAVORITES).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
@@ -101,6 +105,8 @@ public class WebSecurity {
                 .antMatchers(FILTER_INSTANCE_GET_VALUES).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
                 .antMatchers(FILTER_INSTANCE_GET_CHILD_NODES).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
                 .antMatchers(DATA_LINEAGE_PATH).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
+                .antMatchers(DERIVED_FIELD_GET_ALL_BY_REPORT).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
+                .antMatchers(DERIVED_FIELD_EXPRESSIONS_GET_ALL).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
                 .antMatchers("/api/v1/**").hasAnyAuthority(ADMIN.name(), DEVELOPER.name())
                 .antMatchers("/**").permitAll()
                 .anyRequest().authenticated()
@@ -109,7 +115,6 @@ public class WebSecurity {
                 .addFilter(jwtAuthenticationFilter)
                 .addFilter(jwtAuthorizationFilter)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
         return http.build();
     }
 

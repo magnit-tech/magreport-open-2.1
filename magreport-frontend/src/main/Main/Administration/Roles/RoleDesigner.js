@@ -1,18 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { useSnackbar } from 'notistack';
-
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-
 // components
-import { CircularProgress, Tooltip } from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
-import MenuBookIcon from '@material-ui/icons/MenuBook';
-import CreateIcon from '@material-ui/icons/Create';
-import Button from '@material-ui/core/Button';
+import { CircularProgress } from '@material-ui/core';
 import Paper from '@material-ui/core/Paper';
-import TextField from '@material-ui/core/TextField';
-import MenuItem from '@material-ui/core/MenuItem';
 // local
 import DesignerPage from '../../Development/Designer/DesignerPage';
 import PageTabs from 'components/PageTabs/PageTabs';
@@ -22,17 +14,13 @@ import DomainGroupList from '../DomainGroups/DomainGroupList';
 import {FolderItemTypes} from '../../../../main/FolderContent/FolderItemTypes';
 import PermittedFoldersList from './PermittedFoldersList';
 import DesignerFolderBrowser from '../../Development/Designer/DesignerFolderBrowser';
-
 // dataHub
 import dataHub from 'ajax/DataHub';
 import DataLoader from 'main/DataLoader/DataLoader';
-
 // styles 
 import { RolesCSS } from "./RolesCSS";
-
 // actions
 import { actionUsersLoaded, actionUsersLoadFailed } from 'redux/actions/admin/actionUsers';
-import { actionRoleSelectFolderType } from 'redux/actions/admin/actionRoles';
 import { editItemNavbar, addItemNavbar } from "redux/actions/navbar/actionNavbar";
 
 
@@ -52,7 +40,6 @@ function RoleDesigner(props){
     const { enqueueSnackbar } = useSnackbar();
 
     const [pageName, setPagename] = useState(id ? "Редактирование роли" : "Создание роли");
-
     const [uploading, setUploading] = useState(false);
     const [reload, setReload] = useState({ needReload: false });
     const [folderBrowserOpen, setFolderBrowserOpen] = useState(false);
@@ -124,7 +111,6 @@ function RoleDesigner(props){
         let n = ''; 
         
         for (let name of namesList){
-            
             n = name.toLowerCase().includes('filtertemplate') ?  'Шаблоны фильтров':
                 name.toLowerCase().includes('exceltemplate') ? 'Шаблоны Excel': 
                 name.toLowerCase().includes('filterinstance') ? 'Экземпляры фильтров':
@@ -142,12 +128,10 @@ function RoleDesigner(props){
             loadedData: loadedData, 
             namesList:  fullNamesList
         })
-      //  setSelectedPermittedFolder('userReportFolders');
     }
 
-    const handleChangeSelectedPermittedFolder = (event) => {
-        setSelectedPermittedFolder(event.target.value);
-        props.actionRoleSelectFolderType(event.target.value)
+    const handleChangeSelectedPermittedFolder = (value) => {
+        setSelectedPermittedFolder(value);
     };
 
     function handleChangeName(newName){
@@ -315,7 +299,6 @@ function RoleDesigner(props){
         tabdisabled: id === null || id === undefined ? true : false,
         tabcontent:
         <div style={{display: 'flex', flex: 1, flexDirection: 'column'}}>
-
             <Paper elevation={3} className={classes.userListPaper}>
                 <DataLoader
                     loadFunc = {dataHub.roleController.getUsers}
@@ -375,71 +358,21 @@ function RoleDesigner(props){
         tabdisabled: id === null || id === undefined ? true : false,
         tabcontent:
         <div style={{display: 'flex', flex: 1, flexDirection: 'column'}}>
-            <div className={classes.userAddPanel}>
-                <div className={classes.roleAutocompleteDiv}>
-                    <TextField
-                        fullWidth
-                        id="permitted-folders-names-list"
-                        select
-                        label="Объекты"
-                        value={selectedPermittedFolder}
-                        onChange={handleChangeSelectedPermittedFolder}
-                        //helperText="Please select your currency"
-                        variant="outlined"
-                    >
-                        {permittedFolders.namesList.map((item, index) => (
-                            <MenuItem key={item.id} value={item.id}>
-                                {item.value}
-                            </MenuItem>
-                         ))}
-                    </TextField> 
-                    
-                </div>
-                { FolderItemType !== FolderItemTypes.excelTemplates &&
-                    <div className={classes.addButtonsRW}>
-                        <Tooltip title={'Выдать права на чтение'}>
-                            <Button
-                                className={classes.addButtonRW}
-                                color="primary"
-                                variant="outlined"
-                                disabled = {false}
-                                onClick={handleAddFolderRead}
-                            >
-                                <MenuBookIcon/>
-                                <AddIcon/>
-                            </Button>
-                        </Tooltip>
-                        <Tooltip title={'Выдать права на запись'}>
-                            <Button
-                                className={classes.addButtonRW}
-                                color="primary"
-                                variant="outlined"
-                                disabled = {false}
-                                onClick={handleAddFolderWrite}
-                            >
-                                <CreateIcon/>
-                                <AddIcon/>
-                            </Button>
-                        </Tooltip>
+            <div>
+                {uploading ? <div className={classes.container}><CircularProgress/></div> :
+                    <div className={classes.container}>
+                        { FolderItemType !== FolderItemTypes.excelTemplates &&
+                            <DesignerFolderBrowser 
+                                dialogOpen={folderBrowserOpen}
+                                itemType={FolderItemType}
+                                defaultFolderId = {null}
+                                onSubmit={(folderId) => handleSubmit(folderId, readWrite)}
+                                onClose={handleCloseFolderBrowser}
+                                sortParams = {props.sortParams}
+                            />
+                        }
                     </div>
                 }
-            <div>
-            {uploading ? <div className={classes.container}><CircularProgress/></div> :
-            <div className={classes.container}>
-                { FolderItemType !== FolderItemTypes.excelTemplates &&
-                    <DesignerFolderBrowser 
-                        dialogOpen={folderBrowserOpen}
-                        itemType={FolderItemType}
-                        defaultFolderId = {null}
-                        onSubmit={(folderId) => handleSubmit(folderId, readWrite)}
-                        //  onChange={handleChange}
-                        onClose={handleCloseFolderBrowser}
-                        sortParams = {props.sortParams}
-                    />
-                }
-            </div>
-            }
-        </div>
             </div>
             <Paper elevation={3} className={classes.userListPaper}>
                 <DataLoader
@@ -450,24 +383,19 @@ function RoleDesigner(props){
                     onDataLoadFailed = {(message) => enqueueSnackbar(`При получении списка каталогов, к которым роль имеет доступ, возникла ошибка: ${message}`, {variant: "error"})}
                 >
                     <PermittedFoldersList
-                        //itemsType={FolderItemTypes.roles}
                         selectedItem={selectedPermittedFolder}
                         items={permittedFolders}
                         editable = {true}
                         onChange={(folderId, roleType) => handleSubmit(folderId, roleType)}
                         onDelete={(folderId) => handleDeleteRolePermission(folderId)}
-                        
-                       // showDeleteButton={true}
-                      //  roleId={id}
-                      //  onDeleteDomainGroupFromRoleResponse={handleDeleteDomainGroupFromRoleResponse}
+                        onChangeSelectedPermittedFolder = {handleChangeSelectedPermittedFolder}
+                        onAddFolderRead = {handleAddFolderRead}
+                        onAddFolderWrite = {handleAddFolderWrite}
                     />
                 </DataLoader>
             </Paper>
-
         </div>
-    })} /*else if (props.roleTypeId === 3 /*SECURITY_FILTER) {
-
-    }*/;
+    })};
 
     return(
         <DataLoader
@@ -501,7 +429,6 @@ const mapStateToProps = state => {
 const mapDispatchToProps = {
     actionUsersLoaded, 
     actionUsersLoadFailed,
-    actionRoleSelectFolderType,
     editItemNavbar, 
     addItemNavbar
 }
