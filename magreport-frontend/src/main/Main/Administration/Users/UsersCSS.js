@@ -155,7 +155,7 @@ export const UsersCSS = makeStyles(theme => ({
 	domainAutocomplete: {
 		display: 'flex',
 		flexGrow: 1,
-		marginRight: '16px',
+		marginRight: '8px',
 		minWidth: '200px',
 	},
 	roleHideSelect: {

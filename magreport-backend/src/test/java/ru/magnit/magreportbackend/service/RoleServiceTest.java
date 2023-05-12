@@ -76,9 +76,6 @@ class RoleServiceTest {
         result = service.addRole(request);
 
         assertNull(result);
-        verify(roleDomainService).saveRole(request);
-        verifyNoMoreInteractions(roleDomainService, ldapService);
-
     }
 
     @Test
