@@ -4,14 +4,14 @@ import ru.magnit.magreportbackend.metrics_function.MetricsFunction;
 
 public class AvgIntegerFunction implements MetricsFunction {
 
-    private int numValues;
-    private int sumOfValues;
+    private long numValues;
+    private long sumOfValues;
 
     @Override
     public void addValue(String value, int col, int row) {
         if (value != null) {
             numValues++;
-            sumOfValues += Double.parseDouble(value);
+            sumOfValues += Long.parseLong(value);
         }
     }
 
