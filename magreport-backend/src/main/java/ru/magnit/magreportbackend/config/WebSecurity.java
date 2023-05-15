@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ru.magnit.magreportbackend.controller.AdminController.DATA_LINEAGE_PATH;
+import static ru.magnit.magreportbackend.controller.DerivedFieldController.DERIVED_FIELD_EXPRESSIONS_GET_ALL;
 import static ru.magnit.magreportbackend.controller.DerivedFieldController.DERIVED_FIELD_GET_ALL_BY_REPORT;
 import static ru.magnit.magreportbackend.controller.EventController.EVENT_REGISTER;
 import static ru.magnit.magreportbackend.controller.FilterInstanceController.FILTER_INSTANCE_GET_CHILD_NODES;
@@ -90,6 +91,7 @@ public class WebSecurity {
                 .antMatchers("/api/v1/olap/**").hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
                 .antMatchers(FOLDER_GET).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
                 .antMatchers(FOLDER_SEARCH).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
+                .antMatchers(FOLDER_PERMISSION_CHECK).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
                 .antMatchers("/api/v1/folder/**").hasAnyAuthority(ADMIN.name(), DEVELOPER.name())
                 .antMatchers(REPORT_ADD_FAVORITES).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
                 .antMatchers(REPORT_DELETE_FAVORITES).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
@@ -104,7 +106,7 @@ public class WebSecurity {
                 .antMatchers(FILTER_INSTANCE_GET_CHILD_NODES).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
                 .antMatchers(DATA_LINEAGE_PATH).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
                 .antMatchers(DERIVED_FIELD_GET_ALL_BY_REPORT).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
-                .antMatchers(FOLDER_PERMISSION_CHECK).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
+                .antMatchers(DERIVED_FIELD_EXPRESSIONS_GET_ALL).hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
                 .antMatchers("/api/v1/**").hasAnyAuthority(ADMIN.name(), DEVELOPER.name())
                 .antMatchers("/**").permitAll()
                 .anyRequest().authenticated()
