@@ -233,7 +233,8 @@ class ReportJobServiceTest {
                 "user",
                 LocalDateTime.now(),
                 LocalDateTime.now(),
-                true);
+                true,
+                0L);
     }
 
     @Test
@@ -477,7 +478,9 @@ class ReportJobServiceTest {
                 true,
             0L,
                 "comment",
-                true);
+                true,
+                0,
+                Collections.emptyList());
     }
 
     private ReportJobAddRequest getReportJobAddRequest() {
@@ -522,6 +525,7 @@ class ReportJobServiceTest {
                                         2L,
                                         null,
                                         FilterTypeEnum.DATE_RANGE,
+                                        null,
                                         null,
                                         null,
                                         null,

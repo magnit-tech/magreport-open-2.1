@@ -73,6 +73,7 @@ export default function(props){
             tableRow.push({
                 data : props.tableData.columnDimensionsValues[j][dimNum],
                 fieldId : props.tableData.columnDimensionsFields[dimNum].fieldId,
+                original: props.tableData.columnDimensionsFields[dimNum].original,
                 type : "dimensionValue",
                 colSpan : colsMetricFactor,
                 rowSpan : 1
@@ -98,6 +99,7 @@ export default function(props){
             tableRow.push({
                 data : props.tableData.rowDimensionsValues[rowNum][j],
                 fieldId : props.tableData.rowDimensionsFields[j].fieldId,
+                original: props.tableData.rowDimensionsFields[j].original,
                 type : "dimensionValue",
                 colSpan : 1,
                 rowSpan : rowsMetricFactor
@@ -111,7 +113,7 @@ export default function(props){
                 let m = props.tableData.metrics[mIndex];
                 tableRow.push({
                     fieldIndex : mIndex,
-                    data : AggFunc.get(m.aggregationType) + " " + m.metricName,
+                    data : m.metricNewName !== '' ? m.metricNewName : AggFunc.get(m.aggregationType) + " " + m.metricName,
                     type : "metricName",
                     colSpan : 1,
                     rowSpan : 1
@@ -123,7 +125,7 @@ export default function(props){
     function printMetricInRow(tableRow, metricNum, rowNum) {
         tableRow.push({
             fieldIndex : metricNum,
-            data : AggFunc.get(props.tableData.metrics[metricNum].aggregationType) + " " + props.tableData.metrics[metricNum].metricName,
+            data : props.tableData.metrics[metricNum].metricNewName !=='' ? props.tableData.metrics[metricNum].metricNewName : AggFunc.get(props.tableData.metrics[metricNum].aggregationType) + " " + props.tableData.metrics[metricNum].metricName,
             type : "metricName",
             style: props.pivotConfiguration.fieldsLists.metricFields[metricNum]?.formatting || '',
             colSpan : 1,
@@ -368,12 +370,12 @@ export default function(props){
         Обработчики
     ******************
     */
-    function handleDimensionValueCellClick(fieldId, fieldValue) {
-        props.onDimensionValueFilter(fieldId, fieldValue);
+    function handleDimensionValueCellClick(fieldId, original, fieldValue) {
+        props.onDimensionValueFilter(fieldId, original ? 'REPORT_FIELD' : 'DERIVED_FIELD', fieldValue);
     }
 
-    function handleMetricValueCellClick(fieldId, index, fieldValue) {
-        props.onMetricValueFilter(fieldId, index, fieldValue);
+    function handleMetricValueCellClick(fieldId, index, fieldValue, dataType) {
+        props.onMetricValueFilter(fieldId, index, fieldValue, dataType);
     }
 
     function handleContextClick(event, type, cell){
@@ -484,7 +486,7 @@ export default function(props){
         }
 
         let layout =                                                   
-            <div className={`metricValueCellArrowsWrapp ${styles.metricValueCellArrowsWrapp}`}>
+            <div className={'metricValueCellArrowsWrapp'}>
             { rowSortValue !== 'rowAscending' && <Icon path={mdiArrowRightCircle} size={0.7} key='rowAscending' className={styles.metricValueCellArrow} onClick={() => handleClickOnAddSortingArrow('row', 'Ascending', {cell})}/>}
             { rowSortValue !== 'rowDescending' && <Icon path={mdiArrowLeftCircle} size={0.7} key='rowDescending' className={styles.metricValueCellArrow} onClick={() => handleClickOnAddSortingArrow('row', 'Descending', {cell})}/>}
             { columnSortValue !== 'columnAscending' && <Icon path={mdiArrowDownCircle} size={0.7} key='columnAscending' className={styles.metricValueCellArrow} onClick={() => handleClickOnAddSortingArrow('column', 'Ascending', {cell})}/>}
@@ -538,7 +540,7 @@ export default function(props){
 
     const conditionalFormatting = (cell) => {
 
-        if (cell.type === "metricValues" && (cell.conditionalFormatting && cell.conditionalFormatting.length > 0) && (!isNaN(cell.data) && cell.data.length !== 0) && cell.data.trim() !== '') {
+        if (cell.type === "metricValues" && (cell.conditionalFormatting && cell.conditionalFormatting.length > 0)) {
             if (cell.conditionalFormatting.length === 1) {
                 return {backgroundColor: cell.conditionalFormatting[0].color}
             } 
@@ -556,28 +558,32 @@ export default function(props){
     }
 
     const cellDataStyle = (cell) => {
+
+        let styleObj = {
+            margin: '2px', fontSize: '14px', fontFamily: 'Arial', fontWeight: cell.type === "dimensionName" || cell.type === "metricName" ? "bold" : "medium"
+        }
+
         if (cell.type === "metricValues" && cell.fieldId) {
 
-            if (cell.conditionalFormatting && cell.conditionalFormatting.length > 0 && !cell.data.includes('%')) {
-                if (cell.conditionalFormatting.length === 1) {
-                    return  {   
-                            margin: '2px',
-                            height: cell.conditionalFormatting[0].fontSize ? `${cell.conditionalFormatting[0].fontSize + 5}px` : 'auto',
-                            fontWeight: cell.conditionalFormatting[0].fontStyle === 'bold' ? 'bold' : '400',
-                            fontStyle: cell.conditionalFormatting[0].fontStyle === 'italic' ? 'italic' : 'inherit',
-                            textDecoration: cell.conditionalFormatting[0].fontStyle === 'underline' ? 'underline' : 'none',
-                            fontSize: cell.conditionalFormatting[0].fontSize + 'px',
-                            color: cell.conditionalFormatting[0].fontColor,
-                            whiteSpace: 'nowrap'
-                        }
-                    
-                } 
+            if (cell.conditionalFormatting && cell.conditionalFormatting.length > 0) {
                 
-                const cellData = Number(cell.data.replace(/\s/g,'').replace('%', ''))
+                if (cell.conditionalFormatting.length === 1) {
+                    styleObj = {   
+                        margin: '2px',
+                        height: cell.conditionalFormatting[0].fontSize ? `${cell.conditionalFormatting[0].fontSize + 5}px` : 'auto',
+                        fontWeight: cell.conditionalFormatting[0].fontStyle === 'bold' ? 'bold' : '400',
+                        fontStyle: cell.conditionalFormatting[0].fontStyle === 'italic' ? 'italic' : 'inherit',
+                        textDecoration: cell.conditionalFormatting[0].fontStyle === 'underline' ? 'underline' : 'none',
+                        fontSize: cell.conditionalFormatting[0].fontSize + 'px',
+                        color: cell.conditionalFormatting[0].fontColor,
+                        whiteSpace: 'nowrap'
+                    }
+                } else {
+                    const cellData = Number(cell.data.replace(/\s/g,'').replace('%', ''))
     
-                for (let i = 0; i < cell.conditionalFormatting.length; i++) {
-                    if (cellData < Number(cell.conditionalFormatting[i].valueTo)) {
-                        return  {   
+                    for (let i = 0; i < cell.conditionalFormatting.length; i++) {
+                        if (cellData < Number(cell.conditionalFormatting[i].valueTo)) {
+                            styleObj = {   
                                 margin: '2px',
                                 height: cell.conditionalFormatting[i].fontSize ? `${cell.conditionalFormatting[i].fontSize + 5}px` : 'auto',
                                 fontWeight: cell.conditionalFormatting[i].fontStyle === 'bold' ? 'bold' : '400',
@@ -587,32 +593,30 @@ export default function(props){
                                 color: cell.conditionalFormatting[i].fontColor,
                                 whiteSpace: 'nowrap'
                             }
-                        
+                        }
                     }
                 }
+                
+                
             } else if(cell.hasOwnProperty('style') && cell.style) {
-               cell.style.filter((styleObj) => (styleObj.aggFuncName === cell.aggFuncName)).map((formatting) => {
-                    return {   
-                            margin: '2px',
-                            height: formatting.fontSize ? `${formatting.fontSize + 5}px` : 'auto',
-                            fontWeight: formatting.fontStyle === 'bold' ? 'bold' : '400',
-                            fontStyle: formatting.fontStyle === 'italic' ? 'italic' : 'inherit',
-                            textDecoration: formatting.fontStyle === 'underline' ? 'underline' : 'none',
-                            fontSize: formatting.fontSize + 'px',
-                            color: formatting.fontColor,
-                            whiteSpace: 'nowrap'
-                        }
-                    
+               cell.style.filter((styleObj) => (styleObj.aggFuncName === cell.aggFuncName)).forEach((formatting) =>  {
+                    styleObj = {   
+                        margin: '2px',
+                        height: formatting.fontSize ? `${formatting.fontSize + 5}px` : 'auto',
+                        fontWeight: formatting.fontStyle === 'bold' ? 'bold' : '400',
+                        fontStyle: formatting.fontStyle === 'italic' ? 'italic' : 'inherit',
+                        textDecoration: formatting.fontStyle === 'underline' ? 'underline' : 'none',
+                        fontSize: formatting.fontSize + 'px',
+                        color: formatting.fontColor,
+                        whiteSpace: 'nowrap'
+                    }
                 })
             }
 
         }
 
-        return {
-            margin: '2px', fontSize: '14px', fontFamily: 'Arial', fontWeight: cell.type === "dimensionName" || cell.type === "metricName" ? "bold" : "medium"
-        }
+        return styleObj
     }
-
 
     return(
         <div className={clsx(styles.pivotTable)}>
@@ -638,7 +642,6 @@ export default function(props){
                                 return (
                                 <tr key = {ind}>
                                     {r.filter((cell) => (cell.colSpan > 0 && cell.rowSpan > 0)).map( (cell, i) => {
-
                                         const id = Math.random()
                                         return (
                                             <td key = {i} colSpan = {cell.colSpan} rowSpan = {cell.rowSpan}
@@ -667,8 +670,8 @@ export default function(props){
                                                     </div>
                                                 }
                                                 <div 
-                                                    onClick = {cell.type === "dimensionValue" ? () => {handleDimensionValueCellClick(cell.fieldId, cell.data)}
-                                                    : cell.type === "metricValues"  ? () => {handleMetricValueCellClick(cell.fieldId, cell.index, cell.data)}
+                                                    onClick = {cell.type === "dimensionValue" ? () => {handleDimensionValueCellClick(cell.fieldId, cell.original, cell.data)}
+                                                    : cell.type === "metricValues"  ? () => {handleMetricValueCellClick(cell.fieldId, cell.index, cell.data, cell.dataType)}
                                                     : () => {}}
                                                 >
                                                     <div style = { cellDataStyle(cell) }>
@@ -718,7 +721,7 @@ function mergeCells(tableRows, columnDimensionsNum, nHeaderRows, colsMetricFacto
     }
 
     // merge rows
-    let rowSpan = new Array();
+    let rowSpan = new Array(); // eslint-disable-line
     for(let i = tableRows.length - rowsMetricFactor; i >= nHeaderRows; i -= rowsMetricFactor){
         for(let j = 0; j < tableRows[i].length; j++){
             if(tableRows[i][j].type === "dimensionValue"){

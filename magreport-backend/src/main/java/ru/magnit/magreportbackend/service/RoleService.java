@@ -37,7 +37,6 @@ import ru.magnit.magreportbackend.service.domain.SecurityFilterDomainService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -61,8 +60,7 @@ public class RoleService {
 
     public RoleResponse addRole(RoleAddRequest request) {
         var roleId = roleDomainService.saveRole(request);
-
-        return roleId == null ? null : roleDomainService.getRole(roleId);
+        return roleDomainService.getRole(roleId);
     }
 
     public RoleTypeResponse getRoleType(RoleTypeRequest request) {
@@ -146,7 +144,7 @@ public class RoleService {
             return ldapService.getGroupsByNamePart(defaultDomain, request.getNamePart())
                     .stream()
                     .map(group -> new DomainGroupResponse(domainInfo.get(defaultDomain), defaultDomain, group))
-                    .collect(Collectors.toList());
+                    .toList();
         } else {
             var domainInfo = domainService.getIdMap(request.getDomainNames());
             var result = new ArrayList<DomainGroupResponse>();

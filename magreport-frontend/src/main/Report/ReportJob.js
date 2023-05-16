@@ -72,19 +72,16 @@ export default function ReportJob(props){
         }
     }, [timer])
 
-    useEffect(() => {
+    function handleJobInfoLoaded(data){
         const view = searchParams.get('view');
-        if (view) {
+
+        if(view) {
             setViewType(view)
         } else {
-            setSearchParams({...searchParams, view: 'plain' })
+            const v = data.olapLastUserChoice ? 'pivot' : 'plain';
+            setViewType(v);
+            setSearchParams({...searchParams, view: v });
         }
-    }, [searchParams]) // eslint-disable-line
-
-    function handleJobInfoLoaded(data){
-        let v = data.olapLastUserChoice ? 'pivot' : 'plain';
-        setViewType(v);
-        setSearchParams({...searchParams, view: v });
 
         jobData.current = data;
         reportId.current = data.report.id;

@@ -4,27 +4,7 @@ import lombok.RequiredArgsConstructor;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
 import ru.magnit.magreportbackend.expression.BaseExpression;
 import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
-import ru.magnit.magreportbackend.expression.impl.AddExpression;
-import ru.magnit.magreportbackend.expression.impl.ConstantValueExpression;
-import ru.magnit.magreportbackend.expression.impl.CurrentDateExpression;
-import ru.magnit.magreportbackend.expression.impl.DerivedFieldValueExpression;
-import ru.magnit.magreportbackend.expression.impl.DivideExpression;
-import ru.magnit.magreportbackend.expression.impl.LeftSubstrExpression;
-import ru.magnit.magreportbackend.expression.impl.ModuloExpression;
-import ru.magnit.magreportbackend.expression.impl.MultiplyExpression;
-import ru.magnit.magreportbackend.expression.impl.NvlExpression;
-import ru.magnit.magreportbackend.expression.impl.PowExpression;
-import ru.magnit.magreportbackend.expression.impl.ReplaceExpression;
-import ru.magnit.magreportbackend.expression.impl.ReportFieldValueExpression;
-import ru.magnit.magreportbackend.expression.impl.RightSubstrExpression;
-import ru.magnit.magreportbackend.expression.impl.RowNumberExpression;
-import ru.magnit.magreportbackend.expression.impl.SquareRootExpression;
-import ru.magnit.magreportbackend.expression.impl.StrLenExpression;
-import ru.magnit.magreportbackend.expression.impl.SubstrExpression;
-import ru.magnit.magreportbackend.expression.impl.SubtractExpression;
-import ru.magnit.magreportbackend.expression.impl.ToDoubleExpression;
-import ru.magnit.magreportbackend.expression.impl.ToIntegerExpression;
-import ru.magnit.magreportbackend.expression.impl.ToStringExpression;
+import ru.magnit.magreportbackend.expression.impl.*;
 
 import java.util.function.BiFunction;
 
@@ -50,7 +30,45 @@ public enum Expressions {
     CURRENT_DATE(CurrentDateExpression::new),
     ROW_NUMBER(RowNumberExpression::new),
     SQUARE_ROOT(SquareRootExpression::new),
-    POW(PowExpression::new);
+    POW(PowExpression::new),
+    ABS(AbsExpression::new),
+    ZERO_TO_NULL(ZeroToNullExpression::new),
+    IIF(IifExpression::new),
+    SWITCH(SwitchExpression::new),
+    LT(LtExpression::new),
+    LTEQ(LteqExpression::new),
+    EQ(EqExpression::new),
+    LOGIC_AND(AndExpression::new),
+    LOGIC_OR(OrExpression::new),
+    LOGIC_XOR(XorExpression::new),
+    LOGIC_NOT(NotExpression::new),
+    ROUND(RoundExpression::new),
+    FLOOR(FloorExpression::new),
+    CEIL(CeilExpression::new),
+    CONCAT(ConcatExpression::new),
+    YEAR_FROM_DATE(YearFromDateExpression::new),
+    MONTH_FROM_DATE(MonthFromDateExpression::new),
+    WEEK_FROM_DATE(WeekFromDateExpression::new),
+    DAY_FROM_DATE(DayFromDateExpression::new),
+    DATE(DateExpression::new),
+    DAYS_INTERVAL(DaysIntervalExpression::new),
+    MILLSEC_INTERVAL(MillsecIntervalExtension::new),
+    ADD_DAYS(AddDaysExpression::new),
+    ADD_MILLSEC(AddMillsecExpression::new),
+    ADD_WEEKS(AddWeeksExpression::new),
+    ADD_MONTHS(AddMonthsExpression::new),
+    MONTH_FIRST_DATE(MonthFirstDateExpression::new),
+    MONTH_LAST_DATE(MonthLastDateExpression::new),
+    TODAY(CurrentDateExpression::new),
+    NEQ(NeqExpression::new),
+    INTEGER_DIVISION(IntegerDivisionExpression::new),
+    WEEK_DAY_NUMBER(WeekdayNumberExpression::new),
+    NOW(NowExpression::new),
+    TO_DATE(ToDateExpression::new),
+    TO_DATETIME(ToDatetimeExpression::new),
+    IS_NULL(IsNullExpression::new),
+    GET_TYPE(GetTypeExpression::new),
+    NULL_VALUE(NullValueExpression::new);
 
     private final BiFunction<FieldExpressionResponse, ExpressionCreationContext, BaseExpression> factory;
 

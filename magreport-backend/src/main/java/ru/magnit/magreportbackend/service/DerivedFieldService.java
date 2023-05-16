@@ -39,13 +39,7 @@ import ru.magnit.magreportbackend.service.domain.ReportDomainService;
 import ru.magnit.magreportbackend.service.domain.UserDomainService;
 import ru.magnit.magreportbackend.util.Pair;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -66,6 +60,9 @@ public class DerivedFieldService {
     }
 
     public void addDerivedField(DerivedFieldAddRequest request) {
+        if (!checkFieldName(new DerivedFieldCheckNameRequest(request.getReportId(), request.getIsPublic(), request.getName()), null)) {
+            throw new InvalidParametersException("Нарушены правила именования производного поля. Имя общего поля должно быть уникально на уровне отчета, имя приватного поля должно быть уникально на уровне отчет/пользователь.");
+        }
         checkPermission(request);
         final var fieldType = inferFieldType(request);
         domainService.addDerivedField(request, fieldType.getFieldType(), userDomainService.getCurrentUser());
@@ -76,6 +73,9 @@ public class DerivedFieldService {
     }
 
     public void updateDerivedField(DerivedFieldAddRequest request) {
+        if (!checkFieldName(new DerivedFieldCheckNameRequest(request.getReportId(), request.getIsPublic(), request.getName()), request.getId())) {
+            throw new InvalidParametersException("Нарушены правила именования производного поля. Имя общего поля должно быть уникально на уровне отчета, имя приватного поля должно быть уникально на уровне отчет/пользователь.");
+        }
         checkPermission(request);
         final var fieldType = inferFieldType(request);
         domainService.updateDerivedField(request, fieldType.getFieldType(), userDomainService.getCurrentUser());
@@ -92,15 +92,15 @@ public class DerivedFieldService {
             .collect(Collectors.toMap(ReportFieldData::id, ReportFieldData::dataType));
 
         // Получаем набор производных полей, на которые есть прямые ссылки в запросе
-        final var reqDerivedFieldSet = request.getAllFields()
+        final var requestDerivedFields = request.getAllFields()
             .stream()
             .filter(field -> field.getFieldType() == OlapFieldTypes.DERIVED_FIELD)
             .collect(Collectors.toCollection(LinkedHashSet::new));
-        final var requestDerivedFields = new LinkedHashSet<>(reqDerivedFieldSet);
 
         // Добавляем все поля, от которых зависят производные поля
         var callDepth = maxCallDepth;
-        var prevStepFields = new LinkedHashSet<>(reqDerivedFieldSet);
+        var prevStepFields = new LinkedHashSet<>(requestDerivedFields);
+        List<FieldDefinition> usedDerivedFields = new ArrayList<>(requestDerivedFields);
         while (callDepth-- > 0) {
             final var currentStepFields = prevStepFields.stream()
                 .map(field -> derivedFields.get(field.getFieldId()))
@@ -111,16 +111,13 @@ public class DerivedFieldService {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
 
             if (currentStepFields.isEmpty()) break;
-            reqDerivedFieldSet.addAll(currentStepFields);
+            usedDerivedFields.addAll(currentStepFields);
             prevStepFields = currentStepFields;
         }
 
         checkCallDepth(prevStepFields, derivedFields);
 
-        var usedDerivedFields = new ArrayList<>(reqDerivedFieldSet);
-        Collections.reverse(usedDerivedFields);
-        reqDerivedFieldSet.clear();
-        reqDerivedFieldSet.addAll(usedDerivedFields);
+        usedDerivedFields = sortByUsage(usedDerivedFields);
 
         final var fieldIndexes = sourceCube.fieldIndexes().entrySet()
             .stream()
@@ -177,6 +174,18 @@ public class DerivedFieldService {
             resultFieldIndexes,
             resultCube
         ), processedRequest);
+    }
+
+    private List<FieldDefinition> sortByUsage(List<FieldDefinition> sourceFields) {
+        final var result = new ArrayList<FieldDefinition>();
+        final var existingFields = new HashSet<FieldDefinition>();
+        for (var index = sourceFields.size()-1; index >= 0; index--) {
+            if (!existingFields.contains(sourceFields.get(index))) {
+                result.add(sourceFields.get(index));
+                existingFields.add(sourceFields.get(index));
+            }
+        }
+        return result;
     }
 
     private void checkCallDepth(Collection<FieldDefinition> prevStepFields, Map<Long, DerivedFieldResponse> derivedFields) {
@@ -284,9 +293,9 @@ public class DerivedFieldService {
 
     public List<DerivedFieldResponse> getDerivedFieldsByReport(DerivedFieldGetAvailableRequest request) {
         final var fields = domainService.getDerivedFieldsForReport(request.getReportId());
-        final var currentUser = userDomainService.getCurrentUser();
+        final var currentUserId = userDomainService.getCurrentUser().getId();
         return fields.stream()
-            .filter(field -> field.getIsPublic() || field.getUserId().equals(currentUser.getId()))
+            .filter(field -> field.getIsPublic() || field.getUserId().equals(currentUserId) || request.getAdditionalFields().contains(field.getId()))
             .toList();
     }
 
@@ -307,19 +316,19 @@ public class DerivedFieldService {
         return new DerivedFieldTypeResponse(expression.inferType());
     }
 
-    public boolean checkFieldName(DerivedFieldCheckNameRequest request) {
+    public boolean checkFieldName(DerivedFieldCheckNameRequest request, Long fieldId) {
         final var userId = userDomainService.getCurrentUser().getId();
         final var fieldName = Boolean.TRUE.equals(request.getIsPublic()) ?
             request.getReportId() + "_" + request.getName() :
             request.getReportId() + "_" + userId + "_" + request.getName();
 
-        return !domainService.isFieldExists(request.getReportId(), fieldName);
+        return !domainService.isFieldExists(request.getReportId(), fieldName, fieldId);
     }
 
     private void checkPermission(DerivedFieldAddRequest request) {
         if (Boolean.TRUE.equals(request.getIsPublic())) {
             final var userRoes = userDomainService.getCurrentUserRoles(null);
-            final var isDeveloper = userRoes.stream().anyMatch(role -> role.getId().equals(SystemRoles.DEVELOPER.getId()));
+            final var isDeveloper = userRoes.stream().anyMatch(role -> role.getName().equals(SystemRoles.DEVELOPER.name()) || role.getName().equals(SystemRoles.ADMIN.name()));
             final var hasWriteAccess = reportDomainService.isReportAccessible(request.getReportId(), FolderAuthorityEnum.WRITE, userRoes.stream().map(RoleView::getId).toList());
             if (!isDeveloper) {
                 throw new InvalidParametersException("Для создания общедоступных производных полей необходимо обладать ролью DEVELOPER.");

@@ -19,10 +19,13 @@ import {
     FAVORITES_DELETE_START, 
     FAVORITES_DELETED,
     JOBS_FILTER,
+    USERS_JOBS_FILTER,
     TASK_SWITCHED
 } from 'redux/reduxTypes';
 import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
-// import {FLOW_STATE_BROWSE_FOLDER} from './menuViews/flowStates';    
+// import {FLOW_STATE_BROWSE_FOLDER} from './menuViews/flowStates'; 
+
+import {dateCorrection} from  '../../../src/utils/dateFunctions';
 
 const getItemName = itemsType => {
     return  itemsType === FolderItemTypes.reports ? "reports" :
@@ -44,10 +47,24 @@ const getItemName = itemsType => {
     
 }
 
+let now  =  new Date();
+let midNight = new Date();
+
+midNight.setHours(0);
+midNight.setMinutes(0);
+midNight.setSeconds(0);
+midNight.setMilliseconds(0);
+
+now.setHours(23);
+now.setMinutes(59);
+now.setSeconds(59);
+now.setMilliseconds(999);
+
 const initialState = {
 	currentFolderId : null,
     needReload : true,
-    currentFolderData : null,
+    currentFolderData : null, 
+    usersJobsFilters: {periodStart: dateCorrection(midNight, false), periodEnd: dateCorrection(now, false)},
     folderContentLoadErrorMessage : null,
 }
 
@@ -354,16 +371,28 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
 
         case JOBS_FILTER:
             let newStateJF = {}
-                if (action.filters.isCleared){
+                if (action.jobsFilters.isCleared){
                     newStateJF = {...state}
-                    delete newStateJF.filters
+                    delete newStateJF.jobsFilters
                 }
                 else {
                     newStateJF = {
-                        ...state, filters: action.filters
+                        ...state, jobsFilters: action.jobsFilters
                     }
                 }
                 return newStateJF
+        case USERS_JOBS_FILTER:
+            let newStateUJF = {}
+                if (action.usersJobsFilters.isCleared){
+                    newStateUJF = {...state}
+                    delete newStateUJF.usersJobsFilters
+                }
+                else {
+                    newStateUJF = {
+                        ...state, usersJobsFilters: action.usersJobsFilters
+                    }
+                }
+                return newStateUJF
         case TASK_SWITCHED:
                         let newStateTS = {...state}
                         const fullArr = [...state.currentFolderData.scheduleTasks]

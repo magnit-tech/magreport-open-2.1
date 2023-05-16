@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import ru.magnit.magreportbackend.domain.filtertemplate.FilterTypeEnum;
 import ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum;
@@ -300,17 +301,29 @@ public class ReportJobService {
 
     public List<ReportJobResponse> getMyJobs(ReportJobHistoryRequestFilter filter) {
         var currentUser = userDomainService.getCurrentUser();
-        var responses = jobDomainService.getMyJobs();
+        var responses = applyFilter(jobDomainService.getMyJobs(), filter) ;
         responses.forEach(response -> {
             response.setCanExecute(checkReportPermission(response.getReport().id()));
             response.setOlapLastUserChoice(olapUserChoiceDomainService.getOlapUserChoice(response.getReport().id(), currentUser.getId()));
+
+            var users = reportJobUserDomainService.getShortUsersJob(response.getId());
+            response.setCountShareUsers(users.size());
+            response.setShareUsers(users.size() > 11 ? users.subList(0, 10) : users);
         });
-        return applyFilter(responses, filter);
+        return responses ;
     }
 
-    public List<ReportJobResponse> getAllJobs(ReportJobHistoryRequestFilter filter) {
+    public List<ReportJobResponse>   getAllJobs(ReportJobHistoryRequestFilter filter) {
         var responses = applyFilter(jobDomainService.getAllJobs(), filter);
-        responses.forEach(response -> response.setCanExecute(checkReportPermission(response.getReport().id())));
+        responses.forEach(response -> {
+
+            response.setCanExecute(checkReportPermission(response.getReport().id()));
+
+            var users = reportJobUserDomainService.getShortUsersJob(response.getId());
+            response.setCountShareUsers(users.size());
+            response.setShareUsers(users.size() > 11 ? users.subList(0, 10) : users);
+
+        });
         return responses;
     }
 
@@ -405,5 +418,13 @@ public class ReportJobService {
 
     public List<ScheduledReportResponse> getAllScheduledReports() {
         return jobDomainService.getAllScheduledReports();
+    }
+
+    public void streamReport(ResponseBodyEmitter emitter, Long jobId) {
+        var jobData = jobDomainService.getJobData(jobId);
+
+        if (jobData.isReportReadyToDisplay()) {
+            avroReportDomainService.streamReport(emitter, jobData);
+        }
     }
 }
