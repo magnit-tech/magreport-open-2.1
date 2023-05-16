@@ -33,10 +33,21 @@ function SecurityFiltersMenuView(props){
         navigate(`/ui/securityFilters/${folderId}`)
     }
     function handleItemClick(securityFilterId) {
-        navigate(`/ui/securityFilters/${id}/view/${securityFilterId}`, {state: location.pathname})
+        if (id) {
+            navigate(`/ui/securityFilters/${id}/view/${securityFilterId}`, {state: location.pathname})
+        } else {
+            let path = props.state.filteredFolderData ? props.state.filteredFolderData.securityFilters.find(i => i.id === securityFilterId).path : props.state.currentFolderData.securityFilters.find(i => i.id === securityFilterId).path;
+            navigate(`/ui/securityFilters/${path[path.length - 1].id}/view/${securityFilterId}`, {state: location.pathname})
+        }
     }
     function handleEditItemClick(securityFilterId) {
-        navigate(`/ui/securityFilters/${id}/edit/${securityFilterId}`, {state: location.pathname})
+        if (id) {
+            navigate(`/ui/securityFilters/${id}/edit/${securityFilterId}`, {state: location.pathname})
+        } else {
+            let path = props.state.filteredFolderData ? props.state.filteredFolderData.securityFilters.find(i => i.id === securityFilterId).path : props.state.currentFolderData.securityFilters.find(i => i.id === securityFilterId).path;
+            navigate(`/ui/securityFilters/${path[path.length - 1].id}/edit/${securityFilterId}`, {state: location.pathname})
+        }
+        
     }
     function handleAddItemClick(folderItemsType) {
         navigate(`/ui/securityFilters/${id}/add`, {state: location.pathname})

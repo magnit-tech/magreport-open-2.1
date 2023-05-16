@@ -45,8 +45,8 @@ import ru.magnit.magreportbackend.service.domain.FilterReportDomainService;
 import ru.magnit.magreportbackend.service.domain.FolderEntitySearchDomainService;
 import ru.magnit.magreportbackend.service.domain.FolderPermissionsDomainService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
-import ru.magnit.magreportbackend.service.domain.MailTextDomainService;
 import ru.magnit.magreportbackend.service.domain.OlapConfigurationDomainService;
+import ru.magnit.magreportbackend.service.domain.OlapUserChoiceDomainService;
 import ru.magnit.magreportbackend.service.domain.ReportDomainService;
 import ru.magnit.magreportbackend.service.domain.ScheduleTaskDomainService;
 import ru.magnit.magreportbackend.service.domain.SecurityFilterDomainService;
@@ -76,12 +76,12 @@ public class ReportService {
     private final FolderEntitySearchDomainService folderEntitySearchDomainService;
     private final ExcelTemplateDomainService excelTemplateDomainService;
     private final ScheduleTaskDomainService scheduleTaskDomainService;
-    private final MailTextDomainService mailTextDomainService;
     private final ReportFolderRepository reportFolderRepository;
     private final ReportResponseMapper reportResponseMapper;
     private final PermissionCheckerSystem permissionCheckerSystem;
     private final SecurityFilterDomainService securityFilterDomainService;
     private final OlapConfigurationDomainService olapConfigurationDomainService;
+    private final OlapUserChoiceDomainService olapUserChoiceDomainService;
 
     public ReportFolderResponse getFolder(FolderRequest request) {
 
@@ -177,11 +177,15 @@ public class ReportService {
         scheduleTaskDomainService.deleteScheduleTaskByReport(request.getId());
         excelTemplateDomainService.removeReportExcelTemplate(request.getId());
         reportDomainService.deleteFavReportsByReportId(request.getId());
+        olapUserChoiceDomainService.deleteUsersChoiceForReport(request.getId());
         reportDomainService.deleteReport(request.getId());
 
     }
 
     public ReportResponse getReport(ReportRequest request) {
+
+        if (request.getId() == null)
+            throw new IllegalArgumentException("Report id must not be null");
 
         final var report = reportDomainService.getReport(request.getId());
 
@@ -230,6 +234,8 @@ public class ReportService {
         var invalidFieldNames = new HashSet<String>();
         var invalidFilterNames = new HashSet<String>();
 
+        final var currentUser = userDomainService.getCurrentUser();
+
         request.getFields().forEach(field -> {
             var name = field.getName().toUpperCase();
             if (!uniqueNames.add(name)) duplicateNames.add(field.getName());
@@ -257,7 +263,7 @@ public class ReportService {
 
         filterReportDomainService.removeFilters(request.getId());
         reportDomainService.deleteFields(reportDomainService.getDeletedFields(request));
-        reportDomainService.editReport(request);
+        reportDomainService.editReport(request, currentUser.getId());
 
         if (request.getFilterGroup() != null)
             filterReportService.addFilters(request.getFilterGroup());
@@ -343,7 +349,7 @@ public class ReportService {
     }
 
     public void changeReportParentFolder(ChangeParentFolderRequest request) {
-        permissionCheckerSystem.checkPermissionsOnAllFolders(request, reportDomainService::getFolderIds, folderPermissionsDomainService::getExcelTemplateFolderPermissionsForRoles);
+        permissionCheckerSystem.checkPermissionsOnAllFolders(request, reportDomainService::getFolderIds, folderPermissionsDomainService::getReportFolderPermissionsForRoles);
         reportDomainService.changeFilterInstanceParentFolder(request);
     }
 

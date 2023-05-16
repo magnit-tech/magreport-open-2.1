@@ -20,7 +20,6 @@ export const RolesCSS = makeStyles(theme => ({
         display: 'flex',
         flex: 1,
         flexDirection: 'column'
-
     },
     roleListBox: {
        top: 0,
@@ -41,7 +40,9 @@ export const RolesCSS = makeStyles(theme => ({
         display: 'flex', 
         flex: 1, 
         flexDirection: 'column',
-        position: 'relative'
+        position: 'relative',
+		borderColor: theme.palette.divider,
+		borderBottom: `1px solid ${theme.palette.divider}`,
     },
     titlebar: {
         backgroundColor: theme.palette.primary.main,
@@ -59,15 +60,18 @@ export const RolesCSS = makeStyles(theme => ({
         margin: '16px 40px 16px 16px'
     },
     userListPaper: {
+       // margin: '0px 16px 16px',
         padding: '0px 16px 16px',
         display: 'flex',
         flex: 1,
-        width: '100%',
+        flexDirection: 'column',
+       // width: '100%',
         overflowX: 'auto'
     },
     roleAutocompleteDiv: {
-        flexGrow: 1,
-        marginRight: theme.spacing(2)
+        //flexGrow: 1,
+        width: '400px',
+        marginRight: theme.spacing(1)
     },
     /*roleAutocomplete: {
         display: 'flex',
@@ -78,14 +82,14 @@ export const RolesCSS = makeStyles(theme => ({
         height: theme.spacing(7),
         justifyContent: 'center'
     },
-    addButtonRW: {
+    /*addButtonRW: {
         justifyContent: 'center',
         height: theme.spacing(7),
-    },
+    },*/
     addButtonsRW: {
         display: 'flex',
         justifyContent: 'space-between',
-        width: '176px'
+        width: '144px'
     },
     search: {
         position: 'relative',
@@ -143,5 +147,29 @@ export const RolesCSS = makeStyles(theme => ({
         display: 'flex', 
         flex: 1, 
         flexDirection: 'column'
-    }
+    },
+    rwLabelChanged: {
+        color: 'red'
+    },
+    bottomButtons: {
+		display: 'flex',
+		alignItems: 'center',
+		margin: '4px 16px',
+    },
+    pagination: {
+        display: 'flex',
+        flexShrink: 0,
+        marginLeft: theme.spacing(2),
+       // width:'500px',
+    },
+    iconButton: {
+        marginLeft: theme.spacing(1),
+    },
+    pageNumber: {
+        width: '60px',
+        height: '29.6px',
+        backgroundColor: theme.palette.action.hover,
+        marginLeft: theme.spacing(0.5),
+        fontSize: '0.9rem'
+    },
 }));

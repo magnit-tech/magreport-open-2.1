@@ -22,7 +22,7 @@ import UserDesigner from '../main/Main/Administration/Users/UserDesigner';
 import SecurityFiltersMenuView from '../main/Main/Administration/SecurityFilters/SecurityFiltersMenuView';
 import SecurityFilterViewer from '../main/Main/Administration/SecurityFilters/SecurityFilterViewer';
 import SecurityFilterDesigner from '../main/Main/Administration/SecurityFilters/SecurityFilterDesigner';
-import UserJobsMenuView from '../main/Main/Administration/UsersJobs/UsersJobsMenuView';
+import UsersJobsMenuView from '../main/Main/Administration/UsersJobs/UsersJobsMenuView';
 
 import ASMAdministrationMenuView from '../main/Main/Administration/ASMAdministration/ASMAdministrationMenuView';
 import ASMViewer from '../main/Main/Administration/ASMAdministration/ASMViewer';
@@ -112,7 +112,7 @@ export default function AppRoutes(props) {
 					<Route path="/ui/securityFilters/:folderId/edit/:id" element={<SecurityFilterDesigner/>} />
 					<Route path="/ui/securityFilters/:folderId/add" element={<SecurityFilterDesigner/>} />
 
-					<Route path="/ui/userJobs" element={<UserJobsMenuView/>} />
+					<Route path="/ui/userJobs" element={<UsersJobsMenuView/>} />
 
 					<Route path="/ui/asm" element={<ASMAdministrationMenuView/>} />
 					<Route path="/ui/asm/view/:id" element={<ASMViewer/>} />

@@ -11,6 +11,7 @@ import ru.magnit.magreportbackend.domain.olap.AggregationType;
 import ru.magnit.magreportbackend.domain.olap.SortDirection;
 import ru.magnit.magreportbackend.domain.olap.SortingOrder;
 import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
+import ru.magnit.magreportbackend.dto.inner.olap.ExportPivotConfiguration;
 import ru.magnit.magreportbackend.dto.inner.olap.MeasureData;
 import ru.magnit.magreportbackend.dto.inner.olap.MetricResult;
 import ru.magnit.magreportbackend.dto.inner.olap.Sorting;
@@ -26,14 +27,19 @@ import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequestNew;
 import ru.magnit.magreportbackend.dto.request.olap.OlapExportPivotTableRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldItemsRequest;
+import ru.magnit.magreportbackend.dto.request.olap.OlapFieldItemsRequestNew;
 import ru.magnit.magreportbackend.dto.request.olap.SortingParams;
 import ru.magnit.magreportbackend.dto.response.olap.OlapCubeResponse;
 import ru.magnit.magreportbackend.dto.response.olap.OlapFieldItemsResponse;
 import ru.magnit.magreportbackend.dto.response.olap.OlapInfoCubesResponse;
 import ru.magnit.magreportbackend.dto.response.olap.OlapMetricResponse;
 import ru.magnit.magreportbackend.dto.response.olap.OlapMetricResponse2;
+import ru.magnit.magreportbackend.dto.response.report.ReportFieldMetadataResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.TokenResponse;
 import ru.magnit.magreportbackend.exception.OlapMaxDataVolumeExceeded;
+import ru.magnit.magreportbackend.mapper.olap.OlapCubeRequestMapper;
+import ru.magnit.magreportbackend.mapper.olap.OlapFieldItemsRequestMerger;
+import ru.magnit.magreportbackend.mapper.report.ReportFieldMetadataMapper;
 import ru.magnit.magreportbackend.metrics_function.MetricsFunction;
 import ru.magnit.magreportbackend.service.domain.ExcelReportDomainService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
@@ -61,7 +67,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -84,6 +89,11 @@ public class OlapService {
     private final ObjectMapper objectMapper;
     private final TokenService tokenService;
     private final OlapUserChoiceDomainService olapUserChoiceDomainService;
+
+    private final ReportFieldMetadataMapper fieldMapper;
+    private final OlapCubeRequestMapper olapCubeRequestMapper;
+    private final OlapFieldItemsRequestMerger olapFieldItemsRequestMerger;
+
     public OlapCubeResponse getCube(OlapCubeRequest request) {
         var currentUser = userDomainService.getCurrentUser();
         jobDomainService.checkAccessForJob(request.getJobId());
@@ -178,11 +188,11 @@ public class OlapService {
         }
     }
 
-    public OlapFieldItemsResponse getFieldValues(OlapFieldItemsRequest request) {
+    public OlapFieldItemsResponse getFieldValues(OlapFieldItemsRequestNew fieldItemsRequest) {
 
         log.debug("Start processing cube");
         var startTime = System.currentTimeMillis();
-        var jobData = jobDomainService.getJobData(request.getJobId());
+        var jobData = jobDomainService.getJobData(fieldItemsRequest.getJobId());
         var endTime = System.currentTimeMillis() - startTime;
         log.debug("Job data acquired: " + endTime);
 
@@ -190,6 +200,22 @@ public class OlapService {
         var sourceCube = olapDomainService.getCubeData(jobData);
         endTime = System.currentTimeMillis() - startTime;
         log.debug("Report data acquired: " + endTime);
+
+        OlapCubeRequest cubeRequest;
+        var cubeRequestNew = olapCubeRequestMapper.from(fieldItemsRequest);
+
+        if (fieldItemsRequest.hasDerivedFields()) {
+            startTime = System.currentTimeMillis();
+            final var result = derivedFieldService.preProcessCube(sourceCube, cubeRequestNew);
+            sourceCube = result.getL();
+            cubeRequest = result.getR();
+            endTime = System.currentTimeMillis() - startTime;
+            log.debug("Derived fields calculated: " + endTime);
+        } else {
+            cubeRequest = getCubeRequest(cubeRequestNew);
+        }
+
+        var request = olapFieldItemsRequestMerger.merge(fieldItemsRequest, cubeRequest);
 
         startTime = System.currentTimeMillis();
         var checkedFilterRows = olapDomainService.filterCubeData(sourceCube, request.getFilterGroup());
@@ -263,18 +289,37 @@ public class OlapService {
         request.getCubeRequest().getRowsInterval().setFrom(0).setCount(Integer.MAX_VALUE);
         request.getCubeRequest().getColumnsInterval().setFrom(0).setCount(Integer.MAX_VALUE);
 
-        var resultCube = getCube(request.getCubeRequest());
-        var metadata = jobDomainService.getJobMetaData(request.getCubeRequest().getJobId());
+        var resultCube = getCubeNew(request.getCubeRequest());
+        List<ReportFieldMetadataResponse> metadata;
+        OlapCubeRequest cubeRequest;
+        if (request.getCubeRequest().hasDerivedFields()) {
+
+            final var jobData = jobDomainService.getJobData(request.getCubeRequest().getJobId());
+            var sourceCube = olapDomainService.getCubeData(jobData);
+            final var result = derivedFieldService.preProcessCube(sourceCube, request.getCubeRequest());
+            metadata = fieldMapper.from(result.getL().reportMetaData().fields());
+            cubeRequest = result.getR();
+
+        } else {
+            metadata = jobDomainService.getJobMetaData(request.getCubeRequest().getJobId()).fields();
+            cubeRequest = getCubeRequest(request.getCubeRequest());
+        }
         var config = olapConfigurationDomainService.getReportOlapConfiguration(request.getConfiguration());
         var encrypt = jobDomainService.getJobData(request.getCubeRequest().getJobId()).reportData().encryptFile();
 
         var code = (long) (Math.random() * 1000000);
 
         excelReportDomainService.getExcelPivotTable(
-                resultCube,
-                metadata,
-                config.getOlapConfig().getData().isEmpty() ? new HashMap<>(): objectMapper.readValue(config.getOlapConfig().getData(), HashMap.class),
-                request, code, encrypt);
+                new ExportPivotConfiguration(
+                        cubeRequest,
+                        resultCube,
+                        code,
+                        request.isStylePivotTable(),
+                        encrypt,
+                        objectMapper.readTree(config.getOlapConfig().getData()),
+                        metadata
+                )
+        );
 
         return new TokenResponse(tokenService.getToken(request.getCubeRequest().getJobId(), code));
     }
@@ -351,7 +396,7 @@ public class OlapService {
 
 
                         compare = switch (dataTypes.get(i)) {
-                            case INTEGER -> Integer.compare(Integer.parseInt(var1), Integer.parseInt(var2));
+                            case INTEGER -> Long.compare(Long.parseLong(var1), Long.parseLong(var2));
                             case STRING -> var1.compareTo(var2);
                             case DOUBLE -> Double.compare(Double.parseDouble(var1), Double.parseDouble(var2));
                             case DATE -> LocalDate.parse(var1).compareTo(LocalDate.parse(var2));
@@ -778,19 +823,7 @@ public class OlapService {
             endTime = System.currentTimeMillis() - startTime;
             log.debug("Derived fields calculated: " + endTime);
         } else {
-            cubeRequest = new OlapCubeRequest()
-                    .setJobId(request.getJobId())
-                    .setColumnsInterval(request.getColumnsInterval())
-                    .setRowsInterval(request.getRowsInterval())
-                    .setColumnSort(request.getColumnSort())
-                    .setRowSort(request.getRowSort())
-                    .setMetricPlacement(request.getMetricPlacement())
-                    .setColumnFields(columnsFromNew(request))
-                    .setRowFields(rowsFromNew(request))
-                    .setMetrics(fromNew(request.getMetrics()))
-                    .setFilterGroup(request.getFilterGroup() == null ? null : fromNew(request.getFilterGroup()))
-                    .setMetricFilterGroup(request.getMetricFilterGroup());
-
+            cubeRequest = getCubeRequest(request);
         }
 
         startTime = System.currentTimeMillis();
@@ -878,5 +911,20 @@ public class OlapService {
 
     private LinkedHashSet<Long> columnsFromNew(OlapCubeRequestNew request) {
         return request.getColumnFields().stream().map(FieldDefinition::getFieldId).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    private OlapCubeRequest getCubeRequest(OlapCubeRequestNew request) {
+        return new OlapCubeRequest()
+                .setJobId(request.getJobId())
+                .setColumnsInterval(request.getColumnsInterval())
+                .setRowsInterval(request.getRowsInterval())
+                .setColumnSort(request.getColumnSort())
+                .setRowSort(request.getRowSort())
+                .setMetricPlacement(request.getMetricPlacement())
+                .setColumnFields(columnsFromNew(request))
+                .setRowFields(rowsFromNew(request))
+                .setMetrics(fromNew(request.getMetrics()))
+                .setFilterGroup(request.getFilterGroup() == null ? null : fromNew(request.getFilterGroup()))
+                .setMetricFilterGroup(request.getMetricFilterGroup());
     }
 }

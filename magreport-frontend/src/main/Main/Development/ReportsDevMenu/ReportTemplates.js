@@ -19,8 +19,6 @@ import Collapse from '@material-ui/core/Collapse';
 import PublishIcon from '@material-ui/icons/Publish';
 import CloseIcon from '@material-ui/icons/Close';
 import { Tooltip } from '@material-ui/core';
-import AttachFileIcon from '@material-ui/icons/AttachFile';
-import InputAdornment from '@material-ui/core/InputAdornment';
 import Typography from '@material-ui/core/Typography';
 
 
@@ -152,49 +150,32 @@ function ReportTemplates(props) {
                                 value={newItem.file}
                                 fullWidth
                                 disabled
-                                inputProps={{ endAdornment: 
-                                    <InputAdornment position="start">
-                                        <Tooltip title="Выбрать файл">
-                                            {/* span не убирать, иначе сыпятся Warnings если disabled=true */}
-                                            <span>
-                                                <IconButton 
-                                                    aria-label="Select"
-                                                    component="label"
-                                                >
-                                                    <AttachFileIcon />
-                                                    <input
-                                                        type="file"
-                                                        hidden
-                                                        onChange={value => handleChange("file", value)}
-                                                    />
-                                                </IconButton>
-                                            </span>
-                                        </Tooltip>
-                                    </InputAdornment>
-                                }}
+                                //clearable
+                                isFile
+                                onChange = {value => handleChange("file", value)}
                             />
                         </Grid>
                         <Grid item xs={1} >
                             <span style={{display: 'flex', flexWrap: 'nowrap'}}>
-                            <Tooltip title="Загрузить">
-                                                <span>
-                                                    <IconButton 
-                                                        aria-label="add"
-                                                        disabled={!newItem.name || !newItem.description || !newItem.selectedFile}
-                                                        onClick={handleAdd}
-                                                    >
-                                                        <PublishIcon/>
-                                                    </IconButton>
-                                                </span>
-                            </Tooltip>
-                            <Tooltip title="Скрыть">
-                                <IconButton 
-                                    aria-label="close"
-                                    onClick={() => setOpenCollapse(false)}
-                                >
-                                    <CloseIcon />
-                                </IconButton>
-                            </Tooltip>
+                                <Tooltip title="Загрузить">
+                                    <span>
+                                        <IconButton 
+                                            aria-label="add"
+                                            disabled={!newItem.name || !newItem.description || !newItem.selectedFile}
+                                            onClick={handleAdd}
+                                        >
+                                            <PublishIcon/>
+                                        </IconButton>
+                                    </span>
+                                </Tooltip>
+                                <Tooltip title="Скрыть">
+                                    <IconButton 
+                                        aria-label="close"
+                                        onClick={() => setOpenCollapse(false)}
+                                    >
+                                        <CloseIcon />
+                                    </IconButton>
+                                </Tooltip>
                             </span>
                         </Grid>
                     </Grid>

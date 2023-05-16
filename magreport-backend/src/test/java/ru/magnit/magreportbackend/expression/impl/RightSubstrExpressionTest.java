@@ -32,4 +32,26 @@ class RightSubstrExpressionTest {
         assertEquals("ring", expressionResult.getL());
         assertEquals(DataTypeEnum.STRING, expressionResult.getR());
     }
+
+    @Test
+    void OverflowRightSubstrTest() {
+        final var sourceExpression = new FieldExpressionResponse()
+                .setType(Expressions.RIGHT_SUBSTR)
+                .setParameters(List.of(
+                        new FieldExpressionResponse()
+                                .setType(Expressions.CONSTANT_VALUE)
+                                .setConstantType(DataTypeEnum.STRING)
+                                .setConstantValue("Test string"),
+                        new FieldExpressionResponse()
+                                .setType(Expressions.CONSTANT_VALUE)
+                                .setConstantType(DataTypeEnum.INTEGER)
+                                .setConstantValue("16")
+                ));
+
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expressionResult = expression.calculate(0);
+
+        assertEquals("Test string", expressionResult.getL());
+        assertEquals(DataTypeEnum.STRING, expressionResult.getR());
+    }
 }

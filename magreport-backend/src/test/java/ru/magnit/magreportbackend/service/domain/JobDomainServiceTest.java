@@ -428,7 +428,9 @@ class JobDomainServiceTest {
                 false,
             0L,
                 "comment",
-                true
+                true,
+                0,
+                Collections.emptyList()
         );
     }
 

@@ -86,7 +86,9 @@ public class DerivedFieldDomainService {
     }
 
     @Transactional
-    public boolean isFieldExists(Long reportId, String fieldName) {
-        return derivedFieldRepository.existsByReportIdAndUniqueName(reportId, fieldName);
+    public boolean isFieldExists(Long reportId, String fieldName, Long fieldId) {
+        return fieldId == null ?
+            derivedFieldRepository.existsByReportIdAndUniqueName(reportId, fieldName) :
+            derivedFieldRepository.existsByReportIdAndUniqueNameAndIdIsNot(reportId, fieldName, fieldId);
     }
 }

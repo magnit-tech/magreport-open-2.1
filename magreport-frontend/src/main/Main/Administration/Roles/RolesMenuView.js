@@ -31,17 +31,31 @@ function RolesMenuView(props){
     let sidebarItemType = SidebarItems.admin.subItems.roles.key;
     let isSortingAvailable = true;
 
-
     function handleFolderClick(folderId) {
         navigate(`/ui/roles/${folderId}`)
     }
 
     function handleItemClick(roleId) {
-        navigate(`/ui/roles/${id}/view/${roleId}`, {state: location.pathname})
+        if(id) {
+            navigate(`/ui/roles/${id}/view/${roleId}`, {state: location.pathname})
+        } else {
+            const data = state.filteredFolderData ? state.filteredFolderData : state.currentFolderData
+            const parentId = data.roles.find(item => item.id === roleId).path[0].id
+
+            navigate(`/ui/roles/${parentId}/view/${roleId}`, {state: location.pathname})
+        }
     }
 
     function handleEditItemClick(roleId) {
-        navigate(`/ui/roles/${id}/edit/${roleId}`, {state: location.pathname})
+        if(id) {
+            navigate(`/ui/roles/${id}/edit/${roleId}`, {state: location.pathname})
+
+        } else {
+            const data = state.filteredFolderData ? state.filteredFolderData : state.currentFolderData
+            const parentId = data.roles.find(item => item.id === roleId).path[0].id
+
+            navigate(`/ui/roles/${parentId}/edit/${roleId}`, {state: location.pathname})
+        }
     }
 
     function handleAddItemClick() {
