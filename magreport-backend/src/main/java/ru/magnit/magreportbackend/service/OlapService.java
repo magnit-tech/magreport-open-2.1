@@ -396,7 +396,7 @@ public class OlapService {
 
 
                         compare = switch (dataTypes.get(i)) {
-                            case INTEGER -> Integer.compare(Integer.parseInt(var1), Integer.parseInt(var2));
+                            case INTEGER -> Long.compare(Long.parseLong(var1), Long.parseLong(var2));
                             case STRING -> var1.compareTo(var2);
                             case DOUBLE -> Double.compare(Double.parseDouble(var1), Double.parseDouble(var2));
                             case DATE -> LocalDate.parse(var1).compareTo(LocalDate.parse(var2));
