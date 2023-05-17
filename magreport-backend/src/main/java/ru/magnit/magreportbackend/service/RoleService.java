@@ -37,7 +37,6 @@ import ru.magnit.magreportbackend.service.domain.SecurityFilterDomainService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -146,7 +145,7 @@ public class RoleService {
             return ldapService.getGroupsByNamePart(defaultDomain, request.getNamePart())
                     .stream()
                     .map(group -> new DomainGroupResponse(domainInfo.get(defaultDomain), defaultDomain, group))
-                    .collect(Collectors.toList());
+                    .toList();
         } else {
             var domainInfo = domainService.getIdMap(request.getDomainNames());
             var result = new ArrayList<DomainGroupResponse>();
