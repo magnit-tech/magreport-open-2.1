@@ -11,7 +11,7 @@ import ru.magnit.magreportbackend.dto.request.olap.OlapCubeOutRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequestNew;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldItemsOutRequest;
-import ru.magnit.magreportbackend.dto.request.olap.OlapFieldItemsRequest;
+import ru.magnit.magreportbackend.dto.request.olap.OlapFieldItemsRequestNew;
 import ru.magnit.magreportbackend.dto.response.ExtOlapCubeResponse;
 import ru.magnit.magreportbackend.dto.response.olap.OlapCubeResponse;
 import ru.magnit.magreportbackend.dto.response.olap.OlapFieldItemsResponse;
@@ -70,7 +70,7 @@ public class ExternalOlapService {
         return olapCubeResponse.getData();
     }
 
-    public OlapFieldItemsResponse getFieldValues(OlapFieldItemsRequest request) {
+    public OlapFieldItemsResponse getFieldValues(OlapFieldItemsRequestNew request) {
         var jobData = jobDomainService.getJobData(request.getJobId());
         var outRequest = new OlapFieldItemsOutRequest();
 

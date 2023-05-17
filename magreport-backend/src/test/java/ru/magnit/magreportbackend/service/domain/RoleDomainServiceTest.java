@@ -39,6 +39,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -96,7 +97,8 @@ class RoleDomainServiceTest {
     void saveRole() {
 
         when(repository.existsByName(any())).thenReturn(true);
-        assertNull(domainService.saveRole(getRoleAddRequest()));
+        var request = getRoleAddRequest();
+        assertThrows(InvalidParametersException.class,() -> domainService.saveRole(request));
 
         when(repository.existsByName(any())).thenReturn(false);
         when(roleMapper.from(any(RoleAddRequest.class))).thenReturn(get_role());

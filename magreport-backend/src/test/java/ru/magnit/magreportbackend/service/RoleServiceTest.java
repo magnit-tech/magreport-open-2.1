@@ -110,7 +110,6 @@ class RoleServiceTest {
         verify(roleDomainService).saveRole(request);
         verify(roleDomainService).getRole(anyLong());
         verifyNoMoreInteractions(request, roleDomainService, ldapService);
-
     }
 
     @Test

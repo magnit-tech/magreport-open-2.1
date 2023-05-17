@@ -60,8 +60,7 @@ public class RoleService {
 
     public RoleResponse addRole(RoleAddRequest request) {
         var roleId = roleDomainService.saveRole(request);
-
-        return roleId == null ? null : roleDomainService.getRole(roleId);
+        return roleDomainService.getRole(roleId);
     }
 
     public RoleTypeResponse getRoleType(RoleTypeRequest request) {
