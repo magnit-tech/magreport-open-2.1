@@ -25,8 +25,6 @@ function RolesMenuView(props){
 
     let state = props.state;
 
-    console.log(location);
-
     let reload = {needReload : state.needReload};
     let folderItemsType = SidebarItems.admin.subItems.roles.folderItemType;
     let sidebarItemType = SidebarItems.admin.subItems.roles.key;
@@ -34,10 +32,35 @@ function RolesMenuView(props){
 
     let searchParams = location.search ? location.search.replace('?search=', '') : ''
 
+    const folderId = id ? [Number(id)] : [null]
+
+    const body = {
+        likenessType: "CONTAINS",
+        recursive: false,
+        rootFolderId: null,
+        searchString: searchParams
+    };
+
+    // let loadFunc = searchParams ? dataHub.roleController.search : dataHub.roleController.getType;
+    // let loadParams = searchParams ? [body] : folderId
+
+    let loadFunc = dataHub.roleController.getType;
+    let loadParams = folderId
 
     // useEffect(() => {
     //     if(location.search) {
-    //         props.actionSearchClick(folderItemsType, state.currentFolderId, {searchString: location.search.replace('?search=', '')})
+    //         const body = {
+    //             likenessType: "CONTAINS",
+    //             recursive: false,
+    //             rootFolderId: null,
+    //             searchString: searchParams
+    //         };
+    //         // props.actionSearchClick(folderItemsType, state.currentFolderId, {searchString: location.search.replace('?search=', '')})
+    //         // props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)
+    //         loadFunc = dataHub.roleController.search;
+    //         loadParams = body
+
+    //         console.log(loadFunc);
     //     }
     // }, [location])
 
@@ -79,14 +102,20 @@ function RolesMenuView(props){
         // props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)
     }
 
+    async function aaa(data) {
+// {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}
+        await props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)
+        await props.actionSearchClick(folderItemsType, state.currentFolderId, body)
+    }
+
     
     return(
         <div  style={{display: 'flex', flex: 1}}>
             <DataLoader
-                loadFunc = {dataHub.roleController.getType}
-                loadParams = {id ? [Number(id)] : [null]}
+                loadFunc = {loadFunc}
+                loadParams = {loadParams}
                 reload = {reload}
-                onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}}
+                onDataLoaded = {(data) => aaa(data)}
                 onDataLoadFailed = {(message) => {props.actionFolderLoadFailed(folderItemsType, message)}}
             >
                 <FolderContent

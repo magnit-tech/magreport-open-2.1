@@ -158,13 +158,15 @@ export default function RoleController(dataHub){
         return dataHub.requestService(ROLE_DEL_DOMAIN_GROUPS_URL, METHOD, body, callback);
     }
 
-    this.search = function (likenessType, recursive, rootFolderId, searchString, callback){
-        const body = {
-            likenessType,
-            recursive,
-            rootFolderId, 
-            searchString
-        };
+    this.search = function (body, callback){
+        // console.log(likenessType);
+        // console.log(recursive);
+        // const body = {
+        //     likenessType,
+        //     recursive,
+        //     rootFolderId, 
+        //     searchString
+        // };
 
         return dataHub.requestService(ROLE_SEARCH_URL, METHOD, body, callback, data => dataHub.localCache.setSearchFolderData(FolderItemTypes.roles, data));
     }
