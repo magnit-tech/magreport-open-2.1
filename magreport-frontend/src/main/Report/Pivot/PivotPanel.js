@@ -844,7 +844,7 @@ function PivotPanel(props){
     function handleRowFromChange(newRowFrom) {
 
         let newConfiguration = new PivotConfiguration(pivotConfiguration);
-        newConfiguration.setRowFrom(newRowFrom);;
+        newConfiguration.setRowFrom(newRowFrom);
         setPivotConfiguration(newConfiguration);
         handleSaveCurrentConfig(newConfiguration.stringify());
 
@@ -1407,6 +1407,8 @@ function PivotPanel(props){
                                                     onChangeInnerTableSize = {handleChangeInnerTableSize}
                                                     sortingValues = {sortingValues}
                                                     onAddSorting = {handleAddMetricsSort}
+                                                    count = {rowCount}
+                                                    onWheelScrolling = {handleRowFromChange}
                                                 /> 
                                              }
                                         </Grid>
