@@ -113,7 +113,8 @@ export default function DesignerFolderBrowser(props){
     folderPath.current.forEach((item, index, array) =>{
         let len = array.length;
         breadcrumbs.push(
-            <Link 
+            <Link
+                key = {index}
                 style = {{cursor: 'pointer'}}
                 id = {index}
                 color = {len - 1  === index ? "textPrimary" : "inherit"}

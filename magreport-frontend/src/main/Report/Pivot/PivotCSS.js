@@ -296,7 +296,7 @@ export const PivotCSS = makeStyles(theme => ({
 	},
 	thumb: {
 		marginTop: '-4px',
-		'&:focus, &:hover, &$active': {
+		'&:focus, &:hover, &:active': {
 			boxShadow: 'inherit',
 		},
 	},
@@ -1084,7 +1084,7 @@ export const PivotCSS = makeStyles(theme => ({
   		transition: 'all .5s ease-in',
 
 		'&.active': {
-			maxHeight: '3000px',
+			maxHeight: '99999px',
 			transition: 'all .5s ease-in',
 			marginBottom: '15px'
 		}

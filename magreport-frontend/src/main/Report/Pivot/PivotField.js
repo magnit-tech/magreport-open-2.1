@@ -159,7 +159,8 @@ function PivotField(props){
                             classes={{
                                 paper: clsx({
                                     [styles.offPaper] : props.isOff,
-                                    [styles.paper] : !props.isOff
+                                    [styles.paper] : !props.isOff,
+                                    [styles.derivedField] : !props.original,
                                 })
                             }} 
                             open={openPopover}
@@ -180,7 +181,7 @@ function PivotField(props){
                                     {/*props.filtered &&
                                         <Icon path={mdiFilter} size={0.5}/> 
                                     */}
-                                    {props.newfieldName !== '' && props.listName === 'metricFields' ? props.newfieldName :
+                                    {props.newfieldName !== '' && (props.listName === 'metricFields' || props.listName === 'filterFields')? props.newfieldName :
                                     (props.aggFuncName ? AggFunc.get(props.aggFuncName) + ' ' : '') + props.fieldName} 
                                 </div>
                             </div>
@@ -210,7 +211,7 @@ function PivotField(props){
                                 {/*props.filtered && props.listName !== 'filterFields' &&
                                     <Icon path={mdiFilter} size={0.8}/>*/
                                 }
-                                {props.newfieldName !== '' && props.listName === 'metricFields' ? props.newfieldName :
+                                {props.newfieldName !== '' && (props.listName === 'metricFields' || props.listName === 'filterFields')? props.newfieldName :
                                 (props.aggFuncName ? AggFunc.get(props.aggFuncName) + ' ' : '') + props.fieldName}
                             </div>
                                 

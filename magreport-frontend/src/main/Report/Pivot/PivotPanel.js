@@ -844,7 +844,7 @@ function PivotPanel(props){
     function handleRowFromChange(newRowFrom) {
 
         let newConfiguration = new PivotConfiguration(pivotConfiguration);
-        newConfiguration.setRowFrom(newRowFrom);;
+        newConfiguration.setRowFrom(newRowFrom);
         setPivotConfiguration(newConfiguration);
         handleSaveCurrentConfig(newConfiguration.stringify());
 
@@ -908,7 +908,7 @@ function PivotPanel(props){
         if (!(pivotConfiguration.fieldsLists.findFilterFieldIdByFieldIdValueFunc(fieldId, fieldValue))){
             let val = fieldValue === '' ? [] : [fieldValue];
 			let newConfiguration = new PivotConfiguration(pivotConfiguration);
-			let filterObject = new FilterObject({field: {fieldId: fieldId, fieldType: fieldType}, values: val});
+            let filterObject = new FilterObject({field: {fieldId: fieldId, fieldType: fieldType}, values: val});
 			newConfiguration.setFieldFilterByFieldId(fieldId, filterObject);
 			newConfiguration.replaceFilter();
 			newConfiguration.changeSortOrder({});
@@ -956,17 +956,18 @@ function PivotPanel(props){
     function handleSetFilterValue(filterObject, newName){
 
         if (filterObject.values.length > 0 || filterObject.filterType === "BLANK"){
-        oldAndNewConfiguration.current.newConfiguration.setFieldFilterByFieldIndex(oldAndNewConfiguration.current.newFieldIndex, filterObject);
-        oldAndNewConfiguration.current.newConfiguration.setColumnFrom(0);
-        oldAndNewConfiguration.current.newConfiguration.setRowFrom(0);
-        oldAndNewConfiguration.current.newConfiguration.replaceFilter();
-        oldAndNewConfiguration.current.newConfiguration.changeSortOrder({});
-        setPivotConfiguration(new PivotConfiguration(oldAndNewConfiguration.current.newConfiguration));
-        setFilterModalOpen(false);
-        setTableDataLoadStatus(1);
-        dataProviderRef.current.loadDataForNewFieldsLists(oldAndNewConfiguration.current.newConfiguration.fieldsLists, oldAndNewConfiguration.current.newConfiguration.filterGroup, oldAndNewConfiguration.current.newConfiguration.metricFilterGroup, {}, 0, columnCount, 0, rowCount);            
-        handleSaveCurrentConfig(oldAndNewConfiguration.current.newConfiguration.stringify());
-        setSortingValues({})
+            oldAndNewConfiguration.current.newConfiguration.setNewNameByFieldIndex('filterFields', oldAndNewConfiguration.current.newFieldIndex, newName);
+            oldAndNewConfiguration.current.newConfiguration.setFieldFilterByFieldIndex(oldAndNewConfiguration.current.newFieldIndex, filterObject);
+            oldAndNewConfiguration.current.newConfiguration.setColumnFrom(0);
+            oldAndNewConfiguration.current.newConfiguration.setRowFrom(0);
+            oldAndNewConfiguration.current.newConfiguration.replaceFilter();
+            oldAndNewConfiguration.current.newConfiguration.changeSortOrder({});
+            setPivotConfiguration(new PivotConfiguration(oldAndNewConfiguration.current.newConfiguration));
+            setFilterModalOpen(false);
+            setTableDataLoadStatus(1);
+            dataProviderRef.current.loadDataForNewFieldsLists(oldAndNewConfiguration.current.newConfiguration.fieldsLists, oldAndNewConfiguration.current.newConfiguration.filterGroup, oldAndNewConfiguration.current.newConfiguration.metricFilterGroup, {}, 0, columnCount, 0, rowCount);            
+            handleSaveCurrentConfig(oldAndNewConfiguration.current.newConfiguration.stringify());
+            setSortingValues({})
         } else {
             setPivotConfiguration(new PivotConfiguration(oldAndNewConfiguration.current.oldConfiguration));
             setFilterModalOpen(false);
@@ -1406,6 +1407,8 @@ function PivotPanel(props){
                                                     onChangeInnerTableSize = {handleChangeInnerTableSize}
                                                     sortingValues = {sortingValues}
                                                     onAddSorting = {handleAddMetricsSort}
+                                                    count = {rowCount}
+                                                    onWheelScrolling = {handleRowFromChange}
                                                 /> 
                                              }
                                         </Grid>
