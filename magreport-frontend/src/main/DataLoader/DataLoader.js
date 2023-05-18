@@ -52,14 +52,11 @@ export default function DataLoader(props){
     }
 
     function startLoad(){
-        // lastLoadParams.current = props.loadParams.slice();
-        lastLoadParams.current = props.loadParams;
+        lastLoadParams.current = props.loadParams.slice();
         if(props.reload){
             props.reload.needReload = false;
         }
         if(props.loadFunc){
-            console.log(...props.loadParams);
-            // const params = Array.isArray(props.loadParams) ? ...props.loadParams : props.loadParams
             currentLoadRequestId.current = props.loadFunc(...props.loadParams, handleDataLoaded);
             if(loadState !== 'loading'){
                 setLoadState('loading');
@@ -86,7 +83,7 @@ export default function DataLoader(props){
         {
             loadState === 'notLoaded' ?
                 <div></div>  
-            : loadState === 'loading' && (props.showSpinner === undefined || props.showSpinner === true)? 
+            : (loadState === 'loading' || props.search) && (props.showSpinner === undefined || props.showSpinner === true)? 
                 <div className={classes.dataLoaderProgressDiv}><CircularProgress className={classes.dataLoaderProgress}/></div>
             : loadState === 'loadFailed' ?
                 (props.loadFailedElement ? props.loadFailedElement : <Typography>{errLoadMessage.current}</Typography>)

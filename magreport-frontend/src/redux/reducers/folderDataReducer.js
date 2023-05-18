@@ -122,7 +122,8 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
 					currentFolderData : action.folderData,
 					filteredFolderData,
 					sortParams
-				}} else {
+            }} else {
+                console.log(action.folderData);
 					return {
 						...state,
 						needReload : false,
