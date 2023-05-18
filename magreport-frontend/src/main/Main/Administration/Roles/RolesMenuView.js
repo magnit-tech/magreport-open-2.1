@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 
 import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
@@ -15,6 +15,7 @@ import {actionFolderLoaded, actionFolderLoadFailed, actionAddFolder, actionEditF
 import DataLoader from '../../../DataLoader/DataLoader';
 import FolderContent from '../../../FolderContent/FolderContent';
 import SidebarItems from '../../Sidebar/SidebarItems'
+import { CircularProgress } from '@material-ui/core';
 
 
 function RolesMenuView(props){
@@ -23,46 +24,31 @@ function RolesMenuView(props){
     const navigate = useNavigate()
     const location = useLocation()
 
+    let [searchParams, setSearchParams] = useSearchParams();
+
     let state = props.state;
 
-    let reload = {needReload : state.needReload};
+    // let reload = {needReload : state.needReload};
+    const [reload, setReload] = useState({needReload : state.needReload});
     let folderItemsType = SidebarItems.admin.subItems.roles.folderItemType;
     let sidebarItemType = SidebarItems.admin.subItems.roles.key;
     let isSortingAvailable = true;
 
-    let searchParams = location.search ? location.search.replace('?search=', '') : ''
+    const [loading, setLoading] = useState(false)
+
+    const [searchInputParams, setSearchInputParams] = useState({})
+
+    // let searchParams = location.search ? location.search.replace('?search=', '') : ''
+
 
     const folderId = id ? [Number(id)] : [null]
-
-    const body = {
-        likenessType: "CONTAINS",
-        recursive: false,
-        rootFolderId: null,
-        searchString: searchParams
-    };
-
-    // let loadFunc = searchParams ? dataHub.roleController.search : dataHub.roleController.getType;
-    // let loadParams = searchParams ? [body] : folderId
 
     let loadFunc = dataHub.roleController.getType;
     let loadParams = folderId
 
-    // useEffect(() => {
-    //     if(location.search) {
-    //         const body = {
-    //             likenessType: "CONTAINS",
-    //             recursive: false,
-    //             rootFolderId: null,
-    //             searchString: searchParams
-    //         };
-    //         // props.actionSearchClick(folderItemsType, state.currentFolderId, {searchString: location.search.replace('?search=', '')})
-    //         // props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)
-    //         loadFunc = dataHub.roleController.search;
-    //         loadParams = body
-
-    //         console.log(loadFunc);
-    //     }
-    // }, [location])
+    useEffect(() => {
+        setReload({needReload: true})
+    }, [searchParams])
 
     function handleFolderClick(folderId) {
         navigate(`/ui/roles/${folderId}`)
@@ -96,16 +82,26 @@ function RolesMenuView(props){
     }
 
     function handleSearchItems(params) {
-        // searchParams => {props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)}
-        // console.log(searchString);
-        navigate(`${location.pathname}?search=${params.searchString}`)
-        // props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)
+        navigate(`${location.pathname}?search=${params.searchString}&isRecursive=${params.isRecursive || false}`)
     }
 
     async function aaa(data) {
-// {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}
+
+        if(searchParams.get("search")) setLoading(true)
+
         await props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)
-        await props.actionSearchClick(folderItemsType, state.currentFolderId, body)
+
+        if(searchParams.get("search")) {
+            const actionSearchParams = {
+                open: true,
+                searchString: searchParams.get("search"),
+                isRecursive: searchParams.get("isRecursive") === 'true' ? true : false,
+            }
+
+            await props.actionSearchClick(folderItemsType, state.currentFolderId, actionSearchParams)
+
+            await setLoading(false)
+        }
     }
 
     
@@ -114,6 +110,7 @@ function RolesMenuView(props){
             <DataLoader
                 loadFunc = {loadFunc}
                 loadParams = {loadParams}
+                search={loading}
                 reload = {reload}
                 onDataLoaded = {(data) => aaa(data)}
                 onDataLoadFailed = {(message) => {props.actionFolderLoadFailed(folderItemsType, message)}}
@@ -139,7 +136,7 @@ function RolesMenuView(props){
                     onSearchClick = {handleSearchItems}
                     onSortClick ={sortParams => {props.actionSortClick(folderItemsType, state.currentFolderId, sortParams)}}
                     contextAllowed
-                />
+                />  
             </DataLoader>
         </div>
     )
