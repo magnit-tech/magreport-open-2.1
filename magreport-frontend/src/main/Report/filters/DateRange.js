@@ -63,9 +63,13 @@ export default function DatesRange(props) {
                 endValue: defaultEndDate
             } = getRangeFieldsValues(props.lastFilterValue, startFieldId, endFieldId);
 
+            let bd = new Date(defaultStartDate);
+            let ed = new Date(defaultEndDate);
+
             valueList.current.startDate = defaultStartDate;
             valueList.current.endDate = defaultEndDate;
-            setCheckStatus(defaultStartDate || ! mandatory ? 'success' : 'error')
+            setCheckStatus(props.filterData.maxCountItems < ((ed.getTime() - bd.getTime())/(1000 *60*60*24) + 1) ? "limit"
+                : defaultStartDate || ! mandatory ? 'success' : 'error')
             setStartDate(defaultStartDate);
             setEndDate(defaultEndDate);
             setValue(defaultStartDate, defaultEndDate);
@@ -101,7 +105,9 @@ export default function DatesRange(props) {
             setEndDate(endDate);
         };
         if ((valueList.current.startDate && valueList.current.endDate) || (!mandatory && !valueList.current.startDate && !valueList.current.endDate)){
-            setCheckStatus('success')
+            let bd = new Date(valueList.current.startDate);
+            let ed = new Date(valueList.current.endDate);
+            setCheckStatus(props.filterData.maxCountItems < ((ed.getTime() - bd.getTime())/(1000 *60*60*24) + 1) ? "limit" :  'success' );
         }
         else {
             setCheckStatus('error')
