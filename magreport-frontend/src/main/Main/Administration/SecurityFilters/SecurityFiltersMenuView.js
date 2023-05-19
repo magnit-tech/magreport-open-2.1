@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 
-import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 
 // dataHub
 import dataHub from 'ajax/DataHub';
@@ -18,15 +18,22 @@ import SidebarItems from '../../Sidebar/SidebarItems'
 
 function SecurityFiltersMenuView(props){
 
+    const state = props.state;
+
     const {id} = useParams()
     const navigate = useNavigate()
     const location = useLocation()
+    const [searchParams, setSearchParams] = useSearchParams();
+    const locationPreviousHistory = { state: location.pathname + location.search }
 
-    const state = props.state;
+    const [reload, setReload] = useState({needReload : state.needReload});
 
-    let reload = {needReload : state.needReload};
     let folderItemsType = SidebarItems.admin.subItems.securityFilters.folderItemType;
     let isSortingAvailable = true;
+
+    useEffect(() => {
+        setReload({needReload: true})
+    }, [searchParams, state.needReload])
 
 
     function handleFolderClick(folderId) {
@@ -34,23 +41,46 @@ function SecurityFiltersMenuView(props){
     }
     function handleItemClick(securityFilterId) {
         if (id) {
-            navigate(`/ui/securityFilters/${id}/view/${securityFilterId}`, {state: location.pathname})
+            navigate(`/ui/securityFilters/${id}/view/${securityFilterId}`, locationPreviousHistory)
         } else {
             let path = props.state.filteredFolderData ? props.state.filteredFolderData.securityFilters.find(i => i.id === securityFilterId).path : props.state.currentFolderData.securityFilters.find(i => i.id === securityFilterId).path;
-            navigate(`/ui/securityFilters/${path[path.length - 1].id}/view/${securityFilterId}`, {state: location.pathname})
+            navigate(`/ui/securityFilters/${path[path.length - 1].id}/view/${securityFilterId}`, locationPreviousHistory)
         }
     }
     function handleEditItemClick(securityFilterId) {
         if (id) {
-            navigate(`/ui/securityFilters/${id}/edit/${securityFilterId}`, {state: location.pathname})
+            navigate(`/ui/securityFilters/${id}/edit/${securityFilterId}`, locationPreviousHistory)
         } else {
             let path = props.state.filteredFolderData ? props.state.filteredFolderData.securityFilters.find(i => i.id === securityFilterId).path : props.state.currentFolderData.securityFilters.find(i => i.id === securityFilterId).path;
-            navigate(`/ui/securityFilters/${path[path.length - 1].id}/edit/${securityFilterId}`, {state: location.pathname})
-        }
-        
+            navigate(`/ui/securityFilters/${path[path.length - 1].id}/edit/${securityFilterId}`, locationPreviousHistory)
+        } 
     }
-    function handleAddItemClick(folderItemsType) {
-        navigate(`/ui/securityFilters/${id}/add`, {state: location.pathname})
+    function handleAddItemClick() {
+        navigate(`/ui/securityFilters/${id}/add`, locationPreviousHistory)
+    }
+    function handleSearchItems(params) {
+        const { searchString, isRecursive } = params
+
+        if (searchString.trim() === '') {
+            setSearchParams({})
+        } else {
+            setSearchParams({search: searchString, isRecursive: isRecursive ?? false})
+        }
+
+    }
+
+    async function handleDataLoaded(data) {
+        await props.actionFolderLoaded(folderItemsType, data, isSortingAvailable, false, !!searchParams.get("search"))
+
+        if(searchParams.get("search")) {
+            const actionSearchParams = {
+                open: true,
+                searchString: searchParams.get("search"),
+                isRecursive: searchParams.get("isRecursive") === 'true' ? true : false,
+            }
+
+            await props.actionSearchClick(folderItemsType, state.currentFolderId, actionSearchParams)
+        }
     }
 
     return(
@@ -59,7 +89,8 @@ function SecurityFiltersMenuView(props){
                 loadFunc = {dataHub.securityFilterController.getFolder}
                 loadParams = {id ? [Number(id)] : [null]}
                 reload = {reload}
-                onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}}
+                isSearchLoading = {state.isSearchLoading}
+                onDataLoaded = {(data) => handleDataLoaded(data)}
                 onDataLoadFailed = {(message) => {props.actionFolderLoadFailed(folderItemsType, message)}}
             >
                 <FolderContent
@@ -80,7 +111,7 @@ function SecurityFiltersMenuView(props){
                     onEditFolderClick = {(folderId, name, description) => {props.actionEditFolder(folderItemsType, state.currentFolderData.id, folderId, name, description)}}
                     onDeleteFolderClick = {(folderId) => {props.actionDeleteFolderClick(folderItemsType, state.currentFolderData.id, folderId)}}
                     onDeleteItemClick = {(securityFilterId) => {props.actionDeleteItemClick(folderItemsType, state.currentFolderId, securityFilterId)}}
-                    onSearchClick ={searchParams => {props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)}}
+                    onSearchClick = {handleSearchItems}
                     onSortClick ={sortParams => {props.actionSortClick(folderItemsType, state.currentFolderId, sortParams)}}
                     contextAllowed
                     copyAndMoveAllowed

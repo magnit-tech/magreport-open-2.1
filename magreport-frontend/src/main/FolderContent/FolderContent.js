@@ -99,7 +99,7 @@ export default function FolderContent(props){
     const [panelOpen, setPanelOpen] = useState(false);
 
     useEffect(() => {
-        if(props.searchParams.open) setSearchOpen(true)
+        if(props.searchParams?.open) setSearchOpen(true)
     }, [props.searchParams])
 
     const [openWindow, setOpenWindow] = useState(false);

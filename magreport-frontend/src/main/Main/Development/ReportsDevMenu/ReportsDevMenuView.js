@@ -21,11 +21,13 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 function ReportsDevMenuView(props){
 
+    let state = props.state;
+
     const {id} = useParams()
     const navigate = useNavigate()
     const location = useLocation()
-
     const [searchParams, setSearchParams] = useSearchParams();
+    const locationPreviousHistory = { state: location.pathname + location.search }
 
     const [dependency, setDependency] = useState({
         loader: false,
@@ -33,6 +35,7 @@ function ReportsDevMenuView(props){
         id: null,
         data: null
     })
+    const [reload, setReload] = useState({needReload : state.needReload});
 
     useEffect(() => {
         const datasourceId = searchParams.get('dependency');
@@ -46,11 +49,10 @@ function ReportsDevMenuView(props){
                 data: null
             })
         }
-    }, [searchParams]) // eslint-disable-line
 
-    const state = props.state;
+        setReload({needReload: true})
+    }, [searchParams, state.needReload]) // eslint-disable-line
 
-    let reload = {needReload : state.needReload};
     let folderItemsType = SidebarItems.development.subItems.reportsDev.folderItemType;
     let isSortingAvailable = true;
 
@@ -59,31 +61,56 @@ function ReportsDevMenuView(props){
         navigate(`/ui/reportsDev/${folderId}`)
     }
     function handleItemClick(reportId) {
-        navigate(`/ui/report/starter/${reportId}`, {state: location.pathname})
+        navigate(`/ui/report/starter/${reportId}`, locationPreviousHistory)
     }
     function handleViewItemClick(reportId) {
         if (id) {
-            navigate(`/ui/reportsDev/${id}/view/${reportId}`, {state: location.pathname})
+            navigate(`/ui/reportsDev/${id}/view/${reportId}`, locationPreviousHistory)
         } else {
             let reportFolderPath = props.state.filteredFolderData.reports.find(i => i.id === reportId).path;
-            navigate(`/ui/reportsDev/${reportFolderPath[reportFolderPath.length - 1].id}/view/${reportId}`, {state: location.pathname})    
+            navigate(`/ui/reportsDev/${reportFolderPath[reportFolderPath.length - 1].id}/view/${reportId}`, locationPreviousHistory)    
         }
     }
     function handleEditItemClick(reportId) {
         if (id) {
-            navigate(`/ui/reportsDev/${id}/edit/${reportId}`, {state: location.pathname})
+            navigate(`/ui/reportsDev/${id}/edit/${reportId}`, locationPreviousHistory)
         } else {
             let reportFolderPath = props.state.filteredFolderData ? props.state.filteredFolderData.reports.find(i => i.id === reportId).path : props.state.currentFolderData.reports.find(i => i.id === reportId).path;
-            navigate(`/ui/reportsDev/${reportFolderPath[reportFolderPath.length - 1].id}/edit/${reportId}`, {state: location.pathname})
+            navigate(`/ui/reportsDev/${reportFolderPath[reportFolderPath.length - 1].id}/edit/${reportId}`, locationPreviousHistory)
         }
     }
     function handleAddItemClick() {
-        navigate(`/ui/reportsDev/${id}/add`, {state: location.pathname})
+        navigate(`/ui/reportsDev/${id}/add`, locationPreviousHistory)
+    }
+    function handleSearchItems(params) {
+        const { searchString, isRecursive } = params
+
+        if (searchString.trim() === '') {
+            setSearchParams({})
+        } else {
+            setSearchParams({search: searchString, isRecursive: isRecursive ?? false})
+        }
+    }
+
+    async function handleDataLoaded(data) {
+        await props.actionFolderLoaded(folderItemsType, data, isSortingAvailable, false, !!searchParams.get("search"))
+
+        if(searchParams.get("search")) {
+            const actionSearchParams = {
+                open: true,
+                searchString: searchParams.get("search"),
+                isRecursive: searchParams.get("isRecursive") === 'true' ? true : false,
+            }
+
+            await props.actionSearchClick(folderItemsType, state.currentFolderId, actionSearchParams)
+        }
     }
 
     // Dependency
     function handleDependenciesClick(reportId) {
-        setSearchParams({ 'dependency': reportId });
+        searchParams.set('dependency', reportId);
+        setSearchParams(searchParams);
+
         setDependency({...dependency, loader: true})
         dataHub.reportController.getDependencies(Number(reportId), handleLoadedDependency)
     }
@@ -92,7 +119,13 @@ function ReportsDevMenuView(props){
     }
     function handleCloseDependency() {
         setDependency({ show: false })
-        setSearchParams({})
+
+        searchParams.delete('dependency');
+        const newParams = {};
+        searchParams.forEach((value, key) => {
+            newParams[key] = value;
+        });
+        setSearchParams(newParams);
     }
 
     return(
@@ -105,7 +138,8 @@ function ReportsDevMenuView(props){
                         loadFunc = {dataHub.reportController.getFolder}
                         loadParams = {id ? [Number(id)] : [null]}
                         reload = {reload}
-                        onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}}
+                        isSearchLoading = {state.isSearchLoading}
+                        onDataLoaded = {(data) => handleDataLoaded(data)}
                         onDataLoadFailed = {(message) => {props.actionFolderLoadFailed(folderItemsType, message)}}
                     >
                         <FolderContent
@@ -127,7 +161,7 @@ function ReportsDevMenuView(props){
                             onEditFolderClick = {(folderId, name, description) => {props.actionEditFolder(folderItemsType, state.currentFolderData.id, folderId, name, description)}}
                             onDeleteFolderClick = {(folderId) => {props.actionDeleteFolderClick(folderItemsType, state.currentFolderData.id, folderId)}}
                             onDeleteItemClick = {(reportId) => {props.actionDeleteItemClick(folderItemsType, state.currentFolderId, reportId)}}
-                            onSearchClick ={searchParams => {props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)}}
+                            onSearchClick = {handleSearchItems}
                             onSortClick ={sortParams => {props.actionSortClick(folderItemsType, state.currentFolderId, sortParams)}}
                             contextAllowed
                             copyAndMoveAllowed

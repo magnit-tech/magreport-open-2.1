@@ -109,27 +109,21 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
 							return 0;
 					});
 				}
+            }
 
-				const filteredFolderData = {
-					...action.folderData,
-					childFolders,
-					[itemsName]: items
-				}
+            const filteredFolderDataLoaded = {
+                ...action.folderData,
+                childFolders,
+                [itemsName]: items
+            }
 
-				return {
-					...state,
-					needReload : false,
-					currentFolderData : action.folderData,
-					filteredFolderData,
-					sortParams,
-                    isSearchLoading: action.isSearchLoading
-            }} else {
-                return {
-                    ...state,
-                    needReload : false,
-                    currentFolderData : action.folderData,
-                    isSearchLoading: action.isSearchLoading
-                }
+            return {
+                ...state,
+                needReload : false,
+                currentFolderData : action.folderData,
+                filteredFolderData: filteredFolderDataLoaded,
+                sortParams,
+                isSearchLoading: action.isSearchLoading
             }
 
         case FOLDER_CONTENT_LOAD_FAILED:
