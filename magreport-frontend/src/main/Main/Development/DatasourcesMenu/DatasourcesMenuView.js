@@ -21,11 +21,13 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 function DatasourcesMenuView(props){
 
+    const state = props.state;
+
     const {id} = useParams()
     const navigate = useNavigate()
     const location = useLocation()
-
     const [searchParams, setSearchParams] = useSearchParams();
+    const locationPreviousHistory = { state: location.pathname + location.search }
 
     const [dependency, setDependency] = useState({
         loader: false,
@@ -33,6 +35,7 @@ function DatasourcesMenuView(props){
         id: null,
         data: null
     })
+    const [reload, setReload] = useState({needReload : state.needReload});
 
     useEffect(() => {
         const datasourceId = searchParams.get('dependency');
@@ -46,11 +49,10 @@ function DatasourcesMenuView(props){
                 data: null
             })
         }
-    }, [searchParams]) // eslint-disable-line
 
-    const state = props.state;
+        setReload({needReload: true})
+    }, [searchParams, state.needReload]) // eslint-disable-line
 
-    let reload = {needReload : state.needReload};
     let folderItemsType = SidebarItems.development.subItems.datasources.folderItemType;
     let isSortingAvailable = true;
 
@@ -60,28 +62,52 @@ function DatasourcesMenuView(props){
     }
     function handleItemClick(datasourceId) {
         if (id){
-            navigate(`/ui/datasource/${id}/view/${datasourceId}`, {state: location.pathname})
+            navigate(`/ui/datasource/${id}/view/${datasourceId}`, locationPreviousHistory)
         } else {
             let path = props.state.filteredFolderData ? props.state.filteredFolderData.dataSources.find(i => i.id === datasourceId).path : props.state.currentFolderData.dataSources.find(i => i.id === datasourceId).path;
-            navigate(`/ui/datasource/${path[path.length - 1].id}/view/${datasourceId}`, {state: location.pathname})
+            navigate(`/ui/datasource/${path[path.length - 1].id}/view/${datasourceId}`, locationPreviousHistory)
         }
     }
     function handleEditItemClick(datasourceId) {
         if (id) {
-            navigate(`/ui/datasource/${id}/edit/${datasourceId}`, {state: location.pathname})
+            navigate(`/ui/datasource/${id}/edit/${datasourceId}`, locationPreviousHistory)
         } else {
             let path = props.state.filteredFolderData ? props.state.filteredFolderData.dataSources.find(i => i.id === datasourceId).path : props.state.currentFolderData.dataSources.find(i => i.id === datasourceId).path;
-            navigate(`/ui/datasource/${path[path.length - 1].id}/edit/${datasourceId}`, {state: location.pathname})
+            navigate(`/ui/datasource/${path[path.length - 1].id}/edit/${datasourceId}`, locationPreviousHistory)
+        }
+    }
+    function handleAddItemClick() {
+        navigate(`/ui/datasource/${id}/add`, locationPreviousHistory)
+    }
+    function handleSearchItems(params) {
+        const { searchString, isRecursive } = params
+
+        if (searchString.trim() === '') {
+            setSearchParams({})
+        } else {
+            setSearchParams({search: searchString, isRecursive: isRecursive ?? false})
         }
     }
 
-    function handleAddItemClick(folderItemsType) {
-        navigate(`/ui/datasource/${id}/add`, {state: location.pathname})
+    async function handleDataLoaded(data) {
+        await props.actionFolderLoaded(folderItemsType, data, isSortingAvailable, false, !!searchParams.get("search"))
+
+        if(searchParams.get("search")) {
+            const actionSearchParams = {
+                open: true,
+                searchString: searchParams.get("search"),
+                isRecursive: searchParams.get("isRecursive") === 'true' ? true : false,
+            }
+
+            await props.actionSearchClick(folderItemsType, state.currentFolderId, actionSearchParams)
+        }
     }
 
     // Dependency
     function handleDependenciesClick(datasourceId) {
-        setSearchParams({ 'dependency': datasourceId });
+        searchParams.set('dependency', datasourceId);
+        setSearchParams(searchParams);
+
         setDependency({...dependency, loader: true})
         dataHub.datasourceController.getDependencies(Number(datasourceId), handleLoadedDependency)
     }
@@ -90,7 +116,13 @@ function DatasourcesMenuView(props){
     }
     function handleCloseDependency() {
         setDependency({ show: false })
-        setSearchParams({})
+
+        searchParams.delete('dependency');
+        const newParams = {};
+        searchParams.forEach((value, key) => {
+            newParams[key] = value;
+        });
+        setSearchParams(newParams);
     }
 
     return(
@@ -103,7 +135,8 @@ function DatasourcesMenuView(props){
                         loadFunc = {dataHub.datasourceController.getFolder}
                         loadParams = {id ? [Number(id)] : [null]}
                         reload = {reload}
-                        onDataLoaded = {(data) => { props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}}
+                        isSearchLoading = {state.isSearchLoading}
+                        onDataLoaded = {(data) => handleDataLoaded(data)}
                         onDataLoadFailed = {(message) => {props.actionFolderLoadFailed(folderItemsType, message)}}
                     >
                         <FolderContent
@@ -124,7 +157,7 @@ function DatasourcesMenuView(props){
                             onAddFolder = {(name, description) => {props.actionAddFolder(folderItemsType, state.currentFolderData.id, name, description)}}
                             onDeleteFolderClick = {(folderId) => {props.actionDeleteFolderClick(folderItemsType, state.currentFolderData.id, folderId)}}
                             onDeleteItemClick = {(datasourceId) => {props.actionDeleteItemClick(folderItemsType, state.currentFolderId, datasourceId)}}
-                            onSearchClick ={searchParams => {props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)}}
+                            onSearchClick = {handleSearchItems}
                             onSortClick ={sortParams => {props.actionSortClick(folderItemsType, state.currentFolderId, sortParams)}}
                             contextAllowed
                             copyAndMoveAllowed

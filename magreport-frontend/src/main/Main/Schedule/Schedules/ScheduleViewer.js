@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {useSnackbar} from "notistack";
 
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 
 import { useDispatch } from "react-redux";
 import { viewItemNavbar } from "redux/actions/navbar/actionNavbar";
@@ -28,6 +28,7 @@ export default function ScheduleViewer() {
     
     const { id } = useParams()
     const navigate = useNavigate();
+    const location = useLocation();
 
     const dispatch = useDispatch()
 
@@ -88,7 +89,7 @@ export default function ScheduleViewer() {
         <ViewerPage
             itemType={FolderItemTypes.schedules}
             id={id}
-            onOkClick={() => navigate('/ui/schedules')}
+            onOkClick={() => location.state ? navigate(location.state) : navigate('/ui/schedules')}
             disabledPadding={true}
             readOnly={!hasRWRight}
         >
