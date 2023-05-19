@@ -15,7 +15,6 @@ import {actionFolderLoaded, actionFolderLoadFailed, actionAddFolder, actionEditF
 import DataLoader from '../../../DataLoader/DataLoader';
 import FolderContent from '../../../FolderContent/FolderContent';
 import SidebarItems from '../../Sidebar/SidebarItems'
-import { CircularProgress } from '@material-ui/core';
 
 
 function RolesMenuView(props){
@@ -23,28 +22,14 @@ function RolesMenuView(props){
     const { id } = useParams()
     const navigate = useNavigate()
     const location = useLocation()
-
-    let [searchParams, setSearchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     let state = props.state;
 
-    // let reload = {needReload : state.needReload};
     const [reload, setReload] = useState({needReload : state.needReload});
     let folderItemsType = SidebarItems.admin.subItems.roles.folderItemType;
     let sidebarItemType = SidebarItems.admin.subItems.roles.key;
     let isSortingAvailable = true;
-
-    const [loading, setLoading] = useState(false)
-
-    const [searchInputParams, setSearchInputParams] = useState({})
-
-    // let searchParams = location.search ? location.search.replace('?search=', '') : ''
-
-
-    const folderId = id ? [Number(id)] : [null]
-
-    let loadFunc = dataHub.roleController.getType;
-    let loadParams = folderId
 
     useEffect(() => {
         setReload({needReload: true})
@@ -82,14 +67,18 @@ function RolesMenuView(props){
     }
 
     function handleSearchItems(params) {
-        navigate(`${location.pathname}?search=${params.searchString}&isRecursive=${params.isRecursive || false}`)
+        const {searchString, isRecursive} = params
+
+        if (searchString.trim() === '') {
+            setSearchParams({})
+        } else {
+            setSearchParams({search: searchString, isRecursive: isRecursive ?? false})
+        }
+
     }
 
-    async function aaa(data) {
-
-        if(searchParams.get("search")) setLoading(true)
-
-        await props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)
+    async function handleDataLoaded(data) {
+        await props.actionFolderLoaded(folderItemsType, data, isSortingAvailable, false, !!searchParams.get("search"))
 
         if(searchParams.get("search")) {
             const actionSearchParams = {
@@ -99,20 +88,17 @@ function RolesMenuView(props){
             }
 
             await props.actionSearchClick(folderItemsType, state.currentFolderId, actionSearchParams)
-
-            await setLoading(false)
         }
     }
-
     
     return(
         <div  style={{display: 'flex', flex: 1}}>
             <DataLoader
-                loadFunc = {loadFunc}
-                loadParams = {loadParams}
-                search={loading}
+                loadFunc = {dataHub.roleController.getType}
+                loadParams = {id ? [Number(id)] : [null]}
+                isSearchLoading = {state.isSearchLoading}
                 reload = {reload}
-                onDataLoaded = {(data) => aaa(data)}
+                onDataLoaded = {(data) => handleDataLoaded(data)}
                 onDataLoadFailed = {(message) => {props.actionFolderLoadFailed(folderItemsType, message)}}
             >
                 <FolderContent

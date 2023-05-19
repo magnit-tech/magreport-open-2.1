@@ -49,13 +49,14 @@ export function actionFolderLoadFailed (itemsType, errorMessage){
     }
 }
 
-export function actionFolderLoaded(itemsType, folderData, isSortingAvailable=false, isFolderItemPicker=false){
+export function actionFolderLoaded(itemsType, folderData, isSortingAvailable=false, isFolderItemPicker=false, isSearchLoading = false){
     return {
         type : FOLDER_CONTENT_LOADED,
         itemsType : itemsType,
         folderData : folderData,
         isSortingAvailable,
-        isFolderItemPicker
+        isFolderItemPicker,
+        isSearchLoading
     }
 }
 
@@ -292,7 +293,7 @@ export function actionSortClick(itemsType, folderId, sortParams){
 function handleFolderSearch(itemsType, searchParams, magrepResponse){
     let type = magrepResponse.ok ? FOLDER_CONTENT_SEARCH_RESULTS_LOADED : FOLDER_CONTENT_SEARCH_RESULTS_FAILED;
     let data = magrepResponse.data;
-
+    
     store.dispatch({
         type,
         itemsType,
