@@ -23,6 +23,7 @@ function RolesMenuView(props){
     const navigate = useNavigate()
     const location = useLocation()
     const [searchParams, setSearchParams] = useSearchParams();
+    const locationPreviousHistory = { state: location.pathname + location.search }
 
     let state = props.state;
 
@@ -33,39 +34,35 @@ function RolesMenuView(props){
 
     useEffect(() => {
         setReload({needReload: true})
-    }, [searchParams])
+    }, [searchParams, state.needReload])
 
     function handleFolderClick(folderId) {
         navigate(`/ui/roles/${folderId}`)
     }
-
     function handleItemClick(roleId) {
         if(id) {
-            navigate(`/ui/roles/${id}/view/${roleId}`, {state: location.pathname})
+            navigate(`/ui/roles/${id}/view/${roleId}`, locationPreviousHistory)
         } else {
             const data = state.filteredFolderData ? state.filteredFolderData : state.currentFolderData
             const parentId = data.roles.find(item => item.id === roleId).path[0].id
 
-            navigate(`/ui/roles/${parentId}/view/${roleId}`, {state: location.pathname})
+            navigate(`/ui/roles/${parentId}/view/${roleId}`, locationPreviousHistory)
         }
     }
-
     function handleEditItemClick(roleId) {
         if(id) {
-            navigate(`/ui/roles/${id}/edit/${roleId}`, {state: location.pathname})
+            navigate(`/ui/roles/${id}/edit/${roleId}`, locationPreviousHistory)
 
         } else {
             const data = state.filteredFolderData ? state.filteredFolderData : state.currentFolderData
             const parentId = data.roles.find(item => item.id === roleId).path[0].id
 
-            navigate(`/ui/roles/${parentId}/edit/${roleId}`, {state: location.pathname})
+            navigate(`/ui/roles/${parentId}/edit/${roleId}`, locationPreviousHistory)
         }
     }
-
     function handleAddItemClick() {
-        navigate(`/ui/roles/${id}/add`, {state: location.pathname})
+        navigate(`/ui/roles/${id}/add`, locationPreviousHistory)
     }
-
     function handleSearchItems(params) {
         const {searchString, isRecursive} = params
 
