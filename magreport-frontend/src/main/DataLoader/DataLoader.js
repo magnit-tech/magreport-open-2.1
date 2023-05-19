@@ -22,7 +22,7 @@ import {DataLoaderCSS} from './DataLoaderCSS';
  
 export default function DataLoader(props){
     const classes = DataLoaderCSS();
-
+    
     // loadState : notLoaded, loading, loaded, loadFailed
     const [loadState, setLoadState] = useState('notLoaded');
     const lastLoadParams = useRef(null);
@@ -83,7 +83,7 @@ export default function DataLoader(props){
         {
             loadState === 'notLoaded' ?
                 <div></div>  
-            : (loadState === 'loading' || props.search) && (props.showSpinner === undefined || props.showSpinner === true)? 
+            : (loadState === 'loading' || props.isSearchLoading) && (props.showSpinner === undefined || props.showSpinner === true)? 
                 <div className={classes.dataLoaderProgressDiv}><CircularProgress className={classes.dataLoaderProgress}/></div>
             : loadState === 'loadFailed' ?
                 (props.loadFailedElement ? props.loadFailedElement : <Typography>{errLoadMessage.current}</Typography>)

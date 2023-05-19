@@ -121,15 +121,16 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
 					needReload : false,
 					currentFolderData : action.folderData,
 					filteredFolderData,
-					sortParams
+					sortParams,
+                    isSearchLoading: action.isSearchLoading
             }} else {
-                console.log(action.folderData);
-					return {
-						...state,
-						needReload : false,
-						currentFolderData : action.folderData,
-					}
-				}
+                return {
+                    ...state,
+                    needReload : false,
+                    currentFolderData : action.folderData,
+                    isSearchLoading: action.isSearchLoading
+                }
+            }
 
         case FOLDER_CONTENT_LOAD_FAILED:
             return{
@@ -199,7 +200,7 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
                     [itemsNameForSearch]: items
                 }
 
-                return {...state, filteredFolderData, searchParams: action.searchParams}
+                return {...state, filteredFolderData, searchParams: action.searchParams, isSearchLoading: false}
             }
             else {
                 const childFolders = state.currentFolderData.childFolders,
@@ -236,7 +237,7 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
                 }
 
                 delete state.searchParams
-                return {...state, filteredFolderData}
+                return {...state, filteredFolderData, isSearchLoading: false}
             }
 
         case FOLDER_CONTENT_SORT_CLICK:
@@ -308,12 +309,12 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
                     childFolders,
                     [itemsName]: objects
                 }
-                return {...state, filteredFolderData, searchParams: action.searchParams}
+                return {...state, filteredFolderData, searchParams: action.searchParams, isSearchLoading: false}
             }
             else {
                 delete state.filteredFolderData
                 delete state.searchParams
-                return {...state}
+                return {...state, isSearchLoading: false}
             }
 
         case FOLDER_CONTENT_PARENT_FOLDER_CHANGED:
