@@ -6,6 +6,7 @@ import RuLocalizedUtils from 'utils/RuLocalizedUtils'
 import ruLocale from "date-fns/locale/ru";
 import {MuiPickersUtilsProvider, KeyboardDatePicker,} from '@material-ui/pickers';
 import {dateToStringFormat} from 'utils/dateFunctions'
+import FormHelperText from '@material-ui/core/FormHelperText';
 
 // components
 import Box from '@material-ui/core/Box';
@@ -211,6 +212,7 @@ export default function DatesRange(props) {
                         <FilterStatus status={checkStatus} />
                     </span>
                 </div>
+                <FormHelperText disabled> Допустимое кол-во значений: {props.filterData.maxCountItems}</FormHelperText>
             </div>
         </MuiPickersUtilsProvider>
     );
