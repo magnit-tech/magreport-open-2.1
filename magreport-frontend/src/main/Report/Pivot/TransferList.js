@@ -170,7 +170,7 @@ export default function TransferList(props) {
 
         timer.current = setTimeout(() => {        
             setParams(buildParams({ 
-                    fieldId: props.field?.fieldId,
+                    field: {fieldId: props.field?.fieldId, fieldType:  props.field?.fieldType},
                     filterType: 'CONTAINS_CI',
                     invertResult: false,
                     values: [value]
