@@ -132,10 +132,18 @@ export default function DatesRange(props) {
             ]
         }
 
+        let stat = (st && en) || (!mandatory && !st && !en) ? 'success' : 'error';
+        if (en && st){
+            let bd = new Date(st);
+            let ed = new Date(en);
+            if (props.filterData.maxCountItems < ((ed.getTime() - bd.getTime())/(1000 *60*60*24) + 1)){
+                stat = 'limit'
+            }
+        }
         props.onChangeFilterValue({
             filterId : props.filterData.id,
             operationType: "IS_BETWEEN",
-            validation: (st && en) || (!mandatory && !st && !en) ? 'success' : 'error',
+            validation:   stat,
             parameters,
         });      
     }
