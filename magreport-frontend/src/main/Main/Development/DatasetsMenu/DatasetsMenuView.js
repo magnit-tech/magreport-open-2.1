@@ -21,11 +21,13 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 function DatasetsMenuView(props){
 
+    let state = props.state;
+
     const {id} = useParams()
     const navigate = useNavigate()
     const location = useLocation()
-
     const [searchParams, setSearchParams] = useSearchParams();
+    const locationPreviousHistory = { state: location.pathname + location.search }
 
     const [dependency, setDependency] = useState({
         loader: false,
@@ -33,6 +35,7 @@ function DatasetsMenuView(props){
         id: null,
         data: null
     })
+    const [reload, setReload] = useState({needReload : state.needReload});
 
     useEffect(() => {
         const datasourceId = searchParams.get('dependency');
@@ -46,14 +49,11 @@ function DatasetsMenuView(props){
                 data: null
             })
         }
-    }, [searchParams]) // eslint-disable-line
+
+        setReload({needReload: true})
+    }, [searchParams, state.needReload]) // eslint-disable-line
 
     let folderItemsType = SidebarItems.development.subItems.datasets.folderItemType;
-
-    let state = props.state;
-
-    let reload = {needReload : state.needReload};
-
     let isSortingAvailable = true;
     
 
@@ -62,27 +62,52 @@ function DatasetsMenuView(props){
     }
     function handleItemClick(datasetId) {
         if (id){
-            navigate(`/ui/dataset/${id}/view/${datasetId}`, {state: location.pathname})
+            navigate(`/ui/dataset/${id}/view/${datasetId}`, locationPreviousHistory)
         } else {
             let path = props.state.filteredFolderData ? props.state.filteredFolderData.dataSets.find(i => i.id === datasetId).path : props.state.currentFolderData.dataSets.find(i => i.id === datasetId).path;
-            navigate(`/ui/dataset/${path[path.length - 1].id}/view/${datasetId}`, {state: location.pathname})
+            navigate(`/ui/dataset/${path[path.length - 1].id}/view/${datasetId}`, locationPreviousHistory)
         }
     }
     function handleEditItemClick(datasetId) {
         if (id) {
-            navigate(`/ui/dataset/${id}/edit/${datasetId}`, {state: location.pathname})
+            navigate(`/ui/dataset/${id}/edit/${datasetId}`, locationPreviousHistory)
         } else {
             let path = props.state.filteredFolderData ? props.state.filteredFolderData.dataSets.find(i => i.id === datasetId).path : props.state.currentFolderData.dataSets.find(i => i.id === datasetId).path;
-            navigate(`/ui/dataset/${path[path.length - 1].id}/edit/${datasetId}`, {state: location.pathname})
+            navigate(`/ui/dataset/${path[path.length - 1].id}/edit/${datasetId}`, locationPreviousHistory)
         }
     }
     function handleAddItemClick() {
-        navigate(`/ui/dataset/${id}/add`, {state: location.pathname})
+        navigate(`/ui/dataset/${id}/add`, locationPreviousHistory)
+    }
+    function handleSearchItems(params) {
+        const { searchString, isRecursive } = params
+
+        if (searchString.trim() === '') {
+            setSearchParams({})
+        } else {
+            setSearchParams({search: searchString, isRecursive: isRecursive ?? false})
+        }
+    }
+
+    async function handleDataLoaded(data) {
+        await props.actionFolderLoaded(folderItemsType, data, isSortingAvailable, false, !!searchParams.get("search"))
+
+        if(searchParams.get("search")) {
+            const actionSearchParams = {
+                open: true,
+                searchString: searchParams.get("search"),
+                isRecursive: searchParams.get("isRecursive") === 'true' ? true : false,
+            }
+
+            await props.actionSearchClick(folderItemsType, state.currentFolderId, actionSearchParams)
+        }
     }
 
     // Dependency
     function handleDependenciesClick(datasetId) {
-        setSearchParams({ 'dependency': datasetId });
+        searchParams.set('dependency', datasetId);
+        setSearchParams(searchParams);
+
         setDependency({...dependency, loader: true})
         dataHub.datasetController.getDependencies(Number(datasetId), handleLoadedDependency)
     }
@@ -91,7 +116,13 @@ function DatasetsMenuView(props){
     }
     function handleCloseDependency() {
         setDependency({ show: false })
-        setSearchParams({})
+
+        searchParams.delete('dependency');
+        const newParams = {};
+        searchParams.forEach((value, key) => {
+            newParams[key] = value;
+        });
+        setSearchParams(newParams);
     }
 
     return(
@@ -104,7 +135,8 @@ function DatasetsMenuView(props){
                         loadFunc = {dataHub.datasetController.getFolder}
                         loadParams = {id ? [Number(id)] : [null]}
                         reload = {reload}
-                        onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}}
+                        isSearchLoading = {state.isSearchLoading}
+                        onDataLoaded = {(data) => handleDataLoaded(data)}
                         onDataLoadFailed = {(message) => {props.actionFolderLoadFailed(folderItemsType, message)}}
                     >
                         <FolderContent
@@ -121,12 +153,11 @@ function DatasetsMenuView(props){
                             onDependenciesClick = {handleDependenciesClick}
                             onAddItemClick={handleAddItemClick}
 
-
                             onAddFolder = {(name, description) => {props.actionAddFolder(folderItemsType, state.currentFolderData.id, name, description)}}
                             onEditFolderClick = {(folderId, name, description) => {props.actionEditFolder(folderItemsType, state.currentFolderData.id, folderId, name, description)}}
                             onDeleteFolderClick = {(folderId) => {props.actionDeleteFolderClick(folderItemsType, state.currentFolderData.id, folderId)}}
                             onDeleteItemClick = {(datasetId) => {props.actionDeleteItemClick(folderItemsType, state.currentFolderId, datasetId)}}
-                            onSearchClick ={searchParams => {props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)}}
+                            onSearchClick = {handleSearchItems}
                             onSortClick ={sortParams => {props.actionSortClick(folderItemsType, state.currentFolderId, sortParams)}}
                             contextAllowed
                             copyAndMoveAllowed

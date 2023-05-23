@@ -100,7 +100,7 @@ export default function PivotFilterModal(props){
                 
             <PivotFilters
                 jobId = {props.jobId}
-                field = {props.field}
+                field = {{...props.field, fieldType: props.field?.original ? 'REPORT_FIELD' : 'DERIVED_FIELD'}}
                 fieldsLists = {props.fieldsLists}
                 filterGroup = {props.filterGroup}
                 metricFilterGroup = {props.metricFilterGroup}
