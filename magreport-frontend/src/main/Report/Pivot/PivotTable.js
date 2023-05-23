@@ -618,6 +618,18 @@ export default function(props){
         return styleObj
     }
 
+    function handleOnWheel(event) {
+        const { deltaY } = event;
+        const { rowFrom } = props.pivotConfiguration;
+        const { totalRows } = props.tableData;
+
+        if(Math.sign(deltaY) === -1 && rowFrom !== 0) {
+            props.onWheelScrolling(rowFrom - 1)
+        } else if(Math.sign(deltaY) === 1 && !(totalRows <= Math.min(rowFrom + props.count, totalRows))) {
+            props.onWheelScrolling(rowFrom + 1)
+        }
+    }
+
     return(
         <div className={clsx(styles.pivotTable)}>
              <Scrollbars 
@@ -625,7 +637,7 @@ export default function(props){
             >
                 {/*Без Measure скролл не реагирует на изменение размера других компонентов*/}
                 
-                <table style={{borderCollapse: 'collapse'}} className={styles.table}>
+                <table style={{borderCollapse: 'collapse'}} className={styles.table} onWheel={handleOnWheel}>
                     <Measure
 						bounds
 						onResize={contentRect => {
