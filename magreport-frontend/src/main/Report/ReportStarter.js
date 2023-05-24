@@ -196,11 +196,6 @@ export default function ReportStarter(props){
     }
 
     function handleChangeFilterValue(newFilterValue){
-        if(newFilterValue.validation !== 'success') {
-            setDisabledSaveBtn(true)
-        } else {
-            setDisabledSaveBtn(false)
-        }
         if(newFilterValue.operationType !== 'IS_IT_SEARCHING') {
             filterValues.current.setFilterValue(newFilterValue);
             validateMandatoryGroups(newFilterValue, filterToGroupMap, mandatoryGroupsMap);
@@ -216,6 +211,14 @@ export default function ReportStarter(props){
             props.checkFilters(checkMandatoryFiltersResult && checkInvalidValues && isValidMandatorygroups);
             addJobParameters.current = filterValues.current.getParameters();
         }
+
+        let disabledBtn = false;
+        for (let v of filterValues.current.values.values()) {
+            if (v.validation !== 'success'){
+                disabledBtn = true
+            }
+        }
+        setDisabledSaveBtn( disabledBtn)
     }
 
     function validateMandatoryGroups(filterValue, filterMap, groupMap){

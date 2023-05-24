@@ -4,12 +4,12 @@ import ru.magnit.magreportbackend.metrics_function.MetricsFunction;
 
 public class SumIntegerFunction implements MetricsFunction {
 
-    private int sumOfValues;
+    private long sumOfValues;
 
     @Override
     public void addValue(String value, int col, int row) {
         if (value != null)
-            sumOfValues += Double.parseDouble(value);
+            sumOfValues += Long.parseLong(value);
     }
 
     @Override

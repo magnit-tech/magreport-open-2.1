@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 // dataHub
 import dataHub from 'ajax/DataHub';
@@ -97,6 +97,10 @@ export default function FolderContent(props){
    // const defaultStatuses = Object.values(JobStatuses);
     const [searchOpen, setSearchOpen] = useState(false);
     const [panelOpen, setPanelOpen] = useState(false);
+
+    useEffect(() => {
+        if(props.searchParams?.open) setSearchOpen(true)
+    }, [props.searchParams])
 
     const [openWindow, setOpenWindow] = useState(false);
     const [windowType, setWindowType] = useState('');
@@ -651,7 +655,7 @@ export default function FolderContent(props){
                 (props.itemsType !== FolderItemTypes.roles || props.data.id !== null) &&
                 <AddButton
                     showCreateFolder = {canCreateFolder && props.showAddFolder}
-                    showCreateItem = {canCreateItem && props.showAddItem && (props.data.id && props.data.id !== null)}
+                    showCreateItem = {canCreateItem && props.showAddItem}
                     itemName = {itemName}
                     onAddFolder = {handleAddFolder}
                     onAddItemClick = {handleAddItemClick}

@@ -1,7 +1,7 @@
-import React from 'react';
-import {connect} from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
 
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 
 // dataHub
 import dataHub from 'ajax/DataHub';
@@ -55,36 +55,65 @@ import FolderContent from 'main/FolderContent/FolderContent';
 
 function SchedulesMenuView(props) {
 
-    const navigate = useNavigate()
-
     const state = props.state;
 
-    let reload = {needReload: state.needReload};
+    const navigate = useNavigate()
+    const location = useLocation()
+    const [searchParams, setSearchParams] = useSearchParams();
+    const locationPreviousHistory = { state: location.pathname + location.search }
+
+    const [reload, setReload] = useState({needReload : state.needReload});
+
+    useEffect(() => {
+        setReload({needReload: true})
+    }, [searchParams, state.needReload])
+
     let folderItemsType = FolderItemTypes.schedules;
     let isSortingAvailable = true;
 
+    
     function handleItemClick(scheduleId) {
-        navigate(`/ui/schedules/view/${scheduleId}`)
+        navigate(`/ui/schedules/view/${scheduleId}`, locationPreviousHistory)
     }
     function handleEditItemClick(scheduleId) {
-        navigate(`/ui/schedules/edit/${scheduleId}`)
+        navigate(`/ui/schedules/edit/${scheduleId}`, locationPreviousHistory)
     }
     function handleAddItemClick() {
         navigate(`/ui/schedules/add`)
+    }
+    function handleSearchItems(params) {
+        const { searchString, isRecursive } = params
+
+        if (searchString.trim() === '') {
+            setSearchParams({})
+        } else {
+            setSearchParams({search: searchString, isRecursive: isRecursive ?? false})
+        }
+    }
+
+    async function handleDataLoaded(data) {
+        await props.actionFolderLoaded(folderItemsType, {schedules: data, childFolders: []}, isSortingAvailable, false, !!searchParams.get("search"))
+
+        if(searchParams.get("search")) {
+            const actionSearchParams = {
+                open: true,
+                searchString: searchParams.get("search"),
+                isRecursive: searchParams.get("isRecursive") === 'true' ? true : false,
+            }
+
+            await props.actionSearchClick(folderItemsType, state.currentFolderId, actionSearchParams)
+        }
     }
 
     return (
         <div style={{display: 'flex', flex: 1}}>
             <DataLoader
-                loadFunc={dataHub.scheduleController.getAll}
-                loadParams={[]}
-                reload={reload}
-                onDataLoaded={(data) => {
-                    props.actionFolderLoaded(folderItemsType, {schedules: data, childFolders: []}, isSortingAvailable)
-                }}
-                onDataLoadFailed={(message) => {
-                    props.actionFolderLoadFailed(folderItemsType, message)
-                }}
+                loadFunc = {dataHub.scheduleController.getAll}
+                loadParams = {[]}
+                reload = {reload}
+                isSearchLoading = {state.isSearchLoading}
+                onDataLoaded = {(data) => handleDataLoaded(data)}
+                onDataLoadFailed = {(message) => { props.actionFolderLoadFailed(folderItemsType, message) }}
             >
                 <FolderContent
                     itemsType={folderItemsType}
@@ -99,7 +128,7 @@ function SchedulesMenuView(props) {
                     onEditItemClick={handleEditItemClick}
 
                     onDeleteItemClick={scheduleId => { props.actionDeleteItemClick(folderItemsType, null, scheduleId) }}
-                    onSearchClick ={searchParams => { props.actionSearchClick(folderItemsType, [], searchParams) }}
+                    onSearchClick = {handleSearchItems}
                     contextAllowed
                     sortParams = {state.sortParams || {}}
                     onSortClick ={sortParams => { props.actionSortClick(folderItemsType, state.currentFolderId, sortParams) }}

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 
 // components
 import SearchIcon from '@material-ui/icons/Search';
@@ -34,7 +34,13 @@ export default function SearchField(props){
         setSearchParams({...searchParams, searchString: "", isRecursive: false })
     }
         
-    const [searchParams, setSearchParams] = useState(props.searchParams )
+    const [searchParams, setSearchParams] = useState({})
+
+    useEffect(() => {
+        if(props.searchParams) {
+            setSearchParams(props.searchParams)
+        }
+    },[props.searchParams])
 
     const handleChange = (name, value) => {
         setSearchParams({...searchParams, [name]: value})
