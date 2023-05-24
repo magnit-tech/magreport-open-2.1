@@ -197,7 +197,7 @@ export default function ReportFilterItem({index, disabled, filterItem, reportFie
                     </div>
                     
                 </div>
-                {/*
+                {['DATE_RANGE', 'TOKEN_INPUT', 'VALUE_LIST', 'VALUE_LIST_UNBOUNDED'].includes(filterItem.type) &&
                 <DesignerTextField
                     label = "Ограничение кол-ва выбранных значений"
                     type = "number"
@@ -208,7 +208,7 @@ export default function ReportFilterItem({index, disabled, filterItem, reportFie
                     size="small"
                     //error = {!filterItem.name}
                 />
-                */}
+                }
                 <div>
                     <Typography variant="body2" color="textSecondary" component="p" gutterBottom>
                         {datasetType === 0 ? 'Сопоставьте поля фильтра с полями отчёта:' : 'Поля фильтра:'}

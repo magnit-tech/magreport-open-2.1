@@ -13,14 +13,15 @@ export default function FilterStatus({status}){
             title={
                 status === 'waiting' ? "Идет проверка значений" :
                 status === 'success' ? "Введены корректные значения" :
-                status === 'error'   ? "Введены некорректные значения" : ""
+                status === 'error'   ? "Введены некорректные значения" : 
+                status === 'limit'   ? "Превышено допустимое кол-во значений" : ""
             } 
             placement="top"
         >
             {
                 status === 'waiting' ? <CircularProgress size={20} /> :
                 status === 'success' ? <DoneIcon fontSize='small' style={{color: "green"}} /> :
-                status === 'error'   ? <ErrorOutlineIcon fontSize='small' style={{color: "red"}} /> : <></>
+                ['error', 'limit'].includes(status)  ? <ErrorOutlineIcon fontSize='small' style={{color: "red"}} /> : <></>
             }
         </Tooltip>
     )

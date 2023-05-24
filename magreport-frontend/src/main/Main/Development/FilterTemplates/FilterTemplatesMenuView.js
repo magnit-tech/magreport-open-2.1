@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 
-import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 
 // dataHub
 import dataHub from 'ajax/DataHub';
@@ -50,21 +50,49 @@ import SidebarItems from '../../Sidebar/SidebarItems'
 
 function FilterTemplatesMenuView(props){
 
+    const state = props.state;
+
     const {id} = useParams()
     const navigate = useNavigate()
     const location = useLocation()
+    const [searchParams, setSearchParams] = useSearchParams();
+    const locationPreviousHistory = { state: location.pathname + location.search }
 
-    let state = props.state;
+    const [reload, setReload] = useState({needReload : state.needReload});
+    const folderItemsType = SidebarItems.development.subItems.filterTemplates.folderItemType;
 
-    let reload = {needReload : state.needReload};
-    let folderItemsType = SidebarItems.development.subItems.filterTemplates.folderItemType;
-
+    useEffect(() => {
+        setReload({needReload: true})
+    }, [searchParams, state.needReload])
     
     function handleFolderClick(folderId) {
         navigate(`/ui/filterTemplate/${folderId}`)
     }
     function handleItemClick(filterTemplateId) {
-        navigate(`/ui/filterTemplate/${id}/view/${filterTemplateId}`, {state: location.pathname})
+        navigate(`/ui/filterTemplate/${id}/view/${filterTemplateId}`, locationPreviousHistory)
+    }
+    function handleSearchItems(params) {
+        const { searchString, isRecursive } = params
+
+        if (searchString.trim() === '') {
+            setSearchParams({})
+        } else {
+            setSearchParams({search: searchString, isRecursive: isRecursive ?? false})
+        }
+    }
+
+    async function handleDataLoaded(data) {
+        await props.actionFolderLoaded(folderItemsType, data, false, false, !!searchParams.get("search"))
+
+        if(searchParams.get("search")) {
+            const actionSearchParams = {
+                open: true,
+                searchString: searchParams.get("search"),
+                isRecursive: searchParams.get("isRecursive") === 'true' ? true : false,
+            }
+
+            await props.actionSearchClick(folderItemsType, state.currentFolderId, actionSearchParams)
+        }
     }
 
 
@@ -74,7 +102,8 @@ function FilterTemplatesMenuView(props){
                 loadFunc = {dataHub.filterTemplateController.getFolder}
                 loadParams = {id ? [Number(id)] : [null]}
                 reload = {reload}
-                onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data)}}
+                isSearchLoading = {state.isSearchLoading}
+                onDataLoaded = {(data) => handleDataLoaded(data)}
                 onDataLoadFailed = {(message) => {props.actionFolderLoadFailed(folderItemsType, message)}}
             >
                 <FolderContent
@@ -82,16 +111,16 @@ function FilterTemplatesMenuView(props){
                     showAddFolder = {false}
                     showAddItem = {false}
                     showItemControls={false}
-                    data = {state.currentFolderData}
+                    data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
                     searchParams = {state.searchParams || {}}
 
                     onFolderClick = {handleFolderClick}
-                    onItemClick={handleItemClick}
+                    onItemClick = {handleItemClick}
                     // onEditItemClick={handleEditItemClick}
                     // onDependenciesClick = {handleDependenciesClick}
                     // onAddItemClick={handleAddItemClick}
 
-                    onSearchClick ={searchParams => {props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)}}
+                    onSearchClick = {handleSearchItems}
                 />
             </DataLoader>
         </div>
