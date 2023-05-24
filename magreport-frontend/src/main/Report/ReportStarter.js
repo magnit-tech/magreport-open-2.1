@@ -218,7 +218,7 @@ export default function ReportStarter(props){
                 disabledBtn = true
             }
         }
-        setDisabledSaveBtn(disabledBtn)
+        setDisabledSaveBtn( disabledBtn)
     }
 
     function validateMandatoryGroups(filterValue, filterMap, groupMap){
