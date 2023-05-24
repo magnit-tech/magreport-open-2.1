@@ -27,9 +27,8 @@ function SecurityFiltersMenuView(props){
     const locationPreviousHistory = { state: location.pathname + location.search }
 
     const [reload, setReload] = useState({needReload : state.needReload});
-
-    let folderItemsType = SidebarItems.admin.subItems.securityFilters.folderItemType;
-    let isSortingAvailable = true;
+    const folderItemsType = SidebarItems.admin.subItems.securityFilters.folderItemType;
+    const showAddBtn = searchParams.get("isRecursive") === 'true' ? false : true;
 
     useEffect(() => {
         setReload({needReload: true})
@@ -70,7 +69,7 @@ function SecurityFiltersMenuView(props){
     }
 
     async function handleDataLoaded(data) {
-        await props.actionFolderLoaded(folderItemsType, data, isSortingAvailable, false, !!searchParams.get("search"))
+        await props.actionFolderLoaded(folderItemsType, data, true, false, !!searchParams.get("search"))
 
         if(searchParams.get("search")) {
             const actionSearchParams = {
@@ -95,8 +94,8 @@ function SecurityFiltersMenuView(props){
             >
                 <FolderContent
                     itemsType = {folderItemsType}
-                    showAddFolder = {true}
-                    showAddItem = {true}
+                    showAddFolder = {showAddBtn}
+                    showAddItem = {showAddBtn}
                     data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
                     searchParams = {state.searchParams || {}}
                     sortParams = {state.sortParams || {}}

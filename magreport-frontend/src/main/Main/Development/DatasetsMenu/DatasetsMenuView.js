@@ -21,7 +21,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 function DatasetsMenuView(props){
 
-    let state = props.state;
+    const state = props.state;
 
     const {id} = useParams()
     const navigate = useNavigate()
@@ -53,8 +53,8 @@ function DatasetsMenuView(props){
         setReload({needReload: true})
     }, [searchParams, state.needReload]) // eslint-disable-line
 
-    let folderItemsType = SidebarItems.development.subItems.datasets.folderItemType;
-    let isSortingAvailable = true;
+    const folderItemsType = SidebarItems.development.subItems.datasets.folderItemType;
+    const showAddBtn = searchParams.get("isRecursive") === 'true' ? false : true;
     
 
     function handleFolderClick(folderId) {
@@ -90,7 +90,7 @@ function DatasetsMenuView(props){
     }
 
     async function handleDataLoaded(data) {
-        await props.actionFolderLoaded(folderItemsType, data, isSortingAvailable, false, !!searchParams.get("search"))
+        await props.actionFolderLoaded(folderItemsType, data, true, false, !!searchParams.get("search"))
 
         if(searchParams.get("search")) {
             const actionSearchParams = {
@@ -144,8 +144,8 @@ function DatasetsMenuView(props){
                             data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
                             searchParams = {state.searchParams || {}}
                             sortParams = {state.sortParams || {}}
-                            showAddFolder = {true}
-                            showAddItem = {true}
+                            showAddFolder = {showAddBtn}
+                            showAddItem = {showAddBtn}
 
                             onFolderClick = {handleFolderClick}
                             onItemClick={handleItemClick}
