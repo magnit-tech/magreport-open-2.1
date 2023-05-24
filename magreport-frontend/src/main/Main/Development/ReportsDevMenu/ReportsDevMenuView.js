@@ -21,7 +21,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 function ReportsDevMenuView(props){
 
-    let state = props.state;
+    const state = props.state;
 
     const {id} = useParams()
     const navigate = useNavigate()
@@ -53,8 +53,8 @@ function ReportsDevMenuView(props){
         setReload({needReload: true})
     }, [searchParams, state.needReload]) // eslint-disable-line
 
-    let folderItemsType = SidebarItems.development.subItems.reportsDev.folderItemType;
-    let isSortingAvailable = true;
+    const folderItemsType = SidebarItems.development.subItems.reportsDev.folderItemType;
+    const showAddBtn = searchParams.get("isRecursive") === 'true' ? false : true;
 
 
     function handleFolderClick(folderId) {
@@ -93,7 +93,7 @@ function ReportsDevMenuView(props){
     }
 
     async function handleDataLoaded(data) {
-        await props.actionFolderLoaded(folderItemsType, data, isSortingAvailable, false, !!searchParams.get("search"))
+        await props.actionFolderLoaded(folderItemsType, data, true, false, !!searchParams.get("search"))
 
         if(searchParams.get("search")) {
             const actionSearchParams = {
@@ -145,8 +145,8 @@ function ReportsDevMenuView(props){
                         <FolderContent
                             itemsType = {folderItemsType}
                             data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
-                            showAddFolder = {true}
-                            showAddItem = {true}
+                            showAddFolder = {showAddBtn}
+                            showAddItem = {showAddBtn}
                             searchParams = {state.searchParams || {}}
                             sortParams = {state.sortParams || {}}
 
