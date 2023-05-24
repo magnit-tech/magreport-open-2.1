@@ -50,7 +50,7 @@ import SidebarItems from '../../Sidebar/SidebarItems'
 
 function FilterTemplatesMenuView(props){
 
-    let state = props.state;
+    const state = props.state;
 
     const {id} = useParams()
     const navigate = useNavigate()
@@ -59,7 +59,7 @@ function FilterTemplatesMenuView(props){
     const locationPreviousHistory = { state: location.pathname + location.search }
 
     const [reload, setReload] = useState({needReload : state.needReload});
-    let folderItemsType = SidebarItems.development.subItems.filterTemplates.folderItemType;
+    const folderItemsType = SidebarItems.development.subItems.filterTemplates.folderItemType;
 
     useEffect(() => {
         setReload({needReload: true})
