@@ -21,7 +21,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 function FilterInstancesMenuView(props){
 
-    let state = props.state;
+    const state = props.state;
 
     const {id} = useParams()
     const navigate = useNavigate()
@@ -53,8 +53,8 @@ function FilterInstancesMenuView(props){
         setReload({needReload: true})
     }, [searchParams, state.needReload]) // eslint-disable-line
 
-    let folderItemsType = SidebarItems.development.subItems.filterInstances.folderItemType;
-    let isSortingAvailable = true;
+    const folderItemsType = SidebarItems.development.subItems.filterInstances.folderItemType;
+    const showAddBtn = searchParams.get("isRecursive") === 'true' ? false : true;
     
 
     function handleFolderClick(folderId) {
@@ -90,7 +90,7 @@ function FilterInstancesMenuView(props){
     }
 
     async function handleDataLoaded(data) {
-        await props.actionFolderLoaded(folderItemsType, data, isSortingAvailable, false, !!searchParams.get("search"))
+        await props.actionFolderLoaded(folderItemsType, data, true, false, !!searchParams.get("search"))
 
         if(searchParams.get("search")) {
             const actionSearchParams = {
@@ -141,11 +141,11 @@ function FilterInstancesMenuView(props){
                     >
                         <FolderContent
                             itemsType = {folderItemsType}
-                            showAddFolder = {true}
-                            showAddItem = {true}
                             data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
                             searchParams = {state.searchParams || {}}
                             sortParams = {state.sortParams || {}}
+                            showAddFolder = {showAddBtn}
+                            showAddItem = {showAddBtn}
 
                             onFolderClick = {handleFolderClick}
                             onItemClick={handleItemClick}

@@ -53,8 +53,8 @@ function DatasourcesMenuView(props){
         setReload({needReload: true})
     }, [searchParams, state.needReload]) // eslint-disable-line
 
-    let folderItemsType = SidebarItems.development.subItems.datasources.folderItemType;
-    let isSortingAvailable = true;
+    const folderItemsType = SidebarItems.development.subItems.datasources.folderItemType;
+    const showAddBtn = searchParams.get("isRecursive") === 'true' ? false : true;
 
 
     function handleFolderClick(folderId) {
@@ -90,7 +90,7 @@ function DatasourcesMenuView(props){
     }
 
     async function handleDataLoaded(data) {
-        await props.actionFolderLoaded(folderItemsType, data, isSortingAvailable, false, !!searchParams.get("search"))
+        await props.actionFolderLoaded(folderItemsType, data, true, false, !!searchParams.get("search"))
 
         if(searchParams.get("search")) {
             const actionSearchParams = {
@@ -144,8 +144,8 @@ function DatasourcesMenuView(props){
                             data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
                             searchParams = {state.searchParams || {}}
                             sortParams = {state.sortParams || {}}
-                            showAddFolder = {true}
-                            showAddItem = {true}
+                            showAddFolder = {showAddBtn}
+                            showAddItem = {showAddBtn}
                             
                             onFolderClick = {handleFolderClick}
                             onItemClick={handleItemClick}

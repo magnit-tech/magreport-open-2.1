@@ -19,18 +19,18 @@ import SidebarItems from '../../Sidebar/SidebarItems'
 
 function RolesMenuView(props){
 
+    const state = props.state;
+
     const { id } = useParams()
     const navigate = useNavigate()
     const location = useLocation()
     const [searchParams, setSearchParams] = useSearchParams();
     const locationPreviousHistory = { state: location.pathname + location.search }
 
-    let state = props.state;
-
     const [reload, setReload] = useState({needReload : state.needReload});
-    let folderItemsType = SidebarItems.admin.subItems.roles.folderItemType;
-    let sidebarItemType = SidebarItems.admin.subItems.roles.key;
-    let isSortingAvailable = true;
+    const folderItemsType = SidebarItems.admin.subItems.roles.folderItemType;
+    const sidebarItemType = SidebarItems.admin.subItems.roles.key;
+    const showAddBtn = searchParams.get("isRecursive") === 'true' ? false : true;
 
     useEffect(() => {
         setReload({needReload: true})
@@ -75,7 +75,7 @@ function RolesMenuView(props){
     }
 
     async function handleDataLoaded(data) {
-        await props.actionFolderLoaded(folderItemsType, data, isSortingAvailable, false, !!searchParams.get("search"))
+        await props.actionFolderLoaded(folderItemsType, data, true, false, !!searchParams.get("search"))
 
         if(searchParams.get("search")) {
             const actionSearchParams = {
@@ -101,8 +101,8 @@ function RolesMenuView(props){
                 <FolderContent
                     pagination = {true}
                     itemsType = {folderItemsType}
-                    showAddFolder = {false}
-                    showAddItem = {true}
+                    showAddFolder = {showAddBtn}
+                    showAddItem = {showAddBtn}
                     searchParams = {state.searchParams || {}}
                     sortParams = {state.sortParams || {}}
                     data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
