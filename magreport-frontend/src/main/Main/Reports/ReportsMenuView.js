@@ -23,7 +23,7 @@ function ReportsMenuView(props){
 
     const { enqueueSnackbar } = useSnackbar();
 
-    let state = props.state;
+    const state = props.state;
 
     const { id } = useParams()
     const navigate = useNavigate()
@@ -32,9 +32,8 @@ function ReportsMenuView(props){
     const locationPreviousHistory = { state: location.pathname + location.search }
 
     const [reload, setReload] = useState({needReload : state.needReload});
-
-    let folderItemsType = SidebarItems.reports.folderItemType;
-    let isSortingAvailable = true;
+    const folderItemsType = SidebarItems.reports.folderItemType;
+    const showAddBtn = searchParams.get("isRecursive") === 'true' ? false : true
 
     useEffect(() => {
         setReload({needReload: true})
@@ -52,7 +51,7 @@ function ReportsMenuView(props){
     }
 
     async function handleDataLoaded(data) {
-        await props.actionFolderLoaded(folderItemsType, data, isSortingAvailable, false, !!searchParams.get("search"))
+        await props.actionFolderLoaded(folderItemsType, data, true, false, !!searchParams.get("search"))
 
         if(searchParams.get("search")) {
             const actionSearchParams = {
@@ -77,8 +76,8 @@ function ReportsMenuView(props){
             >
                 <FolderContent
                     itemsType = {folderItemsType}
-                    showAddFolder = {true}
-                    showAddItem = {true}
+                    showAddFolder = {showAddBtn}
+                    showAddItem = {showAddBtn}
                     data = {state.filteredFolderData ? state.filteredFolderData : state.currentFolderData}
                     searchParams = {state.searchParams || {}}
                     sortParams = {state.sortParams || {}}
