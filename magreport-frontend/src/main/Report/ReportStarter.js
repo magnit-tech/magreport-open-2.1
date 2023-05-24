@@ -214,7 +214,8 @@ export default function ReportStarter(props){
 
         let disabledBtn = false;
         for (let v of filterValues.current.values.values()) {
-            if (v.validation !== 'success'){
+            /*Временная залепа, нужно для ValueList*/
+            if (v.hasOwnProperty('validation') && v.validation !== 'success'){
                 disabledBtn = true
             }
         }
