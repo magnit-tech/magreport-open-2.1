@@ -69,7 +69,7 @@ export default function DatesRange(props) {
 
             valueList.current.startDate = defaultStartDate;
             valueList.current.endDate = defaultEndDate;
-            setCheckStatus(props.filterData.maxCountItems < ((ed.getTime() - bd.getTime())/(1000 *60*60*24) + 1) ? "limit"
+            setCheckStatus(Boolean(props.filterData.maxCountItems) && props.filterData.maxCountItems < ((ed.getTime() - bd.getTime())/(1000 *60*60*24) + 1) ? "limit"
                 : defaultStartDate || ! mandatory ? 'success' : 'error')
             setStartDate(defaultStartDate);
             setEndDate(defaultEndDate);
@@ -108,7 +108,7 @@ export default function DatesRange(props) {
         if ((valueList.current.startDate && valueList.current.endDate) || (!mandatory && !valueList.current.startDate && !valueList.current.endDate)){
             let bd = new Date(valueList.current.startDate);
             let ed = new Date(valueList.current.endDate);
-            setCheckStatus(props.filterData.maxCountItems < ((ed.getTime() - bd.getTime())/(1000 *60*60*24) + 1) ? "limit" :  'success' );
+            setCheckStatus(Boolean(props.filterData.maxCountItems) && props.filterData.maxCountItems < ((ed.getTime() - bd.getTime())/(1000 *60*60*24) + 1) ? "limit" :  'success' );
         }
         else {
             setCheckStatus('error')
@@ -137,7 +137,7 @@ export default function DatesRange(props) {
         if (en && st){
             let bd = new Date(st);
             let ed = new Date(en);
-            if (props.filterData.maxCountItems < ((ed.getTime() - bd.getTime())/(1000 *60*60*24) + 1)){
+            if (Boolean(props.filterData.maxCountItems) && props.filterData.maxCountItems < ((ed.getTime() - bd.getTime())/(1000 *60*60*24) + 1)){
                 stat = 'limit'
             }
         }
@@ -212,7 +212,7 @@ export default function DatesRange(props) {
                         <FilterStatus status={checkStatus} />
                     </span>
                 </div>
-                <FormHelperText disabled> Допустимое кол-во значений: {props.filterData.maxCountItems}</FormHelperText>
+                {props.filterData.maxCountItems > 0 && <FormHelperText  disabled> Допустимое кол-во значений: {props.filterData.maxCountItems}</FormHelperText>}
             </div>
         </MuiPickersUtilsProvider>
     );
