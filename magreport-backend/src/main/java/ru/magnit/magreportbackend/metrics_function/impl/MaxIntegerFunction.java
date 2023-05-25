@@ -4,16 +4,16 @@ import ru.magnit.magreportbackend.metrics_function.MetricsFunction;
 
 public class MaxIntegerFunction implements MetricsFunction {
 
-    private Double maxValue;
+    private Long maxValue;
 
     @Override
     public void addValue(String value, int col, int row) {
         if (value != null)
-            maxValue = maxValue == null ? Double.parseDouble(value) : Double.max(maxValue, Double.parseDouble(value));
+            maxValue = maxValue == null ? Long.parseLong(value) : Long.max(maxValue, Long.parseLong(value));
     }
 
     @Override
     public String calculate(int col, int row) {
-        return String.valueOf(maxValue == null ? null : maxValue.intValue());
+        return maxValue == null ? "" : String.valueOf(maxValue.longValue());
     }
 }

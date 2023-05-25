@@ -50,7 +50,7 @@ import {ReportFiltersItemCSS} from '../../Designer/DesignerCSS';
  * @param {onChangeOrdinal} props.onChangeOrdinal - function(event) изменение порядка
  */
 export default function ReportFilterItem({index, disabled, filterItem, reportFields, datasetType, onChange, onDeleteItem, onChangeOrdinal}){
-    
+
     const classes = ReportFiltersItemCSS()
 
     const handleDeleteItems = event => {
@@ -67,7 +67,9 @@ export default function ReportFilterItem({index, disabled, filterItem, reportFie
             level: item.level,
             reportFieldId: value,
             ordinal: item.ordinal,
-            type: item.type
+            type: item.type,
+            valid: true,
+            maxCountItems: null
         }
         let arr = [...filterItem.fields]
         arr.splice(itemIndex, 1, fieldObj)
@@ -93,7 +95,7 @@ export default function ReportFilterItem({index, disabled, filterItem, reportFie
         onChange({...filterItem, [field]: value})
     }
 
-    let isValid = !!filterItem.code && !!filterItem.name && !filterItem.errors
+    let isValid = !!filterItem.code && !!filterItem.name && !filterItem.errors && (filterItem.hasOwnProperty('valid') ?  filterItem.valid: true)
     for (let f of filterItem.fields){
         if (f.error){
             isValid = false
@@ -195,6 +197,18 @@ export default function ReportFilterItem({index, disabled, filterItem, reportFie
                     </div>
                     
                 </div>
+                {['DATE_RANGE', 'TOKEN_INPUT', 'VALUE_LIST', 'VALUE_LIST_UNBOUNDED'].includes(filterItem.type) &&
+                <DesignerTextField
+                    label = "Ограничение кол-ва выбранных значений"
+                    type = "number"
+                    value = {filterItem.maxCountItems} 
+                    onChange = {data => {handleChangeMetadata('maxCountItems', data)}}
+                    displayBlock
+                    fullWidth
+                    size="small"
+                    //error = {!filterItem.name}
+                />
+                }
                 <div>
                     <Typography variant="body2" color="textSecondary" component="p" gutterBottom>
                         {datasetType === 0 ? 'Сопоставьте поля фильтра с полями отчёта:' : 'Поля фильтра:'}
@@ -228,7 +242,7 @@ export default function ReportFilterItem({index, disabled, filterItem, reportFie
                                         size="small"
                                         value={filterItem.fields[itemIndex] && datasetType === 0 ? filterItem.fields[itemIndex].reportFieldId : null}
                                         onChange = {value => handleChange(itemIndex, field, value)}
-                                        error={field.error}
+                                        error={field.error || !(filterItem.hasOwnProperty('valid') ?  filterItem.valid: true)}
                                        // disabled={Boolean(datasetType)}
                                     />
                                 }

@@ -31,6 +31,7 @@ public class ScheduleCalendarDomainService {
     }
 
     public boolean checkDates() {
-        return repository.findAll().isEmpty();
+        var dates = repository.findAll().stream().filter(d -> d.getDate().isAfter(LocalDate.now())).toList();
+       return dates.size() > 90;
     }
 }

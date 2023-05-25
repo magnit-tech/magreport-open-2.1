@@ -45,6 +45,7 @@ import ru.magnit.magreportbackend.service.domain.FolderEntitySearchDomainService
 import ru.magnit.magreportbackend.service.domain.FolderPermissionsDomainService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
 import ru.magnit.magreportbackend.service.domain.OlapConfigurationDomainService;
+import ru.magnit.magreportbackend.service.domain.OlapUserChoiceDomainService;
 import ru.magnit.magreportbackend.service.domain.ReportDomainService;
 import ru.magnit.magreportbackend.service.domain.ScheduleTaskDomainService;
 import ru.magnit.magreportbackend.service.domain.UserDomainService;
@@ -123,6 +124,9 @@ class ReportServiceTest {
 
     @Mock
     private OlapConfigurationDomainService olapConfigurationDomainService;
+
+    @Mock
+    private OlapUserChoiceDomainService olapUserChoiceDomainService;
 
 
     @Test
@@ -280,9 +284,11 @@ class ReportServiceTest {
         service.deleteReport(new ReportRequest().setId(ID));
 
         verify(domainService).deleteReport(any());
+        verify(olapUserChoiceDomainService).deleteUsersChoiceForReport(anyLong());
         verify(scheduleTaskDomainService).deleteScheduleTaskByReport(anyLong());
         verify(olapConfigurationDomainService).deleteReportOlapConfigurationByReport(anyLong());
         verify(excelTemplateDomainService).removeReportExcelTemplate(anyLong());
+        verify(domainService).deleteFavReportsByReportId(anyLong());
         verifyNoMoreInteractions(domainService);
     }
 
@@ -337,6 +343,7 @@ class ReportServiceTest {
 
         when(domainService.getDeletedFields(any())).thenReturn(Collections.emptyList());
         when(domainService.getReport(anyLong())).thenReturn(getReportResponse());
+        when(userDomainService.getCurrentUser()).thenReturn(new UserView().setId(ID));
 
         var response = service.editReport(getReportEditRequest());
         assertNotNull(response);
@@ -347,7 +354,7 @@ class ReportServiceTest {
         verify(filterReportDomainService, times(2)).removeFilters(anyLong());
         verify(domainService, times(2)).getDeletedFields(any());
         verify(domainService, times(2)).deleteFields(anyList());
-        verify(domainService, times(2)).editReport(any());
+        verify(domainService, times(2)).editReport(any(),any());
         verify(filterReportService).addFilters(any());
         verify(domainService, times(2)).getReport(anyLong());
 

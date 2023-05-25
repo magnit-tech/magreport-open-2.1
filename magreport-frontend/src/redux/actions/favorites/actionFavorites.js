@@ -12,6 +12,7 @@ import {
 
 export function actionAddDeleteFavorites(itemsType, index, folderId, reportId, favorite, callback){
     let type = FAVORITES_ADD_START
+
     if (favorite){
         dataHub.reportController.deleteFavorites(reportId, m => handleAddDeleteFavorites(itemsType, index, folderId, reportId, favorite, m, callback))
         type = FAVORITES_DELETE_START

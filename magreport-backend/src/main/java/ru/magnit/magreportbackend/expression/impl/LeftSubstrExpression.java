@@ -20,13 +20,25 @@ public class LeftSubstrExpression extends ParameterizedExpression {
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
         final var sourceString = parameters.get(0).calculate(rowNumber);
         final var length = parameters.get(1).calculate(rowNumber);
+        final var stringLength = sourceString.getL().length();
 
         checkParameterNotNull(parameters.get(0), sourceString);
         checkParameterHasAnyType(parameters.get(0), sourceString, DataTypeEnum.STRING, DataTypeEnum.DATE, DataTypeEnum.TIMESTAMP);
 
         checkParameterNotNull(parameters.get(1), length);
         checkParameterHasAnyType(parameters.get(1), length, DataTypeEnum.INTEGER);
+        final var paramLength = Integer.parseInt(length.getL());
+        return result.setL(sourceString.getL().substring(0, Math.min(stringLength, paramLength)));
+    }
 
-        return result.setL(sourceString.getL().substring(0, Integer.parseInt(length.getL())));
+    @Override
+    public DataTypeEnum inferType() {
+        final var stringParameter = parameters.get(0);
+        final var lengthParameter = parameters.get(1);
+        final var stringParameterType = stringParameter.inferType();
+        final var lengthParameterType = stringParameter.inferType();
+        checkParameterHasAnyType(stringParameter, stringParameterType, DataTypeEnum.STRING, DataTypeEnum.DATE, DataTypeEnum.TIMESTAMP);
+        checkParameterHasAnyType(lengthParameter, lengthParameterType, DataTypeEnum.INTEGER);
+        return DataTypeEnum.STRING;
     }
 }

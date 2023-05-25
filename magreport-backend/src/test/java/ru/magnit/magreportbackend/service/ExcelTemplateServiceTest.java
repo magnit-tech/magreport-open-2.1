@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import ru.magnit.magreportbackend.domain.folderreport.FolderAuthorityEnum;
 import ru.magnit.magreportbackend.dto.inner.UserView;
 import ru.magnit.magreportbackend.dto.request.ChangeParentFolderRequest;
 import ru.magnit.magreportbackend.dto.request.exceltemplate.ExcelTemplateAddRequest;
@@ -19,14 +20,17 @@ import ru.magnit.magreportbackend.dto.request.folder.FolderRequest;
 import ru.magnit.magreportbackend.dto.request.report.ReportIdRequest;
 import ru.magnit.magreportbackend.dto.response.exceltemplate.ExcelTemplateFolderResponse;
 import ru.magnit.magreportbackend.dto.response.exceltemplate.ExcelTemplateResponse;
+import ru.magnit.magreportbackend.dto.response.folder.FolderRoleResponse;
 import ru.magnit.magreportbackend.dto.response.user.DomainShortResponse;
 import ru.magnit.magreportbackend.exception.FileSystemException;
+import ru.magnit.magreportbackend.exception.InvalidParametersException;
 import ru.magnit.magreportbackend.mapper.exceltemplate.ExcelTemplateAddRequestMapper;
 import ru.magnit.magreportbackend.service.domain.ExcelTemplateDomainService;
 import ru.magnit.magreportbackend.service.domain.FolderPermissionsDomainService;
 import ru.magnit.magreportbackend.service.domain.UserDomainService;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,7 +42,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
@@ -89,7 +95,7 @@ class ExcelTemplateServiceTest {
         assertEquals(MODIFIED_TIME, response.getModified());
 
         verify(domainService).addFolder(any());
-        verifyNoMoreInteractions(domainService);
+        verifyNoMoreInteractions(domainService, userDomainService, folderPermissionsDomainService);
     }
 
     @Test
@@ -110,7 +116,10 @@ class ExcelTemplateServiceTest {
         assertEquals(MODIFIED_TIME, response.getModified());
 
         verify(domainService).getFolder(any());
-        verifyNoMoreInteractions(domainService);
+        verify(userDomainService).getCurrentUser();
+        verify(userDomainService).getUserRoles(anyString(),anyString(),any());
+        verify(folderPermissionsDomainService).getFoldersReportPermissionsForRoles(anyList(),any());
+        verifyNoMoreInteractions(domainService, userDomainService, folderPermissionsDomainService);
     }
 
     @Test
@@ -210,6 +219,42 @@ class ExcelTemplateServiceTest {
         verify(domainService).changeParentFolder(any());
         verifyNoMoreInteractions(domainService);
     }
+
+
+    @Test
+    void changeParentFolderException1() {
+
+        when(userDomainService.getCurrentUser()).thenReturn(getCurrentUser());
+        when(folderPermissionsDomainService.getExcelTemplateFolderPermissionsForRoles(anyList(),anyList()))
+                .thenReturn(Collections.singletonList(new FolderRoleResponse(ID, FolderAuthorityEnum.NONE)));
+
+        var request = new FolderChangeParentRequest();
+        assertThrows(InvalidParametersException.class,() -> service.changeParentFolder(request));
+
+        verify(userDomainService).getCurrentUser();
+        verify(userDomainService).getUserRoles(anyString(), anyString(), any());
+        verify(folderPermissionsDomainService).getExcelTemplateFolderPermissionsForRoles(anyList(),any());
+        verifyNoMoreInteractions(folderPermissionsDomainService, userDomainService);
+        verifyNoInteractions(domainService);
+    }
+
+    @Test
+    void changeParentFolderException2() {
+
+        when(userDomainService.getCurrentUser()).thenReturn(getCurrentUser());
+        when(folderPermissionsDomainService.getExcelTemplateFolderPermissionsForRoles(anyList(),anyList()))
+                .thenReturn(Collections.singletonList(new FolderRoleResponse(ID, FolderAuthorityEnum.READ)));
+
+        var request = new FolderChangeParentRequest();
+        assertThrows(InvalidParametersException.class,() -> service.changeParentFolder(request));
+
+        verify(userDomainService).getCurrentUser();
+        verify(userDomainService).getUserRoles(anyString(), anyString(), any());
+        verify(folderPermissionsDomainService, times(2)).getExcelTemplateFolderPermissionsForRoles(anyList(),any());
+        verifyNoMoreInteractions(folderPermissionsDomainService, userDomainService);
+        verifyNoInteractions(domainService);
+    }
+
 
     @Test
     void deleteExcelTemplate() {

@@ -53,7 +53,7 @@ export default function OlapConfig(config){
     }  
 
 	// Cохранение текущей конфигурации
-    this.saveCurrentConfig = (pivotConfigForSave) => {
+    this.saveCurrentConfig = (pivotConfigForSave, callback = () => {}) => {
 
         const { olapConfigDescription, olapConfigId, olapConfigName } = this.configData.olapConfig
 
@@ -68,7 +68,12 @@ export default function OlapConfig(config){
 			}
         }
 
-        dataHub.olapController.saveConfig(payloadData, ({ok, data}) => ok && this.createLists(data) )
+        dataHub.olapController.saveConfig(payloadData, ({ok, data}) => {
+            if (ok) {
+                this.createLists(data) 
+                return callback({ok})
+            }
+        })
     }
 
     // Cохранение новой конфигурации (не текущей)

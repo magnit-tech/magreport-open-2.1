@@ -112,6 +112,7 @@ class JobDomainServiceTest {
     void setJobStatus1() {
 
         when(repository.getReferenceById(ID)).thenReturn(getReportJob());
+        when(statisticsRepository.getLastRecord(anyLong())).thenReturn(null);
 
         domainService.setJobStatus(ID, ReportJobStatusEnum.RUNNING, 100L, "", "");
 
@@ -125,6 +126,7 @@ class JobDomainServiceTest {
     void setJobStatus2() {
 
         when(repository.getReferenceById(ID)).thenReturn(getReportJob());
+        when(statisticsRepository.getLastRecord(anyLong())).thenReturn(null);
 
         domainService.setJobStatus(ID, ReportJobStatusEnum.RUNNING, 100L, "");
 
@@ -138,6 +140,7 @@ class JobDomainServiceTest {
     @Test
     void setJobStatus3() {
         when(repository.getReferenceById(ID)).thenReturn(getReportJob());
+        when(statisticsRepository.getLastRecord(anyLong())).thenReturn(null);
 
         domainService.setJobStatus(ID, ReportJobStatusEnum.RUNNING, 100L);
 
@@ -232,6 +235,7 @@ class JobDomainServiceTest {
     void cancelJob() {
 
         when(repository.getReferenceById(ID)).thenReturn(getReportJob());
+        when(statisticsRepository.getLastRecord(anyLong())).thenReturn(null);
 
         domainService.cancelJob(ID);
 
@@ -423,7 +427,10 @@ class JobDomainServiceTest {
                 Collections.emptyList(),
                 false,
             0L,
-                "comment"
+                "comment",
+                true,
+                0,
+                Collections.emptyList()
         );
     }
 

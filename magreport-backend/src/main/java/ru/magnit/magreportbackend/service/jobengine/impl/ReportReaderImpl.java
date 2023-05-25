@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import ru.magnit.magreportbackend.domain.dataset.DataSetTypeEnum;
+import ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum;
 import ru.magnit.magreportbackend.dto.inner.jobengine.CacheEntry;
 import ru.magnit.magreportbackend.dto.inner.jobengine.CacheRow;
 import ru.magnit.magreportbackend.dto.inner.jobengine.ReportReaderData;
@@ -11,6 +12,7 @@ import ru.magnit.magreportbackend.dto.inner.reportjob.ReportFieldData;
 import ru.magnit.magreportbackend.exception.QueryExecutionException;
 import ru.magnit.magreportbackend.exception.ReportExportException;
 import ru.magnit.magreportbackend.service.dao.ConnectionPoolManager;
+import ru.magnit.magreportbackend.service.jobengine.DataProcessor;
 import ru.magnit.magreportbackend.service.jobengine.QueryBuilder;
 import ru.magnit.magreportbackend.service.jobengine.ReaderStatus;
 import ru.magnit.magreportbackend.service.jobengine.ReportReader;
@@ -19,8 +21,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
@@ -38,19 +43,45 @@ public class ReportReaderImpl implements ReportReader {
     private String errorDescription = null;
     private final AtomicReference<PreparedStatement> runningStatement = new AtomicReference<>();
 
+    private final Map<DataSourceTypeEnum, Map<DataSetTypeEnum, DataProcessor<Connection>>> dataProcessors = initDataProcessors();
+
     @Override
     public void run() {
         try (
             var connection = poolManager.getConnection(readerData.dataSource())
         ) {
             status = ReaderStatus.RUNNING;
-            processData(connection);
+            final var processor = dataProcessors.get(readerData.dataSource().type()).get(DataSetTypeEnum.values()[(int) readerData.report().dataSetTypeId()]);
+            processor.apply(connection);
             status = isCanceled ? ReaderStatus.CANCELED : ReaderStatus.FINISHED;
         } catch (Exception ex) {
             status = ReaderStatus.FAILED;
             errorDescription = ex.getMessage() + "\n" + ex;
             status = isCanceled ? ReaderStatus.CANCELED : ReaderStatus.FAILED;
             if (status == ReaderStatus.FAILED) throw new QueryExecutionException("Error trying to execute query", ex);
+        }
+    }
+
+    private void processPostgresFunction(Connection connection) throws SQLException {
+        var query = queryBuilder.getQuery(readerData.report());
+        log.debug("Query for job " + readerData.jobId() + ": " + query);
+        if (isCanceled) return;
+        try (final var statement = connection.prepareCall(query)) {
+            connection.setAutoCommit(false);
+            statement.registerOutParameter(1, Types.OTHER);
+            statement.execute();
+            runningStatement.set(statement);
+            final var reportFields = readerData.report().reportData().fields()
+                .stream()
+                .filter(ReportFieldData::visible)
+                .toList();
+
+            try (final var resultSet =  (ResultSet) statement.getObject(1)) {
+                while (resultSet.next() && !isCanceled) {
+                    processDataEntry(resultSet, reportFields);
+                }
+                log.debug("Total time of reader waiting writer (jobId:" + readerData.jobId() + "): " + waitTime / 1000.0);
+            }
         }
     }
 
@@ -169,5 +200,20 @@ public class ReportReaderImpl implements ReportReader {
     @Override
     public String getErrorDescription() {
         return errorDescription;
+    }
+
+    private Map<DataSourceTypeEnum, Map<DataSetTypeEnum, DataProcessor<Connection>>> initDataProcessors() {
+        final var processors = new EnumMap<DataSourceTypeEnum, Map<DataSetTypeEnum, DataProcessor<Connection>>>(DataSourceTypeEnum.class);
+        for (final var dataSourceType : DataSourceTypeEnum.values()){
+            processors.put(dataSourceType, new EnumMap<>(DataSetTypeEnum.class));
+            for (final var dataSetType : DataSetTypeEnum.values()) {
+                if (dataSourceType == DataSourceTypeEnum.POSTGRESQL && dataSetType == DataSetTypeEnum.PROCEDURE) {
+                    processors.get(dataSourceType).put(dataSetType, this::processPostgresFunction);
+                } else {
+                    processors.get(dataSourceType).put(dataSetType, this::processData);
+                }
+            }
+        }
+        return processors;
     }
 }

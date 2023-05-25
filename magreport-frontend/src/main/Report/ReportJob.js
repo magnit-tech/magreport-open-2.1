@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSnackbar } from 'notistack';
 
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useParams, useSearchParams, useLocation, useNavigate } from 'react-router-dom'
 
 import { useDispatch } from 'react-redux';
 import { addReportNavbar } from "redux/actions/navbar/actionNavbar";
@@ -45,6 +45,9 @@ export default function ReportJob(props){
     const { id } = useParams()
     const [searchParams, setSearchParams] = useSearchParams();
 
+    const navigate = useNavigate()
+    const location = useLocation()
+
     const dispatch = useDispatch()
 
     const classes = ReportDataCSS();
@@ -58,7 +61,7 @@ export default function ReportJob(props){
     const jobOwnerName = useRef(null);
     const excelRowLimit = useRef(1000000);
     const { enqueueSnackbar } = useSnackbar();
-    const [viewType, setViewType] = useState('plain');
+    const [viewType, setViewType] = useState(null);
 
     // убираем таймер при переключении на другой пункт меню, чтобы не было утечек памяти
     useEffect(() => {
@@ -69,16 +72,17 @@ export default function ReportJob(props){
         }
     }, [timer])
 
-    useEffect(() => {
+    function handleJobInfoLoaded(data){
         const view = searchParams.get('view');
-        if (view) {
+
+        if(view) {
             setViewType(view)
         } else {
-            setSearchParams({...searchParams, view: 'plain' })
+            const v = data.olapLastUserChoice ? 'pivot' : 'plain';
+            setViewType(v);
+            setSearchParams({...searchParams, view: v });
         }
-    }, [searchParams]) // eslint-disable-line
 
-    function handleJobInfoLoaded(data){
         jobData.current = data;
         reportId.current = data.report.id;
         folderId.current = data.report.folderId;
@@ -109,9 +113,9 @@ export default function ReportJob(props){
         }
     }
 
-    // function handleRestartReportClick(){
-    //     props.onRestartReportClick(jobData.current.report.id, jobData.current.id);
-    // }
+    function handleRestartReportClick(){
+        navigate(`/ui/report/starter/${jobData.current.report.id}?jobId=${jobData.current.id}`, {state: location.pathname})
+    }
 
     function setCustomErrorMessage(){
 
@@ -147,7 +151,7 @@ export default function ReportJob(props){
             {
                 jobStatus === JobStatus.UNDEFINED ?
                     
-                        <CircularProgress/>
+                    <CircularProgress/>
 
                 :jobStatus === JobStatus.SCHEDULED || jobStatus === JobStatus.RUNNING || jobStatus === JobStatus.PENDING_DB_CONNECTION ?
                     <div className={classes.repExec}>
@@ -168,7 +172,7 @@ export default function ReportJob(props){
                         excelRowLimit = {excelRowLimit.current}
                         excelTemplates = {jobData.current.excelTemplates}
                         changeViewType = {handleChangeViewType}
-                        // onRestartReportClick = {handleRestartReportClick}
+                        onRestartReportClick = {handleRestartReportClick}
                     />
 
                 :jobStatus === JobStatus.CANCELING ?

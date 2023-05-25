@@ -31,4 +31,19 @@ public class ReplaceExpression extends ParameterizedExpression {
 
         return result.setL(sourceString.getL().replace(what.getL(), replacement.getL()));
     }
+
+    @Override
+    public DataTypeEnum inferType() {
+        final var srcParam = parameters.get(0);
+        final var whatParam = parameters.get(1);
+        final var replacementParam = parameters.get(2);
+        final var srcParamType = srcParam.inferType();
+        final var whatParamType = whatParam.inferType();
+        final var replacementParamType = replacementParam.inferType();
+        checkParameterHasAnyType(srcParam, srcParamType, DataTypeEnum.STRING);
+        checkParameterHasAnyType(whatParam, whatParamType, DataTypeEnum.STRING);
+        checkParameterHasAnyType(replacementParam, replacementParamType, DataTypeEnum.STRING);
+
+        return replacementParamType;
+    }
 }

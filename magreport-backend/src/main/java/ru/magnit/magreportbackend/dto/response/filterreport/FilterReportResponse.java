@@ -50,10 +50,17 @@ public record FilterReportResponse(
         LocalDateTime created,
 
         @JsonFormat(pattern = ISO_DATE_TIME_PATTERN)
-        LocalDateTime modified
+        LocalDateTime modified,
+
+        @JsonFormat(shape = JsonFormat.Shape.BOOLEAN)
+        Boolean valid,
+
+        @JsonFormat(shape = JsonFormat.Shape.NUMBER_INT)
+        Long maxCountItems
+
 ) {
 
     public FilterReportResponse() {
-        this(null, null, null, null, null,null, null, null, null, null, null, null, null, null);
+        this(null, null, null, null, null,null, null, null, null, null, null, null, null, null, null, null);
     }
 }

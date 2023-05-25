@@ -25,5 +25,6 @@ public class FilterAddRequest {
     private Boolean mandatory;
     private Boolean rootSelectable;
     private Long filterInstanceId;
+    private Long maxCountItems;
     private List<FilterFieldAddRequest> fields = Collections.emptyList();
 }

@@ -27,8 +27,14 @@ export function TableData() {
         this.totalColumns = response.data.totalColumns;
         this.totalRows = response.data.totalRows;
 
+        /* Старый вариант
         for(let v of this.metrics){
-            v.metricName = fieldIdToNameMapping[v.fieldId];
+            v.metricName = fieldIdToNameMapping.get(v.fieldId);
+        }*/
+
+        for(let i in this.metrics){
+            this.metrics[i].metricName = fieldsLists.metricFields[i].name;
+            this.metrics[i].metricNewName = fieldsLists.metricFields[i].newName;
         }
     }
 
@@ -55,16 +61,14 @@ export function TableData() {
 
             subTableData.metrics = this.metrics.map( (m) => {
                 let subValues = [];
-
-                //console.log(mColumnCount, mRowCount);
-
+                
                 for(let i = 0; i < mColumnCount; i++){
                     subValues.push(new Array(mRowCount));
                     for(let j = 0; j < mRowCount; j++){
-                        //console.log(i, j);
-                        subValues[i][j] = m.values[innerColumnFrom + i][innerRowFrom + j];
+                        subValues[i][j] = m.values[innerColumnFrom + i] ? m.values[innerColumnFrom + i][innerRowFrom + j] : ''
                     }
                 }
+
 
                 return {
                     ...m,

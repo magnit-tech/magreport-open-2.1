@@ -20,7 +20,7 @@ import ru.magnit.magreportbackend.dto.request.olap.OlapConfigRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequestNew;
 import ru.magnit.magreportbackend.dto.request.olap.OlapExportPivotTableRequest;
-import ru.magnit.magreportbackend.dto.request.olap.OlapFieldItemsRequest;
+import ru.magnit.magreportbackend.dto.request.olap.OlapFieldItemsRequestNew;
 import ru.magnit.magreportbackend.dto.request.olap.OlapServiceRegisterInfo;
 import ru.magnit.magreportbackend.dto.request.olap.ReportOlapConfigAddRequest;
 import ru.magnit.magreportbackend.dto.request.olap.ReportOlapConfigRequest;
@@ -193,7 +193,7 @@ public class OlapController {
             produces = APPLICATION_JSON_VALUE)
     public ResponseBody<OlapFieldItemsResponse> getFilteredFieldValues(
             @RequestBody
-            OlapFieldItemsRequest request) throws OlapException, InterruptedException, JsonProcessingException {
+            OlapFieldItemsRequestNew request) throws OlapException, InterruptedException, JsonProcessingException {
         ResponseBody<OlapFieldItemsResponse> response;
         LogHelper.logInfoUserMethodStart();
 

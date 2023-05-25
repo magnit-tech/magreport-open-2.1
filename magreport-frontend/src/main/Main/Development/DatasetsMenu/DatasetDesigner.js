@@ -28,8 +28,7 @@ import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow'; 
-import TableFooter from '@material-ui/core/TableFooter';
+import TableRow from '@material-ui/core/TableRow';
 
 // styles
 import { DatasetDesignerCSS } from '../Designer/DesignerCSS'
@@ -330,7 +329,7 @@ export default function DatasetDesigner(){
             <DesignerFolderItemPicker
                 minWidth = {StyleConsts.designerTextFieldMinWidth}
                 label = {fieldLabels.datasourceId}
-                value = {'id: ' + data.datasourceId + ', ' + data.datasourceName}
+                value = {(data.datasourceId && data.datasourceName) ? 'id: ' + data.datasourceId + ', ' + data.datasourceName : null}
                 itemType = {FolderItemTypes.datasource}
                 onChange = {handleChangeDatasource}
                 displayBlock
@@ -385,7 +384,7 @@ export default function DatasetDesigner(){
         tabs.push({tablabel:"Поля",
             tabcontent:
             <div style={{display: 'flex', flex:1, flexDirection: 'column'}}>
-                <TableFooter className={classes.updateBtn}>
+                <div className={classes.updateBtn}>
                     <Tooltip title="Обновить поля">
                         <IconButton onClick={handleFldRefresh}
                             size="small"
@@ -393,7 +392,7 @@ export default function DatasetDesigner(){
                             <UpdateIcon/>
                         </IconButton>
                     </Tooltip>
-                </TableFooter>
+                </div>
             <div className={classes.verticalScroll}>
             
             <DataLoader

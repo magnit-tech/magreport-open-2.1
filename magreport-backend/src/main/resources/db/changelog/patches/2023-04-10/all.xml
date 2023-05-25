@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="TODAY_SIGNATURE-001" author="artemenko_pa">
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>TODAY()</strong><br/><strong>Возвращаемое значение:</strong>  Текущая дата.</br>]]>
+            </column>
+            <where>NAME='TODAY'</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>

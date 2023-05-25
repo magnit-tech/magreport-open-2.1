@@ -25,6 +25,7 @@ import OlapController from "./controllers/OlapController";
 import EmailController from "./controllers/EmailController";
 import ThemeController from "./controllers/ThemeController";
 import UserServiceController from "./controllers/UserServiceController";
+import DerivedFieldController from "./controllers/DerivedFieldController";
 
 const USER_DATA = localStorage.getItem('userData') ? JSON.parse(localStorage.getItem('userData')) : ''
 
@@ -44,8 +45,9 @@ function DataHub(){
         unautorizedHandler
     */
     
-    this.setUnautorizedHandler = (unautorizedHandler) => {
-        this.unautorizedHandler = unautorizedHandler;
+    this.setUnautorizedHandler = () => {
+        localStorage.removeItem('userData')
+        window.location.reload();
     }
     /*
         Логин
@@ -129,12 +131,12 @@ function DataHub(){
                     );
                 }
                 else{
-                    if(response.status === 401){
-                        if (this.unautorizedHandler){
-                            this.unautorizedHandler(); //!!!!!
-                        }
+                    if(response.status === 401 ){
+                        this.setUnautorizedHandler();
                     }
-                    else {
+                    else if(response.status === 403) {
+                        callback(new MagrepResponse(false, "Запрос не выполнен. Просьба авторизоваться повторно."));
+                    } else {
                         callback(new MagrepResponse(false, "Request failed. Response status: " + response.status, requestId));
                     }
                 }
@@ -206,9 +208,7 @@ function DataHub(){
                 }
                 else{
                     if(response.status === 401){
-                        if (this.unautorizedHandler){
-                            this.unautorizedHandler();
-                        }
+                        this.setUnautorizedHandler();
                     }
                     else {
                         response.json().then(json => {
@@ -235,49 +235,37 @@ function DataHub(){
                 setCache
             }
         callback - общий callback по завершению всех запросов
-        Если все запросы завершились успешно, то в общий callback передаётся
-        magrepResponse последнего запроса (с максимальным индексом), если хоть один
-        запрос завершился неуспешно, в callback передаётся magrepResponse неуспешного
-        запроса с минимальным индексом.
+        В общий callback передаётся массив [magrepResponse] всех ответов в соответствии с порядком запросов.
+        Возвращает requestId последнего запроса
     */
 
     this.doMultipleRequests = (requests, callback) => {
         let responses = new Array(requests.length);
-        let successCnt = 0;
-        let failedCnt = 0;
-        let minFailedNum = requests.length;
+        let finishedCnt = 0;
 
         function processResponse(reqNum, magrepResponse){
             responses[reqNum] = magrepResponse;
-            if(magrepResponse.ok){
-                successCnt++;
-            }
-            else{
-                failedCnt++;
-                if(reqNum < minFailedNum){
-                    minFailedNum = reqNum;
-                }
-            }
+            finishedCnt++;
+
             if(requests[reqNum].callback){
                 requests[reqNum].callback();
             }
-            if(successCnt + failedCnt === requests.length){
-                if(failedCnt === 0){
-                    callback(responses[requests.length - 1]);
-                }
-                else{
-                    callback(responses[minFailedNum]);
-                }
+
+            if(finishedCnt === requests.length){
+                callback(responses);
             }
         }
 
+        let requestId;
         for(let i = 0; i < requests.length; i++){
-            this.requestService(requests[i].serviceUrl, requests[i].method, requests[i].body, 
+            requestId = this.requestService(requests[i].serviceUrl, requests[i].method, requests[i].body, 
                                 (magrepResponse)=>{
                                     processResponse(i, magrepResponse);
                                 }, 
                                 requests[i].setCache);
         }
+
+        return requestId;
     }
 
     /*
@@ -379,6 +367,7 @@ function DataHub(){
     this.themeController = new ThemeController(this);
     this.olapController = new OlapController(this);
     this.userServiceController = new UserServiceController(this);
+    this.derivedFieldController = new DerivedFieldController(this);
 }
 
 const dataHub = new DataHub();

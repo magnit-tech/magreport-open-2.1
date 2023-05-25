@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { connect } from 'react-redux';
 
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -10,7 +10,7 @@ import dataHub from 'ajax/DataHub';
 
 // redux
 import { actionFolderLoaded, actionFolderLoadFailed } from 'redux/actions/menuViews/folderActions';
-import { actionFilterJobs, actionJobCancel, showSqlDialog, actionShowStatusHistory, actionJobAddComment } from 'redux/actions/jobs/actionJobs';
+import { actionFilterJobs, actionJobCancel, showSqlDialog, actionShowStatusHistory, actionShowShareList, actionJobAddComment } from 'redux/actions/jobs/actionJobs';
 
 // components
 import DataLoader from 'main/DataLoader/DataLoader';
@@ -35,7 +35,26 @@ function JobsMenuView(props){
     
     const [reload, setReload] = useState({needReload : false})
 
+    const [activeTab, setActiveTab] = useState(0)
+
+    const [data, setData] = useState([])
+
     let folderItemsType = SidebarItems.jobs.folderItemType;
+
+    const jobActiveTabs = {
+        value: activeTab,
+        handleChange: (value) => setActiveTab(value),
+        tabs: [
+            { key: 0, title: 'Мои задания' },
+            { key: 1, title: 'Поделились со мной' },
+        ]
+    }
+
+    useEffect(() => {
+        if(props.currentFolderData && props.currentFolderData.jobs) {
+            setData({'jobs': props.currentFolderData.jobs.filter(job => activeTab === 1 ? job.user.name !== user.current.name : job.user.name === user.current.name)})
+        }
+    }, [activeTab, props.currentFolderData, user])
 
 
     function handleRefreshFolder(){
@@ -66,12 +85,13 @@ function JobsMenuView(props){
             >
                 <FolderContent
                     itemsType = {folderItemsType}
-                    data = {props.currentFolderData}
+                    data = {data}
                     filters = {props.filters}
                     showAddFolder = {false}
                     showAddItem = {false}
                     showItemControls = {false}
                     pagination = {true}
+                    jobTabs = {jobActiveTabs}
                     currentUser = {user.current.name}
 
                     onItemClick = {handleItemClick}
@@ -82,6 +102,7 @@ function JobsMenuView(props){
                     onRefreshClick = {handleRefreshFolder}
                     onShowSqlDialogClick = {props.showSqlDialog}
                     onShowHistoryStatusClick = {props.actionShowStatusHistory}
+                    onShowShareList = {props.actionShowShareList}
                     onJobAddComment = {(jobId, jobIndex, comment) => actionJobAddComment(folderItemsType, jobId, jobIndex, comment)}
                 />
 
@@ -94,7 +115,7 @@ const mapStateToProps = state => {
     return {
         state : state.folderData,
         currentFolderData : state.folderData.currentFolderData,
-        filters : state.folderData.filters
+        filters : state.folderData.jobsFilters
     }
 }
 
@@ -105,6 +126,7 @@ const mapDispatchToProps = {
     actionJobCancel,
     showSqlDialog,
     actionShowStatusHistory,
+    actionShowShareList,
     actionJobAddComment
 }
 

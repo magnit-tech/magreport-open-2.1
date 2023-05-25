@@ -14,14 +14,16 @@ public class ExpressionResponseMapper implements Mapper<ExpressionResponse, Expr
     @Override
     public ExpressionResponse from(Expression source) {
         return new ExpressionResponse()
-            .setId(source.getId())
-            .setName(source.getName())
-            .setDescription(source.getDescription())
-            .setNumParams(source.getNumParams())
-            .setNumParamType(typeResponseMapper.from(source.getNumParamType()))
-            .setUserId(source.getUser().getId())
-            .setUserName(source.getUser().getName())
-            .setCreated(source.getCreatedDateTime())
-            .setModified(source.getModifiedDateTime());
+                .setId(source.getId())
+                .setName(source.getName())
+                .setDescription(source.getDescription())
+                .setSignature(source.getSignature())
+                .setNumParams(source.getNumParams())
+                .setNumParamType(typeResponseMapper.from(source.getNumParamType()))
+                .setTags(source.getTags().stream().map(tag -> tag.getTag().getCode()).toList())
+                .setUserId(source.getUser().getId())
+                .setUserName(source.getUser().getName())
+                .setCreated(source.getCreatedDateTime())
+                .setModified(source.getModifiedDateTime());
     }
 }

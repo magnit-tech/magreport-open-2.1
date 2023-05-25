@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="NOW_EXPRESSION-001" author="artemenko_pa">
+        <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="NOW"/>
+            <column name="DESCRIPTION" value="Возвращает текущую дату и время."/>
+            <column name="SIGNATURE">
+                <![CDATA[<strong>NOW(дата_время)</strong><br/><strong>Возвращаемое значение:</strong> Текущая дата и время.</br>]]>
+            </column>
+            <column name="NUM_PARAMS" value="0"/>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+    </changeSet>
+    <changeSet id="TO_DATE_EXPRESSION-001" author="artemenko_pa">
+        <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="TO_DATE"/>
+            <column name="DESCRIPTION" value="Конвертирует дату и время в дату."/>
+            <column name="SIGNATURE">
+                <![CDATA[<strong>TO_DATE(дата_время)</strong><br/><strong>Возвращаемое значение:</strong> Дата из дата_время.</br>]]>
+            </column>
+            <column name="NUM_PARAMS" value="1"/>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+    </changeSet>
+    <changeSet id="TO_DATETIME_EXPRESSION-001" author="artemenko_pa">
+        <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="TO_DATETIME"/>
+            <column name="DESCRIPTION" value="Конвертирует дату в дату и время."/>
+            <column name="SIGNATURE">
+                <![CDATA[<strong>TO_DATETIME(дата, <время>)</strong><br/><strong>Возвращаемое значение:</strong> Дата и время из дата и время, если время не передано, либо null - возвращается полночь.</br>]]>
+            </column>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'VARARG'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
