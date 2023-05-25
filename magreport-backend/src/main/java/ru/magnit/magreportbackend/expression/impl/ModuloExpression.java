@@ -17,26 +17,34 @@ public class ModuloExpression extends ParameterizedExpression {
     @Override
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
         var calcResult = 0D;
+        var isNull = false;
         var resultType = DataTypeEnum.INTEGER;
         var firstValue = true;
         for (var parameter : parameters) {
             final var parameterValue = parameter.calculate(rowNumber);
 
-            checkParameterNotNull(parameter, parameterValue);
             checkParameterHasAnyType(parameter, parameterValue, DataTypeEnum.INTEGER, DataTypeEnum.DOUBLE);
 
             resultType = resultType.widerNumeric(parameterValue.getR());
 
             if (firstValue) {
-                calcResult = Double.parseDouble(parameterValue.getL());
+                if (parameterValue.getL() != null) {
+                    calcResult = Double.parseDouble(parameterValue.getL());
+                } else {
+                    isNull = true;
+                }
                 firstValue = false;
                 continue;
             }
 
-            calcResult %= Double.parseDouble(parameterValue.getL());
+            if (parameterValue.getL() != null) {
+                calcResult %= Double.parseDouble(parameterValue.getL());
+            } else {
+                isNull = true;
+            }
         }
         return result
-            .setL(resultType.toTypedString(calcResult))
+            .setL(isNull ? null : resultType.toTypedString(calcResult))
             .setR(resultType);
     }
 }

@@ -6,7 +6,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
+import ru.magnit.magreportbackend.domain.folderreport.FolderAuthorityEnum;
 import ru.magnit.magreportbackend.dto.request.folder.FolderSearchRequest;
+import ru.magnit.magreportbackend.dto.request.folder.FolderTypes;
+import ru.magnit.magreportbackend.dto.request.role.RolePermissionAddRequest;
+import ru.magnit.magreportbackend.dto.request.role.RolePermissionDeleteRequest;
+import ru.magnit.magreportbackend.dto.request.user.DomainGroupADRequest;
 import ru.magnit.magreportbackend.dto.request.user.DomainGroupRequest;
 import ru.magnit.magreportbackend.dto.request.user.RoleAddRequest;
 import ru.magnit.magreportbackend.dto.request.user.RoleDomainGroupSetRequest;
@@ -14,20 +20,35 @@ import ru.magnit.magreportbackend.dto.request.user.RoleRequest;
 import ru.magnit.magreportbackend.dto.request.user.RoleTypeRequest;
 import ru.magnit.magreportbackend.dto.request.user.RoleUsersSetRequest;
 import ru.magnit.magreportbackend.dto.response.folder.FolderSearchResponse;
+import ru.magnit.magreportbackend.dto.response.role.RoleFolderResponse;
+import ru.magnit.magreportbackend.dto.response.securityfilter.SecurityFilterShortResponse;
 import ru.magnit.magreportbackend.dto.response.user.DomainGroupResponse;
 import ru.magnit.magreportbackend.dto.response.user.RoleDomainGroupResponse;
 import ru.magnit.magreportbackend.dto.response.user.RoleResponse;
 import ru.magnit.magreportbackend.dto.response.user.RoleTypeResponse;
 import ru.magnit.magreportbackend.dto.response.user.RoleUsersResponse;
 import ru.magnit.magreportbackend.dto.response.user.UserResponse;
+import ru.magnit.magreportbackend.exception.InvalidParametersException;
+import ru.magnit.magreportbackend.service.domain.DataSetDomainService;
+import ru.magnit.magreportbackend.service.domain.DataSourceDomainService;
+import ru.magnit.magreportbackend.service.domain.DomainService;
+import ru.magnit.magreportbackend.service.domain.ExcelTemplateDomainService;
+import ru.magnit.magreportbackend.service.domain.FilterInstanceDomainService;
+import ru.magnit.magreportbackend.service.domain.FilterTemplateDomainService;
+import ru.magnit.magreportbackend.service.domain.FolderDomainService;
+import ru.magnit.magreportbackend.service.domain.FolderPermissionsDomainService;
 import ru.magnit.magreportbackend.service.domain.LdapService;
+import ru.magnit.magreportbackend.service.domain.ReportDomainService;
 import ru.magnit.magreportbackend.service.domain.RoleDomainService;
+import ru.magnit.magreportbackend.service.domain.SecurityFilterDomainService;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.anyLong;
@@ -41,6 +62,7 @@ import static org.mockito.Mockito.when;
 class RoleServiceTest {
 
     private static final Long ID = 1L;
+    private static final Long FOLDER_ID = 1L;
     private static final String NAME = "Name";
     private static final String DESCRIPTION = "Description";
     private static final Long TYPE_ID = 5L;
@@ -50,6 +72,27 @@ class RoleServiceTest {
 
     @Mock
     private LdapService ldapService;
+    @Mock
+    private FilterTemplateDomainService filterTemplateDomainService;
+    @Mock
+    private ExcelTemplateDomainService excelTemplateDomainService;
+    @Mock
+    private FilterInstanceDomainService filterInstanceDomainService;
+    @Mock
+    private SecurityFilterDomainService securityFilterDomainService;
+    @Mock
+    private DataSourceDomainService dataSourceDomainService;
+    @Mock
+    private DataSetDomainService dataSetDomainService;
+    @Mock
+    private ReportDomainService reportDomainService;
+    @Mock
+    private FolderDomainService folderDomainService;
+    @Mock
+    private FolderPermissionsDomainService folderPermissionsDomainService;
+    @Mock
+    private DomainService domainService;
+
 
     @InjectMocks
     private RoleService service;
@@ -67,18 +110,6 @@ class RoleServiceTest {
         verify(roleDomainService).saveRole(request);
         verify(roleDomainService).getRole(anyLong());
         verifyNoMoreInteractions(request, roleDomainService, ldapService);
-
-
-        Mockito.reset(roleDomainService, ldapService);
-
-        when(roleDomainService.saveRole(request)).thenReturn(null);
-
-        result = service.addRole(request);
-
-        assertNull(result);
-        verify(roleDomainService).saveRole(request);
-        verifyNoMoreInteractions(roleDomainService, ldapService);
-
     }
 
     @Test
@@ -243,12 +274,6 @@ class RoleServiceTest {
         verifyNoMoreInteractions(request, roleDomainService, ldapService);
     }
 
-    private RoleDomainGroupSetRequest getRoleDomainGroupSetRequest() {
-        return new RoleDomainGroupSetRequest()
-                .setId(ID)
-                .setDomainGroups(Collections.singletonList(new DomainGroupRequest(1L, "Group 1")));
-    }
-
     @Test
     void getRoleDomainGroups() {
 
@@ -265,14 +290,6 @@ class RoleServiceTest {
         verify(request).getId();
 
         verifyNoMoreInteractions(request, roleDomainService, ldapService);
-    }
-
-    private RoleDomainGroupResponse getRoleDomainGroupResponse() {
-        return new RoleDomainGroupResponse(new RoleResponse(),
-                Collections.singletonList(new DomainGroupResponse()
-                    .setDomainId(1L)
-                    .setDomainName("Test domain")
-                    .setGroupName("Test group")));
     }
 
     @Test
@@ -332,11 +349,250 @@ class RoleServiceTest {
     @Test
     void searchRole() {
 
-        when(roleDomainService.searchRole(any())).thenReturn(new FolderSearchResponse(Collections.emptyList(),Collections.emptyList()));
+        when(roleDomainService.searchRole(any())).thenReturn(new FolderSearchResponse(Collections.emptyList(), Collections.emptyList()));
         assertNotNull(service.searchRole(new FolderSearchRequest()));
 
         verify(roleDomainService).searchRole(any());
         verifyNoMoreInteractions(roleDomainService);
+
+    }
+
+    @Test
+    void deleteRoleExceptionTest1() {
+        when(roleDomainService.getRoleDomainGroups(anyLong())).thenReturn(getRoleDomainGroupResponse());
+        when(roleDomainService.getRoleUsers(anyLong())).thenReturn(getRoleUsersResponse());
+        when(securityFilterDomainService.getFiltersWithSettingsForRole(any())).thenReturn(Collections.singletonList(getSecurityFilterShortResponse()));
+        when(reportDomainService.getFoldersPermittedToRole(any())).thenReturn(Collections.singletonList(getRoleFolderResponse()));
+
+
+        var request = getRoleRequest();
+        assertThrows(InvalidParametersException.class, () -> service.deleteRole(request));
+
+        verify(roleDomainService).getRoleDomainGroups(anyLong());
+        verifyNoMoreInteractions(roleDomainService);
+    }
+
+
+    @Test
+    void deleteRole() {
+        when(roleDomainService.getRoleDomainGroups(anyLong())).thenReturn(getEmptyRoleDomainGroupResponse());
+        when(roleDomainService.getRoleUsers(anyLong())).thenReturn(getRoleUsersResponse().setUsers(Collections.emptyList()));
+
+
+        service.deleteRole(getRoleRequest());
+
+        verify(roleDomainService).deleteRole(anyLong());
+        verify(roleDomainService).getRoleDomainGroups(anyLong());
+        verifyNoMoreInteractions(roleDomainService);
+    }
+
+    @Test
+    void getADDomainGroupsTest1() {
+
+        ReflectionTestUtils.setField(service, "defaultDomain", "TEST");
+
+        assertEquals(0, service.getADDomainGroups(getDomainGroupADRequest(Collections.emptyList())).size());
+
+        verify(ldapService).getGroupsByNamePart(any(), any());
+        verify(domainService).getIdMap(any());
+        verifyNoMoreInteractions(domainService, ldapService);
+    }
+
+    @Test
+    void getADDomainGroupsTest2() {
+
+        assertEquals(0, service.getADDomainGroups(getDomainGroupADRequest(Collections.singletonList("TEST"))).size());
+
+        verify(ldapService).getGroupsByNamePart(any(), any());
+        verify(domainService).getIdMap(any());
+        verifyNoMoreInteractions(domainService, ldapService);
+    }
+
+
+    @Test
+    void addFolderPermissionTest1() {
+
+        service.addFolderPermission(getRolePermissionAddRequest(FolderTypes.PUBLISHED_REPORT));
+
+        verify(folderPermissionsDomainService).getFolderReportBranch(anyLong());
+        verify(folderDomainService).deleteFolderPermittedToRole(any(), any());
+        verify(folderDomainService).addFolderPermittedToRole(any(), any(), any());
+
+        verifyNoMoreInteractions(folderDomainService, folderPermissionsDomainService);
+    }
+
+    @Test
+    void addFolderPermissionTest2() {
+
+        service.addFolderPermission(getRolePermissionAddRequest(FolderTypes.REPORT_FOLDER));
+
+        verify(folderPermissionsDomainService).getReportFolderBranch(anyLong());
+        verify(reportDomainService).deleteFolderPermittedToRole(any(), any());
+        verify(reportDomainService).addFolderPermittedToRole(any(), any(), any());
+
+        verifyNoMoreInteractions(reportDomainService, folderPermissionsDomainService);
+    }
+
+    @Test
+    void addFolderPermissionTest3() {
+
+        service.addFolderPermission(getRolePermissionAddRequest(FolderTypes.DATASOURCE));
+
+        verify(folderPermissionsDomainService).getDataSourceFolderBranch(anyLong());
+        verify(dataSourceDomainService).deleteFolderPermittedToRole(any(), any());
+        verify(dataSourceDomainService).addFolderPermittedToRole(any(), any(), any());
+
+        verifyNoMoreInteractions(dataSourceDomainService, folderPermissionsDomainService);
+    }
+
+    @Test
+    void addFolderPermissionTest4() {
+
+        service.addFolderPermission(getRolePermissionAddRequest(FolderTypes.DATASET));
+
+        verify(folderPermissionsDomainService).getDataSetFolderBranch(anyLong());
+        verify(dataSetDomainService).deleteFolderPermittedToRole(any(), any());
+        verify(dataSetDomainService).addFolderPermittedToRole(any(), any(), any());
+
+        verifyNoMoreInteractions(dataSetDomainService, folderPermissionsDomainService);
+    }
+
+    @Test
+    void addFolderPermissionTest5() {
+
+        service.addFolderPermission(getRolePermissionAddRequest(FolderTypes.FILTER_INSTANCE));
+
+        verify(folderPermissionsDomainService).getFilterInstanceFolderBranch(anyLong());
+        verify(filterInstanceDomainService).deleteFolderPermittedToRole(any(), any());
+        verify(filterInstanceDomainService).addFolderPermittedToRole(any(), any(), any());
+
+        verifyNoMoreInteractions(filterInstanceDomainService, folderPermissionsDomainService);
+    }
+
+    @Test
+    void addFolderPermissionTest6() {
+
+        service.addFolderPermission(getRolePermissionAddRequest(FolderTypes.FILTER_TEMPLATE));
+
+        verify(folderPermissionsDomainService).getFilterTemplateFolderBranch(anyLong());
+        verify(filterTemplateDomainService).deleteFolderPermittedToRole(any(), any());
+        verify(filterTemplateDomainService).addFolderPermittedToRole(any(), any(), any());
+
+        verifyNoMoreInteractions(filterTemplateDomainService, folderPermissionsDomainService);
+    }
+
+    @Test
+    void addFolderPermissionTest7() {
+
+        service.addFolderPermission(getRolePermissionAddRequest(FolderTypes.SECURITY_FILTER));
+
+        verify(folderPermissionsDomainService).getSecurityFilterFolderBranch(anyLong());
+        verify(securityFilterDomainService).deleteFolderPermittedToRole(any(), any());
+        verify(securityFilterDomainService).addFolderPermittedToRole(any(), any(), any());
+
+        verifyNoMoreInteractions(securityFilterDomainService, folderPermissionsDomainService);
+    }
+
+
+    @Test
+    void addFolderPermissionTest8() {
+
+        service.addFolderPermission(getRolePermissionAddRequest(FolderTypes.EXCEL_TEMPLATE));
+
+        verify(folderPermissionsDomainService).getExcelTemplateFolderBranch(anyLong());
+        verify(excelTemplateDomainService).deleteFolderPermittedToRole(any(), any());
+        verify(excelTemplateDomainService).addFolderPermittedToRole(any(), any(), any());
+
+        verifyNoMoreInteractions(excelTemplateDomainService, folderPermissionsDomainService);
+    }
+
+
+    @Test
+    void deleteFolderPermissionTest1() {
+
+        service.deleteFolderPermission(getRolePermissionDeleteRequest(FolderTypes.PUBLISHED_REPORT));
+
+        verify(folderPermissionsDomainService).getFolderReportBranch(anyLong());
+        verify(folderDomainService).deleteFolderPermittedToRole(any(), any());
+        verifyNoMoreInteractions(folderPermissionsDomainService, folderDomainService);
+
+    }
+
+    @Test
+    void deleteFolderPermissionTest2() {
+
+        service.deleteFolderPermission(getRolePermissionDeleteRequest(FolderTypes.REPORT_FOLDER));
+
+        verify(folderPermissionsDomainService).getReportFolderBranch(anyLong());
+        verify(reportDomainService).deleteFolderPermittedToRole(any(), any());
+        verifyNoMoreInteractions(folderPermissionsDomainService, reportDomainService);
+
+    }
+
+    @Test
+    void deleteFolderPermissionTest3() {
+
+        service.deleteFolderPermission(getRolePermissionDeleteRequest(FolderTypes.DATASOURCE));
+
+        verify(folderPermissionsDomainService).getDataSourceFolderBranch(anyLong());
+        verify(dataSourceDomainService).deleteFolderPermittedToRole(any(), any());
+        verifyNoMoreInteractions(folderPermissionsDomainService, dataSourceDomainService);
+
+    }
+
+    @Test
+    void deleteFolderPermissionTest4() {
+
+        service.deleteFolderPermission(getRolePermissionDeleteRequest(FolderTypes.DATASET));
+
+        verify(folderPermissionsDomainService).getDataSetFolderBranch(anyLong());
+        verify(dataSetDomainService).deleteFolderPermittedToRole(any(), any());
+        verifyNoMoreInteractions(folderPermissionsDomainService, dataSetDomainService);
+
+    }
+
+    @Test
+    void deleteFolderPermissionTest5() {
+
+        service.deleteFolderPermission(getRolePermissionDeleteRequest(FolderTypes.EXCEL_TEMPLATE));
+
+        verify(folderPermissionsDomainService).getExcelTemplateFolderBranch(anyLong());
+        verify(excelTemplateDomainService).deleteFolderPermittedToRole(any(), any());
+        verifyNoMoreInteractions(excelTemplateDomainService, folderPermissionsDomainService);
+
+    }
+
+    @Test
+    void deleteFolderPermissionTest6() {
+
+        service.deleteFolderPermission(getRolePermissionDeleteRequest(FolderTypes.FILTER_INSTANCE));
+
+        verify(folderPermissionsDomainService).getFilterInstanceFolderBranch(anyLong());
+        verify(filterInstanceDomainService).deleteFolderPermittedToRole(any(), any());
+        verifyNoMoreInteractions(filterInstanceDomainService, folderPermissionsDomainService);
+
+    }
+
+    @Test
+    void deleteFolderPermissionTest7() {
+
+        service.deleteFolderPermission(getRolePermissionDeleteRequest(FolderTypes.FILTER_TEMPLATE));
+
+        verify(folderPermissionsDomainService).getFilterTemplateFolderBranch(anyLong());
+        verify(filterTemplateDomainService).deleteFolderPermittedToRole(any(), any());
+        verifyNoMoreInteractions(filterTemplateDomainService, folderPermissionsDomainService);
+
+    }
+
+    @Test
+    void deleteFolderPermissionTest8() {
+
+        service.deleteFolderPermission(getRolePermissionDeleteRequest(FolderTypes.SECURITY_FILTER));
+
+        verify(folderPermissionsDomainService).getSecurityFilterFolderBranch(anyLong());
+        verify(securityFilterDomainService).deleteFolderPermittedToRole(any(), any());
+        verifyNoMoreInteractions(securityFilterDomainService, folderPermissionsDomainService);
+
 
     }
 
@@ -383,5 +639,68 @@ class RoleServiceTest {
         return new RoleUsersSetRequest()
                 .setId(ID)
                 .setUsers(Collections.singletonList(1L));
+    }
+
+    private RoleDomainGroupSetRequest getRoleDomainGroupSetRequest() {
+        return new RoleDomainGroupSetRequest()
+                .setId(ID)
+                .setDomainGroups(Collections.singletonList(new DomainGroupRequest(1L, "Group 1")));
+    }
+
+    private RoleDomainGroupResponse getRoleDomainGroupResponse() {
+        return new RoleDomainGroupResponse(new RoleResponse(),
+                Collections.singletonList(new DomainGroupResponse()
+                        .setDomainId(1L)
+                        .setDomainName("Test domain")
+                        .setGroupName("Test group")));
+    }
+
+    private RoleDomainGroupResponse getEmptyRoleDomainGroupResponse() {
+        return new RoleDomainGroupResponse(
+                new RoleResponse(),
+                Collections.emptyList());
+    }
+
+    private DomainGroupADRequest getDomainGroupADRequest(List<String> names) {
+        return new DomainGroupADRequest()
+                .setDomainNames(names)
+                .setNamePart("")
+                .setMaxResults(0L);
+    }
+
+    private RolePermissionAddRequest getRolePermissionAddRequest(FolderTypes type) {
+        return new RolePermissionAddRequest()
+                .setRoleId(ID)
+                .setFolderId(FOLDER_ID)
+                .setType(type)
+                .setPermissions(Collections.emptyList());
+    }
+
+    private RolePermissionDeleteRequest getRolePermissionDeleteRequest(FolderTypes type) {
+        return new RolePermissionDeleteRequest()
+                .setRoleId(ID)
+                .setFolderId(FOLDER_ID)
+                .setType(type);
+    }
+
+    private SecurityFilterShortResponse getSecurityFilterShortResponse() {
+        return new SecurityFilterShortResponse(
+                ID,
+                NAME,
+                DESCRIPTION,
+                "USER",
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                Collections.emptyList()
+        );
+    }
+
+    private RoleFolderResponse getRoleFolderResponse() {
+        return new RoleFolderResponse(
+                FOLDER_ID,
+                "TEST",
+                FolderAuthorityEnum.NONE,
+                FolderTypes.REPORT_FOLDER
+        );
     }
 }

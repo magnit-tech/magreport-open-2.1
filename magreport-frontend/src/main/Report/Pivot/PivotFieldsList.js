@@ -21,9 +21,10 @@ import { IconButton } from '@material-ui/core';
  * @param {*} props.fields - fields array
  * @param {*} props.direction - list direction
  * @param {*} props.name - название
- * @param {*} props.onButtonClick - функция при нажатии на кнопку поля
- * @param {*} props.onButtonOffClick - функция при нажатии на кнопку выключения поля
+ * @param {*} props.onClick - функция при нажатии на кнопку поля
+ * @param {*} props.onContextClick - функция при нажатии на кнопку выключения поля
  * @param {*} props.onOnlyUnusedClick - функция для выбора отображения всех полей или только неиспользуемых
+ * @param {*} props.onRemoveFieldClick - функция для перемещения полей обратно в неиспользуемые
  * @param {boolean} props.onlyUnused - показывать только неиспользуемые/все поля
  */
 
@@ -43,8 +44,7 @@ export default function PivotFieldsList(props){
                     className={clsx({
                         [styles.verticalList] : props.direction === "vertical",
                         [styles.horizontalList] : props.direction === "horizontal",
-                        [styles.listDraggingOver] : snapshot.isDraggingOver,
-                      //  [styles.filterFieldsList] : props.droppableId === "filterFields"
+                        [styles.listDraggingOver] : snapshot.isDraggingOver
                     })}
                     innerRef = {provided.innerRef}
                     {...provided.droppableProps}
@@ -106,23 +106,28 @@ export default function PivotFieldsList(props){
                                     }
                                 >
                                     {props.fields.length > 0 ?
-                                        props.fields.map((v, ind) => ( 
-                                            <PivotField
-                                                key = {v.fieldId + "-" + ind}
-                                                listName = {props.droppableId}
-                                                index = {ind}
-                                                fieldId = {v.fieldId}
-                                                fieldName = {v.fieldName}
-                                                aggFuncName = {v.aggFuncName}
-                                                filter = {v.filter}
-                                                filtered = {v.filtered}
-                                                isOff = {v.isOff}
-                                                onButtonClick = {props.onButtonClick}
-                                                onButtonOffClick = {props.onButtonOffClick}
-                                                onChooseAggForMetric = {(funcName, index) => props.onChooseAggForMetric(funcName, index)}
-                                                onCloseAggModal = {props.onCloseAggModal}
-                                            />
-                                        )) :
+                                        props.fields.map((v, ind) => {
+                                            return ( 
+                                                <PivotField
+                                                    key = {v.fieldId + "-" + ind}
+                                                    listName = {props.droppableId}
+                                                    index = {ind}
+                                                    fieldId = {v.fieldId}
+                                                    fieldName = {v.fieldName}
+                                                    newfieldName = {v.newName}
+                                                    aggFuncName = {v.aggFuncName}
+                                                    filter = {v.filter}
+                                                    //filtered = {v.filtered}
+                                                    isOff = {v.isOff}
+                                                    original = {v.original}
+                                                    onClick = {props.onClick}
+                                                    onContextClick = {props.onContextClick}
+                                                    onChooseAggForMetric = {(funcName, index) => props.onChooseAggForMetric(funcName, index)}
+                                                    onCloseAggModal = {props.onCloseAggModal}
+                                                    onRemoveFieldClick = {props.onRemoveFieldClick}
+                                                />
+                                            )
+                                        }) :
                                           
                                         <Box 
                                             fontSize={12} 
@@ -131,7 +136,6 @@ export default function PivotFieldsList(props){
                                                 [styles.panelNameVertical]: props.direction === "vertical",
                                                 [styles.panelNameHorizontal]: props.direction === "horizontal",
                                             })}
-                                               //</div>style={props.direction === "vertical" ? {width: '10px', wordWrap: 'break-word', margin: '8px auto'}: {margin: '4px'}}
                                         > 
                                             {props.name}
 

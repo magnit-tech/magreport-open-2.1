@@ -9,6 +9,8 @@ public record FilterReportBackupTuple(
         Long filterInstanceId,
         Long ordinal,
         Long userId,
+
+        Long maxCountItems,
         boolean isHidden,
         boolean isMandatory,
         boolean isRootMandatory,

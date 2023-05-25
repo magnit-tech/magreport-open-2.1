@@ -15,6 +15,7 @@ public class DestinationUserBackupMapper implements Mapper<DestinationUserBackup
                 source.getId(),
                 source.getScheduleTask().getId(),
                 source.getType().getId(),
+                source.getUserId(),
                 source.getValue(),
                 source.getDomainName(),
                 source.getCreatedDateTime(),

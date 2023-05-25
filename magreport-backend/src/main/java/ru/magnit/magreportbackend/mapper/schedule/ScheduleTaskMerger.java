@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.magnit.magreportbackend.domain.excel.ExcelTemplate;
 import ru.magnit.magreportbackend.domain.report.Report;
-import ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum;
 import ru.magnit.magreportbackend.domain.schedule.ScheduleTask;
 import ru.magnit.magreportbackend.domain.schedule.ScheduleTaskStatus;
 import ru.magnit.magreportbackend.domain.schedule.ScheduleTaskType;
@@ -12,6 +11,8 @@ import ru.magnit.magreportbackend.dto.request.schedule.ScheduleTaskAddRequest;
 import ru.magnit.magreportbackend.mapper.Merger;
 
 import java.util.Collections;
+
+import static ru.magnit.magreportbackend.domain.schedule.ScheduleTaskStatusEnum.INACTIVE;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +26,7 @@ public class ScheduleTaskMerger implements Merger<ScheduleTask, ScheduleTaskAddR
     @Override
     public ScheduleTask merge(ScheduleTask target, ScheduleTaskAddRequest source) {
         target
-                .setStatus(new ScheduleTaskStatus(ReportJobStatusEnum.SCHEDULED.getId()))
+                .setStatus(new ScheduleTaskStatus(INACTIVE.getId()))
                 .setExpirationDate(source.getExpirationDate())
                 .setCode(source.getCode())
                 .setReportBodyMail(source.getReportBodyMail())

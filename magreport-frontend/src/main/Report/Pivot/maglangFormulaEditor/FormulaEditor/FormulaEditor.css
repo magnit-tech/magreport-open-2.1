@@ -1,0 +1,33 @@
+.FormulaEditor {
+	width: 100%;
+}
+
+.CodeMirror {
+	font-family: Arial, monospace;
+	font-size: 20px;
+	border-radius: 4px;
+	border: 1px solid;
+	border-color: rgba(0, 0, 0, 0.23);
+	margin: 15px 0;
+	overflow: hidden;
+	height: 200px;
+}
+
+.errorViewer {
+	width: 100%;
+	margin-top: 5px !important;
+}
+
+.errorViewer textarea {
+	font-size: 14px;
+}
+
+.ͼ1.cm-editor.cm-focused {
+	outline: none;
+}
+
+@media screen and (max-height: 700px) {
+	.CodeMirror {
+		height: 150px;
+	}
+}

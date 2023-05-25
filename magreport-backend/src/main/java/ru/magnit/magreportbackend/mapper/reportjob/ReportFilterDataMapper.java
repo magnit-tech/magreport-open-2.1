@@ -36,6 +36,7 @@ public class ReportFilterDataMapper implements Mapper<ReportFilterData, FilterRe
             source.getCode(),
             source.getFilterInstance().getDataSet() == null ? null : source.getFilterInstance().getDataSet().getSchemaName(),
             source.getFilterInstance().getDataSet() == null ? null : source.getFilterInstance().getDataSet().getObjectName(),
+            source.getMaxCountItems(),
             getLevels(source.getFields(), filterTypeId)
         );
     }

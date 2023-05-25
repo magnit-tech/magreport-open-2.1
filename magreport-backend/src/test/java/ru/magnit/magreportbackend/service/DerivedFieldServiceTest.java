@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.domain.enums.Expressions;
@@ -12,6 +13,8 @@ import ru.magnit.magreportbackend.domain.olap.AggregationType;
 import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportFieldData;
+import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldAddRequest;
+import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldExpressionAddRequest;
 import ru.magnit.magreportbackend.dto.request.olap.FieldDefinition;
 import ru.magnit.magreportbackend.dto.request.olap.Interval;
 import ru.magnit.magreportbackend.dto.request.olap.MetricDefinitionNew;
@@ -20,7 +23,10 @@ import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequestNew;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldTypes;
 import ru.magnit.magreportbackend.dto.response.derivedfield.DerivedFieldResponse;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
+import ru.magnit.magreportbackend.dto.response.report.ReportFieldTypeResponse;
+import ru.magnit.magreportbackend.mapper.derivedfield.FieldExpressionResponseRequestMapper;
 import ru.magnit.magreportbackend.service.domain.DerivedFieldDomainService;
+import ru.magnit.magreportbackend.service.domain.ReportDomainService;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -29,6 +35,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -36,12 +43,17 @@ import static org.mockito.Mockito.when;
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 class DerivedFieldServiceTest {
+    @Mock
+    private DerivedFieldDomainService domainService;
+
+    @Mock
+    private ReportDomainService reportDomainService;
+
+    @Spy
+    private FieldExpressionResponseRequestMapper fieldMapper = new FieldExpressionResponseRequestMapper();
 
     @InjectMocks
     private DerivedFieldService service;
-
-    @Mock
-    private DerivedFieldDomainService domainService;
 
     @Test
     void derivedFieldTest() {
@@ -52,6 +64,52 @@ class DerivedFieldServiceTest {
 
         final var result = service.preProcessCube(cubeData, getOlapRequest());
         assertNotNull(result);
+    }
+
+    @Test
+    void fieldTypeInferenceTest() {
+        when(reportDomainService.getReportFields(anyLong())).thenReturn(List.of(
+            new ReportFieldTypeResponse(1L, true, 1, DataTypeEnum.INTEGER),
+            new ReportFieldTypeResponse(2L, true, 2, DataTypeEnum.STRING),
+            new ReportFieldTypeResponse(3L, true, 3, DataTypeEnum.DOUBLE)
+        ));
+        when(domainService.getDerivedFieldsForReport(anyLong())).thenReturn(List.of(
+            new DerivedFieldResponse().setId(1L).setDataType(DataTypeEnum.INTEGER),
+            new DerivedFieldResponse().setId(2L).setDataType(DataTypeEnum.STRING),
+            new DerivedFieldResponse().setId(3L).setDataType(DataTypeEnum.DOUBLE)
+        ));
+
+        final var result = service.inferFieldType(
+            new DerivedFieldAddRequest()
+                .setReportId(1L)
+                .setExpression(new DerivedFieldExpressionAddRequest(
+                        1L,
+                        Expressions.ADD,
+                        null,
+                        null,
+                        null,
+                        List.of(new DerivedFieldExpressionAddRequest(
+                                1L,
+                                Expressions.REPORT_FIELD_VALUE,
+                                1L,
+                                null,
+                                null,
+                                List.of()
+                            ),
+                            new DerivedFieldExpressionAddRequest(
+                                1L,
+                                Expressions.DERIVED_FIELD_VALUE,
+                                3L,
+                                null,
+                                null,
+                                List.of()
+                            )
+                        )
+                    )
+                )
+        );
+
+        assertEquals(DataTypeEnum.DOUBLE, result.getFieldType());
     }
 
     private OlapCubeRequestNew getOlapRequest() {
@@ -113,7 +171,7 @@ class DerivedFieldServiceTest {
             "CUBE_TABLE",
             getReportFields(),
             null,
-                true
+            true
         );
     }
 
@@ -146,6 +204,8 @@ class DerivedFieldServiceTest {
             new DerivedFieldResponse(
                 1L,
                 1L,
+                false,
+                DataTypeEnum.DOUBLE,
                 "Объем продаж",
                 "Объем продаж",
                 1L,
@@ -203,11 +263,14 @@ class DerivedFieldServiceTest {
                             )
                         )
                     )
-                )
+                ),
+                ""
             ),
             new DerivedFieldResponse(
                 2L,
                 1L,
+                false,
+                DataTypeEnum.DOUBLE,
                 "Поле 2",
                 "Поле 2",
                 1L,
@@ -235,11 +298,14 @@ class DerivedFieldServiceTest {
                             Collections.emptyList()
                         )
                     )
-                )
+                ),
+                ""
             ),
             new DerivedFieldResponse(
                 3L,
                 1L,
+                false,
+                DataTypeEnum.INTEGER,
                 "Номер года",
                 "Расчет года",
                 1L,
@@ -268,8 +334,8 @@ class DerivedFieldServiceTest {
                                 new FieldExpressionResponse(
                                     Expressions.CONSTANT_VALUE,
                                     null,
-                                    "null",
-                                    DataTypeEnum.STRING,
+                                    "2022-01-01",
+                                    DataTypeEnum.DATE,
                                     Collections.emptyList()
                                 )
                             )
@@ -282,7 +348,8 @@ class DerivedFieldServiceTest {
                             Collections.emptyList()
                         )
                     )
-                )
+                ),
+                ""
             )
         );
     }

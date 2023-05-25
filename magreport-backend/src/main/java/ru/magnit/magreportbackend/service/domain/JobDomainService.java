@@ -200,11 +200,14 @@ public class JobDomainService {
 
     @Transactional
     public ReportJobResponse getJob(Long jobId) {
-        var job = repository.findById(jobId);
-        var response = job.map(reportJobResponseMapper::from).orElseThrow();
-        response.setExcelTemplates(excelTemplateService.getAllReportExcelTemplateToReport(new ReportIdRequest().setId(response.getReport().id())));
-
-        return response;
+            var job = repository.findById(jobId);
+            if (job.isPresent()) {
+                var response = reportJobResponseMapper.from(job.get());
+                response.setExcelTemplates(excelTemplateService.getAllReportExcelTemplateToReport(new ReportIdRequest().setId(response.getReport().id())));
+                return response;
+            }
+            else
+                throw new InvalidParametersException(String.format("Report job not found, id: %s", jobId));
     }
 
     @Transactional
@@ -419,17 +422,22 @@ public class JobDomainService {
     }
 
     private void saveStats(ReportJob job) {
-        var jobStats = new ReportJobStatistics()
-                .setReportJob(new ReportJob(job.getId()))
-                .setReport(new Report(job.getReport().getId()))
-                .setUser(new User(job.getUser().getId()))
-                .setRowCount(job.getRowCount())
-                .setStatus(job.getStatus())
-                .setState(job.getState())
-                .setExportExcelCount(0L)
-                .setOlapRequestCount(0L)
-                .setIsShare(false);
 
-        statisticsRepository.save(jobStats);
+        var lastRecord = statisticsRepository.getLastRecord(job.getId());
+
+        if (lastRecord != null && lastRecord.getStatus().equals(job.getStatus())) return;
+
+            var jobStats = new ReportJobStatistics()
+                    .setReportJob(new ReportJob(job.getId()))
+                    .setReport(new Report(job.getReport().getId()))
+                    .setUser(new User(job.getUser().getId()))
+                    .setRowCount(job.getRowCount())
+                    .setStatus(job.getStatus())
+                    .setState(job.getState())
+                    .setExportExcelCount(0L)
+                    .setOlapRequestCount(0L)
+                    .setIsShare(false);
+
+            statisticsRepository.save(jobStats);
     }
 }

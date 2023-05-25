@@ -10,6 +10,8 @@ import ru.magnit.magreportbackend.domain.user.SystemRoles;
 import ru.magnit.magreportbackend.dto.inner.RoleView;
 import ru.magnit.magreportbackend.dto.inner.filter.FilterRequestData;
 import ru.magnit.magreportbackend.dto.request.ChangeParentFolderRequest;
+import ru.magnit.magreportbackend.dto.request.filterreport.FilterAddRequest;
+import ru.magnit.magreportbackend.dto.request.filterreport.FilterGroupAddRequest;
 import ru.magnit.magreportbackend.dto.request.folder.CopyFolderRequest;
 import ru.magnit.magreportbackend.dto.request.folder.FolderAddRequest;
 import ru.magnit.magreportbackend.dto.request.folder.FolderChangeParentRequest;
@@ -43,17 +45,19 @@ import ru.magnit.magreportbackend.service.domain.FilterReportDomainService;
 import ru.magnit.magreportbackend.service.domain.FolderEntitySearchDomainService;
 import ru.magnit.magreportbackend.service.domain.FolderPermissionsDomainService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
-import ru.magnit.magreportbackend.service.domain.MailTextDomainService;
 import ru.magnit.magreportbackend.service.domain.OlapConfigurationDomainService;
+import ru.magnit.magreportbackend.service.domain.OlapUserChoiceDomainService;
 import ru.magnit.magreportbackend.service.domain.ReportDomainService;
 import ru.magnit.magreportbackend.service.domain.ScheduleTaskDomainService;
 import ru.magnit.magreportbackend.service.domain.SecurityFilterDomainService;
 import ru.magnit.magreportbackend.service.domain.UserDomainService;
 import ru.magnit.magreportbackend.service.jobengine.filter.FilterQueryExecutor;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -72,12 +76,12 @@ public class ReportService {
     private final FolderEntitySearchDomainService folderEntitySearchDomainService;
     private final ExcelTemplateDomainService excelTemplateDomainService;
     private final ScheduleTaskDomainService scheduleTaskDomainService;
-    private final MailTextDomainService mailTextDomainService;
     private final ReportFolderRepository reportFolderRepository;
     private final ReportResponseMapper reportResponseMapper;
     private final PermissionCheckerSystem permissionCheckerSystem;
     private final SecurityFilterDomainService securityFilterDomainService;
     private final OlapConfigurationDomainService olapConfigurationDomainService;
+    private final OlapUserChoiceDomainService olapUserChoiceDomainService;
 
     public ReportFolderResponse getFolder(FolderRequest request) {
 
@@ -172,11 +176,16 @@ public class ReportService {
         olapConfigurationDomainService.deleteReportOlapConfigurationByReport(request.getId());
         scheduleTaskDomainService.deleteScheduleTaskByReport(request.getId());
         excelTemplateDomainService.removeReportExcelTemplate(request.getId());
+        reportDomainService.deleteFavReportsByReportId(request.getId());
+        olapUserChoiceDomainService.deleteUsersChoiceForReport(request.getId());
         reportDomainService.deleteReport(request.getId());
 
     }
 
     public ReportResponse getReport(ReportRequest request) {
+
+        if (request.getId() == null)
+            throw new IllegalArgumentException("Report id must not be null");
 
         final var report = reportDomainService.getReport(request.getId());
 
@@ -222,19 +231,39 @@ public class ReportService {
 
         var uniqueNames = new HashSet<String>();
         var duplicateNames = new HashSet<String>();
+        var invalidFieldNames = new HashSet<String>();
+        var invalidFilterNames = new HashSet<String>();
+
+        final var currentUser = userDomainService.getCurrentUser();
 
         request.getFields().forEach(field -> {
             var name = field.getName().toUpperCase();
             if (!uniqueNames.add(name)) duplicateNames.add(field.getName());
+
+            if (Boolean.FALSE.equals(dataSetDomainService.checkSyncDatasetField(field.getDataSetFieldId()))) {
+                invalidFieldNames.add(name);
+            }
         });
 
-        if (!duplicateNames.isEmpty()) {
+        if (!duplicateNames.isEmpty())
             throw new InvalidParametersException("Отчет содержит повторяющиеся имена полей: " + duplicateNames);
-        }
+        if (!invalidFieldNames.isEmpty())
+            throw new InvalidParametersException("Отчет содержит невалидные поля: " + invalidFieldNames);
+
+        unWind(request.getFilterGroup(), new ArrayList<>()).stream()
+                .flatMap(f -> f.getFields().stream())
+                .filter(f -> Objects.nonNull(f.getReportFieldId()))
+                .forEach(f -> {
+                    if (Boolean.FALSE.equals(reportDomainService.checkValidField(f.getReportFieldId())))
+                        invalidFilterNames.add(f.getName());
+                });
+
+        if (!invalidFilterNames.isEmpty())
+            throw new InvalidParametersException("Отчет содержит невалидные поля фильтров: " + invalidFilterNames);
 
         filterReportDomainService.removeFilters(request.getId());
         reportDomainService.deleteFields(reportDomainService.getDeletedFields(request));
-        reportDomainService.editReport(request);
+        reportDomainService.editReport(request, currentUser.getId());
 
         if (request.getFilterGroup() != null)
             filterReportService.addFilters(request.getFilterGroup());
@@ -276,7 +305,7 @@ public class ReportService {
         return reportDomainService.changeParentFolder(request);
     }
 
-    public void setReportEncrypt(ReportEncryptRequest request){
+    public void setReportEncrypt(ReportEncryptRequest request) {
         reportDomainService.setReportEncrypt(request);
     }
 
@@ -320,7 +349,7 @@ public class ReportService {
     }
 
     public void changeReportParentFolder(ChangeParentFolderRequest request) {
-        permissionCheckerSystem.checkPermissionsOnAllFolders(request, reportDomainService::getFolderIds, folderPermissionsDomainService::getExcelTemplateFolderPermissionsForRoles);
+        permissionCheckerSystem.checkPermissionsOnAllFolders(request, reportDomainService::getFolderIds, folderPermissionsDomainService::getReportFolderPermissionsForRoles);
         reportDomainService.changeFilterInstanceParentFolder(request);
     }
 
@@ -348,5 +377,13 @@ public class ReportService {
 
         var newFolders = reportDomainService.copyReportFolder(request, userDomainService.getCurrentUser());
         return newFolders.stream().map(f -> reportDomainService.getFolder(userDomainService.getCurrentUser().getId(), f)).toList();
+    }
+
+    private List<FilterAddRequest> unWind(FilterGroupAddRequest reportFilterGroupData, List<FilterAddRequest> reportFilterData) {
+
+        if (reportFilterGroupData == null) return reportFilterData;
+        reportFilterData.addAll(reportFilterGroupData.getFilters());
+        reportFilterData.addAll(reportFilterGroupData.getChildGroups().stream().flatMap(group -> unWind(group, reportFilterData).stream()).toList());
+        return reportFilterData;
     }
 }

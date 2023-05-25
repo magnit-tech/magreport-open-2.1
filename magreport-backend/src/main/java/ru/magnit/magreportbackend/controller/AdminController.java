@@ -14,21 +14,25 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.magnit.magreportbackend.dto.backup.BackupRequest;
 import ru.magnit.magreportbackend.dto.backup.BackupRestoreRequest;
+import ru.magnit.magreportbackend.dto.response.data_governance.DataGovernanceResponse;
 import ru.magnit.magreportbackend.service.AdminService;
 import ru.magnit.magreportbackend.util.LogHelper;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Администрирование приложения")
+@SuppressWarnings("java:S1075")
 public class AdminController {
 
     public static final String ADMIN_LOGS = "/api/v1/admin/logs";
     public static final String OLAP_LOGS = "/api/v1/admin/olap-logs";
     public static final String CREATE_BACKUP = "/api/v1/admin/create-backup";
     public static final String LOAD_BACKUP = "/api/v1/admin/load-backup";
+    public static final String DATA_LINEAGE_PATH = "/api/v1/admin/data-lineage";
 
     private final AdminService adminService;
 
@@ -84,5 +88,20 @@ public class AdminController {
         adminService.loadBackup(new BackupRestoreRequest(), uploadedFile);
         LogHelper.logInfoUserMethodEnd();
 
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Получение данных для Data Governance")
+    @PostMapping(value = DATA_LINEAGE_PATH,
+        produces = APPLICATION_JSON_VALUE)
+    public ru.magnit.magreportbackend.dto.response.ResponseBody<DataGovernanceResponse> getDataLineage() {
+        LogHelper.logInfoUserMethodStart();
+        var response = ru.magnit.magreportbackend.dto.response.ResponseBody.<DataGovernanceResponse>builder()
+            .success(true)
+            .message("")
+            .data(adminService.getDataLineage())
+            .build();
+        LogHelper.logInfoUserMethodEnd();
+        return response;
     }
 }

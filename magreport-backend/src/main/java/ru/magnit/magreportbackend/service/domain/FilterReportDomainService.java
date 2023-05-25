@@ -83,10 +83,10 @@ public class FilterReportDomainService {
             return result;
         else
             return rootGroup
-                .getChildGroups()
-                .stream()
-                .flatMap(group -> unWindGroups(group, result).stream())
-                .toList();
+                    .getChildGroups()
+                    .stream()
+                    .flatMap(group -> unWindGroups(group, result).stream())
+                    .toList();
     }
 
     @Transactional
@@ -118,11 +118,11 @@ public class FilterReportDomainService {
         final var requestData = filterChildNodesRequestDataMerger.merge(filterDataFRMapper.from(filterReport), request, effectiveSettings);
         final var childNodes = queryExecutor.getFilterInstanceChildNodes(requestData);
         final var rootNode = new FilterNodeResponse(
-            requestData.rootFieldId(),
-            requestData.level(),
-            null,
-            null,
-            childNodes);
+                requestData.rootFieldId(),
+                requestData.level(),
+                null,
+                null,
+                childNodes);
 
         return new FilterReportChildNodesResponse(filterReportResponseMapper.from(filterReport), requestData.responseFieldId(), rootNode);
     }
@@ -134,15 +134,17 @@ public class FilterReportDomainService {
         decodeListValueCodeFields(jobData);
 
         jobData.parameters()
-            .forEach(filter -> decodedParameters.add(new ReportJobFilterData(
-                filter.filterId(),
-                filter.datasetId(),
-                filter.securityFilterId(),
-                filter.securityFilterName(),
-                filter.filterType(),
-                filter.operationType(),
-                filter.code(),
-                decodeTuples(jobData.reportData(), filter.fieldValues()))));
+                .forEach(filter -> decodedParameters.add(new ReportJobFilterData(
+                        filter.filterId(),
+                        filter.datasetId(),
+                        filter.securityFilterId(),
+                        filter.securityFilterName(),
+                        filter.filterType(),
+                        filter.operationType(),
+                        filter.code(),
+                        filter.maxCountItems(),
+                        filter.filterName(),
+                        decodeTuples(jobData.reportData(), filter.fieldValues()))));
 
         jobData.parameters().clear();
         jobData.parameters().addAll(decodedParameters);
@@ -153,40 +155,40 @@ public class FilterReportDomainService {
         var emptyFilters = new HashSet<ReportJobFilterData>();
 
         jobData.parameters()
-            .stream()
-            .filter(filter -> filter.filterType() == FilterTypeEnum.VALUE_LIST)
-            .forEach(filter -> {
-                var filterReportData = getFilterReportData(filter.filterId());
-                var filterRequestData = new FilterRequestData(
-                    filterReportData,
-                    getTuplesFromParameters(filter.fieldValues()));
-                var fieldsValues = queryExecutor.getFieldsValues(filterRequestData);
-                var codeFieldId = filterReportData.getFieldByLevelAndType(1, FilterFieldTypeEnum.CODE_FIELD).fieldId();
-                if (fieldsValues.isEmpty()) {
-                    emptyFilters.add(filter);
-                } else {
-                    filter.fieldValues().clear();
-                    filter.fieldValues().addAll(fieldsValues
-                        .stream()
-                        .map(tuple -> new ReportJobTupleData(tuple.getValues()
-                            .stream()
-                            .filter(value -> !value.getFieldId().equals(codeFieldId))
-                            .map(value -> new ReportJobTupleFieldData(codeFieldId, -1L, -1L,  1L, null, null, value.getValue()))
-                            .toList()))
-                        .toList());
-                }
-            });
+                .stream()
+                .filter(filter -> filter.filterType() == FilterTypeEnum.VALUE_LIST)
+                .forEach(filter -> {
+                    var filterReportData = getFilterReportData(filter.filterId());
+                    var filterRequestData = new FilterRequestData(
+                            filterReportData,
+                            getTuplesFromParameters(filter.fieldValues()));
+                    var fieldsValues = queryExecutor.getFieldsValues(filterRequestData);
+                    var codeFieldId = filterReportData.getFieldByLevelAndType(1, FilterFieldTypeEnum.CODE_FIELD).fieldId();
+                    if (fieldsValues.isEmpty()) {
+                        emptyFilters.add(filter);
+                    } else {
+                        filter.fieldValues().clear();
+                        filter.fieldValues().addAll(fieldsValues
+                                .stream()
+                                .map(tuple -> new ReportJobTupleData(tuple.getValues()
+                                        .stream()
+                                        .filter(value -> !value.getFieldId().equals(codeFieldId))
+                                        .map(value -> new ReportJobTupleFieldData(codeFieldId, -1L, -1L, 1L, null, null, value.getValue()))
+                                        .toList()))
+                                .toList());
+                    }
+                });
         jobData.parameters().removeIf(emptyFilters::contains);
     }
 
     private List<Tuple> getTuplesFromParameters(List<ReportJobTupleData> parametersTuples) {
         return parametersTuples
-            .stream()
-            .map(tuple -> new Tuple(tuple.fieldValues()
                 .stream()
-                .map(fieldValue -> new TupleValue(fieldValue.fieldId(), fieldValue.value()))
-                .toList()))
-            .toList();
+                .map(tuple -> new Tuple(tuple.fieldValues()
+                        .stream()
+                        .map(fieldValue -> new TupleValue(fieldValue.fieldId(), fieldValue.value()))
+                        .toList()))
+                .toList();
     }
 
     @Transactional
@@ -222,10 +224,10 @@ public class FilterReportDomainService {
 
         final var tuples = queryExecutor.getFieldsValues(new FilterRequestData(filterDataFRMapper.from(filterReport), Collections.singletonList(new Tuple(request.getValues()))));
         final var tupleValues = request.getValues()
-            .stream()
-            .map(TupleValue::getValue)
-            .filter(value -> tuples.stream().flatMap(tuple -> tuple.getValues().stream()).noneMatch(val -> val.getValue().equals(value)))
-            .toList();
+                .stream()
+                .map(TupleValue::getValue)
+                .filter(value -> tuples.stream().flatMap(tuple -> tuple.getValues().stream()).noneMatch(val -> val.getValue().equals(value)))
+                .toList();
 
         return new FilterReportValuesCheckResponse(filterReportResponseMapper.from(filterReport), tupleValues);
     }
@@ -234,8 +236,8 @@ public class FilterReportDomainService {
         var newTuples = new LinkedList<ReportJobTupleData>();
 
         fieldValues.forEach(tuple -> newTuples.add(
-            new ReportJobTupleData(
-                decodeFieldValues(reportData, tuple.fieldValues()))));
+                new ReportJobTupleData(
+                        decodeFieldValues(reportData, tuple.fieldValues()))));
 
         return newTuples;
     }
@@ -246,14 +248,14 @@ public class FilterReportDomainService {
         var filters = unWind(reportData.filterGroup(), new LinkedList<>());
 
         tuple.forEach(tupleData -> result.add(
-            new ReportJobTupleFieldData(
-                filters.stream().flatMap(filter -> filter.fields().stream()).filter(field -> tupleData.fieldId().equals(field.codeFieldId())).map(ReportFilterLevelData::idFieldId).findFirst().orElse(-1L),
-                tupleData.datasetId(),
-                tupleData.datasetFieldId(),
-                tupleData.level(),
-                filters.stream().flatMap(filter -> filter.fields().stream()).filter(field -> tupleData.fieldId().equals(field.codeFieldId())).map(ReportFilterLevelData::reportFieldName).findFirst().orElse(null),
-                filters.stream().flatMap(filter -> filter.fields().stream()).filter(field -> tupleData.fieldId().equals(field.codeFieldId())).map(ReportFilterLevelData::reportFieldType).findFirst().orElse(null),
-                tupleData.value())));
+                new ReportJobTupleFieldData(
+                        filters.stream().flatMap(filter -> filter.fields().stream()).filter(field -> tupleData.fieldId().equals(field.codeFieldId())).map(ReportFilterLevelData::idFieldId).findFirst().orElse(-1L),
+                        tupleData.datasetId(),
+                        tupleData.datasetFieldId(),
+                        tupleData.level(),
+                        filters.stream().flatMap(filter -> filter.fields().stream()).filter(field -> tupleData.fieldId().equals(field.codeFieldId())).map(ReportFilterLevelData::reportFieldName).findFirst().orElse(null),
+                        filters.stream().flatMap(filter -> filter.fields().stream()).filter(field -> tupleData.fieldId().equals(field.codeFieldId())).map(ReportFilterLevelData::reportFieldType).findFirst().orElse(null),
+                        tupleData.value())));
 
         return result;
     }
@@ -271,10 +273,10 @@ public class FilterReportDomainService {
 
         var filters = filterReportRepository.findFilterReportByFilterInstanceId(filterInstanceId);
         filters.forEach(filter -> filter.getFields()
-            .forEach(field -> {
-                var expand = field.getFilterInstanceField().getExpand();
-                field.setExpand(expand);
-            })
+                .forEach(field -> {
+                    var expand = field.getFilterInstanceField().getExpand();
+                    field.setExpand(expand);
+                })
         );
         filterReportRepository.saveAll(filters);
     }

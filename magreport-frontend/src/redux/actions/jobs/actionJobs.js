@@ -2,15 +2,24 @@ import store from 'redux/store';
 import dataHub from 'ajax/DataHub';
 import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
 
-import { JOBS_FILTER, JOB_CANCEL, JOB_CANCELED, JOB_CANCEL_FAILED, JOB_SQL_CLICK, JOB_DIALOG_CLOSE , JOB_SQL_LOADED, JOB_SQL_LOAD_FAILED, 
+import { JOBS_FILTER, USERS_JOBS_FILTER, JOB_CANCEL, JOB_CANCELED, JOB_CANCEL_FAILED, JOB_SQL_CLICK, 
+        JOB_DIALOG_CLOSE , JOB_SQL_LOADED, JOB_SQL_LOAD_FAILED, 
         JOB_STATUS_HISTORY_CLICK, JOB_STATUS_HISTORY_LOADED, JOB_STATUS_HISTORY_LOAD_FAILED, 
-        JOB_ADD_COMMENT, JOB_ADD_COMMENT_SUCCESS, JOB_ADD_COMMENT_FAILED} from '../../reduxTypes'
+        JOB_ADD_COMMENT, JOB_ADD_COMMENT_SUCCESS, JOB_ADD_COMMENT_FAILED, JOB_SHARE_LIST_CLICK} from '../../reduxTypes'
 
-export function actionFilterJobs(itemsType, filters){
+export function actionFilterJobs(itemsType, jobsFilters){
     return {
         type: JOBS_FILTER,
         itemsType,
-        filters
+        jobsFilters
+    }
+}
+
+export function actionFilterUsersJobs(itemsType, usersJobsFilters){
+    return {
+        type: USERS_JOBS_FILTER,
+        itemsType,
+        usersJobsFilters
     }
 }
 
@@ -82,6 +91,7 @@ function handleClickStatusHistory(magrepResponse){
 }
 
 export const actionShowStatusHistory = (itemsType, titleName, id) => {
+
     if (itemsType === FolderItemTypes.job || itemsType === FolderItemTypes.userJobs) {
         dataHub.reportJobController.getHistory(id, handleClickStatusHistory)
     }
@@ -124,4 +134,15 @@ export function actionJobAddComment(itemsType, jobId, jobIndex, comment){
         jobId,
         comment
     })
+}
+
+export const actionShowShareList = (itemsType, titleName, id, data, count) => {
+    return {
+        type: JOB_SHARE_LIST_CLICK,
+        itemsType,
+        titleName,
+        id,
+        data,
+        count
+    }
 }

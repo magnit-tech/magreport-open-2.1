@@ -6,6 +6,7 @@ import RuLocalizedUtils from 'utils/RuLocalizedUtils'
 import ruLocale from "date-fns/locale/ru";
 import {MuiPickersUtilsProvider, KeyboardDatePicker,} from '@material-ui/pickers';
 import {dateToStringFormat} from 'utils/dateFunctions'
+import FormHelperText from '@material-ui/core/FormHelperText';
 
 // components
 import Box from '@material-ui/core/Box';
@@ -63,9 +64,13 @@ export default function DatesRange(props) {
                 endValue: defaultEndDate
             } = getRangeFieldsValues(props.lastFilterValue, startFieldId, endFieldId);
 
+            let bd = new Date(defaultStartDate);
+            let ed = new Date(defaultEndDate);
+
             valueList.current.startDate = defaultStartDate;
             valueList.current.endDate = defaultEndDate;
-            setCheckStatus(defaultStartDate || ! mandatory ? 'success' : 'error')
+            setCheckStatus(Boolean(props.filterData.maxCountItems) && props.filterData.maxCountItems < ((ed.getTime() - bd.getTime())/(1000 *60*60*24) + 1) ? "limit"
+                : defaultStartDate || ! mandatory ? 'success' : 'error')
             setStartDate(defaultStartDate);
             setEndDate(defaultEndDate);
             setValue(defaultStartDate, defaultEndDate);
@@ -101,7 +106,9 @@ export default function DatesRange(props) {
             setEndDate(endDate);
         };
         if ((valueList.current.startDate && valueList.current.endDate) || (!mandatory && !valueList.current.startDate && !valueList.current.endDate)){
-            setCheckStatus('success')
+            let bd = new Date(valueList.current.startDate);
+            let ed = new Date(valueList.current.endDate);
+            setCheckStatus(Boolean(props.filterData.maxCountItems) && props.filterData.maxCountItems < ((ed.getTime() - bd.getTime())/(1000 *60*60*24) + 1) ? "limit" :  'success' );
         }
         else {
             setCheckStatus('error')
@@ -126,10 +133,18 @@ export default function DatesRange(props) {
             ]
         }
 
+        let stat = (st && en) || (!mandatory && !st && !en) ? 'success' : 'error';
+        if (en && st){
+            let bd = new Date(st);
+            let ed = new Date(en);
+            if (Boolean(props.filterData.maxCountItems) && props.filterData.maxCountItems < ((ed.getTime() - bd.getTime())/(1000 *60*60*24) + 1)){
+                stat = 'limit'
+            }
+        }
         props.onChangeFilterValue({
             filterId : props.filterData.id,
             operationType: "IS_BETWEEN",
-            validation: (st && en) || (!mandatory && !st && !en) ? 'success' : 'error',
+            validation:   stat,
             parameters,
         });      
     }
@@ -197,6 +212,7 @@ export default function DatesRange(props) {
                         <FilterStatus status={checkStatus} />
                     </span>
                 </div>
+                {props.filterData.maxCountItems > 0 && <FormHelperText  disabled> Допустимое кол-во значений: {props.filterData.maxCountItems}</FormHelperText>}
             </div>
         </MuiPickersUtilsProvider>
     );

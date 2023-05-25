@@ -11,5 +11,6 @@ public record ReportFilterData(
         String code,
         String schemaName,
         String tableName,
+        Long maxCountItems,
         List<ReportFilterLevelData> fields
 ) {}

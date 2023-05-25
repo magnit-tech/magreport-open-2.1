@@ -35,7 +35,6 @@ export default function ReportFields(props){
         props.onFieldMove(sourceIndex, targetIndex);
     }
     
-    
     return (
         <div>
             <DraggableItemsList
@@ -50,6 +49,7 @@ export default function ReportFields(props){
                         description={item.description}
                         open={item.open}
                         index={index}
+                        error={item.error}
                         datasetFields={props.dataset.fields}
                         onFieldChange={props.onFieldChange}
                         onDropField={props.onFieldDrop}

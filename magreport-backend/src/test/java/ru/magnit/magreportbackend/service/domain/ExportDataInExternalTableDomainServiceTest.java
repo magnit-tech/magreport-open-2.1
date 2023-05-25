@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum;
 import ru.magnit.magreportbackend.domain.enums.BinaryBooleanOperations;
@@ -43,6 +44,8 @@ class ExportDataInExternalTableDomainServiceTest {
 
     @Test
     void exportData() {
+
+        ReflectionTestUtils.setField(domainService, "batchSize", 1000);
 
         domainService.exportData(getReportJobData());
 
@@ -123,6 +126,7 @@ class ExportDataInExternalTableDomainServiceTest {
                                         NAME,
                                         NAME,
                                         NAME,
+                                        ID,
                                         Collections.singletonList(new ReportFilterLevelData(
                                                 ID,
                                                 -1L,
@@ -155,6 +159,8 @@ class ExportDataInExternalTableDomainServiceTest {
                         FilterTypeEnum.DATE_VALUE,
                         FilterOperationTypeEnum.IS_EQUAL,
                         "*",
+                        null,
+                        "",
                         Collections.singletonList(new ReportJobTupleData(
                                 Collections.singletonList(
                                         new ReportJobTupleFieldData(ID, ID,ID,ID, NAME,DataTypeEnum.DATE,NAME))

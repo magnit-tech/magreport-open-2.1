@@ -28,9 +28,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.CLICK_HOUSE;
 import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.DB2;
 import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.H2;
 import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.IMPALA;
+import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.MSSQL;
 import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.ORACLE;
 import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.POSTGRESQL;
 import static ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum.SAP_HANA;
@@ -51,9 +53,12 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
             Map.entry(IMPALA, ImpalaFilterQueryBuilder.class),
             Map.entry(TERADATA, TeradataFilterQueryBuilder.class),
             Map.entry(ORACLE, OracleFilterQueryBuilder.class),
+            Map.entry(MSSQL, MsSqlFilterQueryBuilder.class),
             Map.entry(POSTGRESQL, PostgreSqlFilterQueryBuilder.class),
-            Map.entry(DB2, PostgreSqlFilterQueryBuilder.class),
-            Map.entry(SAP_HANA, SapHanaFilterQueryBuilder.class)
+            Map.entry(DB2, Db2FilterQueryBuilder.class),
+            Map.entry(SAP_HANA, SapHanaFilterQueryBuilder.class),
+            Map.entry(CLICK_HOUSE, ClickHouseFilterQueryBuilder.class)
+
     );
 
     @Override
@@ -78,8 +83,9 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
             }
             return tuples;
         } catch (Exception ex) {
-            throw new QueryExecutionException(
-                    QUERY_FAILED + filterInstanceValuesQuery, ex);
+            log.debug(QUERY_FAILED + filterInstanceValuesQuery);
+            throw new QueryExecutionException(ex.getMessage(), ex);
+
         }
     }
 
@@ -107,7 +113,8 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
 
             return result;
         } catch (Exception ex) {
-            throw new QueryExecutionException(QUERY_FAILED + childNodesQuery, ex);
+            log.debug(QUERY_FAILED + childNodesQuery);
+            throw new QueryExecutionException(ex.getMessage(), ex);
         }
     }
 
@@ -138,7 +145,8 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
             }
             return tuples;
         } catch (Exception ex) {
-            throw new QueryExecutionException(QUERY_FAILED + fieldsValuesQuery, ex);
+            log.debug(QUERY_FAILED + fieldsValuesQuery);
+            throw new QueryExecutionException(ex.getMessage(), ex);
         }
     }
 
@@ -159,7 +167,9 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
                 result.add(row);
             }
         } catch (SQLException ex) {
-            throw new QueryExecutionException("Error trying to execute query:\n" + query);
+
+            log.debug(QUERY_FAILED + query);
+            throw new QueryExecutionException(ex.getMessage(), ex);
         }
 
         return result;
@@ -177,7 +187,7 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
         ) {
             statement.execute(query);
         } catch (SQLException ex) {
-            log.error("SqlExecQueryImpl.executeSql(): Error trying to execute pre- or post- sql.", ex);
+            log.debug("SqlExecQueryImpl.executeSql(): Error trying to execute pre- or post- sql.", ex);
             throw new QueryExecutionException("Error trying to execute query:\n" + query);
         }
 

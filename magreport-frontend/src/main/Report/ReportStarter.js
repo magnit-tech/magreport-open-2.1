@@ -5,6 +5,7 @@ import { useParams, useNavigate, useLocation, useSearchParams } from 'react-rout
 
 import { useDispatch } from 'react-redux';
 import { addReportStarterNavbar } from "redux/actions/navbar/actionNavbar";
+import SidebarItems from '../Main/Sidebar/SidebarItems';   //'../../   /Main/Sidebar/SidebarItems' ;
 
 // mui
 import {Button} from '@material-ui/core';
@@ -34,13 +35,14 @@ import {ReportStarterCSS} from "./ReportCSS";
 export default function ReportStarter(props){
     const classes = ReportStarterCSS();
 
-    const {id} = useParams()
+    const useParamsId = useParams()?.id
+    const id = props.onDataLoadFunction ? props.reportId : useParamsId;
+
     const navigate = useNavigate();
     const location = useLocation();
+    const dispatch = useDispatch();
+
     const [searchParams, setSearchParams] = useSearchParams(); // eslint-disable-line
-
-    const dispatch = useDispatch()
-
     const [flowState, setFlowState] = useState("filters");
     const [reportMetadata, setReportMetadata] = useState({});
     const [reloadReportMetadata, setReloadReportMetadata] = useState({needReload:false}); // управление перезагрузкой метаданных
@@ -56,7 +58,6 @@ export default function ReportStarter(props){
     const lastFilterValues = useRef(new FilterValues()); // Значения параметров предыдущего запуска отчёта
 
     const filterValues = useRef(new FilterValues()); // Текущий выбор в фильтре
-    
 
     const addJobParameters = useRef([]);
     const { enqueueSnackbar } = useSnackbar();
@@ -66,7 +67,6 @@ export default function ReportStarter(props){
     const [excelTemplates, setExcelTemplates] = useState([])
     const [disabledSaveBtn, setDisabledSaveBtn] = useState(false)
     
-
     function handleReportMetadataLoaded(data){
         setExcelTemplates(data.excelTemplates)
         if((!data.filterGroup || data.filterGroup === null || data.filterGroup.id === null)&& !props.woStartButton){
@@ -105,7 +105,10 @@ export default function ReportStarter(props){
             props.checkFilters(checkMandatoryFiltersResult && checkInvalidValues && isValidMandatorygroups)
         }
 
-        dispatch(addReportStarterNavbar('report/starter', data.name, id))
+        const path = new RegExp(SidebarItems.schedule.subItems.scheduleTasks.folderItemType, "g");
+        if (location.pathname.match(path) === null){
+            dispatch(addReportStarterNavbar('report/starter', data.name, id))
+        }
     }
 
     function mandatoryFilters(data, filtersSet, groupsMap, filterToGrpMap){
@@ -193,11 +196,6 @@ export default function ReportStarter(props){
     }
 
     function handleChangeFilterValue(newFilterValue){
-        if(newFilterValue.validation !== 'success') {
-            setDisabledSaveBtn(true)
-        } else {
-            setDisabledSaveBtn(false)
-        }
         if(newFilterValue.operationType !== 'IS_IT_SEARCHING') {
             filterValues.current.setFilterValue(newFilterValue);
             validateMandatoryGroups(newFilterValue, filterToGroupMap, mandatoryGroupsMap);
@@ -213,6 +211,15 @@ export default function ReportStarter(props){
             props.checkFilters(checkMandatoryFiltersResult && checkInvalidValues && isValidMandatorygroups);
             addJobParameters.current = filterValues.current.getParameters();
         }
+
+        let disabledBtn = false;
+        for (let v of filterValues.current.values.values()) {
+            /*Временная залепа, нужно для ValueList*/
+            if (v.hasOwnProperty('validation') && v.validation !== 'success'){
+                disabledBtn = true
+            }
+        }
+        setDisabledSaveBtn( disabledBtn)
     }
 
     function validateMandatoryGroups(filterValue, filterMap, groupMap){
@@ -250,7 +257,7 @@ export default function ReportStarter(props){
     return (
         flowState === "filters" ? 
             <DataLoader
-                loadFunc = {dataHub.reportController.get}
+                loadFunc = {props.onDataLoadFunction || dataHub.reportController.get}
                 loadParams = {[Number(id), props.scheduleTaskId !== undefined ? props.scheduleTaskId : lastParamJobId]}
                 reload = {reloadReportMetadata}
                 onDataLoaded = {handleReportMetadataLoaded}

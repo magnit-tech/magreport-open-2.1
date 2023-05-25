@@ -25,6 +25,7 @@ public record ScheduleTaskBackupTuple (
         boolean sendEmptyReport,
         LocalDate expirationDate,
         LocalDateTime created,
-        LocalDateTime modified
+        LocalDateTime modified,
+        boolean isActive
 ) {
 }

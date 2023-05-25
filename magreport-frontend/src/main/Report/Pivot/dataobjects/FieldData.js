@@ -8,9 +8,11 @@ export default function FieldData(fieldData){
     // Из метаданных отчёта:
     this.id = 0;
     this.name = "";
+    this.newName = "";
     this.type = '';
     this.visible = true;
-    this.dataType = ''
+    this.dataType = '';
+    this.original = true; // true - исходное поле отчёта, false - производное поле отчёта
 
     // Добавленные на уровне сводной свойства:
     this.aggFuncName = "";
@@ -53,6 +55,11 @@ export default function FieldData(fieldData){
     this.setIsOffFalse = () => {
         this.isOff = false
     }
+
+    // Переименование поля
+    this.setNewName = (newName) => {
+        this.newName = newName
+    }
     /*
         Методы задания фильтрации и сортировки
     */
@@ -89,7 +96,7 @@ export default function FieldData(fieldData){
                                 generatedData = Number(generatedData) * 100
                             }
 
-                            if (item.rounding) {
+                            if (item.rounding || item.rounding === 0) {
                                 generatedData = Number(generatedData).toFixed(item.rounding)
                             }
 

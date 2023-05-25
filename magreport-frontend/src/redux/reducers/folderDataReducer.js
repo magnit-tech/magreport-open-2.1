@@ -18,10 +18,14 @@ import {
     FAVORITES_ADDED, 
     FAVORITES_DELETE_START, 
     FAVORITES_DELETED,
-    JOBS_FILTER
+    JOBS_FILTER,
+    USERS_JOBS_FILTER,
+    TASK_SWITCHED
 } from 'redux/reduxTypes';
 import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
-// import {FLOW_STATE_BROWSE_FOLDER} from './menuViews/flowStates';    
+// import {FLOW_STATE_BROWSE_FOLDER} from './menuViews/flowStates'; 
+
+import {dateCorrection} from  '../../../src/utils/dateFunctions';
 
 const getItemName = itemsType => {
     return  itemsType === FolderItemTypes.reports ? "reports" :
@@ -43,10 +47,24 @@ const getItemName = itemsType => {
     
 }
 
+let now  =  new Date();
+let midNight = new Date();
+
+midNight.setHours(0);
+midNight.setMinutes(0);
+midNight.setSeconds(0);
+midNight.setMilliseconds(0);
+
+now.setHours(23);
+now.setMinutes(59);
+now.setSeconds(59);
+now.setMilliseconds(999);
+
 const initialState = {
 	currentFolderId : null,
     needReload : true,
-    currentFolderData : null,
+    currentFolderData : null, 
+    usersJobsFilters: {periodStart: dateCorrection(midNight, false), periodEnd: dateCorrection(now, false)},
     folderContentLoadErrorMessage : null,
 }
 
@@ -91,26 +109,22 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
 							return 0;
 					});
 				}
+            }
 
-				const filteredFolderData = {
-					...action.folderData,
-					childFolders,
-					[itemsName]: items
-				}
+            const filteredFolderDataLoaded = {
+                ...action.folderData,
+                childFolders,
+                [itemsName]: items
+            }
 
-				return {
-					...state,
-					needReload : false,
-					currentFolderData : action.folderData,
-					filteredFolderData,
-					sortParams
-				}} else {
-					return {
-						...state,
-						needReload : false,
-						currentFolderData : action.folderData,
-					}
-				}
+            return {
+                ...state,
+                needReload : false,
+                currentFolderData : action.folderData,
+                filteredFolderData: filteredFolderDataLoaded,
+                sortParams,
+                isSearchLoading: action.isSearchLoading
+            }
 
         case FOLDER_CONTENT_LOAD_FAILED:
             return{
@@ -180,7 +194,7 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
                     [itemsNameForSearch]: items
                 }
 
-                return {...state, filteredFolderData, searchParams: action.searchParams}
+                return {...state, filteredFolderData, searchParams: action.searchParams, isSearchLoading: false}
             }
             else {
                 const childFolders = state.currentFolderData.childFolders,
@@ -217,7 +231,7 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
                 }
 
                 delete state.searchParams
-                return {...state, filteredFolderData}
+                return {...state, filteredFolderData, isSearchLoading: false}
             }
 
         case FOLDER_CONTENT_SORT_CLICK:
@@ -289,12 +303,12 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
                     childFolders,
                     [itemsName]: objects
                 }
-                return {...state, filteredFolderData, searchParams: action.searchParams}
+                return {...state, filteredFolderData, searchParams: action.searchParams, isSearchLoading: false}
             }
             else {
                 delete state.filteredFolderData
                 delete state.searchParams
-                return {...state}
+                return {...state, isSearchLoading: false}
             }
 
         case FOLDER_CONTENT_PARENT_FOLDER_CHANGED:
@@ -323,7 +337,10 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
 
         case FAVORITES_ADD_START:
         case FAVORITES_DELETE_START:
-            return state
+            return{
+                ...state,
+                needReload : true
+            }
         
         case FAVORITES_ADDED:
         case FAVORITES_DELETED:
@@ -349,18 +366,51 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
             return {...state, currentFolderData: folderData}
 
         case JOBS_FILTER:
-            let newState = {}
-            if (action.filters.isCleared){
-                newState = {...state}
-                delete newState.filters
-            }
-            else {
-                newState = {
-                    ...state, filters: action.filters
+            let newStateJF = {}
+                if (action.jobsFilters.isCleared){
+                    newStateJF = {...state}
+                    delete newStateJF.jobsFilters
                 }
-            }
-            return newState
-
+                else {
+                    newStateJF = {
+                        ...state, jobsFilters: action.jobsFilters
+                    }
+                }
+                return newStateJF
+        case USERS_JOBS_FILTER:
+            let newStateUJF = {}
+                if (action.usersJobsFilters.isCleared){
+                    newStateUJF = {...state}
+                    delete newStateUJF.usersJobsFilters
+                }
+                else {
+                    newStateUJF = {
+                        ...state, usersJobsFilters: action.usersJobsFilters
+                    }
+                }
+                return newStateUJF
+        case TASK_SWITCHED:
+                        let newStateTS = {...state}
+                        const fullArr = [...state.currentFolderData.scheduleTasks]
+                        const filteredArr = [...state.filteredFolderData.scheduleTasks]
+        
+                        let newTask = {};
+        
+                        if (state.searchParams){
+                            newTask = {...filteredArr[action.taskIndex], status: action.status}
+                            let indexFullArr = fullArr.findIndex(item => item.id === action.taskId)
+                            filteredArr.splice(action.taskIndex, 1, newTask)
+                            fullArr.splice(indexFullArr, 1, newTask)
+                            
+                        }
+                        else {
+                            newTask = {...fullArr[action.taskIndex], status: action.status}
+                            fullArr.splice(action.taskIndex, 1, newTask)
+                            filteredArr.splice(action.taskIndex, 1, newTask)
+                        }
+                        newStateTS.filteredFolderData.scheduleTasks = filteredArr;
+                        newStateTS.currentFolderData.scheduleTasks = fullArr;
+                        return newStateTS
         default:
             return state;
     }    

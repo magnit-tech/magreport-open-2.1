@@ -1,5 +1,6 @@
 package ru.magnit.magreportbackend.expression;
 
+import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
 
 import java.util.ArrayList;
@@ -16,6 +17,17 @@ public abstract class ParameterizedExpression extends BaseExpression {
             parameterExpression.parentExpression = this;
             parameters.add(parameterExpression);
         }
+    }
+
+    @Override
+    public DataTypeEnum inferType() {
+        var resultType = DataTypeEnum.INTEGER;
+        for (var parameter: parameters) {
+            final var parameterType = parameter.inferType();
+            checkParameterHasAnyType(parameter, parameterType, DataTypeEnum.INTEGER, DataTypeEnum.DOUBLE);
+            resultType = parameterType.widerNumeric(parameterType);
+        }
+        return resultType;
     }
 
     @Override

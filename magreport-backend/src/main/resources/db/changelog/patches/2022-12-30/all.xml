@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="DERIVED_FIELD-DATA_TYPE-001" author="artemenko_pa">
+        <addColumn tableName="DERIVED_FIELD">
+            <column name="DATA_TYPE_ID" type="INT" defaultValue="1">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <addColumn tableName="DERIVED_FIELD">
+            <column name="IS_PUBLIC" type="BOOLEAN" defaultValueBoolean="false"/>
+        </addColumn>
+        <addColumn tableName="DERIVED_FIELD">
+            <column name="UNIQUE_NAME" type="VARCHAR(255)">
+                <constraints unique="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="DERIVED_FIELD-DATA_TYPE-002" author="artemenko_pa">
+        <addForeignKeyConstraint baseColumnNames="DATA_TYPE_ID" baseTableName="DERIVED_FIELD"
+                                 constraintName="FK-DERIVED_FIELD-DATA_TYPE"
+                                 deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="DATA_TYPE_ID" referencedTableName="DATA_TYPE"/>
+    </changeSet>
+
+</databaseChangeLog>

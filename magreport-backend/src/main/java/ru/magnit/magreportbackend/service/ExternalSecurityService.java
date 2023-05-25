@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ru.magnit.magreportbackend.dto.request.asm.AsmSecurityAddRequest;
 import ru.magnit.magreportbackend.dto.request.asm.AsmSecurityRequest;
 import ru.magnit.magreportbackend.dto.response.asm.AsmSecurityResponse;
+import ru.magnit.magreportbackend.dto.response.asm.AsmSecurityShortResponse;
 import ru.magnit.magreportbackend.service.domain.ExternalAuthRoleFilterRefreshService;
 import ru.magnit.magreportbackend.service.domain.ExternalAuthRoleRefreshService;
 import ru.magnit.magreportbackend.service.domain.ExternalAuthUserRoleRefreshService;
@@ -43,7 +44,7 @@ public class ExternalSecurityService {
         return domainService.getAsmSecurity(request.getId());
     }
 
-    public List<AsmSecurityResponse> getAllAsmSecurity() {
+    public List<AsmSecurityShortResponse> getAllAsmSecurity() {
 
         return domainService.getAllAsmSecurity();
     }
@@ -56,9 +57,16 @@ public class ExternalSecurityService {
 
         final var filters = domainService.getAllAmsFilters(idList);
 
-        filters.forEach(roleRefreshService::refreshRoles);
-        filters.forEach(userRoleRefreshService::refreshUserRoles);
-        filters.forEach(roleFilterRefreshService::refreshSecurityFilters);
+        filters.forEach( filter -> {
+            try {
+                roleRefreshService.refreshRoles(filter);
+                userRoleRefreshService.refreshUserRoles(filter);
+                roleFilterRefreshService.refreshSecurityFilters(filter);
+            } catch (Exception ex){
+                log.error(String.format("Failed update ASM filter (id:%s): %s", filter.getId(), ex.getMessage()));
+                ex.printStackTrace();
+            }
+        });
     }
 
     public AsmSecurityResponse editAsmSecurity(AsmSecurityAddRequest request) {
@@ -74,7 +82,7 @@ public class ExternalSecurityService {
 
         final var allAsmSecurity = domainService.getAllAsmSecurity();
 
-        final var asmIds = allAsmSecurity.stream().map(AsmSecurityResponse::id).toList();
+        final var asmIds = allAsmSecurity.stream().map(AsmSecurityShortResponse::id).toList();
 
         refreshAmsFilters(asmIds);
     }

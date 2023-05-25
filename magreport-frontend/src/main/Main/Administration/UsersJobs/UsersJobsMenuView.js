@@ -1,4 +1,4 @@
-import React, {useState } from 'react';
+import React, {useState} from 'react';
 import { connect } from 'react-redux';
 
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -8,18 +8,23 @@ import dataHub from 'ajax/DataHub';
 
 // redux
 import {actionFolderLoaded, actionFolderLoadFailed} from 'redux/actions/menuViews/folderActions';
-import {actionFilterJobs, actionJobCancel, showSqlDialog, actionShowStatusHistory} from 'redux/actions/jobs/actionJobs';
+import {actionFilterUsersJobs, actionJobCancel, showSqlDialog, actionShowStatusHistory} from 'redux/actions/jobs/actionJobs';
 
 // components
 import DataLoader from 'main/DataLoader/DataLoader';
 import FolderContent from 'main/FolderContent/FolderContent';
 import SidebarItems from '../../Sidebar/SidebarItems';
+import {dateCorrection} from '../../../../../src/utils/dateFunctions'
 
 
 function UsersJobsMenuView(props){
 
+    let folderItemsType = SidebarItems.admin.subItems.userJobs.folderItemType;
+
     const navigate = useNavigate()
     const location = useLocation()
+
+    const [reload, setReload] = useState({needReload : false});
 
     let params = [props.filters?.periodStart ?? null, 
         props.filters?.periodEnd ?? null, 
@@ -27,11 +32,16 @@ function UsersJobsMenuView(props){
         props.filters?.user ?? null,
         props.filters?.reportIds ?? null
     ]
-    const [reload, setReload] = useState({needReload : false});
-
-    let folderItemsType = SidebarItems.admin.subItems.userJobs.folderItemType;
 
     function handleRefreshFolder(){
+        let now  =  new Date();
+        let midNight = new Date();
+    
+        midNight.setHours(0);
+        midNight.setMinutes(0);
+        midNight.setSeconds(0);
+        midNight.setMilliseconds(0);
+        props.actionFilterUsersJobs(folderItemsType, {periodStart: dateCorrection(midNight, false), periodEnd:  dateCorrection(now, false) })
         setReload({needReload : true})
     }
 
@@ -41,6 +51,11 @@ function UsersJobsMenuView(props){
 
     function handleReportRunClick(reportId, jobId) {
         navigate(`/ui/report/starter/${reportId}?jobId=${jobId}`, {state: location.pathname})
+    }
+
+    function handleCancelClick(folderItemsType, jobIndex, jobId){
+        props.actionJobCancel(folderItemsType, jobIndex, jobId);
+        setReload({needReload : true})
     }
 
     return (
@@ -63,9 +78,9 @@ function UsersJobsMenuView(props){
                     dialog = {props.dialog}
                     onItemClick = {handleItemClick}
                     onReportRunClick = {handleReportRunClick}
-                    onFilterClick = {filters => {props.actionFilterJobs(folderItemsType, filters)}}
+                    onFilterClick = {filters => {props.actionFilterUsersJobs(folderItemsType, filters)}}
                     onRefreshClick = {handleRefreshFolder}
-                    onJobCancelClick = {(jobIndex, jobId) => {props.actionJobCancel(folderItemsType, jobIndex, jobId)}}
+                    onJobCancelClick = {(jobIndex, jobId) => {handleCancelClick(folderItemsType, jobIndex, jobId)}}
                     onShowSqlDialogClick = {props.showSqlDialog}
                     onShowHistoryStatusClick = {props.actionShowStatusHistory}
                 />
@@ -79,14 +94,14 @@ const mapStateToProps = state => {
     return {
         state : state.folderData,
         currentFolderData : state.folderData.currentFolderData,
-        filters : state.folderData.filters
+        filters : state.folderData.usersJobsFilters
     }
 }
 
 const mapDispatchToProps = {
     actionFolderLoaded,
     actionFolderLoadFailed,
-    actionFilterJobs,
+    actionFilterUsersJobs,
     actionJobCancel,
     showSqlDialog,
     actionShowStatusHistory

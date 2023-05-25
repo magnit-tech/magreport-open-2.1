@@ -21,13 +21,12 @@ public class PowExpression extends ParameterizedExpression {
         final var parameterValue2 = parameters.get(1).calculate(rowNumber);
         final var parameter2 = parameters.get(1);
 
-        checkParameterNotNull(parameter1, parameterValue1);
         checkParameterHasAnyType(parameter1, parameterValue1, DataTypeEnum.INTEGER, DataTypeEnum.DOUBLE);
 
-        checkParameterNotNull(parameter2, parameterValue2);
         checkParameterHasAnyType(parameter2, parameterValue2, DataTypeEnum.INTEGER, DataTypeEnum.DOUBLE);
 
-        result.setL(String.valueOf(Math.pow(Double.parseDouble(parameterValue1.getL()), Double.parseDouble(parameterValue2.getL()))));
+        final var isNull = parameterValue1.getL() == null || parameterValue2.getL() == null;
+        result.setL(isNull? null : String.valueOf(Math.pow(Double.parseDouble(parameterValue1.getL()), Double.parseDouble(parameterValue2.getL()))));
 
         return result;
     }

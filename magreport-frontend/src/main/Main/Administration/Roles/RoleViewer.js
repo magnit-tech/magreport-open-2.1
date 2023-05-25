@@ -17,8 +17,6 @@ import {FolderItemTypes} from "main/FolderContent/FolderItemTypes";
 import ViewerPage from "main/Main/Development/Viewer/ViewerPage";
 import {ViewerCSS} from "main/Main/Development/Viewer/ViewerCSS";
 import UserList from "main/Main/Administration/Users/UserList";
-import TextField from '@material-ui/core/TextField';
-import MenuItem from '@material-ui/core/MenuItem';
 
 import DomainGroupList from "main/Main/Administration/DomainGroups/DomainGroupList";
 import PermittedFoldersList from './PermittedFoldersList';
@@ -92,8 +90,8 @@ export default function RoleViewer() {
         setSelectedPermittedFolder('all');
     }
 
-    const handleChangeSelectedPermittedFolder = (event) => {
-        setSelectedPermittedFolder(event.target.value);
+    const handleChangeSelectedPermittedFolder = (value) => {
+        setSelectedPermittedFolder(value);
     };
 
     // edit check
@@ -174,27 +172,6 @@ export default function RoleViewer() {
         tablabel:"Права",
         tabcontent:
             <div style={{display: 'flex', flex: 1, flexDirection: 'column'}}>
-                <div className={classes.userAddPanel}>
-                    <div className={classes.permittedSelect}>
-                        <TextField
-                            fullWidth
-                            id="permitted-folders-names-list"
-                            select
-                            label="Тип объекта"
-                            value={selectedPermittedFolder}
-                            onChange={handleChangeSelectedPermittedFolder}
-                            //helperText="Please select your currency"
-                            variant="outlined"
-                        >
-                            {permittedFolders.namesList.map((item, index) => (
-                                <MenuItem key={item.id} value={item.id}>
-                                    {item.value}
-                                </MenuItem>
-                            ))}
-                        </TextField> 
-                
-                    </div>
-                </div>
                 <Paper elevation={3} className={classes.permittedListPaper}>
                     <DataLoader
                         loadFunc = {dataHub.roleController.getPertmittedFolders}
@@ -207,6 +184,7 @@ export default function RoleViewer() {
                             selectedItem={selectedPermittedFolder}
                             items={permittedFolders}
                             editable = {false}
+                            onChangeSelectedPermittedFolder = {handleChangeSelectedPermittedFolder}
                         />
                     </DataLoader>
                 </Paper>

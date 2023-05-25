@@ -3,6 +3,8 @@ package ru.magnit.magreportbackend.service.domain;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.magnit.magreportbackend.domain.dataset.DataType;
+import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.dto.inner.UserView;
 import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldAddRequest;
 import ru.magnit.magreportbackend.dto.response.derivedfield.DerivedFieldResponse;
@@ -31,9 +33,9 @@ public class DerivedFieldDomainService {
     private final ExpressionResponseMapper expressionResponseMapper;
 
     @Transactional
-    public void addDerivedField(DerivedFieldAddRequest request, UserView currentUser) {
+    public void addDerivedField(DerivedFieldAddRequest request, DataTypeEnum fieldType, UserView currentUser) {
         final var derivedField = derivedFieldMapper.from(new Pair<>(request, currentUser));
-
+        derivedField.setDataType(new DataType(fieldType));
         derivedFieldRepository.save(derivedField);
     }
 
@@ -55,10 +57,11 @@ public class DerivedFieldDomainService {
     }
 
     @Transactional
-    public void updateDerivedField(DerivedFieldAddRequest request, UserView currentUser) {
+    public void updateDerivedField(DerivedFieldAddRequest request, DataTypeEnum fieldType, UserView currentUser) {
         fieldExpressionRepository.deleteAllByDerivedFieldId(request.getId());
 
         final var derivedField = derivedFieldMapper.from(new Pair<>(request, currentUser));
+        derivedField.setDataType(new DataType(fieldType));
         derivedField.setId(request.getId());
 
         derivedFieldRepository.save(derivedField);
@@ -72,6 +75,7 @@ public class DerivedFieldDomainService {
             .toList();
     }
 
+    @Transactional
     public List<DerivedFieldResponse> getDerivedFieldsForReport(long reportId) {
         return derivedFieldRepository
             .getAllByReportId(reportId)
@@ -79,5 +83,12 @@ public class DerivedFieldDomainService {
             .map(derivedField -> new Pair<>(derivedField, fieldExpressionRepository.getByDerivedFieldIdAndParentFieldExpressionIsNull(derivedField.getId())))
             .map(derivedFieldResponseMapper::from)
             .toList();
+    }
+
+    @Transactional
+    public boolean isFieldExists(Long reportId, String fieldName, Long fieldId) {
+        return fieldId == null ?
+            derivedFieldRepository.existsByReportIdAndUniqueName(reportId, fieldName) :
+            derivedFieldRepository.existsByReportIdAndUniqueNameAndIdIsNot(reportId, fieldName, fieldId);
     }
 }
