@@ -126,7 +126,7 @@ export default function  TokenInput(props){
             }
         }
 
-        let validationStatus = mandatory && !values.length ? "error" : values.length > maxCountItems ? "limit": "success";
+        let validationStatus = mandatory && !values.length ? "error" : Boolean(maxCountItems) && values.length > maxCountItems ? "limit": "success";
         setCheckStatus(validationStatus)
         handleChangeValues(valuesIds, values, validationStatus);
         setInputValues(values)
@@ -216,7 +216,7 @@ export default function  TokenInput(props){
             }
         }
 
-        let validationStatus = mandatory && !arr.length ? "error" : arr.length > props.filterData.maxCountItems ? "limit": "success";
+        let validationStatus = mandatory && !arr.length ? "error" :  Boolean(props.filterData.maxCountItems) && arr.length > props.filterData.maxCountItems ? "limit": "success";
         handleChangeValues(valuesIds, arr, validationStatus)
         setCheckStatus(validationStatus)
         setInputValues(arr)
