@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="MILLSEC_INTERVAL_SIGNATURE-001" author="artemenko_pa">
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>MILLSEC_INTERVAL(дата_время1, дата_время2)</strong><br/><strong>Возвращаемое значение:</strong> Интервал в миллисекундах между дата_время1 и дата_время2.</br>]]>
+            </column>
+            <column name="DESCRIPTION" value="Возвращает интервал в миллисекундах между двумя датами"/>
+            <where>NAME = 'MILLSEC_INTERVAL'</where>
+        </update>
+        <update tableName="EXPRESSIONS">
+            <column name="SIGNATURE">
+                <![CDATA[<strong>DAYS_INTERVAL(дата1, дата2)</strong><br/><strong>Возвращаемое значение:</strong> Интервал в днях между дата1 и дата2.</br>]]>
+            </column>
+            <where>NAME='DAYS_INTERVAL'</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>

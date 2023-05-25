@@ -184,6 +184,9 @@ public class ReportService {
 
     public ReportResponse getReport(ReportRequest request) {
 
+        if (request.getId() == null)
+            throw new IllegalArgumentException("Report id must not be null");
+
         final var report = reportDomainService.getReport(request.getId());
 
         try {
@@ -231,6 +234,8 @@ public class ReportService {
         var invalidFieldNames = new HashSet<String>();
         var invalidFilterNames = new HashSet<String>();
 
+        final var currentUser = userDomainService.getCurrentUser();
+
         request.getFields().forEach(field -> {
             var name = field.getName().toUpperCase();
             if (!uniqueNames.add(name)) duplicateNames.add(field.getName());
@@ -258,7 +263,7 @@ public class ReportService {
 
         filterReportDomainService.removeFilters(request.getId());
         reportDomainService.deleteFields(reportDomainService.getDeletedFields(request));
-        reportDomainService.editReport(request);
+        reportDomainService.editReport(request, currentUser.getId());
 
         if (request.getFilterGroup() != null)
             filterReportService.addFilters(request.getFilterGroup());
@@ -344,7 +349,7 @@ public class ReportService {
     }
 
     public void changeReportParentFolder(ChangeParentFolderRequest request) {
-        permissionCheckerSystem.checkPermissionsOnAllFolders(request, reportDomainService::getFolderIds, folderPermissionsDomainService::getExcelTemplateFolderPermissionsForRoles);
+        permissionCheckerSystem.checkPermissionsOnAllFolders(request, reportDomainService::getFolderIds, folderPermissionsDomainService::getReportFolderPermissionsForRoles);
         reportDomainService.changeFilterInstanceParentFolder(request);
     }
 

@@ -26,7 +26,8 @@ const defaultTheme = createTheme({
             sidebar: '#252526',
            //sidebarList: '#ffffff'
         }, */
-        type: 'light'
+        type: 'light',
+        derivedField: '#e5f6a2'
     }  ,
     typography: {
         letterSpacing: '0.08333em',

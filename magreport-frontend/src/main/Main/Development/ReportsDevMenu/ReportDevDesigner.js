@@ -425,7 +425,7 @@ function ReportDevDesigner(props){
                 onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/reportsDev/${folderId}`)}
             >
                 <ReportTemplates 
-                    reportId={id}
+                    reportId={data.reportId}
                 />
             </DesignerPage>
     });

@@ -112,10 +112,12 @@ export default function ReportController(dataHub){
         return dataHub.requestService(REPORT_GET_PERMISSIONS_URL, METHOD, body, callback);
     }
 
-    this.setPermissions = function (folderId, roles, callback){
+    this.setPermissions = function (folderId, roles, downSetPermissions, upSetPermissions, callback){
         const body = {
             folderId,
             roles,
+            downSetPermissions,
+            upSetPermissions
         };
         return dataHub.requestService(REPORT_SET_PERMISSIONS_URL, METHOD, body, callback);
     }

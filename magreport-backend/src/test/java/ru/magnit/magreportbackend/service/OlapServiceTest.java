@@ -33,10 +33,14 @@ import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequestNew;
 import ru.magnit.magreportbackend.dto.request.olap.OlapExportPivotTableRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldItemsRequest;
+import ru.magnit.magreportbackend.dto.request.olap.OlapFieldItemsRequestNew;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldTypes;
 import ru.magnit.magreportbackend.dto.request.olap.SortingParams;
 import ru.magnit.magreportbackend.dto.response.olap.OlapConfigResponse;
 import ru.magnit.magreportbackend.dto.response.olap.ReportOlapConfigResponse;
+import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobMetadataResponse;
+import ru.magnit.magreportbackend.mapper.olap.OlapCubeRequestMapper;
+import ru.magnit.magreportbackend.mapper.olap.OlapFieldItemsRequestMerger;
 import ru.magnit.magreportbackend.service.domain.ExcelReportDomainService;
 import ru.magnit.magreportbackend.service.domain.JobDomainService;
 import ru.magnit.magreportbackend.service.domain.OlapConfigurationDomainService;
@@ -60,7 +64,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -99,6 +102,10 @@ class OlapServiceTest {
 
     @Mock
     private OlapUserChoiceDomainService olapUserChoiceDomainService;
+    @Mock
+    private OlapCubeRequestMapper olapCubeRequestMapper;
+    @Mock
+    private OlapFieldItemsRequestMerger olapFieldItemsRequestMerger;
 
     @Test
     void getCubeTest1() {
@@ -165,8 +172,10 @@ class OlapServiceTest {
         when(jobDomainService.getJobData(anyLong())).thenReturn(getTestJobData());
         when(domainService.getCubeData(any())).thenReturn(getTestCubeData());
         when(domainService.filterCubeData(any(), any())).thenReturn(getTrueStatusRows());
+        when(olapCubeRequestMapper.from((OlapFieldItemsRequestNew)any())).thenReturn(getOlapCubeRequestNew(REPORT_FIELD));
+        when(olapFieldItemsRequestMerger.merge(any(),any())).thenReturn(getOlapFieldItemsRequest());
 
-        var result = service.getFieldValues(getOlapFieldItemsRequest());
+        var result = service.getFieldValues(getOlapFieldItemsRequestNew());
 
         assertEquals(5, result.getCountValues());
         assertEquals(5, result.getValueList().length);
@@ -174,15 +183,19 @@ class OlapServiceTest {
         verify(jobDomainService).getJobData(anyLong());
         verify(domainService).getCubeData(any());
         verify(domainService).filterCubeData(any(), any());
-        verifyNoMoreInteractions(jobDomainService, domainService);
+        verify(olapCubeRequestMapper).from((OlapFieldItemsRequestNew)any());
+        verify(olapFieldItemsRequestMerger).merge(any(),any());
+        verifyNoMoreInteractions(jobDomainService, domainService, olapCubeRequestMapper, olapFieldItemsRequestMerger);
 
-        Mockito.reset(jobDomainService, domainService);
+        Mockito.reset(jobDomainService, domainService, olapCubeRequestMapper, olapFieldItemsRequestMerger);
 
         when(jobDomainService.getJobData(anyLong())).thenReturn(getTestJobData());
         when(domainService.getCubeData(any())).thenReturn(getTestCubeData());
         when(domainService.filterCubeData(any(), any())).thenReturn(getFalseStatusRows());
+        when(olapCubeRequestMapper.from((OlapFieldItemsRequestNew)any())).thenReturn(getOlapCubeRequestNew(REPORT_FIELD));
+        when(olapFieldItemsRequestMerger.merge(any(),any())).thenReturn(getOlapFieldItemsRequest());
 
-        result = service.getFieldValues(getOlapFieldItemsRequest());
+        result = service.getFieldValues(getOlapFieldItemsRequestNew());
 
         assertEquals(0, result.getCountValues());
         assertEquals(0, result.getValueList().length);
@@ -190,15 +203,19 @@ class OlapServiceTest {
         verify(jobDomainService).getJobData(anyLong());
         verify(domainService).getCubeData(any());
         verify(domainService).filterCubeData(any(), any());
-        verifyNoMoreInteractions(jobDomainService, domainService);
+        verify(olapCubeRequestMapper).from((OlapFieldItemsRequestNew)any());
+        verify(olapFieldItemsRequestMerger).merge(any(),any());
+        verifyNoMoreInteractions(jobDomainService, domainService, olapCubeRequestMapper, olapFieldItemsRequestMerger);
 
-        Mockito.reset(jobDomainService, domainService);
+        Mockito.reset(jobDomainService, domainService, olapCubeRequestMapper, olapFieldItemsRequestMerger);
 
         when(jobDomainService.getJobData(anyLong())).thenReturn(getTestJobData());
         when(domainService.getCubeData(any())).thenReturn(getTestCubeData());
         when(domainService.filterCubeData(any(), any())).thenReturn(getMixedStatusRows());
+        when(olapCubeRequestMapper.from((OlapFieldItemsRequestNew)any())).thenReturn(getOlapCubeRequestNew(REPORT_FIELD));
+        when(olapFieldItemsRequestMerger.merge(any(),any())).thenReturn(getOlapFieldItemsRequest());
 
-        result = service.getFieldValues(getOlapFieldItemsRequest());
+        result = service.getFieldValues(getOlapFieldItemsRequestNew());
 
         assertEquals(3, result.getCountValues());
         assertEquals(3, result.getValueList().length);
@@ -206,7 +223,9 @@ class OlapServiceTest {
         verify(jobDomainService).getJobData(anyLong());
         verify(domainService).getCubeData(any());
         verify(domainService).filterCubeData(any(), any());
-        verifyNoMoreInteractions(jobDomainService, domainService);
+        verify(olapCubeRequestMapper).from((OlapFieldItemsRequestNew)any());
+        verify(olapFieldItemsRequestMerger).merge(any(),any());
+        verifyNoMoreInteractions(jobDomainService, domainService, olapCubeRequestMapper, olapFieldItemsRequestMerger);
 
     }
 
@@ -233,6 +252,7 @@ class OlapServiceTest {
         when(tokenService.getToken(anyLong(), anyLong())).thenReturn("123456");
         when(domainService.filterMetricResult(any(),any(),any())).thenReturn(getTrueStatusMetricValue());
         when(userDomainService.getCurrentUser()).thenReturn(new UserView());
+        when(jobDomainService.getJobMetaData(any())).thenReturn(new ReportJobMetadataResponse(0L,0L,Collections.emptyList()));
 
 
         var result = service.exportPivotTableExcel(getOlapExportPivotTableRequest());
@@ -248,7 +268,7 @@ class OlapServiceTest {
         verify(tokenService).getToken(anyLong(), anyLong());
         verify(domainService).filterMetricResult(any(),any(),any());
         verify(jobDomainService).checkAccessForJob(any());
-        verify(excelReportDomainService).getExcelPivotTable(any(),any(),any(),any(),anyLong(),anyBoolean());
+        verify(excelReportDomainService).getExcelPivotTable(any());
         verifyNoMoreInteractions(jobDomainService,domainService,derivedFieldService,tokenService,excelReportDomainService);
 
     }
@@ -258,7 +278,7 @@ class OlapServiceTest {
 
         when(excelReportDomainService.getExcelPivotPath(anyLong(), anyLong())).thenReturn(Path.of(""));
 
-        var result = service.getExcelPivotPath(1l, 2l);
+        var result = service.getExcelPivotPath(1L, 2L);
 
         assertNotNull(result);
 
@@ -505,6 +525,14 @@ class OlapServiceTest {
                 .setCount(10L);
     }
 
+    private OlapFieldItemsRequestNew getOlapFieldItemsRequestNew() {
+        return new OlapFieldItemsRequestNew()
+                .setJobId(1L)
+                .setFieldId(2L)
+                .setFrom(0L)
+                .setCount(10L);
+    }
+
     private boolean[] getTrueStatusRows() {
         var result = new boolean[getDataArray().length];
         Arrays.fill(result, true);
@@ -540,7 +568,7 @@ class OlapServiceTest {
 
     private OlapExportPivotTableRequest getOlapExportPivotTableRequest() {
         return new OlapExportPivotTableRequest()
-                .setCubeRequest(getOlapRequest())
+                .setCubeRequest(getOlapCubeRequestNew(REPORT_FIELD))
                 .setStylePivotTable(true)
                 .setConfiguration(1L);
     }
@@ -548,17 +576,17 @@ class OlapServiceTest {
     private ReportJobData getReportJobData() {
         return new ReportJobData(
                 1l,
-                1l,
-                1l,
-                1l,
-                1l,
+                1L,
+                1L,
+                1L,
+                1L,
                 null,
-                1l,
-                1l,
-                1l,
+                1L,
+                1L,
+                1L,
                 true,
                 null,
-                new ReportData(1l, null, null, null, null, null, null, true),
+                new ReportData(1L, null, null, null, null, null, null, true),
                 null,
                 null);
     }

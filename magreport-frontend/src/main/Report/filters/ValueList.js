@@ -140,6 +140,9 @@ function ValueList(props){
         let isSelected = (codeList.length > 0) ? true : false; 
 
         if (isSelected) {
+            status = Boolean(props.filterData.maxCountItems) && values.length > props.filterData.maxCountItems ? "limit" : status;
+            setCheckStatus(status);
+
             props.onChangeFilterValue(
                 {
                     filterId : props.filterData.id,
@@ -149,7 +152,7 @@ function ValueList(props){
                 }
             );
             
-            if(!props.unbounded){
+            if(!props.unbounded && status !=='limit'){
                 if (timer.current > 0){
                     clearInterval(timer.current); // удаляем предыдущий таймер
                 }
@@ -227,6 +230,7 @@ function ValueList(props){
                 className={classes.textField}
                 id="input-with-icon-textfield"
                 label={filterName}
+                helperText={props.filterData.maxCountItems>0 ? 'Допустимое кол-во значений: ' + props.filterData.maxCountItems: null}
                 value={textValue}
                 variant="outlined"
                 multiline
@@ -254,7 +258,7 @@ function ValueList(props){
                             <FilterStatus status={checkStatus} />
                           
                             {
-                                checkStatus === 'error' && !!invalidValues.length &&
+                                checkStatus !== 'success' && !!invalidValues.length &&
                                
                                     <Tooltip title="Показать некорректные значения" placement="top">
                                         <IconButton 

@@ -22,9 +22,13 @@ import ru.magnit.magreportbackend.dto.response.user.UserResponse;
 import ru.magnit.magreportbackend.mapper.auth.GrantedAuthorityMapper;
 import ru.magnit.magreportbackend.service.domain.LdapService;
 import ru.magnit.magreportbackend.service.domain.UserDomainService;
+import ru.magnit.magreportbackend.util.Pair;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -33,8 +37,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -104,17 +110,80 @@ class UserServiceTest {
     }
 
     @Test
-    void loginUser() {
+    void loginUserTest1() {
 
         when(ldapService.getUserFullName(any(), any())).thenReturn("Ivanov Ivan Ivanovich");
         when(ldapService.getUserEmail(any(), any())).thenReturn("ivanov_ii@magnit.ru");
-        when(domainService.getOrCreateUserByName(any())).thenReturn(new UserView().setName("Ivanov_II"));
+        when(domainService.getOrCreateUserByName(any())).thenReturn(getUserView(UserStatusEnum.ACTIVE));
         when(authConfig.getDefaultDomain()).thenReturn("TEST_DOMAIN");
 
-        service.loginUser(null, NAME, Collections.emptyList());
+        var user = service.loginUser(null, NAME, Collections.emptyList());
 
+        assertNotNull(user);
+
+        verify(authConfig).getDefaultDomain();
         verify(ldapService).getUserFullName(any(), any());
         verify(ldapService).getUserEmail(any(), any());
+        verify(domainService).removeDeletedRoles(any(),any(),any());
+        verify(domainService).addInsertedRoles(any(),any(),any());
+        verify(domainService).getDomainGroupRoles(anyList());
+        verify(domainService).getUserRoles(any(),any(),any());
+        verify(domainService).getOrCreateUserByName(any());
+
+        verifyNoMoreInteractions(authConfig, domainService, ldapService);
+    }
+
+    @Test
+    void loginUserTest2() {
+
+        when(ldapService.getUserFullName(any(), any())).thenReturn("Ivanov Ivan Ivanovich");
+        when(ldapService.getUserEmail(any(), any())).thenReturn("ivanov_ii@magnit.ru");
+        when(domainService.getOrCreateUserByName(any())).thenReturn(getUserView(UserStatusEnum.LOGGED_OFF));
+        when(authConfig.getDefaultDomain()).thenReturn("TEST_DOMAIN");
+
+        var user = service.loginUser(null, NAME, Collections.emptyList());
+
+        assertNotNull(user);
+
+        verify(authConfig).getDefaultDomain();
+        verify(ldapService).getUserFullName(any(), any());
+        verify(ldapService).getUserEmail(any(), any());
+        verify(domainService).removeDeletedRoles(any(),any(),any());
+        verify(domainService).addInsertedRoles(any(),any(),any());
+        verify(domainService).getDomainGroupRoles(anyList());
+        verify(domainService).getUserRoles(any(),any(),any());
+        verify(domainService).getOrCreateUserByName(any());
+        verify(domainService).setUserStatus(anyList(),any());
+
+        verifyNoMoreInteractions(authConfig, domainService, ldapService);
+    }
+
+    @Test
+    void loginUserTest3() {
+
+        when(ldapService.getUserFullName(any(), any())).thenReturn("Ivanov Ivan Ivanovich");
+        when(ldapService.getUserEmail(any(), any())).thenReturn("ivanov_ii@magnit.ru");
+        when(domainService.getOrCreateUserByName(any())).thenReturn(getUserView(UserStatusEnum.DISABLED));
+        when(authConfig.getDefaultDomain()).thenReturn("TEST_DOMAIN");
+
+        var user = service.loginUser(null, NAME, Collections.emptyList());
+
+        assertNull(user);
+
+        verify(authConfig).getDefaultDomain();
+        verify(ldapService).getUserFullName(any(), any());
+        verify(ldapService).getUserEmail(any(), any());
+        verify(domainService).getOrCreateUserByName(any());
+
+
+        verifyNoMoreInteractions(authConfig, domainService, ldapService);
+    }
+
+    @Test
+    void loginUserException() {
+
+        var user = service.loginUser(null, NAME, Collections.emptyList());
+        assertNull(user);
     }
 
     @Test
@@ -289,6 +358,22 @@ class UserServiceTest {
         verifyNoInteractions(domainService, ldapService);
     }
 
+    @Test
+    void checkStatusUsers() {
+
+        ReflectionTestUtils.setField(service, "updateUserInfo", true);
+        when(domainService.getNotArchiveUsers()).thenReturn(Arrays.asList(getUserResponseObject("Test1"), getUserResponseObject(""), getUserResponseObject("Test2")));
+        when(ldapService.getUserInfo(anyList())).thenReturn(getUserInfo());
+
+        service.checkStatusUsers();
+
+        verify(domainService).getNotArchiveUsers();
+        verify(ldapService).getUserInfo(anyList());
+        verify(domainService).setUserStatus(anyList(),eq(UserStatusEnum.ARCHIVE));
+        verify(domainService, times(2)).editUser(any());
+        verifyNoMoreInteractions(domainService, ldapService);
+    }
+
     private UserRequest getUserRequest() {
         return new UserRequest()
                 .setUserName(NAME);
@@ -298,5 +383,27 @@ class UserServiceTest {
         return new UserStatusSetRequest()
                 .setStatus(STATUS)
                 .setUserIds(Collections.singletonList(1L));
+    }
+
+    private UserView getUserView(UserStatusEnum status) {
+        return new UserView()
+                .setName("Ivanov_II")
+                .setDomain(new DomainShortResponse( 1L,"TEST_DOMAIN"))
+                .setStatus(status);
+    }
+
+    private UserResponse getUserResponseObject(String name){
+        return new UserResponse()
+                .setId(1L)
+                .setDomain(new DomainShortResponse(1L, "TEST_DOMAIN"))
+                .setName(name)
+                .setStatus(UserStatusEnum.ACTIVE);
+    }
+
+    private Map<String, Pair<String,String>> getUserInfo(){
+        var result = new HashMap<String, Pair<String,String>>();
+                result.put("TEST_DOMAIN\\Test1", new Pair<>("new email","new name"));
+                result.put("TEST_DOMAIN\\Test2", new Pair<>("new email","new name user"));
+                return result;
     }
 }

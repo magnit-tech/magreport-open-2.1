@@ -57,9 +57,16 @@ public class ExternalSecurityService {
 
         final var filters = domainService.getAllAmsFilters(idList);
 
-        filters.forEach(roleRefreshService::refreshRoles);
-        filters.forEach(userRoleRefreshService::refreshUserRoles);
-        filters.forEach(roleFilterRefreshService::refreshSecurityFilters);
+        filters.forEach( filter -> {
+            try {
+                roleRefreshService.refreshRoles(filter);
+                userRoleRefreshService.refreshUserRoles(filter);
+                roleFilterRefreshService.refreshSecurityFilters(filter);
+            } catch (Exception ex){
+                log.error(String.format("Failed update ASM filter (id:%s): %s", filter.getId(), ex.getMessage()));
+                ex.printStackTrace();
+            }
+        });
     }
 
     public AsmSecurityResponse editAsmSecurity(AsmSecurityAddRequest request) {
