@@ -12,7 +12,7 @@ stages:
 
 workflow:
   rules:
-    - if: $CI_COMMIT_BRANCH == "citest"
+    - if: $CI_COMMIT_BRANCH == "release-cloud"
 
 build:
   stage: build
