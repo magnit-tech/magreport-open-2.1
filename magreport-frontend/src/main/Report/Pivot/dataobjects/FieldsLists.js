@@ -10,6 +10,7 @@ export function FieldsLists(fieldsLists){
     this.createLists = (fieldsLists) => {
         this.allFields = fieldsLists ? Array.from(fieldsLists.allFields) : [];
         this.unusedFields = fieldsLists ? Array.from(fieldsLists.unusedFields) :[];
+        this.derivedFields = fieldsLists ? Array.from(fieldsLists.derivedFields) : [];
         this.rowFields = fieldsLists ? Array.from(fieldsLists.rowFields) :[];
         this.columnFields = fieldsLists ? Array.from(fieldsLists.columnFields) :[];
         this.metricFields = fieldsLists ? Array.from(fieldsLists.metricFields) :[];
@@ -21,6 +22,7 @@ export function FieldsLists(fieldsLists){
     this._arrayElementConstructor = {
         allFields : FieldData,
         unusedFields : FieldData,
+        derivedFields : FieldData,
         rowFields : FieldData,
         columnFields : FieldData,
         metricFields : FieldData,
@@ -28,8 +30,13 @@ export function FieldsLists(fieldsLists){
     }
 
     // Создаёт списки полей по метаданным отчёта
-    this.createByReportFields = (reportFields) => {
+    this.createByFields = (reportFields, derivedFields) => {
         this.createLists();
+        for(let f of derivedFields){
+            let fd = new FieldData(f);
+            fd.original = false;
+            this.unusedFields.push(fd);  
+        }
         for(let f of reportFields){
             if(f.visible){
                 let fd = new FieldData(f);
@@ -37,14 +44,23 @@ export function FieldsLists(fieldsLists){
                 this.unusedFields.push(fd);    
             }
         }
+        this.createDerivedFields(derivedFields);
+    }
 
+    this.createDerivedFields = (derivedFields) => {
+        this.derivedFields = [];
+        for(let f of derivedFields){
+            let fd = new FieldData(f);
+            fd.original = false;
+            this.derivedFields.push(fd);  
+        }
     }
 
     // Обновляет списки полей по метадынным отчёта - удаляет отсутствующие поля и добавляет новые
-    this.updateByReportFields = (reportFields) => {
+    this.updateByFields = (reportFields, derivedFields) => {
         // TODO
         // ЗАГЛУШКА!!!
-        this.createByReportFields(reportFields);
+        this.createByFields(reportFields, derivedFields);
     }
 
     // Обновляет списки полей из сохраненной конфигурации
@@ -77,6 +93,7 @@ export function FieldsLists(fieldsLists){
 
         delete saveCopy.allFields;
         delete saveCopy.unusedFields;
+        delete saveCopy.derivedFields;
 
         return saveCopy
     }
@@ -188,6 +205,7 @@ export function FieldsLists(fieldsLists){
             // Обнуляем фильтр
             movingField.setFilter({});
             movingField.setIsOffFalse({});
+            movingField.setNewName('');
 
             if ((dragListName === "metricFields" && dropListName === "metricFields"  && dragListFieldIndex === dropListFieldIndex) ||
                 (dragListName === "filterFields" && dropListName === "filterFields"  && dragListFieldIndex === dropListFieldIndex)
@@ -261,13 +279,14 @@ export function FieldsLists(fieldsLists){
     // Задание фильтра на поле
     this.setFieldFilterByFieldId = (fieldId, filterObject) => {
         this.removeFieldByFieldId("unusedFields", fieldId);
-        let findResult = this.findFieldByFieldId("filterFields", fieldId);
+        let findResult = this.findFieldByFieldId("allFields", fieldId);
 
-      //  if(findResult === undefined){
-            findResult = this.findFieldByFieldId("allFields", fieldId);
-            let newField = new FieldData(findResult.field);
-            newField.setFilter(filterObject);
-            this.filterFields.push(newField);
+        if (findResult === undefined){
+            findResult = this.findFieldByFieldId("derivedFields", fieldId);
+        }
+        let newField = new FieldData(findResult.field);
+        newField.setFilter(filterObject);
+        this.filterFields.push(newField);
       /*  }
         else{
             this.filterFields[findResult.index] = new FieldData(this.filterFields[findResult.index]);
@@ -288,7 +307,13 @@ export function FieldsLists(fieldsLists){
     this.setFieldFilterByFieldIndex = (index, filterObject) => {
         this.filterFields[index] = new FieldData(this.filterFields[index]);
         this.filterFields[index].setFilter(filterObject);
-    }    
+    }
+    
+    // Переименование
+    this.setNewNameByFieldIndex = (fieldsListsName, index, newName) => {
+        this[fieldsListsName][index] = new FieldData(this[fieldsListsName][index]);
+        this[fieldsListsName][index].setNewName(newName);
+    }
 
     // Передаем тип данных метрики
     this.setDataType = (fieldIndex, dataType) => {

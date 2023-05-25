@@ -19,4 +19,6 @@ public class FolderPermissionSetRequest {
 
     private Long folderId;
     private List<RoleAddPermissionRequest> roles;
+    private boolean downSetPermissions;
+    private boolean upSetPermissions;
 }

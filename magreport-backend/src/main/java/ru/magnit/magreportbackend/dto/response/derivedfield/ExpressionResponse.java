@@ -20,6 +20,7 @@ public class ExpressionResponse {
     private Long id;
     private String name;
     private String description;
+    private String signature;
     private Long numParams;
     private NumParamTypeResponse numParamType;
     private List<String> tags;

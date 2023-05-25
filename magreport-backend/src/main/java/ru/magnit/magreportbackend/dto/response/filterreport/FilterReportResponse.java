@@ -53,10 +53,14 @@ public record FilterReportResponse(
         LocalDateTime modified,
 
         @JsonFormat(shape = JsonFormat.Shape.BOOLEAN)
-        Boolean valid
+        Boolean valid,
+
+        @JsonFormat(shape = JsonFormat.Shape.NUMBER_INT)
+        Long maxCountItems
+
 ) {
 
     public FilterReportResponse() {
-        this(null, null, null, null, null,null, null, null, null, null, null, null, null, null, null);
+        this(null, null, null, null, null,null, null, null, null, null, null, null, null, null, null, null);
     }
 }

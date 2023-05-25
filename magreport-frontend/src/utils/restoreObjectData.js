@@ -35,7 +35,7 @@ export default function restoreObjectData(destObj, srcObj){
                           (typeof nextTask.destObj["_arrayElementConstructor"] === "object") &&
                           (typeof nextTask.destObj["_arrayElementConstructor"][p] === "function")){
 
-                            nextTask.destObj[p] = new Array();
+                            nextTask.destObj[p] = new Array(); // eslint-disable-line
                             for(let elm of nextTask.srcObj[p]){
                                 let newElement = new nextTask.destObj["_arrayElementConstructor"][p]();
                                 nextTask.destObj[p].push(newElement);

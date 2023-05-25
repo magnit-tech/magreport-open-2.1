@@ -50,7 +50,7 @@ export default function  TokenInput(props){
     const defaultInputValues = useRef([]);
     useEffect(() => {
         if (defaultInputValues.current.length === 0){
-            defaultInputValues.current = getInputValuesFromLastValueAndSetNewParameters(props.lastFilterValue);
+            defaultInputValues.current = getInputValuesFromLastValueAndSetNewParameters(props.lastFilterValue, props.filterData.maxCountItems);
         }
     }, []) // eslint-disable-line
     
@@ -61,8 +61,8 @@ export default function  TokenInput(props){
     /*
         Обработка изменения значений фильтра
     */
-    function handleChangeValues(newValuesIDs, arr) {
-        
+    function handleChangeValues(newValuesIDs, arr, validationStatus) {
+
         let parameters = [];
         let values = [];
 
@@ -77,12 +77,15 @@ export default function  TokenInput(props){
             parameters.push({
                 values: values
             });    
-        }        
+        }
 
         props.onChangeFilterValue({
             filterId : props.filterData.id,
             operationType: "IS_IN_LIST",
-            validation: mandatory && !parameters.length ? "error" : "success",
+            validation: validationStatus,
+            /*mandatory && !parameters.length ? "error"
+                :   (parameters.length === 0 ? 0 : parameters[0].values.length) > props.filterData.maxCountItems? "limit"
+                :    "success",*/
             parameters: parameters,
             lastParametrs: arr
         });        
@@ -93,7 +96,8 @@ export default function  TokenInput(props){
         необходимость этого специфична для фильтра типа TOKEN_INPUT - для данного типа фильтра объект lastParamters обогащается 
         дополнительным полями и не равен объекту parameters (отличается от него по формату).
     */
-    function getInputValuesFromLastValueAndSetNewParameters(filterValues){
+    function getInputValuesFromLastValueAndSetNewParameters(filterValues, maxCountItems){
+
         let values = [];
         let valuesIds = [];
 
@@ -122,8 +126,9 @@ export default function  TokenInput(props){
             }
         }
 
-        handleChangeValues(valuesIds, values);
-        setCheckStatus(mandatory && !values.length ? "error" : "success")
+        let validationStatus = mandatory && !values.length ? "error" : Boolean(maxCountItems) && values.length > maxCountItems ? "limit": "success";
+        setCheckStatus(validationStatus)
+        handleChangeValues(valuesIds, values, validationStatus);
         setInputValues(values)
 
         return values;
@@ -184,19 +189,20 @@ export default function  TokenInput(props){
         }
     };
 
-    const handleInputChange = (e) => {
-        const inputValue = e.target.value;
-        if (inputValue.length>1){
+    const handleInputChange = (value) => {
+
+        if (value.length>1){
             if (timer.current > 0){
               clearInterval(timer.current); // удаляем предыдущий таймер
             }
             timer.current = setTimeout(() => {
-                getTokens(inputValue.toLowerCase());
+                getTokens(value.toLowerCase());
             }, 1000);
         };
     }
 
-    const handleChange = (e, value) => {
+    const handleChange = (value) => {
+
         let valuesIds = [];
         let arr = []
 
@@ -210,8 +216,9 @@ export default function  TokenInput(props){
             }
         }
 
-        handleChangeValues(valuesIds, arr)
-        setCheckStatus(mandatory && !arr.length ? "error" : "success")
+        let validationStatus = mandatory && !arr.length ? "error" :  Boolean(props.filterData.maxCountItems) && arr.length > props.filterData.maxCountItems ? "limit": "success";
+        handleChangeValues(valuesIds, arr, validationStatus)
+        setCheckStatus(validationStatus)
         setInputValues(arr)
     };
 
@@ -279,14 +286,15 @@ export default function  TokenInput(props){
                 noOptionsText={'Элементы не найдены'}
                 clearText='Очистить фильтр'
                 openText='Показать'
-                onChange={(e, value) => {handleChange(e, value);}}
+                onChange={(e, value) => {handleChange(value)}}
                 renderInput={params => (
                     <TextField
                     {...params}
                     label={name}
+                    helperText={props.filterData.maxCountItems>0 ? 'Допустимое кол-во значений: ' + props.filterData.maxCountItems: null}
                     fullWidth
                     variant="outlined"
-                    onChange={(e) => {handleInputChange(e);}}
+                    onChange={(e) => {handleInputChange(e.target.value)}}
                     InputProps={{
                         ...params.InputProps,
                         endAdornment: (

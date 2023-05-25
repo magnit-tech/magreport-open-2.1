@@ -228,12 +228,13 @@ class FilterReportControllerTest {
                         DESCRIPTION,
                         ORDINAL_INT,
                         Collections.singletonList(new FilterReportFieldResponse(
-                                ID, NAME, DESCRIPTION, FilterFieldTypeEnum.CODE_FIELD, 1L, ORDINAL, ID, ID, "", CREATED_DATE, MODIFIED_DATE, EXPAND
+                                ID, NAME, DESCRIPTION, FilterFieldTypeEnum.CODE_FIELD, 1L, ORDINAL, ID, ID, "", CREATED_DATE, MODIFIED_DATE, EXPAND, true
                         )),
                         USER_NAME,
                         CREATED_DATE,
                         MODIFIED_DATE,
-                        true
+                        true,
+                        0L
                 ),
                 Collections.singletonList(new Tuple())
         );
@@ -280,12 +281,13 @@ class FilterReportControllerTest {
                         DESCRIPTION,
                         ORDINAL_INT,
                         Collections.singletonList(new FilterReportFieldResponse(
-                                ID, NAME, DESCRIPTION, FilterFieldTypeEnum.CODE_FIELD, 1L, ORDINAL, ID, ID, "", CREATED_DATE, MODIFIED_DATE,EXPAND
+                                ID, NAME, DESCRIPTION, FilterFieldTypeEnum.CODE_FIELD, 1L, ORDINAL, ID, ID, "", CREATED_DATE, MODIFIED_DATE,EXPAND, true
                         )),
                         USER_NAME,
                         CREATED_DATE,
                         MODIFIED_DATE,
-                        true
+                        true,
+                        0L
                 ),
                 ID,
                 new FilterNodeResponse(ID, 1L, "ID", NAME, Collections.emptyList())

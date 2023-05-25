@@ -56,6 +56,13 @@ public enum DataTypeEnum {
         return true;
     }
 
+    public boolean in(DataTypeEnum... variants) {
+        for (final var variant: variants){
+            if (variant == this) return true;
+        }
+        return false;
+    }
+
     public DataTypeEnum widerNumeric(DataTypeEnum other) {
         return this == DataTypeEnum.DOUBLE || other == DataTypeEnum.DOUBLE ?
             DataTypeEnum.DOUBLE : DataTypeEnum.INTEGER;

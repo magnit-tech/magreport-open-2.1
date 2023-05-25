@@ -8,7 +8,7 @@ import lombok.ToString;
 import lombok.experimental.Accessors;
 
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -18,5 +18,5 @@ import java.util.List;
 @AllArgsConstructor
 public class DerivedFieldGetAvailableRequest {
     private Long reportId;
-    private List<Long> additionalFields = Collections.emptyList();
+    private Set<Long> additionalFields = Collections.emptySet();
 }

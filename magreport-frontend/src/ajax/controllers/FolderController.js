@@ -79,10 +79,12 @@ export default function FolderController(dataHub){
         return dataHub.requestService(FOLDER_GET_PERMISSIONS_URL, METHOD, body, callback);
     }
 
-    this.setPermissions = function (folderId, roles, callback){
+    this.setPermissions = function (folderId, roles, downSetPermissions, upSetPermissions, callback){
         const body = {
             folderId,
             roles,
+            downSetPermissions,
+            upSetPermissions
         };
         return dataHub.requestService(FOLDER_SET_PERMISSIONS_URL, METHOD, body, callback);
     }
