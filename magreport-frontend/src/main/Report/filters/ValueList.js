@@ -140,7 +140,7 @@ function ValueList(props){
         let isSelected = (codeList.length > 0) ? true : false; 
 
         if (isSelected) {
-            status = values.length > props.filterData.maxCountItems ? "limit" : status;
+            status = Boolean(props.filterData.maxCountItems) && values.length > props.filterData.maxCountItems ? "limit" : status;
             setCheckStatus(status);
 
             props.onChangeFilterValue(
