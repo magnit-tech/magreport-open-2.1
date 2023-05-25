@@ -75,7 +75,7 @@ build:
     - ssh -i /root/.ssh/id_rsa_mg $SSH_USER@$SSH_HOST cd /home/"$SSH_USER"
     - ssh -i /root/.ssh/id_rsa_mg $SSH_USER@$SSH_HOST bash ./build-magreport2-rpm.sh
     - > 
-      if [ $CI_COMMIT_BRANCH == "citest" ]; then 
+      if [ $CI_COMMIT_BRANCH == "release-test" ]; then 
         echo "============================================================="
         echo "Install rpm"
         echo "============================================================="
