@@ -1,0 +1,21 @@
+[Unit]
+Description=magreport2
+After=syslog.target network.target
+
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/sysconfig/magreport2
+WorkingDirectory=/var/magreport2
+ExecStart=/bin/java -Xmx12144M $JAVA_OPTS $APP_ARGS -jar $JAR_FILE
+User=magreport2
+Restart=always
+RestartSec=30
+TimeoutSec=30min
+LimitAS=infinity
+LimitRSS=infinity
+LimitCORE=infinity
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
