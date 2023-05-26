@@ -20,9 +20,11 @@ import ru.magnit.magreportbackend.domain.filtertemplate.FilterFieldType;
 import ru.magnit.magreportbackend.domain.filtertemplate.FilterTemplateField;
 import ru.magnit.magreportbackend.domain.user.User;
 import ru.magnit.magreportbackend.dto.inner.datasource.DataSourceData;
+import ru.magnit.magreportbackend.dto.inner.filter.FilterFieldRequestData;
 import ru.magnit.magreportbackend.dto.request.filterinstance.LikenessType;
 import ru.magnit.magreportbackend.dto.request.filterinstance.ListValuesRequest;
 import ru.magnit.magreportbackend.mapper.datasource.DataSourceViewMapper;
+import ru.magnit.magreportbackend.mapper.filterinstance.FilterFieldRequestFromFRFMapper;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -31,15 +33,20 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static ru.magnit.magreportbackend.domain.dataset.DataTypeEnum.STRING;
 
 @ExtendWith(MockitoExtension.class)
 class FilterReportQueryDataMergerTest {
 
     @Mock
     private DataSourceViewMapper dataSourceViewMapper;
+
+    @Mock
+    private FilterFieldRequestFromFRFMapper filterFieldRequestFromFRFMapper;
 
     @InjectMocks
     private FilterReportQueryDataMerger merger;
@@ -57,25 +64,26 @@ class FilterReportQueryDataMergerTest {
     private final static LocalDateTime CREATE_TIME = LocalDateTime.now();
     private final static LocalDateTime MODIFIED_TIME = LocalDateTime.now().plusDays(1);
 
-
     @Test
     void merge() {
 
         when(dataSourceViewMapper.from(any(DataSource.class))).thenReturn(getDataSourceData());
+        when(filterFieldRequestFromFRFMapper.from(anyList())).thenReturn(Collections.singletonList(getFilterFieldRequestData()));
+        when(filterFieldRequestFromFRFMapper.from(any(FilterReportField.class))).thenReturn(getFilterFieldRequestData());
 
         var response = merger.merge(getFilterReport(), getListValuesRequest());
 
         assertEquals(getDataSourceData(), response.dataSource());
         assertEquals(SCHEMA, response.schemaName());
         assertEquals(OBJECT, response.tableName());
-        assertEquals(NAME + 10, response.filterFieldName());
-        assertEquals(DataTypeEnum.STRING, response.filterFieldType());
-        assertEquals(10L, response.idFieldId());
-        assertEquals(NAME + 10L, response.idFieldName());
-        assertEquals(20L, response.codeFieldId());
-        assertEquals(NAME + 20L, response.codeFieldName());
-        assertEquals(30L, response.nameFieldId());
-        assertEquals(NAME + 30L, response.nameFieldName());
+        assertEquals(NAME, response.filterFields().get(0).getFieldName());
+        assertEquals(STRING, response.filterFields().get(0).getFieldType());
+        assertEquals(1L, response.idField().getFieldId());
+        assertEquals(NAME, response.idField().getFieldName());
+        assertEquals(1L, response.codeField().getFieldId());
+        assertEquals(NAME, response.codeField().getFieldName());
+        assertEquals(1L, response.nameFields().get(0).getFieldId());
+        assertEquals(NAME, response.nameFields().get(0).getFieldName());
         assertFalse(response.isCaseSensitive());
         assertEquals(LikenessType.CONTAINS, response.likenessType());
         assertEquals(5L, response.maxCount());
@@ -145,5 +153,15 @@ class FilterReportQueryDataMergerTest {
 
     private DataSourceData getDataSourceData() {
         return new DataSourceData(ID, DataSourceTypeEnum.IMPALA, "url", "username", "******", (short) 5);
+    }
+
+    private FilterFieldRequestData getFilterFieldRequestData() {
+        return new FilterFieldRequestData(
+                ID,
+                NAME,
+                STRING,
+                Boolean.TRUE,
+                Boolean.TRUE
+        );
     }
 }

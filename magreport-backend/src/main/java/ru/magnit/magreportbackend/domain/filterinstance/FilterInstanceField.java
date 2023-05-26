@@ -61,6 +61,12 @@ public class FilterInstanceField extends EntityWithName {
     @Column(name = "EXPAND")
     private Boolean expand;
 
+    @Column(name = "SHOW_FIELD")
+    private Boolean showField;
+
+    @Column(name = "SEARCH_BY_FIELD")
+    private Boolean searchByField;
+
     public FilterInstanceField(Long id) {
         this.id = id;
     }
