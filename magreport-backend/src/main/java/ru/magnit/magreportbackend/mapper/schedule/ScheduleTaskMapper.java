@@ -30,6 +30,7 @@ public class ScheduleTaskMapper implements Mapper<ScheduleTask, ScheduleTaskAddR
     public ScheduleTask from(ScheduleTaskAddRequest source) {
         var response = new ScheduleTask()
                 .setStatus(new ScheduleTaskStatus(INACTIVE.getId()))
+                .setActive(false)
                 .setExpirationDate(source.getExpirationDate())
                 .setCode(source.getCode())
                 .setReportBodyMail(source.getReportBodyMail())
