@@ -24,6 +24,8 @@ public class FilterInstanceFieldMapper implements Mapper<FilterInstanceField, Fi
                 .setDescription(source.getDescription())
                 .setDataSetField(source.getDataSetFieldId() == null ? null : new DataSetField(source.getDataSetFieldId()))
                 .setTemplateField(new FilterTemplateField(source.getTemplateFieldId()))
-                .setExpand(source.getExpand() != null && source.getExpand());
+                .setExpand(source.getExpand() != null && source.getExpand())
+                .setSearchByField(source.getSearchByField())
+                .setShowField(source.getShowField());
     }
 }

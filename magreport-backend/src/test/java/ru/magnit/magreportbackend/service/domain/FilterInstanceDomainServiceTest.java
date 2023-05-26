@@ -595,9 +595,9 @@ class FilterInstanceDomainServiceTest {
     }
 
     private FilterValueListRequestData getFilterValueListRequestData() {
-        return new FilterValueListRequestData(null, null, null, null,
-                null, null, null, null, null, null,
-                null, false, null, 1, null);
+        return new FilterValueListRequestData(
+                null, null, null, null,  null,
+                null, null, true, null,   0L, null);
     }
 
     private FilterChildNodesRequestData getFilterChildNodesRequestData() {
