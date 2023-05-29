@@ -9,11 +9,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.magnit.magreportbackend.dto.request.folder.FolderSearchRequest;
 import ru.magnit.magreportbackend.dto.request.serversettings.ServerMailTemplateEditRequest;
 import ru.magnit.magreportbackend.dto.request.serversettings.ServerMailTemplateRequest;
 import ru.magnit.magreportbackend.dto.request.serversettings.ServerMailTemplateTypeRequest;
 import ru.magnit.magreportbackend.dto.response.ResponseBody;
 import ru.magnit.magreportbackend.dto.response.ResponseList;
+import ru.magnit.magreportbackend.dto.response.folder.FolderSearchResponse;
 import ru.magnit.magreportbackend.dto.response.serversettings.ServerMailTemplateResponse;
 import ru.magnit.magreportbackend.dto.response.serversettings.ServerMailTemplateTypeResponse;
 import ru.magnit.magreportbackend.service.ServerMailTemplateService;
@@ -33,6 +35,7 @@ public class ServerMailTemplateController {
     public static final String SERVER_MAIL_TEMPLATE_GET_TYPE = "/api/v1/server-mail-template/get-by-type";
     public static final String SERVER_MAIL_TEMPLATE_TYPE_GET = "/api/v1/server-mail-template/type-get";
     public static final String SERVER_MAIL_TEMPLATE_TYPE_GET_ALL = "/api/v1/server-mail-template/type-get-all";
+    public static final String SERVER_MAIL_TEMPLATE_SEARCH = "/api/v1/server-mail-template/search";
 
     private final ServerMailTemplateService mailTemplateService;
 
@@ -158,6 +161,27 @@ public class ServerMailTemplateController {
                 .success(true)
                 .message("")
                 .data( mailTemplateService.getServerMailTemplateType(request))
+                .build();
+
+        LogHelper.logInfoUserMethodEnd();
+        return response;
+    }
+
+    @Operation(summary = "Поиск по дереву ролей")
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping(value = SERVER_MAIL_TEMPLATE_SEARCH,
+            consumes = APPLICATION_JSON_VALUE,
+            produces = APPLICATION_JSON_VALUE)
+    public ResponseBody<FolderSearchResponse> searchTemplates(
+            @RequestBody
+            FolderSearchRequest request) {
+
+        LogHelper.logInfoUserMethodStart();
+
+        var response = ResponseBody.<FolderSearchResponse>builder()
+                .success(true)
+                .message("")
+                .data(mailTemplateService.searchTemplate(request))
                 .build();
 
         LogHelper.logInfoUserMethodEnd();
