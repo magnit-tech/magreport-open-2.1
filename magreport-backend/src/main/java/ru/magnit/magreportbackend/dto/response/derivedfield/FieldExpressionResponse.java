@@ -12,6 +12,7 @@ import ru.magnit.magreportbackend.dto.request.olap.FieldDefinition;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldTypes;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @Getter
@@ -22,6 +23,7 @@ import java.util.List;
 @Accessors(chain = true)
 public class FieldExpressionResponse {
     private Expressions type;
+    private OlapFieldTypes fieldType;
     private Long referenceId;
     private String constantValue;
     private DataTypeEnum constantType;
@@ -37,11 +39,11 @@ public class FieldExpressionResponse {
     }
 
     public List<FieldDefinition> getAllFieldLinks() {
-        final var result = new ArrayList<FieldDefinition>();
+        final var result = new HashSet<FieldDefinition>();
 
-        if (type == Expressions.REPORT_FIELD_VALUE ){
+        if (fieldType == OlapFieldTypes.REPORT_FIELD ){
             result.add(new FieldDefinition(referenceId, OlapFieldTypes.REPORT_FIELD));
-        } else if (type == Expressions.DERIVED_FIELD_VALUE ){
+        } else if (fieldType == OlapFieldTypes.DERIVED_FIELD ){
             result.add(new FieldDefinition(referenceId, OlapFieldTypes.DERIVED_FIELD));
         }
 
@@ -49,6 +51,6 @@ public class FieldExpressionResponse {
             result.addAll(parameter.getAllFieldLinks());
         }
 
-        return result;
+        return result.stream().toList();
     }
 }
