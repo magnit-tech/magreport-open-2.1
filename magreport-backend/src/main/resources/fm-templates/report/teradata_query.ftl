@@ -40,6 +40,9 @@ ${reportData().schemaName()}.${reportData().tableName()} AS job${id()?c}
 --><#case "TUPLE_LIST"><#--
 -->(${filter.getImpalaSqlM2M()})<#--
 --><#break><#--
+--><#case "CURRENT_LOGIN"><#--
+-->(${filter.fieldValues().get(0).fieldValues().get(0).fieldName()} = ${filter.getValue()})<#--
+--><#break><#--
 --></#switch><#--
 --></#macro><#--
 
