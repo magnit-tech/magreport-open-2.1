@@ -20,6 +20,13 @@ public abstract class ParameterizedExpression extends BaseExpression {
     }
 
     @Override
+    public void addValue(String value, int rowNumber, int columnNumber) {
+        for (var parameter : parameters) {
+            parameter.addValue(value, rowNumber, columnNumber);
+        }
+    }
+
+    @Override
     public DataTypeEnum inferType() {
         var resultType = DataTypeEnum.INTEGER;
         for (var parameter: parameters) {
