@@ -217,15 +217,18 @@ class DerivedFieldServiceTest {
                     null,
                     null,
                     null,
+                    null,
                     List.of(
                         new FieldExpressionResponse(
                             Expressions.NVL,
                             null,
                             null,
                             null,
+                            null,
                             List.of(
                                 new FieldExpressionResponse(
                                     Expressions.REPORT_FIELD_VALUE,
+                                    OlapFieldTypes.REPORT_FIELD,
                                     7L,
                                     null,
                                     null,
@@ -233,6 +236,7 @@ class DerivedFieldServiceTest {
                                 ),
                                 new FieldExpressionResponse(
                                     Expressions.CONSTANT_VALUE,
+                                    null,
                                     null,
                                     "0",
                                     DataTypeEnum.INTEGER,
@@ -245,9 +249,11 @@ class DerivedFieldServiceTest {
                             null,
                             null,
                             null,
+                            null,
                             List.of(
                                 new FieldExpressionResponse(
                                     Expressions.REPORT_FIELD_VALUE,
+                                    OlapFieldTypes.REPORT_FIELD,
                                     8L,
                                     null,
                                     null,
@@ -255,6 +261,7 @@ class DerivedFieldServiceTest {
                                 ),
                                 new FieldExpressionResponse(
                                     Expressions.CONSTANT_VALUE,
+                                    null,
                                     null,
                                     "0",
                                     DataTypeEnum.DOUBLE,
@@ -282,9 +289,11 @@ class DerivedFieldServiceTest {
                     null,
                     null,
                     null,
+                    null,
                     List.of(
                         new FieldExpressionResponse(
                             Expressions.CONSTANT_VALUE,
+                            null,
                             null,
                             "1",
                             DataTypeEnum.INTEGER,
@@ -292,6 +301,7 @@ class DerivedFieldServiceTest {
                         ),
                         new FieldExpressionResponse(
                             Expressions.DERIVED_FIELD_VALUE,
+                            OlapFieldTypes.DERIVED_FIELD,
                             1L,
                             null,
                             null,
@@ -317,15 +327,18 @@ class DerivedFieldServiceTest {
                     null,
                     null,
                     null,
+                    null,
                     List.of(
                         new FieldExpressionResponse(
                             Expressions.NVL,
                             null,
                             null,
                             null,
+                            null,
                             List.of(
                                 new FieldExpressionResponse(
                                     Expressions.REPORT_FIELD_VALUE,
+                                    OlapFieldTypes.REPORT_FIELD,
                                     1L,
                                     null,
                                     null,
@@ -333,6 +346,7 @@ class DerivedFieldServiceTest {
                                 ),
                                 new FieldExpressionResponse(
                                     Expressions.CONSTANT_VALUE,
+                                    null,
                                     null,
                                     "2022-01-01",
                                     DataTypeEnum.DATE,
@@ -342,6 +356,7 @@ class DerivedFieldServiceTest {
                         ),
                         new FieldExpressionResponse(
                             Expressions.CONSTANT_VALUE,
+                            null,
                             null,
                             "4",
                             DataTypeEnum.INTEGER,
