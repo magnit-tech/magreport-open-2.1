@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import ru.magnit.magreportbackend.domain.filtertemplate.FilterFieldTypeEnum;
 import ru.magnit.magreportbackend.domain.filtertemplate.FilterTypeEnum;
 import ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum;
 import ru.magnit.magreportbackend.domain.reportjob.ReportJobUserTypeEnum;
@@ -19,6 +20,7 @@ import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobHistoryRequestF
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobShareRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportPageRequest;
+import ru.magnit.magreportbackend.dto.response.filterreport.FilterReportFieldResponse;
 import ru.magnit.magreportbackend.dto.response.filterreport.FilterReportResponse;
 import ru.magnit.magreportbackend.dto.response.report.ReportJobFilterResponse;
 import ru.magnit.magreportbackend.dto.response.report.ReportResponse;
@@ -30,6 +32,8 @@ import ru.magnit.magreportbackend.dto.response.reportjob.ReportSqlQueryResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ScheduledReportResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.TokenResponse;
 import ru.magnit.magreportbackend.dto.response.user.UserResponse;
+import ru.magnit.magreportbackend.dto.tuple.Tuple;
+import ru.magnit.magreportbackend.dto.tuple.TupleValue;
 import ru.magnit.magreportbackend.exception.InvalidParametersException;
 import ru.magnit.magreportbackend.exception.PermissionDeniedException;
 import ru.magnit.magreportbackend.exception.ReportExportException;
@@ -48,6 +52,7 @@ import ru.magnit.magreportbackend.service.domain.TokenService;
 import ru.magnit.magreportbackend.service.domain.UserDomainService;
 
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -150,6 +155,7 @@ public class ReportJobService {
             throw new PermissionDeniedException("У Вас нет прав на выполнение отчета <" + report.getName() + ">, id:" + report.getId());
         }
 
+        updateCurrentLoginFilter(request, report);
         stripEmptyFilters(request);
         checkMandatoryFilters(request, report);
         checkDateParameters(request, report);
@@ -279,6 +285,21 @@ public class ReportJobService {
                 });
     }
 
+    private void updateCurrentLoginFilter(ReportJobAddRequest request, ReportResponse report) {
+
+        final var filter = report.getAllFilters().stream().filter(f -> f.type().equals(FilterTypeEnum.CURRENT_LOGIN)).findFirst();
+
+        if (filter.isPresent()) {
+            var fieldId = filter.get().fields().stream().filter(f -> f.type().equals(FilterFieldTypeEnum.CODE_FIELD)).map(FilterReportFieldResponse::id).findFirst().orElseThrow();
+            var login = userDomainService.getCurrentUser().getName();
+            request.getParameters().forEach(p -> {
+                if (p.getFilterId().equals(filter.get().id())) {
+                    p.getParameters().add(new Tuple().setValues(Collections.singletonList(new TupleValue().setFieldId(fieldId).setValue(login))));
+                }
+            });
+        }
+    }
+
     public ReportJobResponse getJob(ReportJobRequest request) {
         if (request.getJobId() != null) {
             var response = jobDomainService.getJob(request.getJobId());
@@ -296,12 +317,12 @@ public class ReportJobService {
     }
 
     public ReportJobResponse getJob(Long jobId) {
-      return jobDomainService.getJob(jobId);
+        return jobDomainService.getJob(jobId);
     }
 
     public List<ReportJobResponse> getMyJobs(ReportJobHistoryRequestFilter filter) {
         var currentUser = userDomainService.getCurrentUser();
-        var responses = applyFilter(jobDomainService.getMyJobs(), filter) ;
+        var responses = applyFilter(jobDomainService.getMyJobs(), filter);
         responses.forEach(response -> {
             response.setCanExecute(checkReportPermission(response.getReport().id()));
             response.setOlapLastUserChoice(olapUserChoiceDomainService.getOlapUserChoice(response.getReport().id(), currentUser.getId()));
@@ -310,10 +331,10 @@ public class ReportJobService {
             response.setCountShareUsers(users.size());
             response.setShareUsers(users.size() > 11 ? users.subList(0, 10) : users);
         });
-        return responses ;
+        return responses;
     }
 
-    public List<ReportJobResponse>   getAllJobs(ReportJobHistoryRequestFilter filter) {
+    public List<ReportJobResponse> getAllJobs(ReportJobHistoryRequestFilter filter) {
         var responses = applyFilter(jobDomainService.getAllJobs(), filter);
         responses.forEach(response -> {
 

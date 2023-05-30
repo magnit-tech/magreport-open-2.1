@@ -40,6 +40,7 @@ ${reportData().schemaName()}.${reportData().tableName()} job${id()?c}
 --><#case "TUPLE_LIST"><#--
 -->(${filter.getImpalaSqlM2M()})<#--
 --><#break><#--
+
 --></#switch><#--
 --></#macro><#--
 

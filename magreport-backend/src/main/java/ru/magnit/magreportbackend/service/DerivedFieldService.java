@@ -16,15 +16,7 @@ import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldAddReques
 import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldCheckNameRequest;
 import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldGetAvailableRequest;
 import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldRequest;
-import ru.magnit.magreportbackend.dto.request.olap.FieldDefinition;
-import ru.magnit.magreportbackend.dto.request.olap.FilterDefinition;
-import ru.magnit.magreportbackend.dto.request.olap.FilterGroup;
-import ru.magnit.magreportbackend.dto.request.olap.FilterGroupNew;
-import ru.magnit.magreportbackend.dto.request.olap.MetricDefinition;
-import ru.magnit.magreportbackend.dto.request.olap.MetricDefinitionNew;
-import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequest;
-import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequestNew;
-import ru.magnit.magreportbackend.dto.request.olap.OlapFieldTypes;
+import ru.magnit.magreportbackend.dto.request.olap.*;
 import ru.magnit.magreportbackend.dto.response.derivedfield.DerivedFieldResponse;
 import ru.magnit.magreportbackend.dto.response.derivedfield.DerivedFieldTypeResponse;
 import ru.magnit.magreportbackend.dto.response.derivedfield.ExpressionResponse;
@@ -174,6 +166,98 @@ public class DerivedFieldService {
             resultFieldIndexes,
             resultCube
         ), processedRequest);
+    }
+
+    @SuppressWarnings("Duplicates")
+    public Pair<CubeData, OlapCubeRequestV2> preProcessCubeV2(CubeData sourceCube, OlapCubeRequestV2 request) {
+        final var derivedFields = getDerivedFields(sourceCube.reportMetaData().id());
+        final var fieldTypes = sourceCube.reportMetaData().getVisibleFields()
+                .stream()
+                .collect(Collectors.toMap(ReportFieldData::id, ReportFieldData::dataType));
+
+        // Получаем набор производных полей, на которые есть прямые ссылки в запросе
+        final var requestDerivedFields = request.getAllFields()
+                .stream()
+                .filter(field -> field.getFieldType() == OlapFieldTypes.DERIVED_FIELD)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        // Добавляем все поля, от которых зависят производные поля
+        var callDepth = maxCallDepth;
+        var prevStepFields = new LinkedHashSet<>(requestDerivedFields);
+        List<FieldDefinition> usedDerivedFields = new ArrayList<>(requestDerivedFields);
+        while (callDepth-- > 0) {
+            final var currentStepFields = prevStepFields.stream()
+                    .map(field -> derivedFields.get(field.getFieldId()))
+                    .flatMap(field -> field.getUsedDerivedFieldIds().stream())
+                    .map(fieldId -> new FieldDefinition()
+                            .setFieldId(fieldId)
+                            .setFieldType(OlapFieldTypes.DERIVED_FIELD))
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+
+            if (currentStepFields.isEmpty()) break;
+            usedDerivedFields.addAll(currentStepFields);
+            prevStepFields = currentStepFields;
+        }
+
+        checkCallDepth(prevStepFields, derivedFields);
+
+        usedDerivedFields = sortByUsage(usedDerivedFields);
+
+        final var fieldIndexes = sourceCube.fieldIndexes().entrySet()
+                .stream()
+                .map(entry -> new Pair<>(new FieldDefinition(entry.getKey(), OlapFieldTypes.REPORT_FIELD), entry.getValue()))
+                .collect(Collectors.toMap(Pair::getL, entry -> new Pair<>(entry.getR(), fieldTypes.get(entry.getL().getFieldId()))));
+
+        var fieldCount = fieldIndexes.keySet().size();
+        for (final var derivedField : usedDerivedFields) {
+            fieldIndexes.put(derivedField, new Pair<>(fieldCount++, null));
+        }
+
+        final var processedCube = initResultCube(sourceCube, fieldCount);
+        final var fieldExpressions = usedDerivedFields
+                .stream()
+                .map(field -> derivedFields.get(field.getFieldId()))
+                .map(field -> field.getExpression().getType().init(
+                                field.getExpression(),
+                                new ExpressionCreationContext(fieldIndexes, processedCube, field)
+                        )
+                )
+                .toList();
+
+        // Рассчитываем значения всех полей и добавляем в куб
+        final int startColumn = processDerivedFields(sourceCube, usedDerivedFields, fieldIndexes, processedCube, fieldExpressions);
+
+        final var resultCube = initResultCube(sourceCube, startColumn + requestDerivedFields.size());
+        var fieldNumber = 0;
+        final var reportFieldIndex = sourceCube.reportMetaData().getVisibleFields()
+                .stream()
+                .map(ReportFieldData::id)
+                .max(Long::compareTo).orElseThrow() + 1L;
+
+        final var cubeFields = new ArrayList<>(sourceCube.reportMetaData().getVisibleFields());
+        final var derivedFieldsColumns = new HashMap<Long, Long>();
+        copyDataToResultCube(derivedFields, requestDerivedFields, fieldIndexes, processedCube, startColumn, resultCube, fieldNumber, reportFieldIndex, cubeFields, derivedFieldsColumns);
+
+        final var counter = new AtomicInteger(0);
+        final var resultFieldIndexes = cubeFields.stream().collect(Collectors.toMap(ReportFieldData::id, o -> counter.getAndIncrement()));
+
+        final var processedRequest = request;//transformOlapRequest(request, derivedFieldsColumns);
+
+        return new Pair<>(new CubeData(
+                new ReportData(
+                        sourceCube.reportMetaData().id(),
+                        sourceCube.reportMetaData().name(),
+                        sourceCube.reportMetaData().description(),
+                        sourceCube.reportMetaData().schemaName(),
+                        sourceCube.reportMetaData().tableName(),
+                        cubeFields,
+                        sourceCube.reportMetaData().filterGroup(),
+                        sourceCube.reportMetaData().encryptFile()
+                ),
+                sourceCube.numRows(),
+                resultFieldIndexes,
+                resultCube
+        ), new OlapCubeRequestV2());
     }
 
     private List<FieldDefinition> sortByUsage(List<FieldDefinition> sourceFields) {
