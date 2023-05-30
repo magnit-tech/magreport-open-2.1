@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="ADD-FILTER-TEMPLATE-LOGIN-FILTER-001" author="vyushin_aa">
+        <insert schemaName="REPOSITORY" tableName="FILTER_TYPE">
+            <column name="NAME" value="CURRENT_LOGIN"/>
+            <column name="DESCRIPTION" value="Значение логина текущего пользователя"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="ADD-FILTER-TEMPLATE-LOGIN-FILTER-002" author="vyushin_aa">
+        <insert  schemaName="REPOSITORY" tableName="FILTER_TEMPLATE">
+            <column name="FILTER_TYPE_ID" valueComputed="SELECT FILTER_TYPE_ID FROM REPOSITORY.FILTER_TYPE WHERE NAME = 'CURRENT_LOGIN'"/>
+            <column name="FILTER_TEMPLATE_FOLDER_ID" value="1"/>
+            <column name="NAME" value="CURRENT_LOGIN"/>
+            <column name="DESCRIPTION" value="Фильтр с значением логина текущего пользователя"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM REPOSITORY.USERS WHERE NAME = 'MAGREPORT-INIT' "/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="ADD-FILTER-TEMPLATE-LOGIN-FILTER-003" author="vyushin_aa">
+            <insert schemaName="REPOSITORY" tableName="FILTER_TEMPLATE_FIELD">
+                <column name="FILTER_TEMPLATE_ID" valueComputed="SELECT FILTER_TEMPLATE_ID FROM REPOSITORY.FILTER_TEMPLATE WHERE NAME='CURRENT_LOGIN'"/>
+                <column name="FILTER_FIELD_TYPE_ID" valueComputed="SELECT FILTER_FIELD_TYPE_ID FROM REPOSITORY.FILTER_FIELD_TYPE WHERE NAME='ID_FIELD'"/>
+                <column name="NAME" value="ID_FIELD"/>
+                <column name="DESCRIPTION" value="Выходное поле фильтра, мапится к полю отчета"/>
+            </insert>
+            <insert schemaName="REPOSITORY" tableName="FILTER_TEMPLATE_FIELD">
+                <column name="FILTER_TEMPLATE_ID" valueComputed="SELECT FILTER_TEMPLATE_ID FROM REPOSITORY.FILTER_TEMPLATE WHERE NAME='CURRENT_LOGIN'"/>
+                <column name="FILTER_FIELD_TYPE_ID" valueComputed="SELECT FILTER_FIELD_TYPE_ID FROM REPOSITORY.FILTER_FIELD_TYPE WHERE NAME='CODE_FIELD'"/>
+                <column name="NAME" value="CODE_FIELD"/>
+                <column name="DESCRIPTION" value="Входное поле фильтра, для передачи значений в фильтр"/>
+            </insert>
+    </changeSet>
+
+
+</databaseChangeLog>

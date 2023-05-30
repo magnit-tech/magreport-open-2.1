@@ -12,7 +12,8 @@ public enum FilterTypeEnum {
     HIERARCHY_M2M,
     DATE_RANGE,
     DATE_VALUE,
-    TUPLE_LIST;
+    TUPLE_LIST,
+    CURRENT_LOGIN;
 
     public static FilterTypeEnum getByOrdinal(long id) {
         return FilterTypeEnum.values()[(int) id];
