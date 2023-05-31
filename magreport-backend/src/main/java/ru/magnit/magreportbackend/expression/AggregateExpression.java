@@ -6,6 +6,4 @@ public abstract class AggregateExpression extends BaseExpression {
     protected AggregateExpression(FieldExpressionResponse ignored, ExpressionCreationContext context) {
         super(ignored, context);
     }
-
-
 }

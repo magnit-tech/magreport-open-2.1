@@ -127,7 +127,7 @@ public class DerivedFieldService {
             .map(field -> derivedFields.get(field.getFieldId()))
             .map(field -> field.getExpression().getType().init(
                     field.getExpression(),
-                    new ExpressionCreationContext(fieldIndexes, processedCube, field)
+                    new ExpressionCreationContext(fieldIndexes, processedCube, field, null)
                 )
             )
             .toList();
@@ -219,7 +219,7 @@ public class DerivedFieldService {
                 .map(field -> derivedFields.get(field.getFieldId()))
                 .map(field -> field.getExpression().getType().init(
                                 field.getExpression(),
-                                new ExpressionCreationContext(fieldIndexes, processedCube, field)
+                                new ExpressionCreationContext(fieldIndexes, processedCube, field, null)
                         )
                 )
                 .toList();
@@ -393,7 +393,7 @@ public class DerivedFieldService {
             .collect(Collectors.toMap(Pair::getL, entry -> new Pair<>(0, entry.getR())));
         derivedFields.forEach(field -> fieldIndexes.put(new FieldDefinition(field.getId(), OlapFieldTypes.DERIVED_FIELD), new Pair<>(0, field.getDataType())));
 
-        final var expressionContext = new ExpressionCreationContext(fieldIndexes, null, null);
+        final var expressionContext = new ExpressionCreationContext(fieldIndexes, null, null, null);
         final var fieldExpression = fieldExpressionResponseRequestMapper.from(request.getExpression());
         final var expression = fieldExpression.getType().init(fieldExpression, expressionContext);
 

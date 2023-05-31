@@ -23,7 +23,7 @@ class AbsExpressionTest {
                     .setConstantValue("-2")
             ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null, null));
         final var expressionResult = expression.calculate(0);
 
         assertEquals("2", expressionResult.getL());
@@ -41,7 +41,7 @@ class AbsExpressionTest {
                     .setConstantValue("-2.0")
             ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null, null));
         final var expressionResult = expression.calculate(0);
 
         assertEquals("2.0", expressionResult.getL());

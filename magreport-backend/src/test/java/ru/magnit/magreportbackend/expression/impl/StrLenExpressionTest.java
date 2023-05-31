@@ -23,7 +23,7 @@ class StrLenExpressionTest {
                     .setConstantValue("Test string")
             ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null, null));
         final var expressionResult = expression.calculate(0);
 
         assertEquals("11", expressionResult.getL());
