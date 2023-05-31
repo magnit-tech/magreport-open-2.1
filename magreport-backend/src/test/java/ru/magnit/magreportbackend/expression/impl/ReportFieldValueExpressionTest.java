@@ -30,7 +30,8 @@ class ReportFieldValueExpressionTest {
                 new Pair<>(0, DataTypeEnum.INTEGER)
             ),
             new String[][]{{"12345"}},
-            new DerivedFieldResponse(1L,1L, false, DataTypeEnum.INTEGER, "Derived field", "Description", 1L, "Test user", LocalDateTime.now(), LocalDateTime.now(), null, "")
+            new DerivedFieldResponse(1L,1L, false, DataTypeEnum.INTEGER, "Derived field", "Description", 1L, "Test user", LocalDateTime.now(), LocalDateTime.now(), null, ""),
+                null
         );
 
         final var expression = sourceExpression.getType().init(sourceExpression, context);

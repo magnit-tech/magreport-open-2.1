@@ -20,7 +20,7 @@ class CountExpressionTest {
                 .setFieldType(OlapFieldTypes.REPORT_FIELD)
                 .setReferenceId(0L);
 
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null, null));
         expression.addValue(null, 0,0);
         final var expressionResult = expression.calculate(0);
 
@@ -43,7 +43,7 @@ class CountExpressionTest {
                                 .setReferenceId(0L)
                 ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null, null));
         expression.addValue(null, 0,0);
         final var expressionResult = expression.calculate(0);
 

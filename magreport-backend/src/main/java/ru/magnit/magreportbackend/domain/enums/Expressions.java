@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
 import ru.magnit.magreportbackend.expression.BaseExpression;
 import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
-import ru.magnit.magreportbackend.expression.agregate.CountExpression;
+import ru.magnit.magreportbackend.expression.agregate.*;
 import ru.magnit.magreportbackend.expression.impl.*;
 
 import java.util.function.BiFunction;
@@ -70,7 +70,12 @@ public enum Expressions {
     IS_NULL(IsNullExpression::new),
     GET_TYPE(GetTypeExpression::new),
     NULL_VALUE(NullValueExpression::new),
-    COUNT(CountExpression::new);
+    COUNT(CountExpression::new),
+    AVG(AvgExpression::new),
+    MAX(MaxExpression::new),
+    MIN(MinExpression::new),
+    SUM(SumExpression::new),
+    COUNT_DISTINCT(CountDistinctExpression::new);
 
     private final BiFunction<FieldExpressionResponse, ExpressionCreationContext, BaseExpression> factory;
 

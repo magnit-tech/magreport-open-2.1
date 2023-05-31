@@ -21,7 +21,7 @@ class WeekdayNumberExpressionTest {
                                 .setType(Expressions.CURRENT_DATE)
                 ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null, null));
         final var expressionResult = expression.calculate(0);
 
         assertEquals(String.valueOf(LocalDate.now().getDayOfWeek().getValue()), expressionResult.getL());
@@ -39,7 +39,7 @@ class WeekdayNumberExpressionTest {
                                 .setConstantValue("2023-04-28 10:00:00.123")
                 ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null, null));
         final var expressionResult = expression.calculate(0);
 
         assertEquals(String.valueOf(LocalDate.of(2023, 4, 28).getDayOfWeek().getValue()), expressionResult.getL());
