@@ -26,7 +26,7 @@ class IntegerDivisionExpressionTest {
                                 .setConstantValue("4")
                 ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null, null));
         final var expressionResult = expression.calculate(0);
 
         assertEquals("0", expressionResult.getL());
@@ -48,7 +48,7 @@ class IntegerDivisionExpressionTest {
                                 .setConstantValue("4")
                 ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null, null));
         final var expressionResult = expression.calculate(0);
 
         assertEquals("0.0", expressionResult.getL());

@@ -20,18 +20,19 @@ class DerivedFieldValueExpressionTest {
     @Test
     void derivedFieldValueExpressionTest() {
         final var sourceExpression =
-            new FieldExpressionResponse()
-                .setType(Expressions.DERIVED_FIELD_VALUE)
-                .setReferenceId(1L);
+                new FieldExpressionResponse()
+                        .setType(Expressions.DERIVED_FIELD_VALUE)
+                        .setReferenceId(1L);
 
         final var context = new ExpressionCreationContext(
-            Map.of(
-                new FieldDefinition(1L, OlapFieldTypes.DERIVED_FIELD),
-                new Pair<>(0, DataTypeEnum.INTEGER)
-            ),
-            new String[][]{{"123"}},
-        new DerivedFieldResponse(1L,1L, false, DataTypeEnum.INTEGER, "Derived field", "Description", 1L, "Test user", LocalDateTime.now(), LocalDateTime.now(), null, "")
-   );
+                Map.of(
+                        new FieldDefinition(1L, OlapFieldTypes.DERIVED_FIELD),
+                        new Pair<>(0, DataTypeEnum.INTEGER)
+                ),
+                new String[][]{{"123"}},
+                new DerivedFieldResponse(1L, 1L, false, DataTypeEnum.INTEGER, "Derived field", "Description", 1L, "Test user", LocalDateTime.now(), LocalDateTime.now(), null, ""),
+                null
+        );
 
         final var expression = sourceExpression.getType().init(sourceExpression, context);
         final var expressionResult = expression.calculate(0);
