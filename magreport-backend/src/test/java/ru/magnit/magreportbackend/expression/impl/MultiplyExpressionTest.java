@@ -35,7 +35,7 @@ class MultiplyExpressionTest {
                     .setConstantValue("-1")
             ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null, null));
         final var expressionResult = expression.calculate(0);
 
         assertEquals("-27.0", expressionResult.getL());
@@ -61,7 +61,7 @@ class MultiplyExpressionTest {
                     .setConstantValue("-1")
             ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null, null));
         final var expressionResult = expression.calculate(0);
 
         assertEquals("-45", expressionResult.getL());
@@ -87,7 +87,7 @@ class MultiplyExpressionTest {
                     .setConstantValue("-1")
             ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null, null));
         final var expressionResult = expression.calculate(0);
 
         assertNull(expressionResult.getL());
