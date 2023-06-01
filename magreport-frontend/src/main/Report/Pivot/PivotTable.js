@@ -543,8 +543,8 @@ export default function(props){
         if (cell.type === "metricValues" && (cell.conditionalFormatting && cell.conditionalFormatting.length > 0)) {
             if (cell.conditionalFormatting.length === 1) {
                 return {backgroundColor: cell.conditionalFormatting[0].color}
-            } 
-            
+            }
+
             const cellData = Number(cell.data.replace(/\s/g,'').replace('%', ''))
 
             for (let i = 0; i < cell.conditionalFormatting.length; i++) {
@@ -566,8 +566,9 @@ export default function(props){
         if (cell.type === "metricValues" && cell.fieldId) {
 
             if (cell.conditionalFormatting && cell.conditionalFormatting.length > 0) {
-                
+
                 if (cell.conditionalFormatting.length === 1) {
+                   
                     styleObj = {   
                         margin: '2px',
                         height: cell.conditionalFormatting[0].fontSize ? `${cell.conditionalFormatting[0].fontSize + 5}px` : 'auto',
@@ -593,6 +594,7 @@ export default function(props){
                                 color: cell.conditionalFormatting[i].fontColor,
                                 whiteSpace: 'nowrap'
                             }
+                            break
                         }
                     }
                 }
