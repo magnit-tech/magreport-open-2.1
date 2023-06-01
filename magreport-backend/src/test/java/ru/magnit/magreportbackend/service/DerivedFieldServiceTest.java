@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.domain.enums.Expressions;
 import ru.magnit.magreportbackend.domain.olap.AggregationType;
@@ -15,12 +16,7 @@ import ru.magnit.magreportbackend.dto.inner.reportjob.ReportData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportFieldData;
 import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldAddRequest;
 import ru.magnit.magreportbackend.dto.request.derivedfield.DerivedFieldExpressionAddRequest;
-import ru.magnit.magreportbackend.dto.request.olap.FieldDefinition;
-import ru.magnit.magreportbackend.dto.request.olap.Interval;
-import ru.magnit.magreportbackend.dto.request.olap.MetricDefinitionNew;
-import ru.magnit.magreportbackend.dto.request.olap.MetricFilterGroup;
-import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequestNew;
-import ru.magnit.magreportbackend.dto.request.olap.OlapFieldTypes;
+import ru.magnit.magreportbackend.dto.request.olap.*;
 import ru.magnit.magreportbackend.dto.response.derivedfield.DerivedFieldResponse;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
 import ru.magnit.magreportbackend.dto.response.report.ReportFieldTypeResponse;
@@ -112,6 +108,14 @@ class DerivedFieldServiceTest {
         assertEquals(DataTypeEnum.DOUBLE, result.getFieldType());
     }
 
+    @Test
+    void preprocessCubeV2Test() {
+        ReflectionTestUtils.setField(service, "maxCallDepth", 5L, Long.class);
+        when(domainService.getDerivedFieldsForReport(anyLong())).thenReturn(getDerivedFields());
+        final var result = service.preProcessCubeV2(getTestCubeData(), getOlapRequestV2());
+        assertNotNull(result);
+    }
+
     private OlapCubeRequestNew getOlapRequest() {
         return new OlapCubeRequestNew()
             .setJobId(1L)
@@ -129,6 +133,24 @@ class DerivedFieldServiceTest {
             .setMetricFilterGroup(new MetricFilterGroup())
             .setColumnsInterval(new Interval(0, 10))
             .setRowsInterval(new Interval(0, 10));
+    }
+
+    private OlapCubeRequestV2 getOlapRequestV2() {
+        return new OlapCubeRequestV2()
+                .setJobId(1L)
+                .setColumnFields(new LinkedHashSet<>(List.of(new FieldDefinition(0L, OlapFieldTypes.REPORT_FIELD))))
+                .setRowFields(new LinkedHashSet<>(List.of(new FieldDefinition(2L, OlapFieldTypes.REPORT_FIELD))))
+                .setMetrics(List.of(
+                        new FieldExpressionResponse().setType(Expressions.SUM).setFieldType(OlapFieldTypes.REPORT_FIELD).setReferenceId(6L),
+                        new FieldExpressionResponse().setType(Expressions.SUM).setFieldType(OlapFieldTypes.DERIVED_FIELD).setReferenceId(2L),
+                        new FieldExpressionResponse().setType(Expressions.COUNT).setFieldType(OlapFieldTypes.DERIVED_FIELD).setReferenceId(3L),
+                        new FieldExpressionResponse().setType(Expressions.MULTIPLY).setParameters(List.of(
+                                new FieldExpressionResponse().setType(Expressions.SUM).setFieldType(OlapFieldTypes.DERIVED_FIELD).setReferenceId(2L),
+                                new FieldExpressionResponse().setType(Expressions.COUNT).setFieldType(OlapFieldTypes.DERIVED_FIELD).setReferenceId(3L)
+                        ))))
+                .setMetricFilterGroup(new MetricFilterGroup())
+                .setColumnsInterval(new Interval(0, 10))
+                .setRowsInterval(new Interval(0, 10));
     }
 
     private String[][] getDataArray() {

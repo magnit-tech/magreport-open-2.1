@@ -77,6 +77,7 @@ public class DerivedFieldService {
         return domainService.getAllExpressions();
     }
 
+    @SuppressWarnings("Duplicates")
     public Pair<CubeData, OlapCubeRequest> preProcessCube(CubeData sourceCube, OlapCubeRequestNew request) {
         final var derivedFields = getDerivedFields(sourceCube.reportMetaData().id());
         final var fieldTypes = sourceCube.reportMetaData().getVisibleFields()
@@ -240,8 +241,7 @@ public class DerivedFieldService {
 
         final var counter = new AtomicInteger(0);
         final var resultFieldIndexes = cubeFields.stream().collect(Collectors.toMap(ReportFieldData::id, o -> counter.getAndIncrement()));
-
-        final var processedRequest = request;//transformOlapRequest(request, derivedFieldsColumns);
+        request.setFieldIndexes(fieldIndexes);
 
         return new Pair<>(new CubeData(
                 new ReportData(
@@ -257,7 +257,7 @@ public class DerivedFieldService {
                 sourceCube.numRows(),
                 resultFieldIndexes,
                 resultCube
-        ), new OlapCubeRequestV2());
+        ), request);
     }
 
     private List<FieldDefinition> sortByUsage(List<FieldDefinition> sourceFields) {
