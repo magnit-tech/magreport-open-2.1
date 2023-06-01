@@ -29,7 +29,7 @@ import { CompactPicker } from 'react-color';
 function PaperComponent(props) {
     return (
 		<Draggable handle="#dragg-title" cancel={'[class*="MuiDialogContent-root"]'}>
-			<Paper {...props} style={{width: '500px'}}/>
+			<Paper {...props} style={{width: '550px'}}/>
 		</Draggable>
     );
 }
@@ -280,6 +280,12 @@ export default function FormattingDialog(props){
 		e.target.value = onlyNums;
     }
 
+	// Цвет шрифта - Авто
+	const handleSetAutoFontColor = (bool) => {
+		if (bool === true) changeActiveAndRanges({fontColor: ''});
+		setOpenFontColor(false)
+	}
+
   	return (
         <Dialog
             open={props.open}
@@ -484,34 +490,6 @@ export default function FormattingDialog(props){
 						</Box>
 
 						<Box>
-							{/* Число десятичных знаков */}
-							{/* <Box className={classes.FD_wrapperForActionSections}>
-								<Box whiteSpace="nowrap">Число десятичных знаков:</Box>
-
-								<Box className={classes.FD_inputNumberWithArrows}>
-									<IconButton 
-										size="small" 
-										aria-label="decrase" 
-										onClick={() => handleChangeRounding("decrase")}
-									>
-										<Icon path={mdiChevronLeft} size={1} />
-									</IconButton>
-									<input 
-										type='text' 
-										className={classes.FD_inputForNumber}
-										value={active.rounding}
-										readOnly
-									/>
-									<IconButton 
-										size="small" 
-										aria-label="incrase" 
-										onClick={() => handleChangeRounding("incrase")}
-									>
-										<Icon path={mdiChevronRight} size={1} />
-									</IconButton>
-								</Box>
-							</Box> */}
-							
 							{/* Начертание */}
 							<Box className={classes.FD_wrapperForActionSections}>
 								<Box whiteSpace="nowrap">Начертание:</Box>
@@ -580,10 +558,28 @@ export default function FormattingDialog(props){
 										className={classes.FD_fontColorWrapper}
 										onClick={() => setOpenFontColor(!isOpenFontColor)}
 									>
-											<Box 
-												className={classes.FD_fontColorCircle}
-												style={{ background: active.fontColor }}
-											/>
+											
+										{active.fontColor 
+											? 
+												<Box 
+													className={classes.FD_fontColorCircle}
+													style={{ background: active.fontColor }}
+												/>
+											:
+												<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="-500 -500 1000 1000" className={classes.FD_fontColorCircleSVG}> 
+													<defs>
+														<pattern id="CheckerPattern" patternUnits="userSpaceOnUse" x="0" y="0" width="250" height="250" viewBox="0 0 30 30">
+															<rect fill="#FFF" stroke="none" x="0" y="0" height="15" width="15"/>
+															<rect fill="#FFF" stroke="none" x="15" y="15" height="15" width="15"/>
+															<rect fill="#E5E5E5" stroke="none" x="15" y="0" height="15" width="15"/>
+															<rect fill="#E5E5E5" stroke="none" x="0" y="15" height="15" width="15"/>
+														</pattern>
+													</defs>
+													<g>
+														<rect fill="url(#CheckerPattern)" stroke="none" x="-500" y="-500" width="1000" height="1000"/>
+													</g>
+												</svg>
+										}
 											
 										{isOpenFontColor && 
 											<CompactPicker
@@ -591,6 +587,17 @@ export default function FormattingDialog(props){
 												onChangeComplete={(color) => changeActiveAndRanges({fontColor: color.hex})}
 											/>
 										}
+									</Box>
+									<Box className={classes.FD_autoFontColorSection}>
+										<FormControlLabel
+											control={
+												<Checkbox 
+													checked={active.fontColor === '' ? true : false} 
+													onChange={() => handleSetAutoFontColor(active.fontColor === '' ? false : true)}
+												/>
+											}
+											label="Авто"
+										/>
 									</Box>
 								</Box>
 							</Box>
