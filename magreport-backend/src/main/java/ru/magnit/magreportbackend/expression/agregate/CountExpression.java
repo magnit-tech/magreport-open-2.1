@@ -14,7 +14,7 @@ public class CountExpression extends AggregateExpression {
     }
 
     @Override
-    public void addValue(String value, int rowNumber, int columnNumber) {
+    public void addValue(int cubeRow, int rowNumber, int columnNumber) {
         result++;
     }
 

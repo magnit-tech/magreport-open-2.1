@@ -22,9 +22,9 @@ class AvgExpressionTest {
                 .setReferenceId(0L);
 
         final var fieldIndex = Map.of(new FieldDefinition(0L, OlapFieldTypes.REPORT_FIELD), new Pair<>(0, DataTypeEnum.INTEGER));
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(fieldIndex, null, null, null));
-        expression.addValue("1", 0,0);
-        expression.addValue("3", 0,0);
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(fieldIndex, new String[][]{{"1","3"}}, null, null));
+        expression.addValue(0, 0,0);
+        expression.addValue(1, 0,0);
         final var expressionResult = expression.calculate(0);
 
         assertEquals("2", expressionResult.getL());
