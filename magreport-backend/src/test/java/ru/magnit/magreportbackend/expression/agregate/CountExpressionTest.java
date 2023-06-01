@@ -7,8 +7,10 @@ import ru.magnit.magreportbackend.dto.request.olap.FieldDefinition;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldTypes;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
 import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
+import ru.magnit.magreportbackend.util.Pair;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -20,8 +22,9 @@ class CountExpressionTest {
                 .setFieldType(OlapFieldTypes.REPORT_FIELD)
                 .setReferenceId(0L);
 
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null, null));
-        expression.addValue(null, 0,0);
+        final var fieldIndex = Map.of(new FieldDefinition(0L, OlapFieldTypes.REPORT_FIELD), new Pair<>(0, DataTypeEnum.INTEGER));
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(fieldIndex, new String[][]{{"0"}}, null, null));
+        expression.addValue(0, 0,0);
         final var expressionResult = expression.calculate(0);
 
         assertEquals("1", expressionResult.getL());
@@ -43,8 +46,9 @@ class CountExpressionTest {
                                 .setReferenceId(0L)
                 ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null, null));
-        expression.addValue(null, 0,0);
+        final var fieldIndex = Map.of(new FieldDefinition(0L, OlapFieldTypes.REPORT_FIELD), new Pair<>(0, DataTypeEnum.INTEGER));
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(fieldIndex, new String[][]{{"0","0"}}, null, null));
+        expression.addValue(0, 0,0);
         final var expressionResult = expression.calculate(0);
 
         assertEquals("2", expressionResult.getL());

@@ -1,7 +1,6 @@
 package ru.magnit.magreportbackend.expression.agregate;
 
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
-import ru.magnit.magreportbackend.dto.request.olap.FieldDefinition;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
 import ru.magnit.magreportbackend.expression.AggregateExpression;
 import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
@@ -16,12 +15,12 @@ public class CountDistinctExpression extends AggregateExpression {
 
     public CountDistinctExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
         super(fieldExpression, context);
-        final var fieldDefinition = new FieldDefinition(fieldExpression.getReferenceId(), fieldExpression.getFieldType());
-        distinctSet = context.distinctSets().get(fieldDefinition);
+        distinctSet = context.distinctSets().get(fieldExpression);
     }
 
     @Override
-    public void addValue(String value, int rowNumber, int columnNumber) {
+    public void addValue(int cubeRow, int rowNumber, int columnNumber) {
+        final var value = cubeValues[fieldIndex][cubeRow];
         if (distinctSet.add(new Triple<>(columnNumber, rowNumber, value))){
             result++;
         }

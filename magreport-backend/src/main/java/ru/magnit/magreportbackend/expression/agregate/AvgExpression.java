@@ -26,7 +26,8 @@ public class AvgExpression extends AggregateExpression {
     }
 
     @Override
-    public void addValue(String value, int rowNumber, int columnNumber) {
+    public void addValue(int cubeRow, int rowNumber, int columnNumber) {
+        final var value = cubeValues[fieldIndex][cubeRow];
         if (value != null) {
             numValues++;
             switch (dataType) {

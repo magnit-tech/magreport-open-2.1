@@ -1,9 +1,12 @@
 package ru.magnit.magreportbackend.dto.request.olap;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import lombok.experimental.Accessors;
+import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.domain.olap.PlacementType;
 import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
+import ru.magnit.magreportbackend.util.Pair;
 
 import java.util.*;
 
@@ -26,6 +29,8 @@ public class OlapCubeRequestV2 {
     private Interval rowsInterval;
     private List<SortingParams> columnSort = Collections.emptyList();
     private List<SortingParams> rowSort = Collections.emptyList();
+    @JsonIgnore
+    private Map<FieldDefinition, Pair<Integer, DataTypeEnum>> fieldIndexes = Collections.emptyMap();
 
     public Set<FieldDefinition> getAllFields() {
         final var result = new HashSet<FieldDefinition>();

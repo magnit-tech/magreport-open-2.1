@@ -11,6 +11,7 @@ import ru.magnit.magreportbackend.util.Pair;
 import ru.magnit.magreportbackend.util.Triple;
 
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,13 +27,14 @@ class CountDistinctExpressionTest {
 
         final var fieldDefinition = new FieldDefinition(0L, OlapFieldTypes.REPORT_FIELD);
         final var fieldIndex = Map.of(fieldDefinition, new Pair<>(0, DataTypeEnum.INTEGER));
-        final Map<FieldDefinition, Set<Triple<Integer, Integer, String>>> distinctSets = Map.of(fieldDefinition, new HashSet<>());
+        final Map<FieldExpressionResponse, Set<Triple<Integer, Integer, String>>> distinctSets = new IdentityHashMap<>();
+        distinctSets.put(sourceExpression, new HashSet<>());
 
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(fieldIndex, null, null, distinctSets));
-        expression.addValue("1", 0,0);
-        expression.addValue("3", 0,0);
-        expression.addValue("1", 0,0);
-        expression.addValue("3", 0,0);
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(fieldIndex, new String[][]{{"1","3","1","3"}}, null, distinctSets));
+        expression.addValue(0, 0,0);
+        expression.addValue(1, 0,0);
+        expression.addValue(2, 0,0);
+        expression.addValue(3, 0,0);
         final var expressionResult = expression.calculate(0);
 
         assertEquals("2", expressionResult.getL());
