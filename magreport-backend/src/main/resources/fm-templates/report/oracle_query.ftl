@@ -11,7 +11,11 @@ ${reportData().schemaName()}.${reportData().tableName()} job${id()?c}
 --><#macro ParseFilter filter><#--
 --><#switch filter.filterType()><#--
 --><#case "VALUE_LIST"><#--
--->(${filter.fieldValues().get(0).fieldValues().get(0).fieldName()} IN (${filter.getValuesForSqlIn()}))<#--
+    --><#if (filter.operationType() == "IS_NOT_IN_LIST")><#--
+    -->${filter.fieldValues().get(0).fieldValues().get(0).fieldName()} NOT IN (${filter.getValuesForSqlIn()})<#--
+    --><#else><#--
+    -->${filter.fieldValues().get(0).fieldValues().get(0).fieldName()} IN (${filter.getValuesForSqlIn()})<#--
+    --></#if><#--
 --><#break><#--
 --><#case "TOKEN_INPUT"><#--
 -->(${filter.fieldValues().get(0).fieldValues().get(0).fieldName()} IN (${filter.getValuesForSqlIn()}))<#--
@@ -29,7 +33,11 @@ ${reportData().schemaName()}.${reportData().tableName()} job${id()?c}
 -->(${filter.fieldValues().get(0).fieldValues().get(0).fieldName()} = ${filter.getValue()})<#--
 --><#break><#--
 --><#case "VALUE_LIST_UNBOUNDED"><#--
--->(${filter.fieldValues().get(0).fieldValues().get(0).fieldName()} IN (${filter.getValuesForSqlIn()}))<#--
+    --><#if (filter.operationType() == "IS_NOT_IN_LIST")><#--
+    -->${filter.fieldValues().get(0).fieldValues().get(0).fieldName()} NOT IN (${filter.getValuesForSqlIn()})<#--
+    --><#else><#--
+    -->${filter.fieldValues().get(0).fieldValues().get(0).fieldName()} IN (${filter.getValuesForSqlIn()})<#--
+    --></#if><#--
 --><#break><#--
 --><#case "HIERARCHY"><#--
 -->(${filter.getImpalaSqlStrict()})<#--
