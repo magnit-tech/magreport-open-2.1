@@ -19,7 +19,8 @@ public class MaxExpression extends AggregateExpression {
     }
 
     @Override
-    public void addValue(String value, int rowNumber, int columnNumber) {
+    public void addValue(int cubeRow, int rowNumber, int columnNumber) {
+        final var value = cubeValues[fieldIndex][cubeRow];
         if (value != null) {
             switch (dataType) {
                 case INTEGER ->
