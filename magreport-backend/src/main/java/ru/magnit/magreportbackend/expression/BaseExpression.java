@@ -18,7 +18,7 @@ public abstract class BaseExpression {
         this.derivedField = context.derivedField();
     }
 
-    public void addValue(String value, int rowNumber, int columnNumber){
+    public void addValue(int cubeRow, int rowNumber, int columnNumber){
 
     }
 

@@ -20,9 +20,9 @@ public abstract class ParameterizedExpression extends BaseExpression {
     }
 
     @Override
-    public void addValue(String value, int rowNumber, int columnNumber) {
+    public void addValue(int cubeRow, int rowNumber, int columnNumber) {
         for (var parameter : parameters) {
-            parameter.addValue(value, rowNumber, columnNumber);
+            parameter.addValue(cubeRow, rowNumber, columnNumber);
         }
     }
 
