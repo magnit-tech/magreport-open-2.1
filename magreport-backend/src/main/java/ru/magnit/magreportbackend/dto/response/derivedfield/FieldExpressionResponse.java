@@ -38,6 +38,16 @@ public class FieldExpressionResponse {
         return result;
     }
 
+    public List<FieldExpressionResponse> getAllExpressions() {
+        final var result = new ArrayList<FieldExpressionResponse>();
+        result.add(this);
+        for (final var parameter: parameters) {
+            result.addAll(parameter.getChildExpressions());
+        }
+
+        return result;
+    }
+
     public List<FieldDefinition> getAllFieldLinks() {
         final var result = new HashSet<FieldDefinition>();
 

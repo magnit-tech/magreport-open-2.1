@@ -3,6 +3,7 @@ package ru.magnit.magreportbackend.expression;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.dto.request.olap.FieldDefinition;
 import ru.magnit.magreportbackend.dto.response.derivedfield.DerivedFieldResponse;
+import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionResponse;
 import ru.magnit.magreportbackend.util.Pair;
 import ru.magnit.magreportbackend.util.Triple;
 
@@ -14,7 +15,7 @@ public record ExpressionCreationContext (
     Map<FieldDefinition, Pair<Integer, DataTypeEnum>> fieldIndexes,
     String[][] resultCube,
     DerivedFieldResponse derivedField,
-    Map<FieldDefinition, Set<Triple<Integer, Integer, String>>> distinctSets
+    Map<FieldExpressionResponse, Set<Triple<Integer, Integer, String>>> distinctSets
 ) {
     @Override
     public boolean equals(Object o) {

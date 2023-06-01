@@ -6,12 +6,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.domain.enums.BinaryBooleanOperations;
+import ru.magnit.magreportbackend.util.Pair;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Getter
@@ -30,5 +29,21 @@ public class FilterGroupNew {
         var result = filters.stream().map(FilterDefinitionNew::getField).collect(Collectors.toCollection(HashSet::new));
         result.addAll(childGroups.stream().flatMap(g -> g.getAllFields().stream()).collect(Collectors.toSet()));
         return result;
+    }
+
+    public FilterGroup asFilterGroup(Map<FieldDefinition, Pair<Integer, DataTypeEnum>> fieldIndexes){
+        return new FilterGroup(
+                getOperationType(),
+                isInvertResult(),
+                getChildGroups().stream().map(o -> o.asFilterGroup(fieldIndexes)).toList(),
+                getFilters().stream().map(filter -> new FilterDefinition(
+                        filter.getField().getFieldType() == OlapFieldTypes.REPORT_FIELD ? filter.getField().getFieldId() : fieldIndexes.get(filter.getField()).getL(),
+                        filter.getFilterType(),
+                        filter.isInvertResult(),
+                        filter.getRounding(),
+                        filter.isCanRounding(),
+                        filter.getValues()
+                )).toList()
+        );
     }
 }
