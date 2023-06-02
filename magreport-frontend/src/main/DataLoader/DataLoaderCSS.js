@@ -13,14 +13,13 @@ export const DataLoaderCSS = makeStyles(theme => ({
     dataLoaderProgressDiv: {
         display:"flex", 
         flex: 1,
-        justifyContent: "center", 
-        //marginTop:"50px"
+        justifyContent: "center",
     },
     dataLoaderProgress: {
         display: 'flex', 
         alignSelf: 'center'
+    },
+    dataLoaderErrorAlert: {
+        margin: '20px'
     }
-    
-
-
 }))
