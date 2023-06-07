@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 // dataHub
 import dataHub from 'ajax/DataHub';
@@ -21,7 +22,7 @@ import {FolderItemTypes} from "main/FolderContent/FolderItemTypes";
 // local components
 import DataLoader from 'main/DataLoader/DataLoader';
 import FolderContent from 'main/FolderContent/FolderContent';
-
+import DependencyViewer from 'main/Main/Development/DependencyViewer';
 
 /**
  * @callback actionFolderLoaded
@@ -62,11 +63,30 @@ function SchedulesMenuView(props) {
     const [searchParams, setSearchParams] = useSearchParams();
     const locationPreviousHistory = { state: location.pathname + location.search }
 
+    const [dependency, setDependency] = useState({
+        loader: false,
+        show: false,
+        id: null,
+        data: null
+    })
+
     const [reload, setReload] = useState({needReload : state.needReload});
 
     useEffect(() => {
+        const scheduleId = searchParams.get('dependency');
+        if (scheduleId) {
+            handleDependenciesClick(scheduleId)
+        } else {
+            setDependency({
+                loader: false,
+                show: false,
+                id: null,
+                data: null
+            })
+        }
+
         setReload({needReload: true})
-    }, [searchParams, state.needReload])
+    }, [searchParams, state.needReload]) // eslint-disable-line
 
     let folderItemsType = FolderItemTypes.schedules;
     let isSortingAvailable = true;
@@ -105,8 +125,34 @@ function SchedulesMenuView(props) {
         }
     }
 
+    // Dependency
+    function handleDependenciesClick(scheduleId) {
+        searchParams.set('dependency', scheduleId);
+        setSearchParams(searchParams);
+
+        setDependency({...dependency, loader: true})
+        dataHub.filterInstanceController.getDependencies(Number(scheduleId), handleLoadedDependency)
+    }
+    function handleLoadedDependency({data}) {
+        setDependency({show: true, id: data.id, data: data, loader: false})
+    }
+    function handleCloseDependency() {
+        setDependency({ show: false })
+
+        searchParams.delete('dependency');
+        const newParams = {};
+        searchParams.forEach((value, key) => {
+            newParams[key] = value;
+        });
+        setSearchParams(newParams);
+    }
+
     return (
         <div style={{display: 'flex', flex: 1}}>
+            { !dependency.show ?
+                dependency.loader ? 
+                    <div style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}> <CircularProgress /> </div> : 
+                    !searchParams.get('dependency') && 
             <DataLoader
                 loadFunc = {dataHub.scheduleController.getAll}
                 loadParams = {[]}
@@ -126,7 +172,7 @@ function SchedulesMenuView(props) {
                     onItemClick={handleItemClick}
                     onAddItemClick={handleAddItemClick}
                     onEditItemClick={handleEditItemClick}
-
+                    onDependenciesClick = {handleDependenciesClick}
                     onDeleteItemClick={scheduleId => { props.actionDeleteItemClick(folderItemsType, null, scheduleId) }}
                     onSearchClick = {handleSearchItems}
                     contextAllowed
@@ -134,6 +180,14 @@ function SchedulesMenuView(props) {
                     onSortClick ={sortParams => { props.actionSortClick(folderItemsType, state.currentFolderId, sortParams) }}
                 />
             </DataLoader>
+            : 
+            <DependencyViewer
+                itemsType = {folderItemsType}
+                itemId={dependency.id}
+                data={dependency.data}
+                onExit = {handleCloseDependency}
+            />
+    }
         </div>
     );
 }
