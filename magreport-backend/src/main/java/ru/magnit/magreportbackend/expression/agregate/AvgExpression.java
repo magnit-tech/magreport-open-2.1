@@ -40,6 +40,8 @@ public class AvgExpression extends AggregateExpression {
 
     @Override
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
+        if (numValues == 0) return new Pair<>("", dataType);
+
         return switch (dataType) {
             case INTEGER -> new Pair<>(String.valueOf(longSumValues / numValues), dataType);
             case DOUBLE -> new Pair<>(String.valueOf(doubleSumValues / numValues), dataType);

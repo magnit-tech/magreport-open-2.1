@@ -158,7 +158,7 @@ public class OlapController {
         ResponseBody<OlapCubeResponse> response;
         LogHelper.logInfoUserMethodStart();
 
-        LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_GET_CUBE, request, userService.getCurrentUserName()));
+        LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_GET_CUBE_NEW, request, userService.getCurrentUserName()));
 
         if (outService) {
             response = ResponseBody.<OlapCubeResponse>builder()
@@ -233,7 +233,7 @@ public class OlapController {
             @RequestBody
             ReportOlapConfigAddRequest request) throws JsonProcessingException {
         LogHelper.logInfoUserMethodStart();
-        LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_CONFIGURATION_UPDATE, request, userService.getCurrentUserName()));
+        LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_CONFIGURATION_REPORT_ADD, request, userService.getCurrentUserName()));
 
         var response = ResponseBody.<ReportOlapConfigResponse>builder()
                 .success(true)
@@ -254,7 +254,7 @@ public class OlapController {
             @RequestBody
             ReportOlapConfigRequest request) throws JsonProcessingException {
         LogHelper.logInfoUserMethodStart();
-        LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_CONFIGURATION_UPDATE, request, userService.getCurrentUserName()));
+        LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_CONFIGURATION_REPORT_GET, request, userService.getCurrentUserName()));
 
         var response = ResponseBody.<ReportOlapConfigResponse>builder()
                 .success(true)

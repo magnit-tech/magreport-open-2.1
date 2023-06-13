@@ -1,5 +1,6 @@
 package ru.magnit.magreportbackend.dto.response.derivedfield;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,6 +39,7 @@ public class FieldExpressionResponse {
         return result;
     }
 
+    @JsonIgnore
     public List<FieldExpressionResponse> getAllExpressions() {
         final var result = new ArrayList<FieldExpressionResponse>();
         result.add(this);
