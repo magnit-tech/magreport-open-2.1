@@ -1,10 +1,12 @@
 package ru.magnit.magreportbackend.dto.response.olap;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
-
-import java.util.List;
 
 @Getter
 @Setter
@@ -13,6 +15,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OlapMetricResponseV2 {
-    private List<List<String>> values;
+    private String[][] values;
     private DataTypeEnum dataType;
 }
