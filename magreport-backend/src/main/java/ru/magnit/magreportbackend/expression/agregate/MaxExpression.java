@@ -8,6 +8,8 @@ import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.util.Pair;
 import ru.magnit.magreportbackend.util.StringUtils;
 
+import java.util.Objects;
+
 public class MaxExpression extends AggregateExpression {
     private final DataTypeEnum dataType;
     private Object maxValue;
@@ -35,7 +37,7 @@ public class MaxExpression extends AggregateExpression {
 
     @Override
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
-        return new Pair<>(maxValue.toString(), dataType);
+        return new Pair<>(Objects.isNull(maxValue) ? "" :  maxValue.toString(), dataType);
     }
 
     @Override
