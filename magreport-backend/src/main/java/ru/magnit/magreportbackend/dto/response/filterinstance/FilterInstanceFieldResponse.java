@@ -30,4 +30,6 @@ public class FilterInstanceFieldResponse {
     private LocalDateTime created;
     private LocalDateTime modified;
     private Boolean expand;
+    private Boolean showField;
+    private Boolean searchByField;
 }
