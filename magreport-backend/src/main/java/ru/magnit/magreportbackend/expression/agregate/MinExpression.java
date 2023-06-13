@@ -8,9 +8,11 @@ import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.util.Pair;
 import ru.magnit.magreportbackend.util.StringUtils;
 
+import java.util.Objects;
+
 public class MinExpression extends AggregateExpression {
     private final DataTypeEnum dataType;
-    private Object maxValue;
+    private Object minValue;
 
     public MinExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
         super(fieldExpression, context);
@@ -24,18 +26,18 @@ public class MinExpression extends AggregateExpression {
         if (value != null) {
             switch (dataType) {
                 case INTEGER ->
-                        maxValue = maxValue == null ? Long.valueOf(value) : Long.valueOf(Long.min((Long) maxValue, Long.parseLong(value)));
+                        minValue = minValue == null ? Long.valueOf(value) : Long.valueOf(Long.min((Long) minValue, Long.parseLong(value)));
                 case DOUBLE ->
-                        maxValue = maxValue == null ? Double.valueOf(value) : Double.valueOf(Double.min((Double) maxValue, Double.parseDouble(value)));
+                        minValue = minValue == null ? Double.valueOf(value) : Double.valueOf(Double.min((Double) minValue, Double.parseDouble(value)));
                 case STRING, DATE, TIMESTAMP, BOOLEAN ->
-                        maxValue = maxValue == null ? value : StringUtils.min((String) maxValue, value);
+                        minValue = minValue == null ? value : StringUtils.min((String) minValue, value);
             }
         }
     }
 
     @Override
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
-        return new Pair<>(maxValue.toString(), dataType);
+        return new Pair<>(Objects.isNull(minValue) ? "" :  minValue.toString(), dataType);
     }
 
     @Override
