@@ -32,9 +32,7 @@ public class FilterInstanceResponse {
     private String code;
     private List<FilterInstanceFieldResponse> fields = Collections.emptyList();
     private List<FolderNodeResponse> path = Collections.emptyList();
-
     private String userName;
-
     @JsonFormat(pattern = ISO_DATE_TIME_PATTERN)
     private LocalDateTime created;
 

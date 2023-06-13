@@ -30,7 +30,9 @@ public class FilterInstanceFieldResponseMapper implements Mapper<FilterInstanceF
                 .setDataSetFieldId(nvl(source.getDataSetField()))
                 .setCreated(source.getCreatedDateTime())
                 .setModified(source.getModifiedDateTime())
-                .setExpand(source.getExpand());
+                .setExpand(source.getExpand())
+                .setShowField(source.getShowField())
+                .setSearchByField(source.getSearchByField());
     }
 
     private FilterFieldTypeEnum mapFieldType(Long id) {
