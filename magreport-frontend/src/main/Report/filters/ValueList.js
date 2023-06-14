@@ -18,6 +18,7 @@ import { ValueListCSS, AllFiltersCSS } from './FiltersCSS'
 import dataHub from 'ajax/DataHub';
 
 import {buildTextFromLastValues, getCodeFieldId} from "utils/reportFiltersFunctions";
+import { FormControl, MenuItem, Select } from '@material-ui/core';
 
 /**
  * @callback onChangeFilterValue
@@ -36,12 +37,14 @@ function ValueList(props){
     const cls = AllFiltersCSS();
     const mandatory = props.filterData.mandatory
     //const [operationType, setOperationType] = useState(getOperationType(props.lastFilterValue));
-    let operationType = getOperationType(props.lastFilterValue);
+    // let operationType = getOperationType(props.lastFilterValue);
     const toggleFilter = useRef(props.toggleClearFilter);
     const timer = useRef(0);
     const requestId = useRef("")
     const [showInvalidValues, setShowInvalidValues] = useState(false)
     const [invalidValues, setInvalidValues] = useState([])
+    const [operationType, setOperationType] = useState(getOperationType(props.lastFilterValue))
+    // const [operationType, setOperationType] = useState('IS_IN_LIST')
 
     /*
         Вычисляем поле фильтра с типом CODE_FIELD
@@ -223,8 +226,31 @@ function ValueList(props){
         }
     })
 
+    function handleChangeOperationType(type) {
+        setOperationType(type);
+        props.onChangeFilterValue(
+            {
+                filterId: props.filterData.id,
+                operationType: type,
+                validation: mandatory ? "error" : 'success',
+                parameters: props.lastFilterValue?.parameters || [],
+            }
+        );
+    }
+
     return (
-        <div>
+        <div style={{display: 'flex'}}>
+            <FormControl variant="outlined" className={classes.formControl}>
+                <Select
+                    labelId="demo-simple-select-filled-label"
+                    id="demo-simple-select-filled"
+                    value={operationType}
+                    onChange={e => handleChangeOperationType(e.target.value)}
+                >
+                    <MenuItem value={'IS_IN_LIST'}>В списке</MenuItem>
+                    <MenuItem value={'IS_NOT_IN_LIST'}>Не в списке</MenuItem>
+                </Select>
+            </FormControl>
             <TextField
                 size = "small"
                 className={classes.textField}
