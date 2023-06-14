@@ -26,6 +26,7 @@ import DesignerTextField from '../../Designer/DesignerTextField';
 
 // styles
 import {ReportFiltersItemCSS} from '../../Designer/DesignerCSS';
+import { FormControl, MenuItem, Select } from '@material-ui/core';
 /**
  * @callback onChange
  * @param {Object} filterItem
@@ -194,6 +195,18 @@ export default function ReportFilterItem({index, disabled, filterItem, reportFie
                             size="small"
                             error = {!filterItem.code || (filterItem.errors && filterItem.errors.code) }
                         />
+
+                        <FormControl variant="outlined" className={classes.formControl}>
+                            <Select
+                                labelId="demo-simple-select-filled-label"
+                                id="demo-simple-select-filled"
+                                value={'IS_IN_LIST'}
+                                // onChange={e => handleChangeOperationType(e.target.value)}
+                            >
+                                <MenuItem value={'IS_IN_LIST'}>В списке</MenuItem>
+                                <MenuItem value={'IS_NOT_IN_LIST'}>Не в списке</MenuItem>
+                            </Select>
+                        </FormControl>
                     </div>
                     
                 </div>
