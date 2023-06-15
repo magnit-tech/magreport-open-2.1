@@ -129,7 +129,7 @@ public class EmailService {
 
     public ListEmailsCheckResponse checkEmails(ListEmailsCheckRequest request) {
         var emails = new ArrayList<>(request.getEmails().stream().map(String::toLowerCase).toList());
-        var goodEmails = checkAndFilterEmails(request.getEmails());
+        var goodEmails = checkAndFilterEmails(emails);
         emails.removeAll(goodEmails);
         return new ListEmailsCheckResponse().setEmails(emails);
 
