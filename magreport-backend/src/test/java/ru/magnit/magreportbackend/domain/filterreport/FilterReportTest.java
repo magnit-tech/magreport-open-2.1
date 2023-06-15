@@ -28,7 +28,7 @@ class FilterReportTest extends BaseEntityTest {
 
     @BeforeAll
     public void init() throws ClassNotFoundException {
-        checkNumberOfFields(16);
+        checkNumberOfFields(17);
     }
 
     @Test
