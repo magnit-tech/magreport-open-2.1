@@ -53,6 +53,9 @@ public class FilterReport extends EntityWithName {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "filterReport")
     private List<ReportJobFilter> reportJobFilters = Collections.emptyList();
 
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "filterReport")
+    private List<FilterReportMode> modes = Collections.emptyList();
+
     @Column(name = "ORDINAL")
     private Long ordinal;
 
