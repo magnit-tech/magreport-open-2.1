@@ -5,6 +5,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum;
 import ru.magnit.magreportbackend.dto.inner.datasource.DataSourceData;
 import ru.magnit.magreportbackend.service.security.CryptoService;
 
@@ -61,6 +62,7 @@ public class ConnectionPoolManager {
         hikariConfig.setJdbcUrl(dataSource.url());
         hikariConfig.setUsername(dataSource.userName());
         hikariConfig.setPassword(cryptoService.decode(dataSource.password()));
+        hikariConfig.setReadOnly(dataSource.type() == DataSourceTypeEnum.CLICK_HOUSE);
         hikariConfig.setMaxLifetime(1800000);
         hikariConfig.setLeakDetectionThreshold(1800000);
         hikariConfig.setIdleTimeout(600000);
