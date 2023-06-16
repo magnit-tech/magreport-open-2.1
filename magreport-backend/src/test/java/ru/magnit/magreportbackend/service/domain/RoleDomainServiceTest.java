@@ -96,17 +96,17 @@ class RoleDomainServiceTest {
     @Test
     void saveRole() {
 
-        when(repository.existsByName(any())).thenReturn(true);
+        when(repository.existsByNameIgnoreCase(any())).thenReturn(true);
         var request = getRoleAddRequest();
         assertThrows(InvalidParametersException.class,() -> domainService.saveRole(request));
 
-        when(repository.existsByName(any())).thenReturn(false);
+        when(repository.existsByNameIgnoreCase(any())).thenReturn(false);
         when(roleMapper.from(any(RoleAddRequest.class))).thenReturn(get_role());
         when(repository.save(any())).thenReturn(get_role());
 
         assertNotNull(domainService.saveRole(getRoleAddRequest()));
 
-        verify(repository, times(2)).existsByName(any());
+        verify(repository, times(2)).existsByNameIgnoreCase(any());
         verify(roleMapper).from(any(RoleAddRequest.class));
         verify(repository).save(any());
 
