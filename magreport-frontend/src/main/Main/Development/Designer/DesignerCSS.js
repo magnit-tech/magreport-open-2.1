@@ -189,9 +189,17 @@ export const ReportFiltersItemCSS = makeStyles((theme) => ({
         display: 'flex',
         flex: 1
     },
-    devRepFiltersCode: {
-      //  width: '108px',
+    devRepFilters: {
+        display: 'flex',
+        alignItems: 'center',
         marginLeft: '16px'
+    },
+    devRepFiltersSelect: {
+        width: '170px',
+        marginLeft: '10px',
+        '& .MuiOutlinedInput-input': {
+            padding: '10.5px 14px'
+        }
     }
 }));
 
