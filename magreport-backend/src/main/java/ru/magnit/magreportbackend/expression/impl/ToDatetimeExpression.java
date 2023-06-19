@@ -6,6 +6,8 @@ import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
+import java.util.Objects;
+
 public class ToDatetimeExpression extends ParameterizedExpression {
     private final Pair<String, DataTypeEnum> result = new Pair<>(null, DataTypeEnum.TIMESTAMP);
 
@@ -19,13 +21,16 @@ public class ToDatetimeExpression extends ParameterizedExpression {
         final var dateResult = dateParameter.calculate(rowNumber);
         var timePart = " 00:00:00";
 
+        if (Objects.isNull(dateResult.getL())) return result;
+
+
         if (parameters.size() == 2) {
             final var timeResult = parameters.get(1).calculate(rowNumber);
             checkParameterNotNull(parameters.get(1), timeResult);
             timePart = " " + timeResult.getL();
         }
 
-        checkParameterNotNull(dateParameter, dateResult);
+
         checkParameterHasAnyType(dateParameter, dateResult, DataTypeEnum.DATE, DataTypeEnum.TIMESTAMP);
 
         return result
