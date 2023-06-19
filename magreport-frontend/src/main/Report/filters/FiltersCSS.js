@@ -20,8 +20,19 @@ export const SingleValueUnboundedCSS = makeStyles(theme => ({
 }));
 
 export const ValueListCSS = makeStyles(theme => ({
+    valueListWrapper: {
+        display: 'flex',
+        alignItems: 'center'
+    },
+    typeSelect: {
+        width: '170px',
+        marginRight: '15px',
+        '& .MuiOutlinedInput-input': {
+            padding: '10.5px 14px'
+        }
+    },
     textField: {
-        //width: '100%',
+        width: '100%',
         display: "flex",
         margin: "8px 0px",
         '& .MuiInputBase-root': {
