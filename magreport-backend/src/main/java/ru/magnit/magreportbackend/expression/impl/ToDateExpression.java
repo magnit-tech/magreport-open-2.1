@@ -6,6 +6,8 @@ import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
+import java.util.Objects;
+
 public class ToDateExpression extends ParameterizedExpression {
     private final Pair<String, DataTypeEnum> result = new Pair<>(null, DataTypeEnum.DATE);
 
@@ -18,7 +20,7 @@ public class ToDateExpression extends ParameterizedExpression {
         final var dateParameter = parameters.get(0);
         final var dateResult = dateParameter.calculate(rowNumber);
 
-        checkParameterNotNull(dateParameter, dateResult);
+        if (Objects.isNull(dateResult.getL())) return result;
         checkParameterHasAnyType(dateParameter, dateResult, DataTypeEnum.DATE, DataTypeEnum.TIMESTAMP);
 
         return result

@@ -8,6 +8,7 @@ import ru.magnit.magreportbackend.util.Pair;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class AddWeeksExpression extends ParameterizedExpression {
     private final Pair<String, DataTypeEnum> result = new Pair<>(null, null);
@@ -22,7 +23,8 @@ public class AddWeeksExpression extends ParameterizedExpression {
         final var dateParameter = parameters.get(0);
         final var dateResult = dateParameter.calculate(rowNumber);
 
-        checkParameterNotNull(dateParameter, dateResult);
+        if (Objects.isNull(dateResult.getL())) return result;
+
         checkParameterHasAnyType(dateParameter, dateResult, DataTypeEnum.DATE, DataTypeEnum.TIMESTAMP);
 
         final var weeksParameter = parameters.get(1);
