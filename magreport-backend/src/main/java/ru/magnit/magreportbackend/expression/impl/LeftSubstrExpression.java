@@ -6,6 +6,8 @@ import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
+import java.util.Objects;
+
 public class LeftSubstrExpression extends ParameterizedExpression {
 
     private final Pair<String, DataTypeEnum> result;
@@ -20,9 +22,10 @@ public class LeftSubstrExpression extends ParameterizedExpression {
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
         final var sourceString = parameters.get(0).calculate(rowNumber);
         final var length = parameters.get(1).calculate(rowNumber);
+
+        if (Objects.isNull(sourceString.getL())) return result;
         final var stringLength = sourceString.getL().length();
 
-        checkParameterNotNull(parameters.get(0), sourceString);
         checkParameterHasAnyType(parameters.get(0), sourceString, DataTypeEnum.STRING, DataTypeEnum.DATE, DataTypeEnum.TIMESTAMP);
 
         checkParameterNotNull(parameters.get(1), length);

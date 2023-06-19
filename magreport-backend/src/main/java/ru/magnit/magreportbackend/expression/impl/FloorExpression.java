@@ -6,6 +6,8 @@ import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
+import java.util.Objects;
+
 public class FloorExpression extends ParameterizedExpression {
     private final Pair<String, DataTypeEnum> result = new Pair<>(null, DataTypeEnum.INTEGER);
 
@@ -18,6 +20,8 @@ public class FloorExpression extends ParameterizedExpression {
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
         final var firstParameter = parameters.get(0);
         final var firstValue = firstParameter.calculate(rowNumber);
+
+        if (Objects.isNull(firstValue.getL())) return result;
 
         checkParameterHasAnyType(firstParameter, firstValue, DataTypeEnum.DOUBLE, DataTypeEnum.INTEGER);
 
