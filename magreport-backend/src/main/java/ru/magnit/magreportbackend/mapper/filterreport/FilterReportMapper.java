@@ -28,7 +28,7 @@ public class FilterReportMapper implements Mapper<FilterReport, FilterAddRequest
                 .setFilterInstance(new FilterInstance(source.getFilterInstanceId()))
                 .setFields(fieldMapper.from(source.getFields()))
                 .setMaxCountItems(source.getMaxCountItems())
-                .setModes(source.getModes().stream().map(m -> new FilterReportMode(new FilterReportModeType(m.getId()))).toList());
+                .setModes(source.getFilterReportModes().stream().map(m -> new FilterReportMode(new FilterReportModeType(m.getId()))).toList());
         filterReport.getFields().forEach(field -> field.setFilterReport(filterReport));
         filterReport.getModes().forEach( mode -> mode.setFilterReport(filterReport));
 

@@ -7,6 +7,7 @@ import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class DateExpression extends ParameterizedExpression {
     private final Pair<String, DataTypeEnum> result = new Pair<>(null, DataTypeEnum.DATE);
@@ -20,19 +21,19 @@ public class DateExpression extends ParameterizedExpression {
         final var yearParameter = parameters.get(0);
         final var yearResult = yearParameter.calculate(rowNumber);
 
-        checkParameterNotNull(yearParameter, yearResult);
+        if (Objects.isNull(yearResult.getL())) return result;
         checkParameterHasAnyType(yearParameter, yearResult, DataTypeEnum.INTEGER, DataTypeEnum.STRING);
 
         final var monthParameter = parameters.get(1);
         final var monthResult = monthParameter.calculate(rowNumber);
 
-        checkParameterNotNull(monthParameter, monthResult);
+        if (Objects.isNull(monthResult.getL())) return result;
         checkParameterHasAnyType(monthParameter, monthResult, DataTypeEnum.INTEGER, DataTypeEnum.STRING);
 
         final var dayParameter = parameters.get(2);
         final var dayResult = dayParameter.calculate(rowNumber);
 
-        checkParameterNotNull(dayParameter, dayResult);
+        if (Objects.isNull(dayResult.getL())) return result;
         checkParameterHasAnyType(dayParameter, dayResult, DataTypeEnum.INTEGER, DataTypeEnum.STRING);
 
         final var yearValue = Integer.parseInt(yearResult.getL());

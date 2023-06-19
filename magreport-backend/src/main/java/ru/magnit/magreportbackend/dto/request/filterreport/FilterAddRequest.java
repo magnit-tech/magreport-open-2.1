@@ -28,5 +28,5 @@ public class FilterAddRequest {
     private Long filterInstanceId;
     private Long maxCountItems;
     private List<FilterFieldAddRequest> fields = Collections.emptyList();
-    private List<FilterReportOperationTypeEnum> modes = Collections.emptyList();
+    private List<FilterReportOperationTypeEnum> filterReportModes = Collections.emptyList();
 }
