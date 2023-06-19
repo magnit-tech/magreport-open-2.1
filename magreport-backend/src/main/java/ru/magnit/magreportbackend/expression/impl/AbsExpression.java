@@ -6,6 +6,8 @@ import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
+import java.util.Objects;
+
 public class AbsExpression extends ParameterizedExpression {
     private final Pair<String, DataTypeEnum> result = new Pair<>(null, null);
 
@@ -18,7 +20,7 @@ public class AbsExpression extends ParameterizedExpression {
         final var parameter = parameters.get(0);
         final var parameterValue = parameter.calculate(rowNumber);
 
-        checkParameterNotNull(parameter, parameterValue);
+        if (Objects.isNull(parameterValue.getL())) return result;
         checkParameterHasAnyType(parameter, parameterValue, DataTypeEnum.INTEGER, DataTypeEnum.DOUBLE);
 
         result.setR(parameterValue.getR());

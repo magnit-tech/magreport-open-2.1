@@ -2,9 +2,11 @@ package ru.magnit.magreportbackend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.magnit.magreportbackend.dto.request.folder.FolderSearchRequest;
 import ru.magnit.magreportbackend.dto.request.serversettings.ServerMailTemplateEditRequest;
 import ru.magnit.magreportbackend.dto.request.serversettings.ServerMailTemplateRequest;
 import ru.magnit.magreportbackend.dto.request.serversettings.ServerMailTemplateTypeRequest;
+import ru.magnit.magreportbackend.dto.response.folder.FolderSearchResponse;
 import ru.magnit.magreportbackend.dto.response.serversettings.ServerMailTemplateResponse;
 import ru.magnit.magreportbackend.dto.response.serversettings.ServerMailTemplateTypeResponse;
 import ru.magnit.magreportbackend.service.domain.ServerMailTemplateDomainService;
@@ -51,4 +53,7 @@ public class ServerMailTemplateService {
         return serverMailTemplateDomainService.getAllServerMailTemplate();
     }
 
+    public FolderSearchResponse searchTemplate(FolderSearchRequest request) {
+        return serverMailTemplateDomainService.searchTemplate(request);
+    }
 }

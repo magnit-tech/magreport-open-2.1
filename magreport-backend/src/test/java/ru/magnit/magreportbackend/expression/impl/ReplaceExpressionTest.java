@@ -32,7 +32,7 @@ class ReplaceExpressionTest {
                     .setConstantValue("word")
             ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, new DerivedFieldResponse().setId(1L).setName("Test field")));
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, new DerivedFieldResponse().setId(1L).setName("Test field"), null));
         final var expressionResult = expression.calculate(0);
 
         assertEquals("Test word", expressionResult.getL());

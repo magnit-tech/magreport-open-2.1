@@ -18,6 +18,7 @@ const SCHEDULE_TASK_MANUAL_START_URL = CONTROLLER_URL + "/task-manual-start";
 const SCHEDULE_TASK_RUN_URL = CONTROLLER_URL + "/task-run";
 const SCHEDULE_TASK_SWITCH_URL = CONTROLLER_URL + "/task-switch";
 const SCHEDULE_TASK_GET_LINK_URL = CONTROLLER_URL + "/task-get-manual-link";
+const SCHEDULE_GET_TASKS_URL = CONTROLLER_URL + "/get-tasks";
 
 //TODO: add /prolongation
 export default function ScheduleController(dataHub) {
@@ -135,4 +136,10 @@ export default function ScheduleController(dataHub) {
         return dataHub.requestService(SCHEDULE_TASK_GET_LINK_URL, METHOD, body, callback);
     };
 
+    this.getDependencies = function (id, callback){
+        const body = {
+            id,
+        };
+        return dataHub.requestService(SCHEDULE_GET_TASKS_URL, METHOD, body, callback, dataHub.localCache.setDependenciesFolderData);
+    }
 }

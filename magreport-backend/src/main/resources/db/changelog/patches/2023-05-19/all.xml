@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="ADD-FIELDS-FILTER-INSTANCE-FIELD-001" author="vyushin_aa">
+
+        <addColumn tableName="FILTER_INSTANCE_FIELD" schemaName="REPOSITORY">
+            <column name="SHOW_FIELD" type="BOOLEAN">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="SEARCH_BY_FIELD" type="BOOLEAN">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <update tableName="FILTER_INSTANCE_FIELD" schemaName="REPOSITORY">
+            <column name="SHOW_FIELD" value="true"/>
+            <column name="SEARCH_BY_FIELD" value="false"/>
+            <where>
+                FILTER_INSTANCE_FIELD_ID IN (
+                SELECT FIF.FILTER_INSTANCE_FIELD_ID FROM REPOSITORY.FILTER_INSTANCE_FIELD AS FIF
+                JOIN REPOSITORY.FILTER_INSTANCE AS FI ON FI.FILTER_INSTANCE_ID = FIF.FILTER_INSTANCE_ID
+                JOIN REPOSITORY.FILTER_TEMPLATE AS FT ON FT.FILTER_TEMPLATE_ID =FI.FILTER_TEMPLATE_ID
+                JOIN REPOSITORY.FILTER_TEMPLATE_FIELD AS FTF ON FTF.FILTER_TEMPLATE_FIELD_ID =
+                FIF.FILTER_TEMPLATE_FIELD_ID
+                WHERE FTF.FILTER_FIELD_TYPE_ID != 2 and FT.FILTER_TYPE_ID = 4
+                )
+            </where>
+        </update>
+
+        <update tableName="FILTER_INSTANCE_FIELD" schemaName="REPOSITORY">
+            <column name="SHOW_FIELD" value="true"/>
+            <column name="SEARCH_BY_FIELD" value="true"/>
+            <where>
+                FILTER_INSTANCE_FIELD_ID IN (
+                SELECT FIF.FILTER_INSTANCE_FIELD_ID FROM REPOSITORY.FILTER_INSTANCE_FIELD AS FIF
+                JOIN REPOSITORY.FILTER_INSTANCE AS FI ON FI.FILTER_INSTANCE_ID = FIF.FILTER_INSTANCE_ID
+                JOIN REPOSITORY.FILTER_TEMPLATE AS FT ON FT.FILTER_TEMPLATE_ID =FI.FILTER_TEMPLATE_ID
+                JOIN REPOSITORY.FILTER_TEMPLATE_FIELD AS FTF ON FTF.FILTER_TEMPLATE_FIELD_ID =
+                FIF.FILTER_TEMPLATE_FIELD_ID
+                WHERE FTF.FILTER_FIELD_TYPE_ID = 2 and FT.FILTER_TYPE_ID = 4
+                )
+            </where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>
