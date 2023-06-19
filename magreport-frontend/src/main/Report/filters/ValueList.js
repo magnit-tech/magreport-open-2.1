@@ -18,7 +18,7 @@ import { ValueListCSS, AllFiltersCSS } from './FiltersCSS'
 import dataHub from 'ajax/DataHub';
 
 import {buildTextFromLastValues, getCodeFieldId} from "utils/reportFiltersFunctions";
-import { FormControl, MenuItem, Select } from '@material-ui/core';
+import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 
 /**
  * @callback onChangeFilterValue
@@ -35,16 +35,14 @@ import { FormControl, MenuItem, Select } from '@material-ui/core';
 function ValueList(props){
     const classes = ValueListCSS();
     const cls = AllFiltersCSS();
-    const mandatory = props.filterData.mandatory
-    //const [operationType, setOperationType] = useState(getOperationType(props.lastFilterValue));
-    // let operationType = getOperationType(props.lastFilterValue);
+    const mandatory = props.filterData.mandatory;
     const toggleFilter = useRef(props.toggleClearFilter);
     const timer = useRef(0);
     const requestId = useRef("")
     const [showInvalidValues, setShowInvalidValues] = useState(false)
     const [invalidValues, setInvalidValues] = useState([])
-    const [operationType, setOperationType] = useState(getOperationType(props.lastFilterValue))
-    // const [operationType, setOperationType] = useState('IS_IN_LIST')
+    const [operationTypeDisabled, setOperationTypeDisabled] = useState(true);
+    const [operationType, setOperationType] = useState('IN_LIST');
 
     /*
         Вычисляем поле фильтра с типом CODE_FIELD
@@ -68,13 +66,17 @@ function ValueList(props){
     /*
         Вычислить тип операции по предыдущему значению
     */
-    function getOperationType(lastParameters){
-        let operationType = 'IS_IN_LIST';
-        if(lastParameters){
-            operationType = lastParameters.operationType;
+    useEffect(() => {
+        const type = props.filterData.filterReportModes;
+
+        if (type.length < 1 || type.length === 2){
+            setOperationTypeDisabled(false)
+            setOperationType('IN_LIST')
+        } else {
+            setOperationTypeDisabled(true)
+            return type.length > 0 ? setOperationType([...type]) : setOperationType('IN_LIST');
         }
-        return operationType;
-    }
+    }, [props.filterData.filterReportModes])
 
     function getRegexp() {
         let s = ""
@@ -149,7 +151,7 @@ function ValueList(props){
             props.onChangeFilterValue(
                 {
                     filterId : props.filterData.id,
-                    operationType: operationType,
+                    operationType: operationType === 'IN_LIST' ? 'IS_IN_LIST' : 'IS_NOT_IN_LIST',
                     validation: status,
                     parameters: parameters
                 }
@@ -167,7 +169,7 @@ function ValueList(props){
         else {
             props.onChangeFilterValue({
                 filterId : props.filterData.id,
-                operationType: operationType,
+                operationType: operationType === 'IN_LIST' ? 'IS_IN_LIST' : 'IS_NOT_IN_LIST',
                 validation: mandatory ? "error" : 'success',
                 parameters: []
             });
@@ -200,7 +202,7 @@ function ValueList(props){
             props.onChangeFilterValue(
                 {
                     filterId : props.filterData.id,
-                    operationType,
+                    operationType: operationType === 'IN_LIST' ? 'IS_IN_LIST' : 'IS_NOT_IN_LIST',
                     validation,
                     parameters,
                 }
@@ -227,28 +229,30 @@ function ValueList(props){
     })
 
     function handleChangeOperationType(type) {
-        setOperationType(type);
         props.onChangeFilterValue(
             {
                 filterId: props.filterData.id,
-                operationType: type,
+                operationType: type === 'IN_LIST' ? 'IS_IN_LIST' : 'IS_NOT_IN_LIST',
                 validation: mandatory ? "error" : 'success',
                 parameters: props.lastFilterValue?.parameters || [],
             }
         );
+        setOperationType(type);
     }
 
     return (
-        <div style={{display: 'flex'}}>
-            <FormControl variant="outlined" className={classes.formControl}>
+        <div className={classes.valueListWrapper}>
+            <FormControl variant="outlined" className={classes.typeSelect} disabled={operationTypeDisabled}>
+                <InputLabel id="devRepFiltersSelect">Операция</InputLabel>
                 <Select
-                    labelId="demo-simple-select-filled-label"
-                    id="demo-simple-select-filled"
+                    label="Операция"
+                    labelId="devRepFiltersSelect"
+                    id="devRepFiltersSelect"
                     value={operationType}
                     onChange={e => handleChangeOperationType(e.target.value)}
                 >
-                    <MenuItem value={'IS_IN_LIST'}>В списке</MenuItem>
-                    <MenuItem value={'IS_NOT_IN_LIST'}>Не в списке</MenuItem>
+                    <MenuItem value={'IN_LIST'}>В списке</MenuItem>
+                    <MenuItem value={'NOT_IN_LIST'}>Не в списке</MenuItem>
                 </Select>
             </FormControl>
             <TextField
