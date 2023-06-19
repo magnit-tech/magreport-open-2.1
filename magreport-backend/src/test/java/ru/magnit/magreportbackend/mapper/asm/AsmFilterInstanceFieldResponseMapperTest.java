@@ -72,7 +72,9 @@ class AsmFilterInstanceFieldResponseMapperTest {
             "Field 1 description",
             creationTime,
             modificationTime,
-            true
+            true,
+                true,
+                true
         );
     }
 }

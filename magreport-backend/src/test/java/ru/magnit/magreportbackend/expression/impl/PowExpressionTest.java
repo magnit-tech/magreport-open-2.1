@@ -26,7 +26,7 @@ class PowExpressionTest {
                     .setConstantValue("2")
             ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null, null));
         final var expressionResult = expression.calculate(0);
 
         assertEquals("16.0", expressionResult.getL());
@@ -48,7 +48,7 @@ class PowExpressionTest {
                     .setConstantValue(null)
             ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null, null));
         final var expressionResult = expression.calculate(0);
 
         assertNull(expressionResult.getL());

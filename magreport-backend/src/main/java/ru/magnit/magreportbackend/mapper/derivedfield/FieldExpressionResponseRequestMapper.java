@@ -12,6 +12,7 @@ public class FieldExpressionResponseRequestMapper implements Mapper<FieldExpress
     public FieldExpressionResponse from(DerivedFieldExpressionAddRequest source) {
         return new FieldExpressionResponse(
             source.getType(),
+            null,
             source.getReferenceId(),
             source.getConstantValue(),
             source.getConstantType(),

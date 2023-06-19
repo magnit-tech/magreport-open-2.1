@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="FILTER-REPORT-MODE-001" author="vyushin_aa">
+        <preConditions>
+            <not>
+                <sequenceExists schemaName="REPOSITORY" sequenceName="FILTER_REPORT_MODE_TYPE_SEQ"/>
+            </not>
+        </preConditions>
+        <createSequence schemaName="REPOSITORY" sequenceName="FILTER_REPORT_MODE_TYPE_SEQ" startValue="0"/>
+        <modifySql>
+            <append value=" NOCACHE"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="FILTER-REPORT-MODE-002" author="vyushin_aa">
+            <preConditions>
+                <not>
+                        <tableExists tableName="FILTER_REPORT_MODE_TYPE" schemaName="REPOSITORY"/>
+                </not>
+            </preConditions>
+
+        <createTable tableName="FILTER_REPORT_MODE_TYPE" schemaName="REPOSITORY">
+
+            <column name="FILTER_REPORT_MODE_TYPE_ID" type="INT" defaultValueSequenceNext="FILTER_REPORT_MODE_TYPE_SEQ">
+                <constraints primaryKey="true" primaryKeyName="FILTER_REPORT_MODE_TYPE_PK"/>
+            </column>
+
+            <column name="NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="DESCRIPTION" type="VARCHAR(255)"/>
+
+            <column name="CREATED" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="MODIFIED" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+    </changeSet>
+
+    <changeSet id="FILTER_REPORT_MODE-003" author="vyushin_aa">
+
+        <insert tableName="FILTER_REPORT_MODE_TYPE" schemaName="REPOSITORY">
+            <column name="NAME" value="IN_LIST"/>
+            <column name="DESCRIPTION" value="Режим работы фильтра: 'В списке'"/>
+        </insert>
+
+        <insert tableName="FILTER_REPORT_MODE_TYPE" schemaName="REPOSITORY">
+            <column name="NAME" value="NOT_IN_LIST"/>
+            <column name="DESCRIPTION" value="Режим работы фильтра: 'Не в списке'"/>
+        </insert>
+
+    </changeSet>
+
+    <changeSet id="FILTER_REPORT_MODE-004" author="vyushin_aa">
+
+        <preConditions>
+            <not>
+                <sequenceExists schemaName="REPOSITORY" sequenceName="FILTER_REPORT_MODE_SEQ"/>
+            </not>
+        </preConditions>
+        <createSequence schemaName="REPOSITORY" sequenceName="FILTER_REPORT_MODE_SEQ"/>
+        <modifySql>
+            <append value=" NOCACHE"/>
+        </modifySql>
+
+    </changeSet>
+
+    <changeSet id="FILTER_REPORT_MODE-005" author="vyushin_aa">
+
+        <preConditions>
+            <not>
+                <not>
+                    <tableExists tableName="FILTER_REPORT_MODE_TYPE" schemaName="REPOSITORY"/>
+                </not>
+            </not>
+        </preConditions>
+
+        <createTable tableName="FILTER_REPORT_MODE" schemaName="REPOSITORY">
+
+            <column name="FILTER_REPORT_MODE_ID" type="INT" defaultValueSequenceNext="FILTER_REPORT_MODE_SEQ">
+                <constraints primaryKey="true" primaryKeyName="FILTER_REPORT_MODE_PK"/>
+            </column>
+
+            <column name="FILTER_REPORT_ID" type="INT" >
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="FILTER_REPORT_MODE_TYPE_ID" type="INT" >
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="CREATED" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="MODIFIED" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+    </changeSet>
+
+    <changeSet id="FILTER_REPORT_MODE-006" author="vyushin_aa">
+
+        <preConditions>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK-FILTER_REPORT_MODE-FILTER_REPORT"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="FILTER_REPORT_ID" baseTableName="FILTER_REPORT_MODE"
+                                 constraintName="FK-FILTER_REPORT_MODE-FILTER_REPORT"
+                                 deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="FILTER_REPORT_ID" referencedTableName="FILTER_REPORT"/>
+
+    </changeSet>
+
+    <changeSet id="FILTER_REPORT_MODE-007" author="vyushin_aa">
+
+        <preConditions>
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="FK-FILTER_REPORT_MODE-FILTER_REPORT_MODE_TYPE"/>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint baseColumnNames="FILTER_REPORT_MODE_TYPE_ID" baseTableName="FILTER_REPORT_MODE"
+                                 constraintName="FK-FILTER_REPORT_MODE-FILTER_REPORT_MODE_TYPE"
+                                 deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" onUpdate="RESTRICT"
+                                 referencedColumnNames="FILTER_REPORT_MODE_TYPE_ID" referencedTableName="FILTER_REPORT_MODE_TYPE"/>
+
+    </changeSet>
+
+</databaseChangeLog>

@@ -292,7 +292,12 @@ function ItemCard(props){
         );
     };
 
-    if (props.itemType === FolderItemTypes.dataset || props.itemType === FolderItemTypes.datasource || props.itemType === FolderItemTypes.reportsDev || props.itemType === FolderItemTypes.filterInstance ) {
+    if (props.itemType === FolderItemTypes.dataset || 
+        props.itemType === FolderItemTypes.datasource || 
+        props.itemType === FolderItemTypes.reportsDev || 
+        props.itemType === FolderItemTypes.filterInstance ||
+        props.itemType === FolderItemTypes.schedules
+    ) {
         actionBtns.push(
             <Tooltip key={3} title="Показать зависимости">
                 <IconButton

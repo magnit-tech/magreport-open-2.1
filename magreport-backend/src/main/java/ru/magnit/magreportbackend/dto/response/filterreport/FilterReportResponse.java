@@ -56,11 +56,14 @@ public record FilterReportResponse(
         Boolean valid,
 
         @JsonFormat(shape = JsonFormat.Shape.NUMBER_INT)
-        Long maxCountItems
+        Long maxCountItems,
+
+        @JsonFormat(shape = JsonFormat.Shape.STRING)
+        List<String> filterReportModes
 
 ) {
 
     public FilterReportResponse() {
-        this(null, null, null, null, null,null, null, null, null, null, null, null, null, null, null, null);
+        this(null, null, null, null, null,null, null, null, null, null, null, null, null, null, null, null,null);
     }
 }

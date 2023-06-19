@@ -23,7 +23,7 @@ public enum DataTypeEnum {
             case BIGINT, INTEGER, TINYINT, SMALLINT, BIT -> INTEGER;
             case DATE -> DATE;
             case REAL, DOUBLE, FLOAT, DECIMAL, NUMERIC -> DOUBLE;
-            case TIME, TIMESTAMP -> TIMESTAMP;
+            case TIME, TIMESTAMP, TIMESTAMP_WITH_TIMEZONE, TIME_WITH_TIMEZONE -> TIMESTAMP;
             case BOOLEAN -> BOOLEAN;
             default -> null;
         };

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="ADD-CONSTRAINT-SCHEDULE_TASK-ACTIVE-001" author="vyushin_aa">
+
+        <update tableName="SCHEDULE_TASK">
+            <column name="ACTIVE" value="false"/>
+            <where> ACTIVE IS NULL </where>
+        </update>
+
+        <addNotNullConstraint tableName="SCHEDULE_TASK" columnName="ACTIVE"/>
+    </changeSet>
+
+</databaseChangeLog>

@@ -26,7 +26,7 @@ class MillsecIntervalExtensionTest {
                     .setConstantValue("2023-03-28 09:27:02.513")
             ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null, null));
         final var expressionResult = expression.calculate(0);
 
         assertEquals("1001", expressionResult.getL());
@@ -62,7 +62,7 @@ class MillsecIntervalExtensionTest {
                                 ))
                 ));
 
-        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null));
+        final var expression = sourceExpression.getType().init(sourceExpression, new ExpressionCreationContext(null, null, null, null));
         final var expressionResult = expression.calculate(0);
 
         assertEquals("0", expressionResult.getL());

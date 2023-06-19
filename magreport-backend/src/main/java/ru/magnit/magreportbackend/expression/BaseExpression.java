@@ -18,6 +18,10 @@ public abstract class BaseExpression {
         this.derivedField = context.derivedField();
     }
 
+    public void addValue(int cubeRow, int rowNumber, int columnNumber){
+
+    }
+
     public abstract Pair<String, DataTypeEnum> calculate(int rowNumber);
 
     public abstract DataTypeEnum inferType();

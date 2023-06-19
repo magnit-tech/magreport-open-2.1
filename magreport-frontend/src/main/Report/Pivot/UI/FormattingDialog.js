@@ -521,7 +521,7 @@ export default function FormattingDialog(props){
 
 					<Box className={classes.FD_wrapperForActionSections}>
 						<Box className={classes.FD_fontColorSection}>
-							<Box whiteSpace="nowrap"> Цвет:</Box>
+							<Box whiteSpace="nowrap"> Цвет: </Box>
 							<Box
 								className={classes.FD_fontColorWrapper}
 								onClick={() => setOpen(autoFontColor ? isOpen : !isOpen)}

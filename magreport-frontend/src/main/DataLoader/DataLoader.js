@@ -1,9 +1,10 @@
-import React from 'react'
-import {useState, useRef} from 'react';
-import { CircularProgress, Typography } from '@material-ui/core';
+import React, { useState, useRef } from 'react';
 import clsx from 'clsx';
 
 import {DataLoaderCSS} from './DataLoaderCSS';
+
+import { CircularProgress } from '@material-ui/core';
+import { Alert } from '@material-ui/lab';
 
 /**
  * Загрузчик данных для дочерних компонентов
@@ -80,15 +81,17 @@ export default function DataLoader(props){
 
     return (
         <div  className={clsx(classes.dataLoaderRoot, {[classes.dataLoaderRootWOScroll]: props.disabledScroll})}>
-        {
-            loadState === 'notLoaded' ?
-                <div></div>  
-            : (loadState === 'loading' || props.isSearchLoading) && (props.showSpinner === undefined || props.showSpinner === true)? 
-                <div className={classes.dataLoaderProgressDiv}><CircularProgress className={classes.dataLoaderProgress}/></div>
-            : loadState === 'loadFailed' ?
-                (props.loadFailedElement ? props.loadFailedElement : <Typography>{errLoadMessage.current}</Typography>)
-            : props.children 
-        }
+            {
+                loadState === 'notLoaded' ?
+                    <div></div>  
+                : (loadState === 'loading' || props.isSearchLoading) && (props.showSpinner === undefined || props.showSpinner === true) ? 
+                    <div className={classes.dataLoaderProgressDiv}>
+                        <CircularProgress className={classes.dataLoaderProgress}/>
+                    </div>
+                : loadState === 'loadFailed' ?
+                    (props.loadFailedElement ? props.loadFailedElement : <Alert severity="error" className={classes.dataLoaderErrorAlert}> {errLoadMessage.current} </Alert> )
+                : props.children 
+            }
         </div>
     );
 
