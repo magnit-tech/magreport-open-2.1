@@ -36,7 +36,7 @@ public enum AggregationType {
             case SUM -> switch (dataType) {
                 case INTEGER -> new SumIntegerFunction();
                 case DOUBLE -> new SumDoubleFunction();
-                case STRING, DATE, TIMESTAMP, BOOLEAN->
+                case STRING, DATE, TIMESTAMP, BOOLEAN, UNKNOWN->
                     throw new InvalidParametersException(String.format(ERROR_MESSAGE, this, dataType));
             };
 
@@ -44,18 +44,20 @@ public enum AggregationType {
                 case INTEGER -> new MaxIntegerFunction();
                 case DOUBLE -> new MaxDoubleFunction();
                 case STRING, DATE, TIMESTAMP, BOOLEAN -> new MaxStringFunction();
+                case UNKNOWN ->  throw new InvalidParametersException(String.format(ERROR_MESSAGE, this, dataType));
             };
 
             case MIN -> switch (dataType) {
                 case INTEGER -> new MinIntegerFunction();
                 case DOUBLE -> new MinDoubleFunction();
                 case STRING, DATE, TIMESTAMP, BOOLEAN -> new MinStringFunction();
+                case UNKNOWN ->  throw new InvalidParametersException(String.format(ERROR_MESSAGE, this, dataType));
             };
 
             case AVG -> switch (dataType) {
                 case INTEGER -> new AvgIntegerFunction();
                 case DOUBLE -> new AvgDoubleFunction();
-                case STRING, DATE, TIMESTAMP, BOOLEAN ->
+                case STRING, DATE, TIMESTAMP, BOOLEAN, UNKNOWN ->
                     throw new InvalidParametersException(String.format(ERROR_MESSAGE, this, dataType));
             };
         };

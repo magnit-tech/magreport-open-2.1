@@ -56,7 +56,7 @@ public class MetricLesserFilter implements MetricFilterNode {
                 var filter = value.isEmpty() ? LocalDateTime.MAX : LocalDateTime.parse(value.replace(" ", "T"));
                 yield current.isBefore(filter);
             }
-            case STRING, BOOLEAN -> throw new InvalidParametersException("Not supported datatype metric");
+            case STRING, BOOLEAN, UNKNOWN -> throw new InvalidParametersException("Not supported datatype metric");
         };
 
         return invert != (result);

@@ -7,10 +7,6 @@
 
     <changeSet id="NEW-DATA-TYPE-001" author="vyushin_aa">
 
-        <preConditions>
-            <rowCount schemaName="REPOSITORY" tableName="DATA_TYPE" expectedRows="7"/>
-        </preConditions>
-
         <delete schemaName="REPOSITORY" tableName="DATA_TYPE">
             <where>DATA_TYPE_ID = 6</where>
         </delete>

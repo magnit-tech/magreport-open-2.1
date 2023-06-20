@@ -36,6 +36,7 @@ import ru.magnit.magreportbackend.dto.response.olap.OlapMetricResponse;
 import ru.magnit.magreportbackend.dto.response.olap.OlapMetricResponse2;
 import ru.magnit.magreportbackend.dto.response.report.ReportFieldMetadataResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.TokenResponse;
+import ru.magnit.magreportbackend.exception.InvalidParametersException;
 import ru.magnit.magreportbackend.exception.OlapMaxDataVolumeExceeded;
 import ru.magnit.magreportbackend.mapper.olap.OlapCubeRequestMapper;
 import ru.magnit.magreportbackend.mapper.olap.OlapFieldItemsRequestMerger;
@@ -406,6 +407,7 @@ public class OlapService {
                                 yield time1.compareTo(time2);
                             }
                             case BOOLEAN -> Boolean.compare(Boolean.parseBoolean(var1), Boolean.parseBoolean(var2));
+                            case UNKNOWN ->  throw new InvalidParametersException("Not supported datatype field");
                         };
                         i++;
                     }
@@ -687,6 +689,7 @@ public class OlapService {
                             var v2 = value2.isEmpty() ? Double.MIN_VALUE : Double.parseDouble(value2);
                             yield Double.compare(v1, v2);
                         }
+                        case UNKNOWN ->  throw new InvalidParametersException("Not supported datatype field");
                     };
 
                     if (compare == 0)
