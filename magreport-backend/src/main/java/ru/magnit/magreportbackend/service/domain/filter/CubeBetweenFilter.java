@@ -63,7 +63,7 @@ public class CubeBetweenFilter implements CubeFilterNode {
                 yield (current.isAfter(filterStart) || current.isEqual(filterStart)) && (current.isBefore(filterStop) || current.isEqual(filterStop));
             }
 
-            case STRING, BOOLEAN ->  throw new InvalidParametersException("Not supported datatype field");
+            case STRING, BOOLEAN, UNKNOWN ->  throw new InvalidParametersException("Not supported datatype field");
         };
 
 
