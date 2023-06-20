@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="NEW-DATA-TYPE-001" author="vyushin_aa">
+
+        <preConditions>
+            <rowCount schemaName="REPOSITORY" tableName="DATA_TYPE" expectedRows="7"/>
+        </preConditions>
+
+        <delete schemaName="REPOSITORY" tableName="DATA_TYPE">
+            <where>DATA_TYPE_ID = 6</where>
+        </delete>
+
+        <sql> ALTER SEQUENCE  REPOSITORY.DATA_TYPE_SEQ RESTART WITH 6</sql>
+
+    </changeSet>
+
+    <changeSet id="NEW-DATA-TYPE-002" author="vyushin_aa">
+
+        <insert tableName="DATA_TYPE">
+            <column name="NAME" value="UNKNOWN"/>
+            <column name="DESCRIPTION" value="Неизвестный тип данных"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

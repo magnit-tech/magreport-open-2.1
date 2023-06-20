@@ -11,7 +11,8 @@ public enum DataTypeEnum {
     DOUBLE(false),
     DATE(true),
     TIMESTAMP(true),
-    BOOLEAN(false);
+    BOOLEAN(false),
+    UNKNOWN(true);
 
     DataTypeEnum(boolean quoted) {
         this.quoted = quoted;
@@ -25,10 +26,10 @@ public enum DataTypeEnum {
             case REAL, DOUBLE, FLOAT, DECIMAL, NUMERIC -> DOUBLE;
             case TIME, TIMESTAMP, TIMESTAMP_WITH_TIMEZONE, TIME_WITH_TIMEZONE -> TIMESTAMP;
             case BOOLEAN -> BOOLEAN;
-            default -> null;
+            default -> UNKNOWN;
         };
 
-        if (result == null)
+        if (result == UNKNOWN)
             log.error("Mapping for data type " + columnType + " not set");
 
         return result;

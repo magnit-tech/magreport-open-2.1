@@ -3,6 +3,7 @@ package ru.magnit.magreportbackend.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.domain.filtertemplate.FilterFieldTypeEnum;
 import ru.magnit.magreportbackend.domain.filtertemplate.FilterTypeEnum;
 import ru.magnit.magreportbackend.domain.folderreport.FolderAuthorityEnum;
@@ -157,7 +158,12 @@ public class ReportService {
     public ReportResponse addReport(ReportAddRequest request) {
         final var dataSet = dataSetDomainService.getDataSet(request.getDataSetId());
 
-        if (Boolean.FALSE.equals(dataSet.getIsValid()))
+        var checkFields = dataSet.getFields()
+                .stream()
+                .filter(f -> !f.getTypeName().equals(DataTypeEnum.UNKNOWN.name()))
+                .anyMatch(f -> !f.getIsValid());
+
+        if (checkFields)
             throw new InvalidParametersException("Набор данных имеет не существующие на источнике поля.");
 
         final var currentUser = userDomainService.getCurrentUser();
