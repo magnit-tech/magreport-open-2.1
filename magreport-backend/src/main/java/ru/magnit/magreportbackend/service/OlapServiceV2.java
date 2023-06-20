@@ -21,6 +21,7 @@ import ru.magnit.magreportbackend.dto.response.derivedfield.FieldExpressionRespo
 import ru.magnit.magreportbackend.dto.response.olap.OlapCubeResponseV2;
 import ru.magnit.magreportbackend.dto.response.olap.OlapInfoCubesResponse;
 import ru.magnit.magreportbackend.dto.response.olap.OlapMetricResponseV2;
+import ru.magnit.magreportbackend.exception.InvalidParametersException;
 import ru.magnit.magreportbackend.exception.OlapMaxDataVolumeExceeded;
 import ru.magnit.magreportbackend.expression.BaseExpression;
 import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
@@ -256,7 +257,7 @@ public class OlapServiceV2 {
                             var v2 = value2.isEmpty() ? Integer.MIN_VALUE : Integer.parseInt(value2);
                             yield Integer.compare(v1, v2);
                         }
-                        case STRING, DATE, TIMESTAMP, BOOLEAN -> value1.compareTo(value2);
+                        case STRING, DATE, TIMESTAMP, BOOLEAN, UNKNOWN -> value1.compareTo(value2);
                         case DOUBLE -> {
                             var v1 = value1.isEmpty() ? Double.MIN_VALUE : Double.parseDouble(value1);
                             var v2 = value2.isEmpty() ? Double.MIN_VALUE : Double.parseDouble(value2);
@@ -501,6 +502,7 @@ public class OlapServiceV2 {
                                 yield time1.compareTo(time2);
                             }
                             case BOOLEAN -> Boolean.compare(Boolean.parseBoolean(var1), Boolean.parseBoolean(var2));
+                            case UNKNOWN -> throw new InvalidParametersException("Not supported datatype field");
                         };
                         i++;
                     }
