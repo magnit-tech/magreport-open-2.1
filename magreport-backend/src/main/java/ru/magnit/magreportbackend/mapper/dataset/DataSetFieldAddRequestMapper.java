@@ -20,10 +20,12 @@ public class DataSetFieldAddRequestMapper implements Mapper<DataSetFieldAddReque
 
     private DataSetFieldAddRequest mapBaseProperties(ObjectFieldResponse source) {
 
+        var typeId = (long) DataTypeEnum.valueOf(JDBCType.valueOf(source.getDataType())).ordinal();
+
         return new DataSetFieldAddRequest()
-                .setTypeId((long) DataTypeEnum.valueOf(JDBCType.valueOf(source.getDataType())).ordinal())
+                .setTypeId(typeId)
                 .setName(source.getFieldName())
                 .setDescription(source.getRemarks())
-                .setIsValid(true);
+                .setIsValid(typeId != DataTypeEnum.UNKNOWN.ordinal());
     }
 }

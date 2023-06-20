@@ -24,6 +24,7 @@ import ru.magnit.magreportbackend.dto.request.report.ReportAddRequest;
 import ru.magnit.magreportbackend.dto.request.report.ReportEditRequest;
 import ru.magnit.magreportbackend.dto.request.report.ReportIdRequest;
 import ru.magnit.magreportbackend.dto.request.report.ReportRequest;
+import ru.magnit.magreportbackend.dto.response.dataset.DataSetFieldResponse;
 import ru.magnit.magreportbackend.dto.response.dataset.DataSetResponse;
 import ru.magnit.magreportbackend.dto.response.folder.FolderSearchResponse;
 import ru.magnit.magreportbackend.dto.response.folderreport.FolderResponse;
@@ -270,7 +271,7 @@ class ReportServiceTest {
         assertEquals(MODIFIED_TIME, response.getModified());
 
         Mockito.reset(dataSetDomainService);
-        when(dataSetDomainService.getDataSet(anyLong())).thenReturn(new DataSetResponse().setIsValid(false));
+        when(dataSetDomainService.getDataSet(anyLong())).thenReturn(new DataSetResponse().setFields(Collections.singletonList(getDataSetFieldResponse())));
         var request = getReportAddRequest();
         assertThrows(InvalidParametersException.class, () -> service.addReport(request));
 
@@ -533,5 +534,11 @@ class ReportServiceTest {
         return new UserView()
                 .setName("TestUser")
                 .setDomain(new DomainShortResponse(ID,NAME));
+    }
+
+    private DataSetFieldResponse getDataSetFieldResponse(){
+        return new DataSetFieldResponse()
+                .setTypeName("INTEGER")
+                .setIsValid(false);
     }
 }
