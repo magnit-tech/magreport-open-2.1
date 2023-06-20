@@ -62,7 +62,7 @@ public class MetricBetweenFilter implements MetricFilterNode {
                 yield (current.isAfter(filterStart) || current.isEqual(filterStart)) && (current.isBefore(filterStop) || current.isEqual(filterStop));
             }
 
-            case STRING, BOOLEAN -> throw new InvalidParametersException("Not supported datatype metric");
+            case STRING, BOOLEAN, UNKNOWN -> throw new InvalidParametersException("Not supported datatype metric");
         };
 
         return invert != result;
