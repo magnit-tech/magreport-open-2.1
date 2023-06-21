@@ -35,5 +35,9 @@ public record AsmSecurityShortResponse(
         LocalDateTime modified,
 
         @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-        List<FolderNodeResponse> path)
+        List<FolderNodeResponse> path,
+
+        @JsonFormat(shape = JsonFormat.Shape.BOOLEAN)
+        Boolean isActive )
+
 {}

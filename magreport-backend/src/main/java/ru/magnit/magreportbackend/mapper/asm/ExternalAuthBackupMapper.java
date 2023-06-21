@@ -19,7 +19,8 @@ public class ExternalAuthBackupMapper implements Mapper<ExternalAuthBackupTuple,
                 source.getDescription(),
                 source.getIsDefaultDomain(),
                 source.getCreatedDateTime(),
-                source.getModifiedDateTime()
+                source.getModifiedDateTime(),
+                source.getIsActive()
         );
     }
 }
