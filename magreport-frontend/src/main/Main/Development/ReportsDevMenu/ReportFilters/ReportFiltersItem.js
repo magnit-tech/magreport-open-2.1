@@ -57,7 +57,9 @@ export default function ReportFilterItem({index, disabled, filterItem, reportFie
     const [operationType, setOperationType] = useState(getOperationType(filterItem.filterReportModes));
 
     function getOperationType(type){
-        if (type.length < 1 || type.length === 2){
+        if (!type) {
+            return 'IN_LIST';
+        } else if (type || type.length < 1 || type.length === 2){
             return 'ALL_IN_LIST';
         } else {
             return type.length > 0 ? [...type] : 'IN_LIST';
