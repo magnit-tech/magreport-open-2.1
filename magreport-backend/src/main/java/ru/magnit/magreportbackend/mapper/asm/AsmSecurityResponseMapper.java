@@ -30,7 +30,8 @@ public class AsmSecurityResponseMapper implements Mapper<AsmSecurityResponse, Ex
                 source.getIsDefaultDomain(),
                 source.getCreatedDateTime(),
                 source.getModifiedDateTime(),
-                Collections.emptyList());
+                Collections.emptyList(),
+                source.getIsActive());
     }
 
     @Override

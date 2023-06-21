@@ -75,6 +75,10 @@ public class ExternalSecurityService {
         return domainService.getAsmSecurity(request.getId());
     }
 
+    public Boolean switchActiveAsmSecurity(AsmSecurityRequest request) {
+        return domainService.switchAsmSecurity(request.getId());
+    }
+
     @Scheduled(cron = "${magreport.asm.refresh-schedule}")
     private void scheduledRefresher() {
         log.info("ASM scheduled refresh started, profile:'" + profile + "'.");
@@ -82,7 +86,7 @@ public class ExternalSecurityService {
 
         final var allAsmSecurity = domainService.getAllAsmSecurity();
 
-        final var asmIds = allAsmSecurity.stream().map(AsmSecurityShortResponse::id).toList();
+        final var asmIds = allAsmSecurity.stream().filter(AsmSecurityShortResponse::isActive).map(AsmSecurityShortResponse::id).toList();
 
         refreshAmsFilters(asmIds);
     }
