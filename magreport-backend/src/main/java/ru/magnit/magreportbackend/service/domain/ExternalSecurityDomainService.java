@@ -73,4 +73,13 @@ public class ExternalSecurityDomainService {
 
         return asmSecurityResponseMapper.from(savedExternalAuth);
     }
+
+    @Transactional
+    public Boolean switchAsmSecurity(Long id){
+
+        final var externalAuth = authRepository.getReferenceById(id);
+        externalAuth.setIsActive(!externalAuth.getIsActive());
+
+        return authRepository.saveAndFlush(externalAuth).getIsActive();
+    }
 }

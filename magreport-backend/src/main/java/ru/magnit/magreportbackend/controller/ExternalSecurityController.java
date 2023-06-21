@@ -21,6 +21,8 @@ import ru.magnit.magreportbackend.dto.response.asm.AsmSecurityShortResponse;
 import ru.magnit.magreportbackend.service.ExternalSecurityService;
 import ru.magnit.magreportbackend.util.LogHelper;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -33,6 +35,7 @@ public class ExternalSecurityController {
     public static final String AMS_SECURITIES_GET_ALL = "/api/v1/asm-securities/get-all";
     public static final String AMS_SECURITIES_DELETE = "/api/v1/asm-securities/delete";
     public static final String AMS_SECURITIES_REFRESH = "/api/v1/asm-securities/refresh";
+    public static final String AMS_SECURITIES_SWITCH = "/api/v1/asm-securities/switch";
 
     private final ExternalSecurityService service;
 
@@ -160,5 +163,27 @@ public class ExternalSecurityController {
 
         LogHelper.logInfoUserMethodEnd();
         return result;
+    }
+
+    @Operation(summary = "Переключение активности обновления фтльтров ASM")
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping(value = AMS_SECURITIES_SWITCH,
+            consumes = APPLICATION_JSON_VALUE,
+            produces = APPLICATION_JSON_VALUE)
+    public ResponseBody<Boolean> switchScheduleTask(
+            @RequestBody
+            AsmSecurityRequest request
+    ) {
+
+        LogHelper.logInfoUserMethodStart();
+
+        var response = ResponseBody.<Boolean>builder()
+                .success(true)
+                .message("")
+                .data(service.switchActiveAsmSecurity(request))
+                .build();
+
+        LogHelper.logInfoUserMethodEnd();
+        return response;
     }
 }
