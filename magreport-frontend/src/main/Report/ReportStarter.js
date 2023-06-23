@@ -38,11 +38,13 @@ export default function ReportStarter(props){
     const useParamsId = useParams()?.id
     const id = props.onDataLoadFunction ? props.reportId : useParamsId;
 
+
     const navigate = useNavigate();
     const location = useLocation();
     const dispatch = useDispatch();
 
     const [searchParams, setSearchParams] = useSearchParams(); // eslint-disable-line
+
     const [flowState, setFlowState] = useState("filters");
     const [reportMetadata, setReportMetadata] = useState({});
     const [reloadReportMetadata, setReloadReportMetadata] = useState({needReload:false}); // управление перезагрузкой метаданных
@@ -50,6 +52,7 @@ export default function ReportStarter(props){
     const [toggleClearFilters, setToggleClearFilters] = useState(false); // переключатель очистки фильтра - если изменилось значение, надо очистить фильтры
     const [reportJobId, setReportJobId] = useState(null);
     const [lastParamJobId, setLastParamJobId] = useState(searchParams.get('jobId'));
+    const externalFiltersValue = searchParams.get('externalFiltersValue') ? JSON.parse(searchParams.get('externalFiltersValue')) : null;
 
     // useEffect( () => {
     //     setLastParamJobId(props.jobId);
@@ -269,6 +272,7 @@ export default function ReportStarter(props){
                                 <FilterGroup
                                     groupData = {reportMetadata.filterGroup}
                                     mandatoryGroups = {mandatoryGroupsMap}
+                                    externalFiltersValue = {externalFiltersValue}
                                     lastFilterValues = {lastFilterValues.current}
                                     onChangeFilterValue = {handleChangeFilterValue}
                                     toggleClearFilters = {toggleClearFilters}
