@@ -1,5 +1,5 @@
+import React, { useState, useRef, useEffect } from 'react';
 import 'date-fns';
-import React, {useEffect, useState} from 'react';
 
 // date utils
 import RuLocalizedUtils from 'utils/RuLocalizedUtils'
@@ -35,14 +35,14 @@ import { Typography } from '@material-ui/core';
  *                                                  filterValue - объект для передачи в сервис в массиве parameters
  * */
 export default function DatesRange(props) {
-
-    const [startDate, setStartDate] = React.useState(null);
-    const [endDate, setEndDate] = React.useState(null);
-    const [toggleFilter, setToggleFilter] = React.useState(false);
-    const [checkStatus, setCheckStatus] = useState("error")
     const classes = DatePickersCSS();
 
-    let valueList = React.useRef({});
+    let valueList = useRef({});
+
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
+    const [toggleFilter, setToggleFilter] = useState(false);
+    const [checkStatus, setCheckStatus] = useState("error")
 
     const mandatory = props.filterData.mandatory
 
@@ -59,10 +59,23 @@ export default function DatesRange(props) {
     useEffect(() => {
         if (valueList.current.startDate === undefined){
 
-            const {
-                startValue: defaultStartDate,
-                endValue: defaultEndDate
-            } = getRangeFieldsValues(props.lastFilterValue, startFieldId, endFieldId);
+            let defaultStartDate, defaultEndDate;
+
+            const externalValue = props.externalFiltersValue[props.filterData.code]
+
+            function checkDate(dateString) {
+                if(/^\d{4}-\d{2}-\d{2}/.test(dateString)) return dateString;
+                return null;
+            }
+
+            if(props.externalFiltersValue && externalValue) {
+                defaultStartDate = checkDate(externalValue.begin_dt);
+                defaultEndDate = checkDate(externalValue.end_dt);
+            } else {
+                const { startValue, endValue } = getRangeFieldsValues(props.lastFilterValue, startFieldId, endFieldId);
+                defaultStartDate = startValue;
+                defaultEndDate = endValue;
+            }
 
             let bd = new Date(defaultStartDate);
             let ed = new Date(defaultEndDate);
