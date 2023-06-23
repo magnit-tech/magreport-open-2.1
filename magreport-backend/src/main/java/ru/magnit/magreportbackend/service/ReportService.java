@@ -190,9 +190,6 @@ public class ReportService {
 
     public ReportResponse getReport(ReportRequest request) {
 
-        if (request.getId() == null)
-            throw new IllegalArgumentException("Report id must not be null");
-
         final var report = reportDomainService.getReport(request.getId());
 
         try {
