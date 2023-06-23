@@ -61,7 +61,7 @@ export default function DatesRange(props) {
 
             let defaultStartDate, defaultEndDate;
 
-            const externalValue = props.externalFiltersValue[props.filterData.code]
+            const externalValue = props.externalFiltersValue ? props.externalFiltersValue[props.filterData.code] : null
 
             function checkDate(dateString) {
                 if(/^\d{4}-\d{2}-\d{2}/.test(dateString)) return dateString;
