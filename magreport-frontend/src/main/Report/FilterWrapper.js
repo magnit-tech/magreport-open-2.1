@@ -82,6 +82,7 @@ function FilterWrapper(props){
         return(
             <DateRange 
                 filterData={props.filterData} 
+                externalFiltersValue = {props.externalFiltersValue}
                 lastFilterValue={props.lastFilterValue} 
                 toggleClearFilter={props.toggleClearFilters}
                 onChangeFilterValue={props.onChangeFilterValue}
