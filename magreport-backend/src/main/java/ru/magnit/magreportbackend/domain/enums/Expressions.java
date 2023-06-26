@@ -75,7 +75,8 @@ public enum Expressions {
     MAX(MaxExpression::new),
     MIN(MinExpression::new),
     SUM(SumExpression::new),
-    COUNT_DISTINCT(CountDistinctExpression::new);
+    COUNT_DISTINCT(CountDistinctExpression::new),
+    SPLIT(SplitExpression::new);
 
     private final BiFunction<FieldExpressionResponse, ExpressionCreationContext, BaseExpression> factory;
 
