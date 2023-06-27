@@ -29,7 +29,7 @@ import { Typography } from '@material-ui/core';
  *                                                  filterValue - объект для передачи в сервис в массиве parameters
  * */
 export default function Range(props) {
-
+    
     const [startValue, setStartValue] = useState(null);
     const [endValue, setEndValue] = useState(null);
     const [toggleFilter, setToggleFilter] = useState(false);
@@ -52,10 +52,17 @@ export default function Range(props) {
     useEffect(() => {
         if (valueList.current.startValue === null) {
 
-            const {
-                startValue: defaultStartValue,
-                endValue: defaultEndValue
-            } = getRangeFieldsValues(props.lastFilterValue, startFieldId, endFieldId);
+            let defaultStartValue, defaultEndValue;
+            const externalValue = props.externalFiltersValue ? props.externalFiltersValue[props.filterData.code] : null
+
+            if(props.externalFiltersValue && externalValue) {
+                defaultStartValue = externalValue.from;
+                defaultEndValue = externalValue.to;
+            } else {
+                const { startValue, endValue } = getRangeFieldsValues(props.lastFilterValue, startFieldId, endFieldId);
+                defaultStartValue = startValue;
+                defaultEndValue = endValue;
+            }
 
             valueList.current.startValue = defaultStartValue;
             valueList.current.endValue = defaultEndValue;
