@@ -29,7 +29,8 @@ function FilterWrapper(props){
         return(
             <SingleValueUnbounded
                 filterData={props.filterData} 
-                lastFilterValue={props.lastFilterValue} 
+                lastFilterValue={props.lastFilterValue}
+                externalFiltersValue = {props.externalFiltersValue}
                 toggleClearFilter={props.toggleClearFilters}
                 onChangeFilterValue={props.onChangeFilterValue}
             />
@@ -82,9 +83,9 @@ function FilterWrapper(props){
     else if (filterType === 'DATE_RANGE'){
         return(
             <DateRange 
-                filterData={props.filterData} 
+                filterData={props.filterData}
+                lastFilterValue={props.lastFilterValue}
                 externalFiltersValue = {props.externalFiltersValue}
-                lastFilterValue={props.lastFilterValue} 
                 toggleClearFilter={props.toggleClearFilters}
                 onChangeFilterValue={props.onChangeFilterValue}
             />
@@ -94,7 +95,8 @@ function FilterWrapper(props){
         return(
             <DateValue
                 filterData={props.filterData} 
-                lastFilterValue={props.lastFilterValue} 
+                lastFilterValue={props.lastFilterValue}
+                externalFiltersValue = {props.externalFiltersValue}
                 toggleClearFilter={props.toggleClearFilters}
                 onChangeFilterValue={props.onChangeFilterValue}
             />
@@ -104,8 +106,8 @@ function FilterWrapper(props){
         return(
             <Range
                 filterData={props.filterData}
-                externalFiltersValue = {props.externalFiltersValue}
                 lastFilterValue={props.lastFilterValue}
+                externalFiltersValue = {props.externalFiltersValue}
                 toggleClearFilter={props.toggleClearFilters}
                 onChangeFilterValue={props.onChangeFilterValue}
             />
