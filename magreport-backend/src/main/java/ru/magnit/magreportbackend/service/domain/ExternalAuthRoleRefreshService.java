@@ -23,7 +23,7 @@ public class ExternalAuthRoleRefreshService {
     private static final String CHANGE_TYPE = "change_type";
     private static final String DELETE = "D";
     private static final String ROLE_NAME = "role_name";
-    private static final String ROLE_DESCRIPTION = "Роль для автоматического создания секьюрити фильтров AMS";
+
     private final ExternalAuthRoleRefreshQueryBuilder amsRoleSettingsQueryBuilder;
     private final FilterQueryExecutor filterQuery;
     private final RoleService roleService;
@@ -46,7 +46,8 @@ public class ExternalAuthRoleRefreshService {
             if (currentRecord.get(CHANGE_TYPE).equalsIgnoreCase(DELETE)) {
                 roleService.deleteRole(currentRecord.get(ROLE_NAME));
             } else {
-                roleService.addRole(new RoleAddRequest(null, (long) securityView.getRoleType().ordinal(), currentRecord.get(ROLE_NAME), securityView.getSources().get(GROUP_SOURCE).getRoleDescription() ));
+                if (!roleService.isRoleExists(currentRecord.get(ROLE_NAME)))
+                    roleService.addRole(new RoleAddRequest(null, (long) securityView.getRoleType().ordinal(), currentRecord.get(ROLE_NAME), securityView.getSources().get(GROUP_SOURCE).getRoleDescription()));
             }
         });
     }
