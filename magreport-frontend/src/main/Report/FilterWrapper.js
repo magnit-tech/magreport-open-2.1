@@ -40,6 +40,7 @@ function FilterWrapper(props){
             <ValueList
                 filterData={props.filterData} 
                 lastFilterValue={props.lastFilterValue} 
+                externalFiltersValue = {props.externalFiltersValue}
                 toggleClearFilter={props.toggleClearFilters}
                 onChangeFilterValue={props.onChangeFilterValue}
                 unbounded = {filterType === 'VALUE_LIST_UNBOUNDED'}
