@@ -152,6 +152,12 @@ public class RoleDomainService {
     }
 
     @Transactional
+    public boolean isRoleExists(String name) {
+        return repository.existsByNameIgnoreCase(name);
+    }
+
+
+    @Transactional
     public void clearUsersFromRole(Long id, List<Long> users) {
         userRoleRepository.deleteByRoleIdAndUserIdIn(id, users);
     }
