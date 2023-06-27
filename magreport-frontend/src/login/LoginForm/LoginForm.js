@@ -144,7 +144,8 @@ function LoginForm(props){
                     error={props.alertData.data.open}
                     /> */
                 }
-                <Button                          
+                <Button     
+                    id="loginSubmit"                     
                     type="submit"
                     fullWidth
                     variant="contained"
