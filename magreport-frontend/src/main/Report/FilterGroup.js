@@ -1,5 +1,6 @@
 import React from 'react';
 import clsx from 'clsx';
+
 //material-ui
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -70,6 +71,7 @@ export default function FilterGroup(props){
                             return <div key = {v.id} className = {clsx(classes.andOrType, andOrType)} >
                                 <FilterGroup
                                     groupData = {v}
+                                    externalFiltersValue = {props.externalFiltersValue}
                                     mandatoryGroups = {props.mandatoryGroups}
                                     lastFilterValues = {props.lastFilterValues}
                                     onChangeFilterValue = {props.onChangeFilterValue}
@@ -81,6 +83,7 @@ export default function FilterGroup(props){
                             return <div key = {v.id} className = {clsx(classes.andOrType, {[andOrType]: !prevAndOrType && !v.hidden})}>        
                                 <FilterWrapper
                                     filterData = {v}
+                                    externalFiltersValue = {props.externalFiltersValue}
                                     lastFilterValue = {props.lastFilterValues.getFilterValue(v.id)}
                                     onChangeFilterValue = {props.onChangeFilterValue}
                                     toggleClearFilters = {props.toggleClearFilters}

@@ -11,5 +11,7 @@ public record ExternalAuthBackupTuple(
         String description,
         Boolean isDefaultDomain,
         LocalDateTime created,
-        LocalDateTime modified
+        LocalDateTime modified,
+
+        Boolean isActive
 ){}
