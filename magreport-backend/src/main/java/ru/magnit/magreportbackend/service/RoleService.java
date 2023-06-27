@@ -285,6 +285,9 @@ public class RoleService {
         }
     }
 
+    public boolean isRoleExists(String name) {
+        return roleDomainService.isRoleExists(name);
+    }
 
     private String getRoleDependenciesDescription(
             RoleFolderPermissionResponse permittedFolders,
