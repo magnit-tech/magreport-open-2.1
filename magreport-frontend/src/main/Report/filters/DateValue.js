@@ -47,7 +47,20 @@ export default function DateValue(props) {
 
     // Задаём значения по-умолчанию
     useEffect(() => {
-        if (dt === null){
+        const externalValue = props.externalFiltersValue ? props.externalFiltersValue[props.filterData.code] : null
+
+        function checkDate(dateString) {
+            if (/^\d{4}-\d{2}-\d{2}/.test(dateString)) {
+                setDt(dateString);
+                setValue(dateString)
+                setCheckStatus(dateString || !mandatory ? 'success' : 'error')
+            };
+            return null;
+        }
+
+        if (props.externalFiltersValue && externalValue) {
+            checkDate(externalValue.date)
+        } else if (dt === null){
             const defaultDate = getValueFieldValue(props.lastFilterValue, fieldId);
 
             setCheckStatus(defaultDate || !mandatory ? 'success' : 'error');
@@ -66,12 +79,7 @@ export default function DateValue(props) {
 
     function handleDateChange(date){
         setDt(date);
-        if (date){
-            setValue(date ? dateToStringFormat(date) : null)
-        }
-        else {
-            setValue(null)
-        }
+        setValue(date ? dateToStringFormat(date) : null)
         setCheckStatus(date || !mandatory ? 'success' : 'error')
     };
 
