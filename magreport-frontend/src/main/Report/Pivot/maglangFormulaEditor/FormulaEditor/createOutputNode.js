@@ -61,7 +61,7 @@ export function createOutputNode(syntNode, code, errorList, originalFieldNameToI
     else if(syntNode.name === "String"){
       outNode = {
         nodeType: nodeType.stringLiteral,
-        value: code.substring(syntNode.from, syntNode.to)
+        value: code.substring(syntNode.from+1, syntNode.to-1)
       }
     }
     else if(syntNode.name === "BooleanLiteral"){

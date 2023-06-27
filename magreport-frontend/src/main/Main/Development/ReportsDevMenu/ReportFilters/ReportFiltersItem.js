@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 // components
 import Paper from '@material-ui/core/Paper';
@@ -26,6 +26,7 @@ import DesignerTextField from '../../Designer/DesignerTextField';
 
 // styles
 import {ReportFiltersItemCSS} from '../../Designer/DesignerCSS';
+import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
 /**
  * @callback onChange
  * @param {Object} filterItem
@@ -52,6 +53,18 @@ import {ReportFiltersItemCSS} from '../../Designer/DesignerCSS';
 export default function ReportFilterItem({index, disabled, filterItem, reportFields, datasetType, onChange, onDeleteItem, onChangeOrdinal}){
 
     const classes = ReportFiltersItemCSS()
+
+    const [operationType, setOperationType] = useState(getOperationType(filterItem.filterReportModes));
+
+    function getOperationType(type){
+        if (!type) {
+            return 'IN_LIST';
+        } else if (type || type.length < 1 || type.length === 2){
+            return 'ALL_IN_LIST';
+        } else {
+            return type.length > 0 ? [...type] : 'IN_LIST';
+        }
+    }
 
     const handleDeleteItems = event => {
         onDeleteItem(event)
@@ -93,6 +106,19 @@ export default function ReportFilterItem({index, disabled, filterItem, reportFie
 
     const handleChangeMetadata = (field, value) => {
         onChange({...filterItem, [field]: value})
+    }
+
+    function handleChangeOperationType(type) {
+        let filterReportModes = []
+
+        if(type === 'IN_LIST' || type === 'NOT_IN_LIST') {
+            filterReportModes = [type]
+        } else {
+            filterReportModes = ['IN_LIST', 'NOT_IN_LIST']
+        }
+
+        setOperationType(type);
+        handleChangeMetadata('filterReportModes', filterReportModes)
     }
 
     let isValid = !!filterItem.code && !!filterItem.name && !filterItem.errors && (filterItem.hasOwnProperty('valid') ?  filterItem.valid: true)
@@ -185,7 +211,7 @@ export default function ReportFilterItem({index, disabled, filterItem, reportFie
                             error = {!filterItem.name}
                         />
                     </div>
-                    <div className={classes.devRepFiltersCode}>
+                    <div className={classes.devRepFilters}>
                         <DesignerTextField
                             label = "Код фильтра"
                             value = {filterItem.code} 
@@ -194,6 +220,23 @@ export default function ReportFilterItem({index, disabled, filterItem, reportFie
                             size="small"
                             error = {!filterItem.code || (filterItem.errors && filterItem.errors.code) }
                         />
+
+                        {filterItem.type === 'VALUE_LIST' &&
+                            <FormControl variant="outlined" className={classes.devRepFiltersSelect}>
+                                <InputLabel id="devRepFiltersSelect">Операция</InputLabel>
+                                <Select
+                                    label="Операция"
+                                    labelId="devRepFiltersSelect"
+                                    id="devRepFiltersSelect"
+                                    value={operationType}
+                                    onChange={e => handleChangeOperationType(e.target.value)}
+                                >
+                                    <MenuItem value={'IN_LIST'}>В списке</MenuItem>
+                                    <MenuItem value={'NOT_IN_LIST'}>Не в списке</MenuItem>
+                                    <MenuItem value={'ALL_IN_LIST'}>Оба варианта</MenuItem>
+                                </Select>
+                            </FormControl>
+                        }
                     </div>
                     
                 </div>

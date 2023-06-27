@@ -35,6 +35,16 @@ export default function ReportFiltersItemViewer({filterItem, reportFields}) {
 
     const [expanded, setExpanded] = useState(true);
 
+    const operationType = () => {
+        const type = filterItem.filterReportModes;
+
+        if (type.length < 1 || type.length === 2){
+            return 'Оба варианта';
+        } else {
+            return [...type] === 'IN_LIST' ? 'В списке' : [...type] === 'NOT_IN_LIST' ? 'Не в списке' : 'В списке';
+        }
+    }
+
     return (
         <Paper className={classes.root} elevation={3}>
             <div className={classes.devRepFilterHeader}>
@@ -76,7 +86,14 @@ export default function ReportFiltersItemViewer({filterItem, reportFields}) {
                             value={filterItem.code}
                         />
                     </div>
-
+                    {filterItem.type === 'VALUE_LIST' &&
+                        <div>
+                            <ViewerTextField
+                                label="Операция"
+                                value={operationType()}
+                            />
+                        </div>
+                    }
                 </div>
                 <div>
                     <Typography variant="body2" color="textSecondary" component="p" gutterBottom>

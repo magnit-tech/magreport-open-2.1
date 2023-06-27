@@ -53,7 +53,7 @@ public class CubeGreaterOrEqualsFilter implements CubeFilterNode {
                 var filter = value.isEmpty() ? LocalDateTime.MIN : LocalDateTime.parse(value.replace(" ", "T"));
                 yield current.isAfter(filter) || current.isEqual(filter);
             }
-            case STRING, BOOLEAN -> throw new InvalidParametersException("Not supported datatype field");
+            case STRING, BOOLEAN, UNKNOWN -> throw new InvalidParametersException("Not supported datatype field");
         };
 
         return invert != result;

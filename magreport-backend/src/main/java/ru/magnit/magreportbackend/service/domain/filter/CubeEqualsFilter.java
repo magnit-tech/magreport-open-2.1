@@ -3,6 +3,7 @@ package ru.magnit.magreportbackend.service.domain.filter;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
 import ru.magnit.magreportbackend.dto.request.olap.FilterDefinition;
+import ru.magnit.magreportbackend.exception.InvalidParametersException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -65,6 +66,8 @@ public class CubeEqualsFilter implements CubeFilterNode {
                 var filter = !value.isEmpty() && Boolean.parseBoolean(value);
                 yield current &&  filter;
             }
+
+            case UNKNOWN -> throw new InvalidParametersException("Not supported datatype field");
         };
 
         return invert != result;
