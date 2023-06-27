@@ -47,6 +47,7 @@ class ExternalAuthRoleRefreshServiceTest {
     void refreshRoles() {
 
         when(filterQuery.getQueryResult(any(),any())).thenReturn(getQueryResult());
+        when(roleService.isRoleExists(any())).thenReturn(false);
 
         service.refreshRoles(getExternalAuthSourceView());
 
@@ -54,6 +55,7 @@ class ExternalAuthRoleRefreshServiceTest {
         verify(filterQuery,times(2)).executeSql(any(),any());
         verify(roleService).deleteRole(anyString());
         verify(roleService).addRole(any());
+        verify(roleService).isRoleExists(any());
         verify(amsRoleSettingsQueryBuilder).buildQuery(any());
         verifyNoMoreInteractions(filterQuery,roleService,amsRoleSettingsQueryBuilder);
     }
