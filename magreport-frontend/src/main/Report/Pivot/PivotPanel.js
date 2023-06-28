@@ -16,6 +16,7 @@ import { setAggModalParams } from 'redux/actions/olap/olapAction.js'
 
 // magreport
 import dataHub from 'ajax/DataHub'
+import { eventNames } from 'ajax/controllers/EventController';
 import DataLoader from 'main/DataLoader/DataLoader'
 import PivotFieldsList from './PivotFieldsList'
 import PivotTable from './PivotTable'
@@ -699,6 +700,26 @@ function PivotPanel(props){
             )
         {
             
+            // Логирование события
+            if(destination.droppableId === "columnFields"){
+                dataHub.eventController.register(eventNames.moveFieldToColumnDimension, `{"reportId":${props.reportId}, "jobId":${props.jobId}}`);
+            }
+            else if (destination.droppableId === "rowFields"){
+                dataHub.eventController.register(eventNames.moveFieldToRowDimension, `{"reportId":${props.reportId}, "jobId":${props.jobId}}`);
+            }
+            else if(source.droppableId === "columnFields" && destination.droppableId !== "columnFields"){
+                dataHub.eventController.register(eventNames.moveFieldFromColumnDimension, `{"reportId":${props.reportId}, "jobId":${props.jobId}}`);
+            }
+            else if(source.droppableId === "rowFields" && destination.droppableId !== "rowFields"){
+                dataHub.eventController.register(eventNames.moveFieldFromRowDimension, `{"reportId":${props.reportId}, "jobId":${props.jobId}}`);
+            }
+            else if (destination.droppableId === "metricFields"){
+                dataHub.eventController.register(eventNames.moveFieldToMetric, `{"reportId":${props.reportId}, "jobId":${props.jobId}}`);
+            }
+            else if (destination.droppableId === "metricFields" && source.droppableId === "allFields"){
+                dataHub.eventController.register(eventNames.moveFieldFromMetric, `{"reportId":${props.reportId}, "jobId":${props.jobId}}`);
+            }
+
             // Формируем новый объект конфигурации
             let newPivotConfiguration = new PivotConfiguration(pivotConfiguration);
             let destIndex = newPivotConfiguration.dragAndDropField(source.droppableId, destination.droppableId, source.index, destination.index);

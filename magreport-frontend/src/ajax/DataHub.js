@@ -26,6 +26,7 @@ import EmailController from "./controllers/EmailController";
 import ThemeController from "./controllers/ThemeController";
 import UserServiceController from "./controllers/UserServiceController";
 import DerivedFieldController from "./controllers/DerivedFieldController";
+import EventController from "./controllers/EventController";
 
 const USER_DATA = localStorage.getItem('userData') ? JSON.parse(localStorage.getItem('userData')) : ''
 
@@ -368,6 +369,7 @@ function DataHub(){
     this.olapController = new OlapController(this);
     this.userServiceController = new UserServiceController(this);
     this.derivedFieldController = new DerivedFieldController(this);
+    this.eventController = new EventController(this);
 }
 
 const dataHub = new DataHub();
