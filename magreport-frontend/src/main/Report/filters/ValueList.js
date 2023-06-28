@@ -74,6 +74,14 @@ function ValueList(props){
 
         if (externalValue) {
             handleTextChanged(externalValue.value && Array.isArray(JSON.parse(externalValue.value)) ? JSON.parse(externalValue.value).join(';') : "")
+            if (type.length < 1 || type.length === 2){
+                setOperationTypeDisabled(false)
+                setOperationType(externalValue.operationType === 'IN_LIST' ? 'IN_LIST' : externalValue.operationType === 'NOT_IN_LIST' ? 'NOT_IN_LIST' : 'IN_LIST')
+            } else {
+                setOperationTypeDisabled(true)
+                return type.length > 0 ? setOperationType([...type]) : setOperationType('IN_LIST');
+            }
+
         } else {
             if (type.length < 1 || type.length === 2){
                 setOperationTypeDisabled(false)
