@@ -524,6 +524,15 @@ export default function FolderContent(props){
             setCountElement(prev => prev + 100)
         }
     }
+    
+    const NotFoundComponent = () => {
+        
+        if (props.searchParams?.searchString) {
+            return <span className={classes.notfoundComponent}> Результат по параметру "{props.searchParams.searchString}" не найден </span>
+        } else {
+            return <span className={classes.notfoundComponent}> Ничего не найдено </span> 
+        }
+    }
 
     return(
         <div className={classes.relative}>
@@ -635,12 +644,19 @@ export default function FolderContent(props){
                             searchWithoutRecursive = {props.searchWithoutRecursive}
 				        />
 			        }
-					<Grid container>
-						{gridFolders}
-					</Grid>
-					<Grid container>
-						{gridItems}
-					</Grid>
+                    { ( gridFolders.length > 0 || gridItems.length > 0 ) ?
+                        <>
+                            <Grid container>
+                                {gridFolders}
+                            </Grid>
+                            <Grid container>
+                                {gridItems}
+                            </Grid>
+                        </>
+                        :
+                        <NotFoundComponent/>
+                    }
+
 				</div>
             </div>
             {
