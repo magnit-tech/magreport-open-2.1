@@ -66,6 +66,13 @@ export default function SingleValueUnbounded(props) {
     }, [props.filterData, props.lastFilterValue]);
 */
     useEffect(() => {
+        const externalValue = props.externalFiltersValue ? props.externalFiltersValue[props.filterData.code] : null
+
+        if (props.externalFiltersValue && externalValue) {
+            setTextValue(externalValue?.value || '')
+        } else {
+            setTextValue(tf ? tf : '')
+        }
 
         if (props.toggleClearFilter !== toggleFilter){
             setToggleFilter(props.toggleClearFilter);

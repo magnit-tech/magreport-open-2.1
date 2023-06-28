@@ -33,6 +33,7 @@ import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
  * @param {onChangeFilterValue} props.onChangeFilterValue - function(filterValue) - callback для передачи значения изменившегося параметра фильтра
  */
 function ValueList(props){
+
     const classes = ValueListCSS();
     const cls = AllFiltersCSS();
     const mandatory = props.filterData.mandatory;
@@ -67,16 +68,31 @@ function ValueList(props){
         Вычислить тип операции по предыдущему значению
     */
     useEffect(() => {
-        const type = props.filterData.filterReportModes;
 
-        if (type.length < 1 || type.length === 2){
-            setOperationTypeDisabled(false)
-            setOperationType('IN_LIST')
+        const type = props.filterData.filterReportModes;
+        const externalValue = props.externalFiltersValue ? props.externalFiltersValue[props.filterData.code] : null
+
+        if (externalValue) {
+            handleTextChanged(externalValue.value && Array.isArray(JSON.parse(externalValue.value)) ? JSON.parse(externalValue.value).join(';') : "")
+            if (type.length < 1 || type.length === 2){
+                setOperationTypeDisabled(false)
+                setOperationType(externalValue.operationType === 'IN_LIST' ? 'IN_LIST' : externalValue.operationType === 'NOT_IN_LIST' ? 'NOT_IN_LIST' : 'IN_LIST')
+            } else {
+                setOperationTypeDisabled(true)
+                return type.length > 0 ? setOperationType([...type]) : setOperationType('IN_LIST');
+            }
+
         } else {
-            setOperationTypeDisabled(true)
-            return type.length > 0 ? setOperationType([...type]) : setOperationType('IN_LIST');
+            if (type.length < 1 || type.length === 2){
+                setOperationTypeDisabled(false)
+                setOperationType('IN_LIST')
+            } else {
+                setOperationTypeDisabled(true)
+                return type.length > 0 ? setOperationType([...type]) : setOperationType('IN_LIST');
+            }
         }
-    }, [props.filterData.filterReportModes])
+        
+    }, [props.filterData.filterReportModes, props.externalFiltersValue, props.filterData.code]) // eslint-disable-line
 
     function getRegexp() {
         let s = ""
