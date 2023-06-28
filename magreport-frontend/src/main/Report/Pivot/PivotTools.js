@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Icon from '@mdi/react';
 import { mdiDeleteForever, mdiPlay, mdiTable, mdiTableMergeCells, mdiTableSplitCell, mdiTableColumn, 
         mdiTableRow, mdiTableHeadersEyeOff, mdiTableHeadersEye, mdiCog, mdiContentSaveCogOutline, mdiShareAll, mdiSort, mdiMicrosoftExcel,
@@ -22,7 +22,7 @@ import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
  * @param {*} props.onConfigDialog - открытие диалогового окна для Config или ConfigSave, при определенном отправленом значение
  * @param {*} props.onShareJobDialog - открытие диалогового окна для ShareJob
  * @param {*} props.showShareToolBtn - отображение кнопки 'Поделиться заданием' (true/false)
- * @param {*} props.onExportToExcel - function() - callback экспорт в Excel
+ * @param {*} props.onExportToExcel - function(boolean) - callback экспорт в Excel
  * @param {*} props.onShowCreateFieldDialogue - function(true | false) действие по нажатию кнопки "Добавить поле"
  * @returns 
  */
@@ -30,6 +30,14 @@ export default function PivotTools(props){
 
     function handleViewTypeChange(){
         props.onViewTypeChange('plain');
+    }
+
+    const [excelExportDisabled, setExcelExportDisabled] = useState(false);
+
+    function handlePressExcelExport(){
+        setExcelExportDisabled(true);
+        setTimeout(() => {setExcelExportDisabled(false)}, 15000);
+        props.onExportToExcel(true);
     }
 
     return(
@@ -197,7 +205,8 @@ export default function PivotTools(props){
                             <IconButton
                                 size="small"
                                 aria-label="sortingDialog"
-                                onClick={() => {props.onExportToExcel(true)} }
+                                disabled = {excelExportDisabled}
+                                onClick={handlePressExcelExport}
                             >
                                 <Icon path={mdiMicrosoftExcel}
                                     size={1}
