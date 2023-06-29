@@ -59,10 +59,10 @@ export default function ReportFilterItem({index, disabled, filterItem, reportFie
     function getOperationType(type){
         if (!type) {
             return 'IN_LIST';
-        } else if (type || type.length < 1 || type.length === 2){
+        } else if (type.length === 2){
             return 'ALL_IN_LIST';
         } else {
-            return type.length > 0 ? [...type] : 'IN_LIST';
+            return type.length > 0 ? type[0] : 'IN_LIST';
         }
     }
 
