@@ -8,10 +8,10 @@ import ru.magnit.magreportbackend.util.Pair;
 
 import java.util.Objects;
 
-public class SplitExpression extends ParameterizedExpression {
+public class StringSplitExpression extends ParameterizedExpression {
     private final Pair<String, DataTypeEnum> result = new Pair<>(null, DataTypeEnum.STRING);
 
-    public SplitExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
+    public StringSplitExpression(FieldExpressionResponse fieldExpression, ExpressionCreationContext context) {
         super(fieldExpression, context);
     }
 
