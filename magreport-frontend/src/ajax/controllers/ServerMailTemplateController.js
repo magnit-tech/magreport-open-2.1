@@ -9,7 +9,7 @@ const SETTINGS_GET_ALL_MAIL_TEMPLATE = CONTROLLER_URL + 'get-all';
 const SETTINGS_EDIT_MAIL_TEMPLATE = CONTROLLER_URL + '/edit';
 const SETTINGS_GET_MAIL_TEMPLATE_TYPE = CONTROLLER_URL + '/type-get';
 const SETTINGS_GET_ALL_MAIL_TEMPLATE_TYPE = CONTROLLER_URL + '/type-get-all';
-
+const SETTINGS_MAIL_TEMPLATE_SEARCH_URL = CONTROLLER_URL + '/search';
 
 export default function ServerMailTemplateController(dataHub) {
 
@@ -76,5 +76,14 @@ export default function ServerMailTemplateController(dataHub) {
         return dataHub.requestService(SETTINGS_GET_ALL_MAIL_TEMPLATE_TYPE, METHOD, body, callback);
     }
 
+    this.search = function (likenessType, recursive, rootFolderId, searchString, callback){
+        const body = {
+            likenessType,
+            recursive,
+            rootFolderId, 
+            searchString
+        };
+        return dataHub.requestService(SETTINGS_MAIL_TEMPLATE_SEARCH_URL, METHOD, body, callback, data => dataHub.localCache.setSearchFolderData(FolderItemTypes.reportsDev, data));
+    }
 
 }
