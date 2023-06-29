@@ -15,6 +15,7 @@ import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
 import Pageview from "@material-ui/icons/Pageview";
 import EditIcon from "@material-ui/icons/Edit";
+import SwapHorizontalCircleIcon from '@material-ui/icons/SwapHorizontalCircle';
 import DeleteIcon from "@material-ui/icons/Delete";
 import IconButton from "@material-ui/core/IconButton";
 
@@ -24,6 +25,7 @@ import dataHub from "ajax/DataHub";
 import {actionAsmDeleted} from "redux/actions/admin/actionAsm";
 import {hideAlertDialog, showAlertDialog} from "redux/actions/UI/actionsAlertDialog";
 import {connect} from "react-redux";
+import clsx from "clsx";
 
 /**
  * @callback actionAsmDeleted
@@ -64,6 +66,7 @@ import {connect} from "react-redux";
  * @param {actionAsmDeleted} props.actionAsmDeleted - action успешного удаления ASM
  * @param {showAlertDialog} props.showAlertDialog - показать диалоговое окно
  * @param {hideAlertDialog} props.hideAlertDialog - скрыть диалоговое окно
+ * @param {onSwitchClick} props.onSwitchClick - нажатие на кнопку изменения статуса обновления ASM
  * @param {onClick} props.onClick - выполняется при нажатии на карточку
  * @returns {JSX.Element}
  * @constructor
@@ -84,6 +87,8 @@ function ASMItemCard(props) {
     const modified = new Date(props.modified).toLocaleDateString("ru");
     const isSelected = props.isSelected;
 
+    let invalidSuccessDefault =  props.isActive ? classes.successIcon :classes.primaryIcon;
+
     //event handlers
     function handleViewButtonClick() {
         navigate(`/ui/asm/view/${id}`)
@@ -91,6 +96,10 @@ function ASMItemCard(props) {
 
     function handleEditButtonClick() {
         navigate(`/ui/asm/edit/${id}`)
+    }
+
+    function handleSwitchClick() {
+        props.onSwitchClick(id)
     }
 
     function handleDeleteButtonClick() {
@@ -122,10 +131,15 @@ function ASMItemCard(props) {
             <Card className={cardClasses} elevation={5} onClick={props.onClick}>
                 <CardHeader
                     classes={{root: classes.cardHead, content: classes.cardHeadContent}}
-                    titleTypographyProps={{variant: "subtitle2", align: "left"}}
+                    titleTypographyProps={{
+                        variant: "subtitle2", 
+                        align: "left",
+                        color: `${props.isActive? "inherit" : "textPrimary"}`
+                    }}
                     subheaderTypographyProps={{variant: "caption", align: "left"}}
                     title={name}
                     subheader={description}
+                    
                 />
                 <CardContent>
                     <Table>
@@ -154,21 +168,26 @@ function ASMItemCard(props) {
                 </CardContent>
                 <CardActions className={classes.cardAction}>
                     <span>
-                            <Tooltip title="Просмотр">
-                                <IconButton fontSize="small" color="primary" onClick={handleViewButtonClick}>
-                                    <Pageview />
-                                </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Редактировать">
-                                <IconButton fontSize="small" color="primary" onClick={handleEditButtonClick}>
-                                    <EditIcon/>
-                                </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Удалить">
-                                <IconButton fontSize="small" color="primary" onClick={handleDeleteButtonClick}>
-                                    <DeleteIcon/>
-                                </IconButton>
-                            </Tooltip>
+                        <Tooltip key={1} title="Просмотр">
+                            <IconButton className={classes.btn} size="small" fontSize="small" onClick={handleViewButtonClick}>
+                                <Pageview className = {clsx({  [classes.successIcon] : props.isActive , [classes.primaryIcon]: !props.isActive})}/>
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip key={2} title="Редактировать">
+                            <IconButton className={classes.btn} size="small" fontSize="small" onClick={handleEditButtonClick}>
+                                <EditIcon className = {invalidSuccessDefault}/>
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip key={3} title="Изменить статус">
+                            <IconButton className={classes.btn} size="small" fontSize="small" onClick={handleSwitchClick}>
+                                <SwapHorizontalCircleIcon className = {invalidSuccessDefault}/>
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip  key={4} title="Удалить">
+                            <IconButton className={classes.btn} size="small" fontSize="small" onClick={handleDeleteButtonClick}>
+                                <DeleteIcon className = {invalidSuccessDefault}/>
+                            </IconButton>
+                        </Tooltip>
                     </span>
                 </CardActions>
             </Card>
