@@ -73,7 +73,6 @@ public class OlapController {
     public static final String OLAP_GET_CUBE = "/api/v1/olap/get-cube";
     public static final String OLAP_GET_CUBE_NEW = "/api/v1/olap/get-cube-new";
     public static final String OLAP_GET_FIELD_VALUES = "/api/v1/olap/get-field-values";
-    public static final String OLAP_CONFIGURATION_UPDATE = "/api/v1/olap/configuration/update";
     public static final String OLAP_CONFIGURATION_REPORT_ADD = "/api/v1/olap/configuration/report-add";
     public static final String OLAP_CONFIGURATION_REPORT_GET = "/api/v1/olap/configuration/report-get";
     public static final String OLAP_GET_USERS_RECEIVED_MY_JOB = "/api/v1/olap/get-users-received-my-jobs";
@@ -89,6 +88,8 @@ public class OlapController {
     public static final String OLAP_GET_EXTERNAL_SERVICES = "/api/v1/olap/get-external-services";
     public static final String OLAP_GET_PIVOT_TABLE_EXCEL = "/api/v1/olap/create-excel-pivot-table";
     public static final String OLAP_GET_PIVOT_TABLE_EXCEL_GET = "/api/v1/olap/excel-pivot-table/{pivotToken}";
+
+    public static final String START_ERROR_MASSAGE = "Error executing OLAP request: ";
 
     private final OlapService olapService;
     private final ExternalOlapService externalOlapService;
@@ -137,7 +138,7 @@ public class OlapController {
                         .data(olapService.getCube(request))
                         .build();
             } catch (Exception ex) {
-                throw new OlapException("Error executing OLAP request: " + ex.getMessage(), ex);
+                throw new OlapException(START_ERROR_MASSAGE + ex.getMessage(), ex);
             } finally {
                 semaphore.release();
             }
@@ -176,7 +177,7 @@ public class OlapController {
                     .data(olapService.getCubeNew(request))
                     .build();
             } catch (Exception ex) {
-                throw new OlapException("Error executing OLAP request: " + ex.getMessage(), ex);
+                throw new OlapException(START_ERROR_MASSAGE+ ex.getMessage(), ex);
             } finally {
                 semaphore.release();
             }
@@ -214,7 +215,7 @@ public class OlapController {
                         .data(olapService.getFieldValues(request))
                         .build();
             } catch (Exception ex) {
-                throw new OlapException("Error executing OLAP request: " + ex.getMessage(), ex);
+                throw new OlapException(START_ERROR_MASSAGE + ex.getMessage(), ex);
             } finally {
                 semaphore.release();
             }
@@ -515,15 +516,23 @@ public class OlapController {
     @PostMapping(value = OLAP_GET_PIVOT_TABLE_EXCEL)
     public ResponseBody<TokenResponse> exportPivotTableExcel(
             @RequestBody
-            OlapExportPivotTableRequest dataRequest) throws Exception {
+            OlapExportPivotTableRequest dataRequest) throws InterruptedException {
         LogHelper.logInfoUserMethodStart();
 
+        semaphore.acquire();
+        ResponseBody<TokenResponse> dataResponse;
+        try {
 
-        var dataResponse = ResponseBody.<TokenResponse>builder()
-                .success(true)
-                .message("")
-                .data(olapService.exportPivotTableExcel(dataRequest))
-                .build();
+            dataResponse = ResponseBody.<TokenResponse>builder()
+                    .success(true)
+                    .message("")
+                    .data(olapService.exportPivotTableExcel(dataRequest))
+                    .build();
+        } catch (Exception ex) {
+            throw new OlapException(START_ERROR_MASSAGE+ ex.getMessage(), ex);
+        } finally {
+            semaphore.release();
+        }
 
         LogHelper.logInfoUserMethodEnd();
 
