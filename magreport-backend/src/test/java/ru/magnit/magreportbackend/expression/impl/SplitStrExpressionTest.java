@@ -20,7 +20,7 @@ class SplitStrExpressionTest {
     void splitStrTest1(){
 
         final var sourceExpression = new FieldExpressionResponse()
-                .setType(Expressions.SPLIT)
+                .setType(Expressions.STRING_SPLIT)
                 .setParameters(List.of(
                         new FieldExpressionResponse()
                                 .setType(Expressions.CONSTANT_VALUE)
@@ -48,7 +48,7 @@ class SplitStrExpressionTest {
     void splitStrTest2(){
 
         final var sourceExpression = new FieldExpressionResponse()
-                .setType(Expressions.SPLIT)
+                .setType(Expressions.STRING_SPLIT)
                 .setParameters(List.of(
                         new FieldExpressionResponse()
                                 .setType(Expressions.CONSTANT_VALUE)
@@ -76,7 +76,7 @@ class SplitStrExpressionTest {
     void splitStrTest3(){
 
         final var sourceExpression = new FieldExpressionResponse()
-                .setType(Expressions.SPLIT)
+                .setType(Expressions.STRING_SPLIT)
                 .setParameters(List.of(
                         new FieldExpressionResponse()
                                 .setType(Expressions.CONSTANT_VALUE)
@@ -104,7 +104,7 @@ class SplitStrExpressionTest {
     void splitStrTest4(){
 
         final var sourceExpression = new FieldExpressionResponse()
-                .setType(Expressions.SPLIT)
+                .setType(Expressions.STRING_SPLIT)
                 .setParameters(List.of(
                         new FieldExpressionResponse()
                                 .setType(Expressions.CONSTANT_VALUE)
@@ -129,7 +129,7 @@ class SplitStrExpressionTest {
     void splitStrTest5(){
 
         final var sourceExpression = new FieldExpressionResponse()
-                .setType(Expressions.SPLIT)
+                .setType(Expressions.STRING_SPLIT)
                 .setParameters(List.of(
                         new FieldExpressionResponse()
                                 .setType(Expressions.CONSTANT_VALUE)
