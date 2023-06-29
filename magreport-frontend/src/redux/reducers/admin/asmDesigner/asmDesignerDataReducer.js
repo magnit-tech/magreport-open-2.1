@@ -8,7 +8,8 @@ import {
     ASM_DESIGNER_SET_SECURITY_SOURCE_DATASET,
     ASM_DESIGNER_SET_SECURITY_SOURCE_FIELD,
     ASM_DESIGNER_DELETE_SECURITY_SOURCE_FIELD,
-    ASM_DESIGNER_UPDATE_SECURITY_FILTER_FIELD_MAPPING, ASM_DATA_LOADED
+    ASM_DESIGNER_UPDATE_SECURITY_FILTER_FIELD_MAPPING, 
+    ASM_DATA_LOADED
 } from "redux/reduxTypes";
 import {NAME, DESCRIPTION, ROLE_TYPE_ID, SECURITY_SOURCES, IS_DEFAULT_DOMAIN} from "utils/asmConstants";
 import {asmDesignerDataSecuritySourcesReducer} from "./asmDesignerDataSecuritySourcesReducer";
@@ -46,7 +47,6 @@ export const asmDesignerDataReducer = (state, action) => {
                 ...state,
                 [SECURITY_SOURCES]: asmDesignerDataSecuritySourcesReducer(state[SECURITY_SOURCES], action)
             };
-
         default:
             return state;
     }
