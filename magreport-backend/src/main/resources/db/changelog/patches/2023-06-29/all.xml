@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="SPLIT_STRING_EXPRESSION-001" author="vyushin_aa">
+        <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="SPLIT_STRING"/>
+            <column name="DESCRIPTION" value="Производит разбиение строки на подстроки по разделителю и возвращает N-ую подстроку"/>
+            <column name="SIGNATURE">
+                <![CDATA[<strong>SPLIT_STRING(строка1, делиметр, число1)</strong><br/><strong>Возвращаемое значение:</strong> Подстрока под номером число1 </br>]]>
+            </column>
+            <column name="NUM_PARAMS" value="3"/>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="JSON_FIELD_EXPRESSION-001" author="vyushin_aa">
+        <insert tableName="EXPRESSIONS">
+            <column name="NAME" value="JSON_FIELD"/>
+            <column name="DESCRIPTION" value="Возвращает найденый объект в JSON по заданному пути"/>
+            <column name="SIGNATURE">
+                <![CDATA[<strong>JSON_FIELD(строка1, строка2)</strong><br/><strong>Возвращаемое значение:</strong> Значение найденное в строка1 по пути строка2 </br>]]>
+            </column>
+            <column name="NUM_PARAMS" value="2"/>
+            <column name="NUM_PARAM_TYPE_ID" valueComputed="SELECT NUM_PARAM_TYPE_ID FROM ${default-schema}.NUM_PARAM_TYPE WHERE NAME = 'FIXED'"/>
+            <column name="USER_ID" valueComputed="SELECT USER_ID FROM ${default-schema}.USERS WHERE NAME = 'MAGREPORT-INIT'"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
