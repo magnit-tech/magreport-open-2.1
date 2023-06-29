@@ -69,28 +69,39 @@ function ValueList(props){
     */
     useEffect(() => {
 
-        const type = props.filterData.filterReportModes;
-        const externalValue = props.externalFiltersValue ? props.externalFiltersValue[props.filterData.code] : null
+        // const type = props.filterData.filterReportModes;
+        // const externalValue = props.externalFiltersValue ? props.externalFiltersValue[props.filterData.code] : null
 
-        if (externalValue) {
-            handleTextChanged(externalValue.value && Array.isArray(JSON.parse(externalValue.value)) ? JSON.parse(externalValue.value).join(';') : "")
-            if (type.length < 1 || type.length === 2){
-                setOperationTypeDisabled(false)
-                setOperationType(externalValue.operationType === 'IN_LIST' ? 'IN_LIST' : externalValue.operationType === 'NOT_IN_LIST' ? 'NOT_IN_LIST' : 'IN_LIST')
-            } else {
-                setOperationTypeDisabled(true)
-                return type.length > 0 ? setOperationType([...type]) : setOperationType('IN_LIST');
-            }
+        // if (externalValue) {
+        //     handleTextChanged(externalValue.value && Array.isArray(JSON.parse(externalValue.value)) ? JSON.parse(externalValue.value).join(';') : "")
+        //     if (type.length < 1 || type.length === 2){
+        //         setOperationTypeDisabled(false)
+        //         setOperationType(externalValue.operationType === 'IN_LIST' ? 'IN_LIST' : externalValue.operationType === 'NOT_IN_LIST' ? 'NOT_IN_LIST' : 'IN_LIST')
+        //     } else {
+        //         setOperationTypeDisabled(true)
+        //         return type.length > 0 ? setOperationType([...type]) : setOperationType('IN_LIST');
+        //     }
+        // } else {
+        //     if (type.length < 1 || type.length === 2){
+        //         setOperationTypeDisabled(false)
+        //         setOperationType('IN_LIST')
+        //     } else {
+        //         setOperationTypeDisabled(true)
+        //         return type.length > 0 ? setOperationType([...type]) : setOperationType('IN_LIST');
+        //     }
+        // }
 
-        } else {
-            if (type.length < 1 || type.length === 2){
-                setOperationTypeDisabled(false)
-                setOperationType('IN_LIST')
-            } else {
-                setOperationTypeDisabled(true)
-                return type.length > 0 ? setOperationType([...type]) : setOperationType('IN_LIST');
+        props.onChangeFilterValue(
+            {
+                filterId : props.filterData.id,
+                operationType: 'IS_IN_LIST',
+                validation: mandatory ? "error" : 'success',
+                parameters: props.lastFilterValue?.parameters || []
             }
-        }
+        );
+
+        setOperationTypeDisabled(true)
+        setOperationType('IN_LIST')
         
     }, [props.filterData.filterReportModes, props.externalFiltersValue, props.filterData.code]) // eslint-disable-line
 
