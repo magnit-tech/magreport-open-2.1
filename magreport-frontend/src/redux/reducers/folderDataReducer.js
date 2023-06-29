@@ -20,7 +20,8 @@ import {
     FAVORITES_DELETED,
     JOBS_FILTER,
     USERS_JOBS_FILTER,
-    TASK_SWITCHED
+    TASK_SWITCHED,
+    ASM_SWITCHED
 } from 'redux/reduxTypes';
 import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
 // import {FLOW_STATE_BROWSE_FOLDER} from './menuViews/flowStates'; 
@@ -390,27 +391,35 @@ export function folderDataReducer(state = initialState, action, sidebarItem, fol
                 }
                 return newStateUJF
         case TASK_SWITCHED:
-                        let newStateTS = {...state}
-                        const fullArr = [...state.currentFolderData.scheduleTasks]
-                        const filteredArr = [...state.filteredFolderData.scheduleTasks]
+            let newStateTS = {...state}
+            const fullArr = [...state.currentFolderData.scheduleTasks]
+            const filteredArr = [...state.filteredFolderData.scheduleTasks]
         
-                        let newTask = {};
+            let newTask = {};
         
-                        if (state.searchParams){
-                            newTask = {...filteredArr[action.taskIndex], status: action.status}
-                            let indexFullArr = fullArr.findIndex(item => item.id === action.taskId)
-                            filteredArr.splice(action.taskIndex, 1, newTask)
-                            fullArr.splice(indexFullArr, 1, newTask)
-                            
-                        }
-                        else {
-                            newTask = {...fullArr[action.taskIndex], status: action.status}
-                            fullArr.splice(action.taskIndex, 1, newTask)
-                            filteredArr.splice(action.taskIndex, 1, newTask)
-                        }
-                        newStateTS.filteredFolderData.scheduleTasks = filteredArr;
-                        newStateTS.currentFolderData.scheduleTasks = fullArr;
-                        return newStateTS
+            if (state.searchParams){
+                newTask = {...filteredArr[action.taskIndex], status: action.status}
+                let indexFullArr = fullArr.findIndex(item => item.id === action.taskId)
+                filteredArr.splice(action.taskIndex, 1, newTask)
+                fullArr.splice(indexFullArr, 1, newTask)
+            }
+            else {
+                newTask = {...fullArr[action.taskIndex], status: action.status}
+                fullArr.splice(action.taskIndex, 1, newTask)
+                    filteredArr.splice(action.taskIndex, 1, newTask)
+                }
+            newStateTS.filteredFolderData.scheduleTasks = filteredArr;
+            newStateTS.currentFolderData.scheduleTasks = fullArr;
+            
+            return newStateTS
+        case ASM_SWITCHED:
+            let asmArr = state.currentFolderData;
+            let switchedAsmIndex = asmArr.findIndex((item)=>item.id === action.id);
+
+            asmArr[switchedAsmIndex] = {...asmArr[switchedAsmIndex], isActive: action.data};
+
+            let newState = {...state, currentFolderData: asmArr, filteredFolderData: asmArr}
+            return newState
         default:
             return state;
     }    

@@ -1,18 +1,19 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
 
 // local
 import dataHub from 'ajax/DataHub';
-import { actionAsmListLoaded, actionAsmListLoadFailed } from "redux/actions/admin/actionAsm";
+import {actionFolderLoaded, actionFolderLoadFailed} from 'redux/actions/menuViews/folderActions';
+import SidebarItems from '../../Sidebar/SidebarItems';
 
 // components
 import DataLoader from "../../../DataLoader/DataLoader";
-import ExternalSecurityList from "./ASMList";
+import ASMList from "./ASMList";
 
 
-function ASMAdministrationMenuView(){
+function ASMAdministrationMenuView(props){
 
     const navigate = useNavigate()
 
@@ -20,7 +21,7 @@ function ASMAdministrationMenuView(){
         navigate(`/ui/asm/add`)
     }
 
-    const [data, setData] = useState()
+    const folderItemsType = SidebarItems.admin.subItems.ASMAdministration.folderItemType;
 
     return (
         <div  style={{display: 'flex', flex: 1}}>
@@ -28,11 +29,11 @@ function ASMAdministrationMenuView(){
                 loadFunc={dataHub.asmController.getAll}
                 loadParams={[]}
                 reload={false}
-                onDataLoaded={(data) => setData(data)}
-                onDataLoadFailed={(error) => setData(error)}
+                onDataLoaded={(data) => props.actionFolderLoaded(folderItemsType, data)}
+                onDataLoadFailed={(error) => props.actionFolderLoadFailed(folderItemsType, error)}
             >
-                <ExternalSecurityList
-                    data={data}
+                <ASMList
+                    data={props.state.currentFolderData}
                     onAddAsmClick={handleAddItemClick}
                 />
             </DataLoader>
@@ -42,13 +43,13 @@ function ASMAdministrationMenuView(){
 
 const mapStateToProps = state => {
     return {
-        state: state.asmAdministrationMenuView
+        state: state.folderData
     }
 }
 
 const mapDispatchToProps = {
-    actionAsmListLoaded,
-    actionAsmListLoadFailed,
+    actionFolderLoaded,
+    actionFolderLoadFailed
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(ASMAdministrationMenuView);

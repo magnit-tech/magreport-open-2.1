@@ -170,7 +170,11 @@ function Header(props) {
 						)}
 					</IconButton>
 				</Tooltip>
-				<Typography variant='overline' className={classes.userNameClass}>
+				<Typography 
+					id="userNameLabel"
+					variant='overline'
+					className={classes.userNameClass}
+				>
 					{user.current ? user.current.name : ''}
 				</Typography>
 				{user.current?.name ? (
