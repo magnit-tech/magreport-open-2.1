@@ -8,6 +8,7 @@ const ASM_DELETE_URL = CONTROLLER_URL + "/delete";
 const ASM_GET_URL = CONTROLLER_URL + "/get";
 const ASM_GET_ALL_URL = CONTROLLER_URL + "/get-all";
 const ASM_REFRESH_URL = CONTROLLER_URL + "/refresh";
+const ASM_SWITCH_URL = CONTROLLER_URL + "/switch";
 
 export default function ASMController(dataHub) {
 
@@ -60,6 +61,13 @@ export default function ASMController(dataHub) {
             idList
         }
         return dataHub.requestService(ASM_REFRESH_URL, METHOD, body, callback);
+    }
+
+    this.switch = function(id, callback) {
+        const body = {
+            id
+        }
+        return dataHub.requestService(ASM_SWITCH_URL, METHOD, body, callback);
     }
 
 }
