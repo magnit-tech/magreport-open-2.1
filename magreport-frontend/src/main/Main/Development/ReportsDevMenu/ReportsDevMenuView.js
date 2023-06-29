@@ -83,12 +83,12 @@ function ReportsDevMenuView(props){
         navigate(`/ui/reportsDev/${id}/add`, locationPreviousHistory)
     }
     function handleSearchItems(params) {
-        const { searchString, isRecursive } = params
+        const { searchString } = params
 
         if (searchString.trim() === '') {
             setSearchParams({})
         } else {
-            setSearchParams({search: searchString, isRecursive: isRecursive ?? false})
+            setSearchParams({search: searchString, isRecursive: true})
         }
     }
 
@@ -99,7 +99,7 @@ function ReportsDevMenuView(props){
             const actionSearchParams = {
                 open: true,
                 searchString: searchParams.get("search"),
-                isRecursive: searchParams.get("isRecursive") === 'true' ? true : false,
+                isRecursive: true,
             }
 
             await props.actionSearchClick(folderItemsType, state.currentFolderId, actionSearchParams)

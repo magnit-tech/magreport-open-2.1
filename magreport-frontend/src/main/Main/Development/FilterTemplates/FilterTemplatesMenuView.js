@@ -72,12 +72,12 @@ function FilterTemplatesMenuView(props){
         navigate(`/ui/filterTemplate/${id}/view/${filterTemplateId}`, locationPreviousHistory)
     }
     function handleSearchItems(params) {
-        const { searchString, isRecursive } = params
+        const { searchString } = params
 
         if (searchString.trim() === '') {
             setSearchParams({})
         } else {
-            setSearchParams({search: searchString, isRecursive: isRecursive ?? false})
+            setSearchParams({search: searchString, isRecursive: true})
         }
     }
 
@@ -88,7 +88,7 @@ function FilterTemplatesMenuView(props){
             const actionSearchParams = {
                 open: true,
                 searchString: searchParams.get("search"),
-                isRecursive: searchParams.get("isRecursive") === 'true' ? true : false,
+                isRecursive: true,
             }
 
             await props.actionSearchClick(folderItemsType, state.currentFolderId, actionSearchParams)
