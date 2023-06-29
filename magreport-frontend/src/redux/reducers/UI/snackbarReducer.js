@@ -11,7 +11,7 @@ import { SHOWSNACKBAR, HIDESNACKBAR,
         USERS_LIST_ROLE_DELETE_FAILED, FOLDERS_TREE_PARENT_CHANGED_FAIL, JOB_SQL_LOAD_FAILED, 
         REPORT_TEMPLATES_LOAD_FAILED, REPORT_TEMPLATES_ADDED, REPORT_TEMPLATES_ADD_FAILED, REPORT_TEMPLATES_DELETED, REPORT_TEMPLATES_DELETE_FAILED,
         REPORT_TEMPLATES_SET_DEFAULT_SUCCESS, REPORT_TEMPLATES_SET_DEFAULT_FAILED, SCHEDULE_TASK_RUN_FAILED, SCHEDULE_TASK_RUN_OK,
-        TASK_SWITCH_FAILED
+        TASK_SWITCH_FAILED, ASM_SWITCH_FAILED
     } from 'redux/reduxTypes';
     
 const initialState = {
@@ -174,6 +174,8 @@ export const snackbarReducer = (state = initialState, action) => {
             
         case TASK_SWITCH_FAILED:
             return {...errorInfo, text: "Не удалось изменить статус отчета на расписании"}
+        case ASM_SWITCH_FAILED:
+            return {...errorInfo, text: "Не удалось переключить статус запуска/отключения обновления ASM"}
 
         default:
             return state

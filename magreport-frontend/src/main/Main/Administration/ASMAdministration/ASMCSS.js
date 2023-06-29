@@ -22,7 +22,9 @@ export const ASMCSS = makeStyles(theme => ({
     },
     cardHead: {
         height: '100%',
-        alignItems: 'start'
+        alignItems: 'start',
+        padding: '16px 16px 0px',
+        color: theme.palette.success.main
     },
     cardHeadContent: {
         alignSelf: 'start'
@@ -58,5 +60,14 @@ export const ASMCSS = makeStyles(theme => ({
     },
     progress: {
         margin: 'auto auto'
+    },
+    btn: {
+        margin: '4px 0px 4px 8px'
+    },
+    successIcon:{
+        color: theme.palette.success.main
+    },
+    primaryIcon: {
+        color: theme.palette.primary.main
     },
 }));

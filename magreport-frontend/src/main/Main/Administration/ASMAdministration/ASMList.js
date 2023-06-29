@@ -16,7 +16,7 @@ import AddButton from '../../../FolderContent/AddButton';
 
 // local
 import dataHub from "ajax/DataHub";
-import { actionAmsRefresh } from "redux/actions/admin/actionAsm";
+import { actionAmsRefresh, actionAsmSwitch } from "redux/actions/admin/actionAsm";
 import { addNavbar } from "redux/actions/navbar/actionNavbar";
 import { ASMCSS } from "./ASMCSS";
 
@@ -66,6 +66,11 @@ function ASMList(props) {
             props.actionAmsRefresh("FINISH")
         })
     }
+    
+    function handleSwitchClick(id){
+
+        props.actionAsmSwitch(id)
+    }
 
     function handleItemCardClick(index) {
         const newData = data.slice();
@@ -87,7 +92,9 @@ function ASMList(props) {
                     description={item.description}
                     created={item.created}
                     modified={item.modified}
+                    isActive={item.isActive}
                     isSelected={item.isSelected}
+                    onSwitchClick = {() => handleSwitchClick(item.id)}
                     onClick={() => handleItemCardClick(index)}
                 />
             </Grid>
@@ -149,6 +156,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = {
     actionAmsRefresh,
+    actionAsmSwitch,
     addNavbar
 };
 
