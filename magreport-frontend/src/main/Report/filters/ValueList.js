@@ -92,8 +92,15 @@ function ValueList(props){
         } else {
             if (type.length === 2){
                 setOperationTypeDisabled(false)
-                setOperationType('IN_LIST')
-                handleChangeTypeForLastFilterValue('IN_LIST');
+
+                if(props.lastFilterValue && props.lastFilterValue.operationType) {
+                    const typeValue = props.lastFilterValue.operationType === "IS_IN_LIST" ? "IN_LIST" : "NOT_IN_LIST";
+                    setOperationType(typeValue)
+                    handleChangeTypeForLastFilterValue(typeValue);
+                } else {
+                    setOperationType('IN_LIST')
+                    handleChangeTypeForLastFilterValue('IN_LIST');
+                }
             } else {
                 setOperationTypeDisabled(true)
                 if (type.length > 0) {
@@ -110,7 +117,6 @@ function ValueList(props){
 
     function handleChangeTypeForLastFilterValue(type) {
         if(props.lastFilterValue) {
-            console.log(type);
             props.onChangeFilterValue(
                 {
                     filterId : props.filterData.id,
