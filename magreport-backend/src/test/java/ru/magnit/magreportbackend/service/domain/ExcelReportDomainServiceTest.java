@@ -77,7 +77,7 @@ class ExcelReportDomainServiceTest {
         FileUtils.deleteDirectory(new File("test/"));
 
         when(readerFactory.createReader(any(ReportJobData.class), any())).thenReturn(getReader());
-        when(writerFactory.createWriter(any(Reader.class), any(ReportData.class), any())).thenReturn(getWriter());
+        when(writerFactory.createWriter(any(Reader.class), any(ReportData.class), any(),any())).thenReturn(getWriter());
 
         assertNotNull(domainService.getExcelReport(getReportJobData(), "", ID));
 
@@ -105,12 +105,12 @@ class ExcelReportDomainServiceTest {
         ReflectionTestUtils.setField(domainService, "decryptOutFolder", "test/outFolder");
 
         when(readerFactory.createReader(any(ReportJobData.class), any())).thenReturn(getReader());
-        when(writerFactory.createWriter(any(Reader.class), any(ReportData.class), any())).thenReturn(getWriter());
+        when(writerFactory.createWriter(any(Reader.class), any(ReportData.class), any(), any())).thenReturn(getWriter());
 
         domainService.createExcelReport(getReportJobData(), "", ID);
 
         verify(readerFactory).createReader(any(ReportJobData.class), any());
-        verify(writerFactory).createWriter(any(Reader.class), any(ReportData.class), any());
+        verify(writerFactory).createWriter(any(Reader.class), any(ReportData.class), any(), any());
 
         verifyNoMoreInteractions(readerFactory, writerFactory);
     }
