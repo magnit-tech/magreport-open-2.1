@@ -20,6 +20,7 @@ import FilterStatus from './FilterStatus';
  * @param {Object} props - свойства компонента
  * @param {boolean} props.disabled - компонент используется для просмотра
  * @param {Object} props.filterData - данные фильтра (объект ответа от сервиса)
+ * @param {Object} props.externalFiltersValue - параметров фильтров через URL. {"SINGLE_VALUE_CODE":{"value": <(Любое значение): string>}}
  * @param {Object} props.lastFilterValue - объект со значениями фильтра из последнего запуска (как приходит от сервиса)
  * @param {boolean} props.toggleClearFilter - при изменении значения данного свойства требуется очистить выбор в фильтре
  * @param {onChangeFilterValue} props.onChangeFilterValue - function(filterValue) - callback для передачи значения изменившегося параметра фильтра
