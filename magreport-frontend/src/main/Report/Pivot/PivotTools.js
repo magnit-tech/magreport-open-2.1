@@ -13,6 +13,7 @@ import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
  * 
  * @param {*} props.columnsMetricPlacement - true/false
  * @param {*} props.onMetricPlacementChange - function(placeColumn)
+ * @param {*} props.onClearAllOlap - function() - очистка всех зон полей
  * @param {*} props.mergeMode - true/false
  * @param {*} props.onMergeModeChange - function(mergeMode)
  * @param {*} props.onViewTypeChange - function() - callback смена вида с сводной на простую таблицу
