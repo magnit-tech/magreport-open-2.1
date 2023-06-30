@@ -6,8 +6,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.magnit.magreportbackend.dto.request.event.EventPivotRegisterRequest;
 import ru.magnit.magreportbackend.dto.request.event.EventRegisterRequest;
+import ru.magnit.magreportbackend.exception.FileSystemException;
 import ru.magnit.magreportbackend.service.domain.EventDomainService;
 import ru.magnit.magreportbackend.service.domain.UserDomainService;
+
+import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +42,12 @@ public class EventService {
 
     @Scheduled(cron = "${magreport.event.time-write-file}")
     private void writeEvents() {
-        if(isEnableWriteEvent)
-            eventDomainService.pivotEventWriter();
+        if(isEnableWriteEvent) {
+            try {
+                eventDomainService.pivotEventWriter();
+            } catch (IOException e) {
+                throw new FileSystemException(e.getMessage());
+            }
+        }
     }
 }
