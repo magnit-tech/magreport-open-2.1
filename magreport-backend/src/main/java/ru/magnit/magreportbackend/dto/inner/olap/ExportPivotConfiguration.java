@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import ru.magnit.magreportbackend.dto.inner.TaskInfo;
 import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequest;
 import ru.magnit.magreportbackend.dto.response.olap.OlapCubeResponse;
 import ru.magnit.magreportbackend.dto.response.report.ReportFieldMetadataResponse;
@@ -23,6 +24,7 @@ public class ExportPivotConfiguration {
     private boolean encrypt;
     private JsonNode config;
     private List<ReportFieldMetadataResponse> metadataFields = Collections.emptyList();
+    private TaskInfo taskInfo;
 
 
 }

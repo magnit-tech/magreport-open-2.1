@@ -520,6 +520,7 @@ public class OlapController {
     public ResponseBody<TokenResponse> exportPivotTableExcel(
             @RequestBody OlapExportPivotTableRequest dataRequest) throws JsonProcessingException {
 
+        LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_GET_PIVOT_TABLE_EXCEL, dataRequest, userService.getCurrentUserName()));
 
         if (countDop.get() < maxDop) {
             LogHelper.logInfoUserMethodStart();
