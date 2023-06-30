@@ -52,11 +52,9 @@ export default function ReportStarter(props){
     const [toggleClearFilters, setToggleClearFilters] = useState(false); // переключатель очистки фильтра - если изменилось значение, надо очистить фильтры
     const [reportJobId, setReportJobId] = useState(null);
     const [lastParamJobId, setLastParamJobId] = useState(searchParams.get('jobId'));
-    const externalFiltersValue = searchParams.get('externalFiltersValue') ? JSON.parse(searchParams.get('externalFiltersValue')) : null;
-
-    // useEffect( () => {
-    //     setLastParamJobId(props.jobId);
-    // }, [props.jobId])
+    // const externalFiltersValue = searchParams.get('externalFiltersValue') ? JSON.parse(searchParams.get('externalFiltersValue')) : null;
+    const decodeExternalFiltersValue = decodeURI(searchParams.get('externalFiltersValue'))
+    const externalFiltersValue = decodeExternalFiltersValue ? JSON.parse(decodeExternalFiltersValue) : null;
     
     const lastFilterValues = useRef(new FilterValues()); // Значения параметров предыдущего запуска отчёта
 
