@@ -11,7 +11,9 @@ import org.apache.poi.ss.usermodel.Name;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.h2.util.Task;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
+import ru.magnit.magreportbackend.dto.inner.TaskInfo;
 import ru.magnit.magreportbackend.dto.inner.jobengine.CacheRow;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportData;
 import ru.magnit.magreportbackend.exception.ReportExportException;
@@ -37,13 +39,14 @@ public class ExcelWriter implements Writer {
     private final Path exportPath;
     private final String nameDataList;
     private final TelemetryService telemetryService;
+    private final TaskInfo taskInfo;
 
     private final AtomicInteger rowCount = new AtomicInteger(0);
     private final AtomicInteger colCount = new AtomicInteger(0);
 
     @Override
     public void convert(String templatePath) {
-        final var telemetryId = telemetryService.init(ExcelExportTelemetry.INITIALIZING);
+        final var telemetryId = telemetryService.init(ExcelExportTelemetry.INITIALIZING, taskInfo);
         telemetryService.setState(telemetryId, ExcelExportTelemetry.INITIALIZING);
         try (
                 final var inputStream = Files.newInputStream(Paths.get(templatePath));

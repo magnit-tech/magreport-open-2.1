@@ -96,7 +96,7 @@ public class PivotTableWriter implements Writer {
 
     @Override
     public void convert(String templatePath) {
-        final var telemetryId = telemetryService.init(ExcelExportTelemetry.INITIALIZING);
+        final var telemetryId = telemetryService.init(ExcelExportTelemetry.INITIALIZING, configuration.getTaskInfo());
         telemetryService.setState(telemetryId, ExcelExportTelemetry.INITIALIZING);
 
         try (
@@ -143,6 +143,7 @@ public class PivotTableWriter implements Writer {
 
             telemetryService.setState(telemetryId, ExcelExportTelemetry.WORKBOOK_DISPOSAL);
             workbook.dispose();
+
 
             telemetryService.logTimings(telemetryId);
             telemetryService.clear(telemetryId);

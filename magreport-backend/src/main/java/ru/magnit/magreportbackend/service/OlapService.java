@@ -10,6 +10,7 @@ import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.domain.olap.AggregationType;
 import ru.magnit.magreportbackend.domain.olap.SortDirection;
 import ru.magnit.magreportbackend.domain.olap.SortingOrder;
+import ru.magnit.magreportbackend.dto.inner.TaskInfo;
 import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
 import ru.magnit.magreportbackend.dto.inner.olap.ExportPivotConfiguration;
 import ru.magnit.magreportbackend.dto.inner.olap.MeasureData;
@@ -306,7 +307,7 @@ public class OlapService {
             cubeRequest = getCubeRequest(request.getCubeRequest());
         }
         var config = olapConfigurationDomainService.getReportOlapConfiguration(request.getConfiguration());
-        var encrypt = jobDomainService.getJobData(request.getCubeRequest().getJobId()).reportData().encryptFile();
+        var jobData = jobDomainService.getJobData(request.getCubeRequest().getJobId());
 
         var code = (long) (Math.random() * 1000000);
 
@@ -316,9 +317,10 @@ public class OlapService {
                         resultCube,
                         code,
                         request.isStylePivotTable(),
-                        encrypt,
+                        jobData.reportData().encryptFile(),
                         objectMapper.readTree(config.getOlapConfig().getData()),
-                        metadata
+                        metadata,
+                        new TaskInfo(jobData.userName(), jobData.id())
                 )
         );
 
