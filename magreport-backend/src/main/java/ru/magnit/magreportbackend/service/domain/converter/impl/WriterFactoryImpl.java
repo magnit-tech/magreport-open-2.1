@@ -3,6 +3,7 @@ package ru.magnit.magreportbackend.service.domain.converter.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.magnit.magreportbackend.dto.inner.TaskInfo;
 import ru.magnit.magreportbackend.dto.inner.olap.ExportPivotConfiguration;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportData;
 import ru.magnit.magreportbackend.service.domain.converter.Reader;
@@ -21,8 +22,8 @@ public class WriterFactoryImpl implements WriterFactory {
     private final TelemetryService telemetryService;
 
     @Override
-    public Writer createWriter(Reader reader, ReportData data, Path exportPath) {
-        return new ExcelWriter(reader, data, exportPath, nameDataList, telemetryService);
+    public Writer createWriter(Reader reader, ReportData data, Path exportPath, TaskInfo taskInfo) {
+        return new ExcelWriter(reader, data, exportPath, nameDataList, telemetryService, taskInfo);
     }
 
     @Override

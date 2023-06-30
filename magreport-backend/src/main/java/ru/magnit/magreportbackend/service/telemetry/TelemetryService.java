@@ -2,6 +2,7 @@ package ru.magnit.magreportbackend.service.telemetry;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.magnit.magreportbackend.dto.inner.TaskInfo;
 import ru.magnit.magreportbackend.service.telemetry.counter.TelemetryCounter;
 import ru.magnit.magreportbackend.service.telemetry.state.TelemetryState;
 
@@ -22,11 +23,13 @@ public class TelemetryService {
     private final Map<Long, Map<TelemetryState, Long>> stateTimes = new ConcurrentHashMap<>();
     private final Map<Long, Map<TelemetryState, Long>> timers = new ConcurrentHashMap<>();
     private final Map<Long, Map<TelemetryCounter, Long>> counters = new ConcurrentHashMap<>();
+    private final Map<Long, TaskInfo> taskInfos = new ConcurrentHashMap<>();
 
-    public long init(TelemetryState state) {
+    public long init(TelemetryState state, TaskInfo taskInfo) {
         final var serialNumber = instanceCounter.getAndIncrement();
         stateTimes.put(serialNumber, state.getStatesTree());
         timers.put(serialNumber, state.getStatesTree());
+        taskInfos.put(serialNumber, taskInfo);
         return serialNumber;
     }
 
@@ -53,6 +56,7 @@ public class TelemetryService {
         stateTimes.remove(serialNumber);
         timers.remove(serialNumber);
         counters.remove(serialNumber);
+        taskInfos.remove(serialNumber);
     }
 
     public void logTimings(long serialNumber) {
@@ -60,6 +64,7 @@ public class TelemetryService {
         final var currentTime = System.nanoTime();
 
         log.debug("\nTimings for series: " + serialNumber + "\n" +
+                "Task information: " + taskInfos.get(serialNumber).toString() + "\n" +
                 "Current state: " + currentStates.get(serialNumber) + "\n" +
                 "{}", stateTimes.get(serialNumber)
                 .entrySet()

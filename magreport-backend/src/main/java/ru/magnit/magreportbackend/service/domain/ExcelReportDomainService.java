@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import ru.magnit.magreportbackend.dto.inner.TaskInfo;
 import ru.magnit.magreportbackend.dto.inner.olap.ExportPivotConfiguration;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportJobData;
 import ru.magnit.magreportbackend.exception.FileSystemException;
@@ -216,7 +217,7 @@ public class ExcelReportDomainService {
         }
 
         try (var reader = readerFactory.createReader(jobData, getPath(jobData.id(), "avro"))) {
-            var writer = writerFactory.createWriter(reader, jobData.reportData(), getPath(jobData, templateId, "xlsm"));
+            var writer = writerFactory.createWriter(reader, jobData.reportData(), getPath(jobData, templateId, "xlsm"), new TaskInfo(jobData.userName(), jobData.id()));
             writer.convert(replaceHomeShortcut(templatePath));
         } catch (Exception ex) {
             try {
