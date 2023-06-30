@@ -27,6 +27,7 @@ import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
  * Компонент настройки фильтра со списком значений у отчета
  * @param {Object} props - свойства компонента
  * @param {Object} props.filterData - данные фильтра (объект ответа от сервиса)
+ * @param {Object} props.externalFiltersValue - параметров фильтров через URL. {"VALUE_LIST_CODE":{"operationType": <(Тип операции: IN_LIST | NOT_IN_LIST): string>, "value": <(массив значений): number[]>}}
  * @param {Object} props.lastFilterValue - объект со значениями фильтра из последнего запуска (как приходит от сервиса)
  * @param {boolean} props.toggleClearFilter - при изменении значения данного свойства требуется очистить выбор в фильтре
  * @param {boolean} props.unbounded - выбор не ограничен справочником (unbounded = true - значит введённые значения не проверяются по справочнику)
