@@ -320,7 +320,7 @@
                                 <!--suppress UnresolvedMavenProperty -->
                                 <mkdir dir="${MAGREPORT_HOME}/reports"/>
                                 <!--suppress UnresolvedMavenProperty -->
-                                <mkdir dir="${MAGREPORT_HOME}/log"/>
+                                <mkdir dir="${MAGREPORT_HOME}/log/event-logs"/>
                                 <!--suppress UnresolvedMavenProperty -->
                                 <mkdir dir="${MAGREPORT_HOME}/excel-export"/>
                                 <!--suppress UnresolvedMavenProperty -->
