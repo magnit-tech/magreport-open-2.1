@@ -30,6 +30,7 @@ import { Typography } from '@material-ui/core';
  * @param {Object} props - свойства компонента
  * @param {Object} props.filterData - данные фильтра (объект ответа от сервиса)
  * @param {Object} props.lastFilterValue - объект со значениями фильтра из последнего запуска (как приходит от сервиса)
+ * @param {Object} props.externalFiltersValue - параметров фильтров через URL. {"DATE_RANGE_CODE":{"begin_dt":<(дата в формате YYYY-MM-DD): string>,"end_dt":<(дата в формате YYYY-MM-DD): string>}}
  * @param {boolean} props.toggleClearFilter - при изменении значения данного свойства требуется очистить выбор в фильтре
  * @param {onChangeFilterValue} props.onChangeFilterValue - function(filterValue) - callback для передачи значения изменившегося параметра фильтра
  *                                                  filterValue - объект для передачи в сервис в массиве parameters

@@ -7,12 +7,13 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import IconButton from '@material-ui/core/IconButton';
 import Paper from '@material-ui/core/Paper';
 import ClearIcon from '@material-ui/icons/Clear';
-import RepeatIcon from '@material-ui/icons/Repeat';
+//import RepeatIcon from '@material-ui/icons/Repeat';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import InputBase from '@material-ui/core/InputBase';
 import Divider from '@material-ui/core/Divider';
 import Tooltip from '@material-ui/core/Tooltip';
 import Slide from '@material-ui/core/Slide';
+//import TuneOutlinedIcon from '@material-ui/icons/TuneOutlined';
 
 // styles 
 import { SearchFieldCSS } from "./FolderContentCSS";
@@ -20,8 +21,11 @@ import { SearchFieldCSS } from "./FolderContentCSS";
 export default function SearchField(props){
     const classes = SearchFieldCSS();
 
+    const [searchParams, setSearchParams] = useState({})
+
     const handleClickSearch = () => {
         if (searchParams.searchString && searchParams.searchString.trim().length > 0){
+            setSearchParams(searchParams);
             props.onSearchClick(searchParams)
         }
     };
@@ -34,7 +38,6 @@ export default function SearchField(props){
         setSearchParams({...searchParams, searchString: "", isRecursive: false })
     }
         
-    const [searchParams, setSearchParams] = useState({})
 
     useEffect(() => {
         if(props.searchParams) {
@@ -74,34 +77,18 @@ export default function SearchField(props){
                             }}
                             endAdornment={
                                 <InputAdornment position="end">
-                                    <Tooltip title = "Найти" placement="top">
+                                    <Tooltip title = "Найти" placement="top" disabled={searchParams.searchString === undefined || searchParams.searchString === null || searchParams.searchString.trim() === ""}>
                                         <IconButton
                                             size="small"
                                             aria-label="search"
-                                            onClick={handleClickSearch}
+                                            onClick={() => {
+                                                handleClickSearch()
+                                            }}
                                         >
-                                            <SearchIcon color={props.searchParams && props.searchParams.searchString ? "secondary" : "inherit" } />
+                                            <SearchIcon color={props.searchParams && props.searchParams.searchString ? "secondary" : "inherit"}/>
                                         </IconButton>
                                     </Tooltip>
                                     <Divider className={classes.divider} />
-                                    { !props.searchWithoutRecursive &&
-                                        <>
-                                            <Tooltip title = "Рекурсивно" placement="top">
-                                                <IconButton
-                                                    size="small"
-                                                    value = {searchParams.isRecursive || false}
-                                                    aria-label="recoursive"
-                                                    onClick={() => handleChange("isRecursive", !searchParams.isRecursive)}
-                                                >
-                                                    <RepeatIcon 
-                                                        color={searchParams.isRecursive ? "secondary" : "inherit"}
-                                                    />
-                                                </IconButton>
-                                            </Tooltip>
-
-                                            <Divider className={classes.divider} />
-                                        </>
-                                    }
                                     <Tooltip title = "Очистить" placement="top">
                                         <IconButton
                                             size="small"
