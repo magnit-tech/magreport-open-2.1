@@ -55,6 +55,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -69,6 +70,8 @@ public class OlapController {
 
     @Value("${magreport.olap.max-dop}")
     private int maxDop;
+
+    private final AtomicInteger countDop = new AtomicInteger(0);
 
     public static final String OLAP_GET_CUBE = "/api/v1/olap/get-cube";
     public static final String OLAP_GET_CUBE_NEW = "/api/v1/olap/get-cube-new";
@@ -151,11 +154,11 @@ public class OlapController {
     @Operation(summary = "Получение среза OLAP куба с производными полями")
     @ResponseStatus(HttpStatus.OK)
     @PostMapping(value = OLAP_GET_CUBE_NEW,
-        consumes = APPLICATION_JSON_VALUE,
-        produces = APPLICATION_JSON_VALUE)
+            consumes = APPLICATION_JSON_VALUE,
+            produces = APPLICATION_JSON_VALUE)
     public ResponseBody<OlapCubeResponse> getCubeNew(
-        @RequestBody
-        OlapCubeRequestNew request) throws JsonProcessingException, InterruptedException {
+            @RequestBody
+            OlapCubeRequestNew request) throws JsonProcessingException, InterruptedException {
         ResponseBody<OlapCubeResponse> response;
         LogHelper.logInfoUserMethodStart();
 
@@ -163,21 +166,21 @@ public class OlapController {
 
         if (outService) {
             response = ResponseBody.<OlapCubeResponse>builder()
-                .success(true)
-                .message("")
-                .data(externalOlapService.getCubeNew(request))
-                .build();
+                    .success(true)
+                    .message("")
+                    .data(externalOlapService.getCubeNew(request))
+                    .build();
 
         } else {
             semaphore.acquire();
             try {
                 response = ResponseBody.<OlapCubeResponse>builder()
-                    .success(true)
-                    .message("")
-                    .data(olapService.getCubeNew(request))
-                    .build();
+                        .success(true)
+                        .message("")
+                        .data(olapService.getCubeNew(request))
+                        .build();
             } catch (Exception ex) {
-                throw new OlapException(START_ERROR_MASSAGE+ ex.getMessage(), ex);
+                throw new OlapException(START_ERROR_MASSAGE + ex.getMessage(), ex);
             } finally {
                 semaphore.release();
             }
@@ -493,7 +496,7 @@ public class OlapController {
     @GetMapping(value = OLAP_GET_PIVOT_TABLE_EXCEL_GET)
     public void getExcelPivotTable(
             @PathVariable
-            String pivotToken, HttpServletRequest request, HttpServletResponse response ) throws Exception {
+            String pivotToken, HttpServletRequest request, HttpServletResponse response) throws Exception {
         LogHelper.logInfoUserMethodStart();
 
         final var value = tokenService.getAssociatedValue(pivotToken);
@@ -503,7 +506,7 @@ public class OlapController {
 
         LogHelper.logInfoUserMethodEnd();
 
-        MultipartFileSender.fromPath(olapService.getExcelPivotPath(jobId,userId), fileName)
+        MultipartFileSender.fromPath(olapService.getExcelPivotPath(jobId, userId), fileName)
                 .with(request)
                 .with(response)
                 .serveResource();
@@ -515,28 +518,35 @@ public class OlapController {
     @ResponseStatus(HttpStatus.OK)
     @PostMapping(value = OLAP_GET_PIVOT_TABLE_EXCEL)
     public ResponseBody<TokenResponse> exportPivotTableExcel(
-            @RequestBody
-            OlapExportPivotTableRequest dataRequest) throws InterruptedException {
-        LogHelper.logInfoUserMethodStart();
+            @RequestBody OlapExportPivotTableRequest dataRequest) throws JsonProcessingException {
 
-        semaphore.acquire();
-        ResponseBody<TokenResponse> dataResponse;
-        try {
 
-            dataResponse = ResponseBody.<TokenResponse>builder()
+        if (countDop.get() < maxDop) {
+            LogHelper.logInfoUserMethodStart();
+            countDop.incrementAndGet();
+
+            var dataResponse = ResponseBody.<TokenResponse>builder()
                     .success(true)
                     .message("")
                     .data(olapService.exportPivotTableExcel(dataRequest))
                     .build();
-        } catch (Exception ex) {
-            throw new OlapException(START_ERROR_MASSAGE+ ex.getMessage(), ex);
-        } finally {
-            semaphore.release();
+
+            LogHelper.logInfoUserMethodEnd();
+            countDop.decrementAndGet();
+            return dataResponse;
+        } else {
+
+            LogHelper.logInfoUserMethodStart();
+            var dataResponse = ResponseBody.<TokenResponse>builder()
+                    .success(false)
+                    .message("Нет свободных подключений, повторите попытку позднее")
+                    .data(null)
+                    .build();
+
+            LogHelper.logInfoUserMethodEnd();
+            return dataResponse;
+
         }
-
-        LogHelper.logInfoUserMethodEnd();
-
-        return dataResponse;
     }
 
 }
