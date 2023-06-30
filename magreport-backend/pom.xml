@@ -8,6 +8,13 @@
         <artifactId>magreport</artifactId>
         <version>2.1</version>
     </parent>
+    
+    <repositories>
+        <repository >
+            <id>nexus</id>
+            <url>https://repo.corp.tander.ru/repository/maven-central/</url>
+        </repository>
+    </repositories>    
 
     <artifactId>magreport-backend</artifactId>
     <name>magreport-backend</name>

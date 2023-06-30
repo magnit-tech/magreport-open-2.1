@@ -1,0 +1,12 @@
+# describe your Application options in that file
+
+# Application Home
+SERVICE_HOME=/var/magreport2/
+
+# Location of Jar file
+JAR_FILE=/var/magreport2/magreport2.jar
+
+# Additional java options
+JAVA_OPTS="-Djavax.net.ssl.trustStore=/var/magreport2/keystore/tanderca.jks -Djavax.net.ssl.trustStorePassword=1qaz@WSX3edc"
+APP_ARGS=""
+
