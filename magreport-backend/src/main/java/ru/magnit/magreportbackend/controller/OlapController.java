@@ -71,6 +71,9 @@ public class OlapController {
     @Value("${magreport.olap.max-dop}")
     private int maxDop;
 
+    @Value("${magreport.olap.max-dop-pivot}")
+    private int maxDopPivot;
+
     private final AtomicInteger countDop = new AtomicInteger(0);
 
     public static final String OLAP_GET_CUBE = "/api/v1/olap/get-cube";
@@ -520,20 +523,30 @@ public class OlapController {
     public ResponseBody<TokenResponse> exportPivotTableExcel(
             @RequestBody OlapExportPivotTableRequest dataRequest) throws JsonProcessingException {
 
-        LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_GET_PIVOT_TABLE_EXCEL, dataRequest, userService.getCurrentUserName()));
 
-        if (countDop.get() < maxDop) {
+        if (countDop.get() < maxDopPivot) {
+            LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_GET_PIVOT_TABLE_EXCEL, dataRequest, userService.getCurrentUserName()));
             LogHelper.logInfoUserMethodStart();
             countDop.incrementAndGet();
+
+            TokenResponse response;
+
+            try {
+                response = olapService.exportPivotTableExcel(dataRequest);
+            } catch (Exception ex) {
+                countDop.decrementAndGet();
+                throw new OlapException(ex.getMessage());
+            }
 
             var dataResponse = ResponseBody.<TokenResponse>builder()
                     .success(true)
                     .message("")
-                    .data(olapService.exportPivotTableExcel(dataRequest))
+                    .data(response)
                     .build();
 
-            LogHelper.logInfoUserMethodEnd();
             countDop.decrementAndGet();
+            LogHelper.logInfoUserMethodEnd();
+
             return dataResponse;
         } else {
 
