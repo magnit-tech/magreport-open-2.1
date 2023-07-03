@@ -64,6 +64,11 @@ function PivotPanel(props){
 
     const [searchParams, setSearchParams] = useSearchParams();
 
+    // Отмена выполнения Olap-запросы при выходе из панели сводной
+    useEffect(() => {
+        return () => {dataHub.olapController.abortLastOlapRequest();}
+    }, []);
+
     useEffect(() => {
         // Проверка пользователя на разработчика отчета
         dataHub.userController.whoAmI(({data}) => {
