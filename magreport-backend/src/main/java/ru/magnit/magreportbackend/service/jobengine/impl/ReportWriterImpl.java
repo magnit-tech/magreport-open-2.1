@@ -77,7 +77,7 @@ public class ReportWriterImpl implements ReportWriter {
                     );
                     fileWriter.append(genericRecord);
                     rowCount++;
-                    if (rowCount != maxRows) {
+                    if (rowCount > maxRows) {
                         errorDescription = "Превышено максимально допустимое количество строк отчета:" + maxRows;
                         throw new ReportExportException(errorDescription);
                     }
