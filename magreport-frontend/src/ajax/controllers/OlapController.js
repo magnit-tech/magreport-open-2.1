@@ -25,6 +25,9 @@ const SAVE_GENERAL_ACCESS = CONTROLLER_URL + '/configuration/report-share';
 
 export default function OlapController(dataHub){
 
+    // Abort Cpntroller to abort olap requests. Used to abort olap request when new request is send or when pivot table is unmounted to avoid unnessary server workload 
+    this.abortController = null;
+
     this.getJobMetadata = (jobId, callback) => {
 
         const body = {
@@ -74,7 +77,15 @@ export default function OlapController(dataHub){
     }
 
     this.getCube = (olapRequest, callback) => {
-        return dataHub.requestService(GET_CUBE, METHOD, olapRequest, callback);
+        this.abortLastOlapRequest();
+        this.abortController = new AbortController();
+        return dataHub.requestService(GET_CUBE, METHOD, olapRequest, callback, () => {}, this.abortController.signal);
+    }
+
+    this.abortLastOlapRequest = () => {
+        if(this.abortController !== null){
+            this.abortController.abort();
+        }
     }
 
     this.getFieldType = (originalField) => {

@@ -89,14 +89,15 @@ function DataHub(){
     /*
         Общая схема выполнения запроса к сервису
     */
-    this.requestService = (serviceUrl, method, body, callback, setCache) => {
+    this.requestService = (serviceUrl, method, body, callback, setCache, abortSignal) => {
 
         let request = {
             method: method,
             headers: {
                 'Authorization' : this.authorization,
                 'Content-Type' : 'application/json'
-            }
+            },
+            signal : abortSignal
         };
 
         let requestId = Date.now() + '-' + Math.floor(Math.random()*1000000);
