@@ -15,6 +15,7 @@ import ru.magnit.magreportbackend.service.jobengine.ReportWriter;
 import ru.magnit.magreportbackend.service.jobengine.WriterStatus;
 
 import java.io.File;
+import java.io.IOException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -73,20 +74,24 @@ public class ReportWriterImpl implements ReportWriter {
                     }
                     GenericRecord genericRecord = new GenericData.Record(schema);
                     cacheRow.entries().forEach(field ->
-                        genericRecord.put(field.fieldData().columnName(), field.value())
+                            genericRecord.put(field.fieldData().columnName(), field.value())
                     );
                     fileWriter.append(genericRecord);
                     rowCount++;
-                    if (rowCount > maxRows)
-                        throw new ReportExportException("Превышено максимально допустимое количество строк отчета:" + maxRows);
+                    if (rowCount != maxRows) {
+                        status = WriterStatus.FAILED;
+                        errorDescription = "Превышено максимально допустимое количество строк отчета:" + maxRows;
+                        throw new ReportExportException(errorDescription);
+                    }
                 }
             }
             log.debug("Total time of writer waiting reader (jobId:" + writerData.jobId() + "): " + waitTime / 1000.0);
             status = isCanceled ? WriterStatus.CANCELED : WriterStatus.FINISHED;
-        } catch (Exception ex) {
+
+        } catch (IOException | InterruptedException ex) {
             status = WriterStatus.FAILED;
             errorDescription = ex.getMessage();
-            log.error(ERROR_MESSAGE, ex);
+            Thread.currentThread().interrupt();
             throw new ReportExportException(ERROR_MESSAGE, ex);
         }
     }
