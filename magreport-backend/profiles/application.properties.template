@@ -91,6 +91,7 @@ magreport.h2.console.whitelist=
 
 # OLAP settings
 magreport.olap.max-dop = 2
+magreport.olap.max-dop-pivot = 2
 magreport.olap.max-cache-size = 3
 magreport.olap.max-data-volume = 50000000
 
