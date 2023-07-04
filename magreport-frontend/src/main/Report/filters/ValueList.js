@@ -122,7 +122,6 @@ function ValueList(props){
                 {
                     filterId : props.filterData.id,
                     operationType: type === 'IN_LIST' ? 'IS_IN_LIST' : 'IS_NOT_IN_LIST',
-                    validation: mandatory ? "error" : 'success',
                     parameters: props.lastFilterValue?.parameters || []
                 }
             );
