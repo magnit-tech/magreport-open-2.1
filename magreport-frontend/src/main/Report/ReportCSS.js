@@ -92,8 +92,10 @@ export const ReportDataCSS = makeStyles(theme => ({
         path: {
             fill: theme.palette.secondary.main
         }
+    },
+    dataLoaderErrorAlert: {
+        margin: '20px'
     }
-    
 }));
 
 export const ReportStarterCSS = makeStyles(theme => ({
@@ -126,5 +128,8 @@ export const ReportStarterCSS = makeStyles(theme => ({
     filterButton: {
         margin: theme.spacing(1),
         width: 100
-    },    
+    },  
+    dataLoaderErrorAlert: {
+        margin: '20px'
+    }  
 }));
