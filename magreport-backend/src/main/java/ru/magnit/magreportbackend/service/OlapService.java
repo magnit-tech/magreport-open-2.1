@@ -804,8 +804,6 @@ public class OlapService {
 
     public OlapCubeResponse getCubeNew(OlapCubeRequestNew request, Long currentUserId) {
 
-        log.error("You dont see this message!");
-
       //  jobDomainService.checkAccessForJob(request.getJobId());
 
         jobDomainService.updateJobStats(request.getJobId(), false, true, false);
