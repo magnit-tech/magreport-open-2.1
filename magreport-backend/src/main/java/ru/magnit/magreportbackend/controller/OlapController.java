@@ -59,7 +59,6 @@ import ru.magnit.magreportbackend.util.MultipartFileSender;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.time.LocalTime;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -121,7 +120,7 @@ public class OlapController {
     @Qualifier("OlapRequestExecutor")
     private final ThreadPoolTaskExecutor olapExecutor;
 
-    ConcurrentHashMap<ResponseBodyEmitter, Object> emitters = new ConcurrentHashMap<>();
+    ConcurrentHashMap<ResponseBodyEmitter, Thread> emitters = new ConcurrentHashMap<>();
 
     @PostConstruct
     private void init() {
@@ -172,10 +171,10 @@ public class OlapController {
     @PostMapping(value = OLAP_GET_CUBE_NEW,
             consumes = APPLICATION_JSON_VALUE,
             produces = APPLICATION_JSON_VALUE)
-    public ResponseEntity<ResponseBodyEmitter> getCubeNew(@RequestBody OlapCubeRequestNew request) throws JsonProcessingException, InterruptedException {
+    public ResponseEntity<ResponseBodyEmitter> getCubeNew(@RequestBody OlapCubeRequestNew request) throws JsonProcessingException {
 
         LogHelper.logInfoUserMethodStart();
-      //  LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_GET_CUBE_NEW, request, userService.getCurrentUserName()));
+        LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_GET_CUBE_NEW, request, userService.getCurrentUserName()));
 
         ResponseBodyEmitter emitter = new ResponseBodyEmitter();
         emitter.onCompletion(() -> {
@@ -190,23 +189,22 @@ public class OlapController {
 
         emitter.onTimeout(() -> emitters.remove(emitter));
 
-        emitters.put(emitter, LocalTime.now());
-
+        emitters.put(emitter, new Thread("Empty"));
 
         if (outService) {
-        /*    response = ResponseBody.<OlapCubeResponse>builder()
-                    .success(true)
-                    .message("")
-                    .data(externalOlapService.getCubeNew(request))
-                    .build();*/
+            try {
+                emitter.send(externalOlapService.getCubeNew(request));
+                emitter.complete();
+            } catch (Exception ex) {
+                emitter.completeWithError(ex);
+            }
 
         } else {
             var userId = userService.getCurrentUserId();
 
             olapExecutor.execute(() -> {
-
                 if (emitters.containsKey(emitter)) {
-
+                    emitters.put(emitter, Thread.currentThread());
                     try {
                         emitter.send(olapService.getCubeNew(request, userId), APPLICATION_JSON);
                         emitter.complete();
@@ -236,7 +234,8 @@ public class OlapController {
             produces = APPLICATION_JSON_VALUE)
     public ResponseBody<OlapFieldItemsResponse> getFilteredFieldValues(
             @RequestBody
-            OlapFieldItemsRequestNew request) throws OlapException, InterruptedException, JsonProcessingException {
+            OlapFieldItemsRequestNew request) throws
+            OlapException, InterruptedException, JsonProcessingException {
         ResponseBody<OlapFieldItemsResponse> response;
         LogHelper.logInfoUserMethodStart();
 
@@ -601,12 +600,13 @@ public class OlapController {
 
     @Scheduled(fixedDelayString = "500", initialDelay = 1000L)
     private void checkEmitters() {
-        emitters.forEach((k, v) -> {
+        emitters.forEach((emitter, thread) -> {
                     try {
-                        k.send(" ");
+                        emitter.send(" ");
                     } catch (Exception ex) {
                         log.info("Schedule check emitter: " + ex.getMessage());
-                        emitters.remove(k);
+                        if (!thread.getName().equals("Empty")) thread.interrupt();
+                        emitters.remove(emitter);
                     }
                 }
         );
