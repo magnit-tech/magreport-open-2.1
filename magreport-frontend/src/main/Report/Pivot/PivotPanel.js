@@ -220,6 +220,7 @@ function PivotPanel(props){
     */
 
     function handleMetadataLoaded(data){
+        setTableDataLoadStatus(1);
         let fieldIdToNameMapping = new Map();
         let derivedFieldIdToNameMapping = new Map();
         for(let v of data.fields){
