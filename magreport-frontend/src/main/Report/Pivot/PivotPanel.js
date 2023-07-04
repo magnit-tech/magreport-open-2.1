@@ -605,6 +605,8 @@ function PivotPanel(props){
     }
 
     function handleExcelFileResponseNew(resp){
+        console.log(resp.data);
+
         if (resp.ok){
             const url = resp.data.urlFile + resp.data.token
             const link = document.createElement('a');
@@ -614,7 +616,7 @@ function PivotPanel(props){
             link.parentNode.removeChild(link);
         }
         else {
-            enqueueSnackbar("Не удалось получить файл с сервера", { variant: 'error'});
+            enqueueSnackbar(`Не удалось получить файл с сервера. Ошибка: ${resp.data ?? 'Не известно'}`, { variant: 'error'});
         }
     }
 
