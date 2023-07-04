@@ -605,8 +605,6 @@ function PivotPanel(props){
     }
 
     function handleExcelFileResponseNew(resp){
-        console.log(resp.data);
-
         if (resp.ok){
             const url = resp.data.urlFile + resp.data.token
             const link = document.createElement('a');
