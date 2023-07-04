@@ -21,6 +21,7 @@ import FilterValues from "./FilterValues";
 
 // styles
 import {ReportStarterCSS} from "./ReportCSS";
+import { Alert } from '@material-ui/lab';
 
 /**
  * Запуск отчёта
@@ -36,8 +37,7 @@ export default function ReportStarter(props){
     const classes = ReportStarterCSS();
 
     const useParamsId = useParams()?.id
-    const id = props.onDataLoadFunction ? props.reportId : useParamsId;
-
+    const id = props.onDataLoadFunction ? props.reportId : Number(useParamsId);
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -256,59 +256,64 @@ export default function ReportStarter(props){
     }
 
     return (
-        flowState === "filters" ? 
-            <DataLoader
-                loadFunc = {props.onDataLoadFunction || dataHub.reportController.get}
-                loadParams = {[Number(id), props.scheduleTaskId !== undefined ? props.scheduleTaskId : lastParamJobId]}
-                reload = {reloadReportMetadata}
-                onDataLoaded = {handleReportMetadataLoaded}
-            >
-                {reportMetadata.filterGroup && reportMetadata.filterGroup.id !== null &&
-                    <div className={classes.reportStarterRelative}>
-                        <div className={classes.reportStarterAbsolute}>
-                            <div className = {classes.filterRoot}>
-                                <FilterGroup
-                                    groupData = {reportMetadata.filterGroup}
-                                    mandatoryGroups = {mandatoryGroupsMap}
-                                    externalFiltersValue = {externalFiltersValue}
-                                    lastFilterValues = {lastFilterValues.current}
-                                    onChangeFilterValue = {handleChangeFilterValue}
-                                    toggleClearFilters = {toggleClearFilters}
-                                />
+        id 
+            ?
+                flowState === "filters" ? 
+                    <DataLoader
+                        loadFunc = {props.onDataLoadFunction || dataHub.reportController.get}
+                        loadParams = {[Number(id), props.scheduleTaskId !== undefined ? props.scheduleTaskId : lastParamJobId]}
+                        reload = {reloadReportMetadata}
+                        onDataLoaded = {handleReportMetadataLoaded}
+                    >
+                        {reportMetadata.filterGroup && reportMetadata.filterGroup.id !== null &&
+                            <div className={classes.reportStarterRelative}>
+                                <div className={classes.reportStarterAbsolute}>
+                                    <div className = {classes.filterRoot}>
+                                        <FilterGroup
+                                            groupData = {reportMetadata.filterGroup}
+                                            mandatoryGroups = {mandatoryGroupsMap}
+                                            externalFiltersValue = {externalFiltersValue}
+                                            lastFilterValues = {lastFilterValues.current}
+                                            onChangeFilterValue = {handleChangeFilterValue}
+                                            toggleClearFilters = {toggleClearFilters}
+                                        />
+                                    </div>
+                                
+                                    <div className={classes.buttonContainer}>
+                                        { ! Boolean(props.woStartButton) ?
+                                            <Button variant="contained" color="primary" size = "small" className={classes.filterButton} onClick={handleRun} disabled={disabledSaveBtn}> Выполнить </Button>
+                                        :
+                                            <Button variant="contained" color="primary" size = "small" className={classes.filterButton} onClick={handleSaveScheduleTaskFilterData} disabled={disabledSaveBtn}> Сохранить </Button>
+                                        }
+                                        <Button variant="contained" color="primary" size = "small" className={classes.filterButton} onClick={handleClearFilters}> Очистить </Button>
+                                        <Button variant="contained" color="primary" size = "small" className={classes.filterButton} onClick={handleCancel}> Отменить </Button>
+                                    </div>
+                                    
+                                </div>
                             </div>
-                           
-                            <div className={classes.buttonContainer}>
-                                { ! Boolean(props.woStartButton) ?
-                                    <Button variant="contained" color="primary" size = "small" className={classes.filterButton} onClick={handleRun} disabled={disabledSaveBtn}> Выполнить </Button>
-                                :
-                                    <Button variant="contained" color="primary" size = "small" className={classes.filterButton} onClick={handleSaveScheduleTaskFilterData} disabled={disabledSaveBtn}> Сохранить </Button>
-                                }
-                                <Button variant="contained" color="primary" size = "small" className={classes.filterButton} onClick={handleClearFilters}> Очистить </Button>
-                                <Button variant="contained" color="primary" size = "small" className={classes.filterButton} onClick={handleCancel}> Отменить </Button>
-                            </div>
-                            
-                        </div>
-                    </div>
-                }
-            </DataLoader>
+                        }
+                    </DataLoader>
 
-        : flowState === "reportJob" ?
-            <DataLoader
-                loadFunc = {reportJobId === null ? dataHub.reportJobController.add : null}
-                loadParams = {[Number(id), addJobParameters.current]}
-                reload = {reloadRunReport}
-                onDataLoaded = {handleReportStarted}
-            >
-                <ReportJob
-                    reportId = {Number(id)}
-                    jobId = {reportJobId}
-                    excelTemplates = {excelTemplates}
-                    onRestartReportClick = {handleRestartReportClick}
-                />
-            </DataLoader>
+                : flowState === "reportJob" ?
+                    <DataLoader
+                        loadFunc = {reportJobId === null ? dataHub.reportJobController.add : null}
+                        loadParams = {[Number(id), addJobParameters.current]}
+                        reload = {reloadRunReport}
+                        onDataLoaded = {handleReportStarted}
+                    >
+                        <ReportJob
+                            reportId = {Number(id)}
+                            jobId = {reportJobId}
+                            excelTemplates = {excelTemplates}
+                            onRestartReportClick = {handleRestartReportClick}
+                        />
+                    </DataLoader>
 
-        : <div>ReportStarter : неизвестное состояние</div>
-           
+                : <div>ReportStarter : неизвестное состояние</div>
+            :
+                <Alert severity="error" className={classes.dataLoaderErrorAlert}> 
+                    {"Ошибка: отсуствует, либо передан некорректный id отчёта"} 
+                </Alert>
     )
 
 }
