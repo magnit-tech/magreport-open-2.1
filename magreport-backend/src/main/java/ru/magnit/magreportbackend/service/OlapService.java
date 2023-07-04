@@ -11,6 +11,7 @@ import ru.magnit.magreportbackend.domain.olap.AggregationType;
 import ru.magnit.magreportbackend.domain.olap.SortDirection;
 import ru.magnit.magreportbackend.domain.olap.SortingOrder;
 import ru.magnit.magreportbackend.dto.inner.TaskInfo;
+import ru.magnit.magreportbackend.dto.inner.UserView;
 import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
 import ru.magnit.magreportbackend.dto.inner.olap.ExportPivotConfiguration;
 import ru.magnit.magreportbackend.dto.inner.olap.MeasureData;
@@ -290,8 +291,9 @@ public class OlapService {
     public TokenResponse exportPivotTableExcel(OlapExportPivotTableRequest request) throws JsonProcessingException {
         request.getCubeRequest().getRowsInterval().setFrom(0).setCount(Integer.MAX_VALUE);
         request.getCubeRequest().getColumnsInterval().setFrom(0).setCount(Integer.MAX_VALUE);
+        var currentUser = userDomainService.getCurrentUser();
 
-        var resultCube = getCubeNew(request.getCubeRequest());
+        var resultCube = getCubeNew(request.getCubeRequest(), currentUser.getId());
         List<ReportFieldMetadataResponse> metadata;
         OlapCubeRequest cubeRequest;
         if (request.getCubeRequest().hasDerivedFields()) {
@@ -800,9 +802,11 @@ public class OlapService {
         return result;
     }
 
-    public OlapCubeResponse getCubeNew(OlapCubeRequestNew request) {
-        var currentUser = userDomainService.getCurrentUser();
-        jobDomainService.checkAccessForJob(request.getJobId());
+    public OlapCubeResponse getCubeNew(OlapCubeRequestNew request, Long currentUserId) {
+
+        log.error("You dont see this message!");
+
+      //  jobDomainService.checkAccessForJob(request.getJobId());
 
         jobDomainService.updateJobStats(request.getJobId(), false, true, false);
 
@@ -812,7 +816,7 @@ public class OlapService {
         var endTime = System.currentTimeMillis() - startTime;
         log.debug("Job data acquired: " + endTime);
 
-        olapUserChoiceDomainService.setOlapUserChoice(jobData.reportId(), currentUser.getId(), true);
+        olapUserChoiceDomainService.setOlapUserChoice(jobData.reportId(), currentUserId, true);
 
         startTime = System.currentTimeMillis();
         var sourceCube = olapDomainService.getCubeData(jobData);

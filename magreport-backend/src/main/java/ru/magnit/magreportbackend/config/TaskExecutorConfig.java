@@ -15,6 +15,9 @@ public class TaskExecutorConfig {
     @Value("${magreport.jobengine.thread-name-prefix}")
     private String threadNamePrefix;
 
+    @Value("${magreport.olap.max-dop}")
+    private int poolSizeOlapExecutor;
+
     @Primary
     @Bean(name = "JobEngineTaskExecutor")
     ThreadPoolTaskExecutor threadPoolTaskExecutor() {
@@ -36,5 +39,16 @@ public class TaskExecutorConfig {
         taskExport.initialize();
 
         return  taskExport;
+    }
+
+    @Bean(name = "OlapRequestExecutor")
+    ThreadPoolTaskExecutor threadPoolOlapRequestExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(poolSizeOlapExecutor);
+        executor.setMaxPoolSize(poolSizeOlapExecutor);
+        executor.setThreadNamePrefix("Olap-Worker-Thread");
+        executor.initialize();
+
+        return  executor;
     }
 }
