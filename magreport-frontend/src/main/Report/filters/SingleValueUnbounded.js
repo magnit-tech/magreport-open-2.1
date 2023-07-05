@@ -70,9 +70,9 @@ export default function SingleValueUnbounded(props) {
         const externalValue = props.externalFiltersValue ? props.externalFiltersValue[props.filterData.code] : null
 
         if (props.externalFiltersValue) {
-            setTextValue((externalValue && externalValue.value) ? externalValue.value : '')
+            handleTextChange((externalValue && externalValue.value) ? externalValue.value : '')
         } else {
-            setTextValue(tf ? tf : '')
+            handleTextChange(tf ? tf : '')
         }
 
         if (props.toggleClearFilter !== toggleFilter){

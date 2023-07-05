@@ -1,5 +1,5 @@
-import React, { useRef, useState} from 'react';
-import {useSnackbar} from 'notistack';
+import React, { useMemo, useRef, useState} from 'react';
+import { useSnackbar } from 'notistack';
 
 import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 
@@ -35,6 +35,7 @@ import { Alert } from '@material-ui/lab';
  */
 export default function ReportStarter(props){
     const classes = ReportStarterCSS();
+    const { enqueueSnackbar } = useSnackbar();
 
     const useParamsId = useParams()?.id
     const id = props.onDataLoadFunction ? props.reportId : Number(useParamsId);
@@ -54,14 +55,28 @@ export default function ReportStarter(props){
     const [lastParamJobId, setLastParamJobId] = useState(searchParams.get('jobId'));
     // const externalFiltersValue = searchParams.get('externalFiltersValue') ? JSON.parse(searchParams.get('externalFiltersValue')) : null;
     const decodeExternalFiltersValue = decodeURI(searchParams.get('externalFiltersValue'))
-    const externalFiltersValue = decodeExternalFiltersValue ? JSON.parse(decodeExternalFiltersValue) : null;
+
+    const externalFiltersValue = useMemo(
+        () => {
+            try {
+                JSON.parse(decodeExternalFiltersValue);
+            } catch (e) {
+                enqueueSnackbar("Передан некороктенный json-объект 'externalFiltersValue' в URL", {variant : "error"});
+                return null;
+            }
+            return JSON.parse(decodeExternalFiltersValue);
+        }, 
+        [] // eslint-disable-line
+    );
+
+
+
     
     const lastFilterValues = useRef(new FilterValues()); // Значения параметров предыдущего запуска отчёта
 
     const filterValues = useRef(new FilterValues()); // Текущий выбор в фильтре
 
     const addJobParameters = useRef([]);
-    const { enqueueSnackbar } = useSnackbar();
     const [mandatoryFiltersSet, setMandatoryFiltersSet] = useState(new Set())
     const [mandatoryGroupsMap, setMandatoryGroupsMap] = useState(new Map())
     const [filterToGroupMap, setFilterToGroupMap] = useState(new Map())
