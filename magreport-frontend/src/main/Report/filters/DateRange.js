@@ -69,9 +69,9 @@ export default function DatesRange(props) {
                 return null;
             }
 
-            if(props.externalFiltersValue && externalValue) {
-                defaultStartDate = checkDate(externalValue.begin_dt);
-                defaultEndDate = checkDate(externalValue.end_dt);
+            if(props.externalFiltersValue) {
+                defaultStartDate = externalValue ? checkDate(externalValue.begin_dt) : null;
+                defaultEndDate = externalValue ? checkDate(externalValue.end_dt) : null;
             } else {
                 const { startValue, endValue } = getRangeFieldsValues(props.lastFilterValue, startFieldId, endFieldId);
                 defaultStartDate = startValue;
