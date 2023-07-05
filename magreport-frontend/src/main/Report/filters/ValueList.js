@@ -34,7 +34,7 @@ import { FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
  * @param {onChangeFilterValue} props.onChangeFilterValue - function(filterValue) - callback для передачи значения изменившегося параметра фильтра
  */
 function ValueList(props){
-
+    
     const classes = ValueListCSS();
     const cls = AllFiltersCSS();
     const mandatory = props.filterData.mandatory;
@@ -60,7 +60,7 @@ function ValueList(props){
         {name: 'Табуляция',  value: '\\t', checked: true},
         {name: 'Перенос строки',  value: '\\n', checked: true},
     ]
-    const [textValue, setTextValue] = useState(buildTextFromLastValues('VALUE_LIST', props.lastFilterValue, codeFieldId, ';', props.filterData.fields));
+    const [textValue, setTextValue] = useState('');
     const [checkStatus, setCheckStatus] = useState(mandatory && !textValue ? "error" : 'success')
     const [separators, setSeparators] = useState(separatorsArray)
 
@@ -73,7 +73,8 @@ function ValueList(props){
         const type = props.filterData.filterReportModes;
         const externalValue = props.externalFiltersValue ? props.externalFiltersValue[props.filterData.code] : null
 
-        if (externalValue) {
+        if (props.externalFiltersValue) {
+            if(externalValue) {
             handleTextChanged(externalValue.value && Array.isArray(JSON.parse(externalValue.value)) ? JSON.parse(externalValue.value).join(';') : "")
             if (type.length === 2){
                 const typeValue = externalValue.operationType === 'IN_LIST' ? 'IN_LIST' : externalValue.operationType === 'NOT_IN_LIST' ? 'NOT_IN_LIST' : 'IN_LIST'
@@ -90,7 +91,9 @@ function ValueList(props){
                     handleChangeTypeForLastFilterValue('IN_LIST');
                 }
             }
+            }
         } else {
+            handleTextChanged(buildTextFromLastValues('VALUE_LIST', props.lastFilterValue, codeFieldId, ';', props.filterData.fields))
             if (type.length === 2){
                 setOperationTypeDisabled(false)
 

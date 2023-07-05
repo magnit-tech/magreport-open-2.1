@@ -55,7 +55,7 @@ export default function SingleValueUnbounded(props) {
 
     let tf = props.lastFilterValue?.parameters[0].values.find((item) => item.fieldId === codeFieldId).value;
 
-    const [textValue, setTextValue] = useState(tf ? tf : '');
+    const [textValue, setTextValue] = useState('');
     const [checkStatus, setCheckStatus] = useState(mandatory && !textValue.length ? "error" : "success");
 
     // Необходимость очистки фильтров
@@ -69,8 +69,8 @@ export default function SingleValueUnbounded(props) {
     useEffect(() => {
         const externalValue = props.externalFiltersValue ? props.externalFiltersValue[props.filterData.code] : null
 
-        if (props.externalFiltersValue && externalValue) {
-            setTextValue(externalValue?.value || '')
+        if (props.externalFiltersValue) {
+            setTextValue((externalValue && externalValue.value) ? externalValue.value : '')
         } else {
             setTextValue(tf ? tf : '')
         }
