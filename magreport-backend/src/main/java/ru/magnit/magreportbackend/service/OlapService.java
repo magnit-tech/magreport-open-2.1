@@ -804,7 +804,7 @@ public class OlapService {
 
     public OlapCubeResponse getCubeNew(OlapCubeRequestNew request, Long currentUserId) {
 
-      //  jobDomainService.checkAccessForJob(request.getJobId());
+        jobDomainService.checkAccessForJob(request.getJobId(), currentUserId);
 
         jobDomainService.updateJobStats(request.getJobId(), false, true, false);
 

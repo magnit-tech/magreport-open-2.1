@@ -243,7 +243,7 @@ class OlapServiceTest {
         verifyNoMoreInteractions(domainService);
     }
 
-   @Disabled
+
     @Test
     void exportPivotTableExcel() throws JsonProcessingException {
 
@@ -269,7 +269,7 @@ class OlapServiceTest {
         verify(jobDomainService).getJobMetaData(any());
         verify(tokenService).getToken(anyLong(), anyLong());
         verify(domainService).filterMetricResult(any(),any(),any());
-        verify(jobDomainService).checkAccessForJob(any());
+        verify(jobDomainService).checkAccessForJob(any(), any());
         verify(excelReportDomainService).getExcelPivotTable(any());
         verifyNoMoreInteractions(jobDomainService,domainService,derivedFieldService,tokenService,excelReportDomainService);
 
@@ -288,7 +288,7 @@ class OlapServiceTest {
         verifyNoMoreInteractions(excelReportDomainService);
 
     }
-    @Disabled
+
     @Test
     void getCubeNewTest1() {
 
@@ -297,7 +297,6 @@ class OlapServiceTest {
         when(domainService.filterCubeData(any(), any())).thenReturn(getTrueStatusRows());
         when(domainService.filterMetricResult(any(),any(),any())).thenReturn(getTrueStatusMetricValue());
         when(derivedFieldService.preProcessCube(any(),any())).thenReturn(new Pair<>(getTestCubeData(),getOlapRequest()));
-        when(userDomainService.getCurrentUser()).thenReturn(new UserView());
 
 
         var result = service.getCubeNew(getOlapCubeRequestNew(DERIVED_FIELD), 0L);
@@ -315,7 +314,7 @@ class OlapServiceTest {
         assertEquals("1", result.getMetricValues().get(5).getValues().get(1).get(1));
 
         verify(jobDomainService).getJobData(any());
-        verify(jobDomainService).checkAccessForJob(any());
+        verify(jobDomainService).checkAccessForJob(any(),any());
         verify(jobDomainService).updateJobStats(any(),anyBoolean(),anyBoolean(),anyBoolean());
         verify(domainService).getCubeData(any());
         verify(domainService).filterCubeData(any(),any());
@@ -323,7 +322,7 @@ class OlapServiceTest {
         verify(derivedFieldService).preProcessCube(any(),any());
         verifyNoMoreInteractions(jobDomainService,domainService,derivedFieldService,tokenService,excelReportDomainService);
     }
-    @Disabled
+
     @Test
     void getCubeNewTest2() {
 
@@ -331,7 +330,7 @@ class OlapServiceTest {
         when(domainService.getCubeData(any())).thenReturn(getTestCubeData());
         when(domainService.filterCubeData(any(), any())).thenReturn(getTrueStatusRows());
         when(domainService.filterMetricResult(any(),any(),any())).thenReturn(getTrueStatusMetricValue());
-        when(userDomainService.getCurrentUser()).thenReturn(new UserView());
+
 
         var result = service.getCubeNew(getOlapCubeRequestNew(REPORT_FIELD), 0L);
 
@@ -348,7 +347,7 @@ class OlapServiceTest {
         assertEquals("1", result.getMetricValues().get(5).getValues().get(1).get(1));
 
         verify(jobDomainService).getJobData(any());
-        verify(jobDomainService).checkAccessForJob(any());
+        verify(jobDomainService).checkAccessForJob(any(), any());
         verify(jobDomainService).updateJobStats(any(),anyBoolean(),anyBoolean(),anyBoolean());
         verify(domainService).getCubeData(any());
         verify(domainService).filterCubeData(any(),any());
@@ -356,14 +355,13 @@ class OlapServiceTest {
         verifyNoMoreInteractions(jobDomainService,domainService,derivedFieldService,tokenService,excelReportDomainService);
     }
 
-    @Disabled
     @Test
     void getCubeNewTest3() {
 
         when(jobDomainService.getJobData(anyLong())).thenReturn(getTestJobData());
         when(domainService.getCubeData(any())).thenReturn(getTestCubeData());
         when(domainService.filterCubeData(any(), any())).thenReturn(getTrueStatusRows());
-        when(userDomainService.getCurrentUser()).thenReturn(new UserView());
+
 
         var result = service.getCubeNew(getOlapCubeRequestNew(REPORT_FIELD).setMetricFilterGroup(new MetricFilterGroup()),0L);
 
@@ -380,7 +378,7 @@ class OlapServiceTest {
         assertEquals("1", result.getMetricValues().get(5).getValues().get(1).get(1));
 
         verify(jobDomainService).getJobData(any());
-        verify(jobDomainService).checkAccessForJob(any());
+        verify(jobDomainService).checkAccessForJob(any(),any());
         verify(jobDomainService).updateJobStats(any(),anyBoolean(),anyBoolean(),anyBoolean());
         verify(domainService).getCubeData(any());
         verify(domainService).filterCubeData(any(),any());

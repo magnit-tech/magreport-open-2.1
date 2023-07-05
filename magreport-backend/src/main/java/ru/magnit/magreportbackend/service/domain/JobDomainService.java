@@ -134,7 +134,7 @@ public class JobDomainService {
     public void setJobStatus(Long id, ReportJobStatusEnum status, Long rowCount, String errorMessage) {
 
         final var job = repository.getReferenceById(id);
-        final var jobStatus =  ReportJobStatusEnum.getById(job.getStatus().getId());
+        final var jobStatus = ReportJobStatusEnum.getById(job.getStatus().getId());
 
         if ((jobStatus.equals(SCHEDULED) || jobStatus.equals(PENDING_DB_CONNECTION)) && status.equals(CANCELING) || jobStatus.equals(CANCELING))
             status = CANCELED;
@@ -200,14 +200,13 @@ public class JobDomainService {
 
     @Transactional
     public ReportJobResponse getJob(Long jobId) {
-            var job = repository.findById(jobId);
-            if (job.isPresent()) {
-                var response = reportJobResponseMapper.from(job.get());
-                response.setExcelTemplates(excelTemplateService.getAllReportExcelTemplateToReport(new ReportIdRequest().setId(response.getReport().id())));
-                return response;
-            }
-            else
-                throw new InvalidParametersException(String.format("Report job not found, id: %s", jobId));
+        var job = repository.findById(jobId);
+        if (job.isPresent()) {
+            var response = reportJobResponseMapper.from(job.get());
+            response.setExcelTemplates(excelTemplateService.getAllReportExcelTemplateToReport(new ReportIdRequest().setId(response.getReport().id())));
+            return response;
+        } else
+            throw new InvalidParametersException(String.format("Report job not found, id: %s", jobId));
     }
 
     @Transactional
@@ -294,7 +293,7 @@ public class JobDomainService {
         List<Path> removeFiles = new ArrayList<>();
 
         if (Boolean.TRUE.equals(clearRmsOutFolder)) {
-             removeFiles.addAll(Arrays.stream(Objects.requireNonNull(new File(FileUtils.replaceHomeShortcut(rmsOutFolder))
+            removeFiles.addAll(Arrays.stream(Objects.requireNonNull(new File(FileUtils.replaceHomeShortcut(rmsOutFolder))
                             .listFiles()))
                     .filter(file -> new Date(file.lastModified()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().isBefore(LocalDateTime.now().minusHours(jobRetentionTime)))
                     .map(file -> Path.of(file.getAbsolutePath())).toList());
@@ -350,12 +349,17 @@ public class JobDomainService {
 
     @Transactional
     public void checkAccessForJob(Long jobId) {
-        final var job = repository.getReferenceById(jobId);
         final var currentUser = userDomainService.getCurrentUser();
-        final var isAdmin = userDomainService.getCurrentUserRoles(null).stream().anyMatch(role -> role.getId().equals(SystemRoles.ADMIN.getId()));
-        if (isAdmin || currentUser.getId().equals(job.getUser().getId())) return;
+        checkAccessForJob(jobId, currentUser.getId());
+    }
 
-        final var sharedJob = reportJobUserRepository.findSharedJob(jobId, currentUser.getId(), ReportJobUserTypeEnum.SHARE.getId());
+    @Transactional
+    public void checkAccessForJob(Long jobId, Long currentUserId) {
+        final var job = repository.getReferenceById(jobId);
+        final var isAdmin = userDomainService.getUserResponse(currentUserId).getRoles().stream().anyMatch(role -> role.getId().equals(SystemRoles.ADMIN.getId()));
+        if (isAdmin || currentUserId.equals(job.getUser().getId())) return;
+
+        final var sharedJob = reportJobUserRepository.findSharedJob(jobId, currentUserId, ReportJobUserTypeEnum.SHARE.getId());
         if (sharedJob.isEmpty()) throw new InvalidParametersException("Permission denied");
     }
 
@@ -384,10 +388,10 @@ public class JobDomainService {
     }
 
     @Transactional
-    public void addReportJobComment(Long jobId, Long userId, String comment){
+    public void addReportJobComment(Long jobId, Long userId, String comment) {
         var job = repository.getReferenceById(jobId);
 
-        if (!job.getUser().getId().equals(userId)){
+        if (!job.getUser().getId().equals(userId)) {
             throw new InvalidParametersException("Only owner job can write a comment!");
         }
 
@@ -400,10 +404,10 @@ public class JobDomainService {
     @Transactional
     public List<ReportJobStatisticsResponse> getJobStatHistory(Long jobId) {
         return statisticsRepository
-            .getAllByReportJobIdOrderById(jobId)
-            .stream()
-            .map(statisticsResponseMapper::from)
-            .toList();
+                .getAllByReportJobIdOrderById(jobId)
+                .stream()
+                .map(statisticsResponseMapper::from)
+                .toList();
     }
 
     @Transactional
@@ -427,17 +431,17 @@ public class JobDomainService {
 
         if (lastRecord != null && lastRecord.getStatus().equals(job.getStatus())) return;
 
-            var jobStats = new ReportJobStatistics()
-                    .setReportJob(new ReportJob(job.getId()))
-                    .setReport(new Report(job.getReport().getId()))
-                    .setUser(new User(job.getUser().getId()))
-                    .setRowCount(job.getRowCount())
-                    .setStatus(job.getStatus())
-                    .setState(job.getState())
-                    .setExportExcelCount(0L)
-                    .setOlapRequestCount(0L)
-                    .setIsShare(false);
+        var jobStats = new ReportJobStatistics()
+                .setReportJob(new ReportJob(job.getId()))
+                .setReport(new Report(job.getReport().getId()))
+                .setUser(new User(job.getUser().getId()))
+                .setRowCount(job.getRowCount())
+                .setStatus(job.getStatus())
+                .setState(job.getState())
+                .setExportExcelCount(0L)
+                .setOlapRequestCount(0L)
+                .setIsShare(false);
 
-            statisticsRepository.save(jobStats);
+        statisticsRepository.save(jobStats);
     }
 }
