@@ -186,6 +186,13 @@ public class UserDomainService {
     }
 
     @Transactional
+    public UserResponse getUserResponse(Long userId) {
+        final var user = userRepository.getReferenceById(userId);
+        return userResponseMapper.from(user);
+    }
+
+
+    @Transactional
     public void clearRoles(String userName, String domainName, List<String> roleNames) {
         final var domain = getDomain(domainName);
         final var user = userRepository.getUserByNameAndDomainId(userName, domain.getId());
