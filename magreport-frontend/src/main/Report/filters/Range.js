@@ -56,9 +56,9 @@ export default function Range(props) {
             let defaultStartValue, defaultEndValue;
             const externalValue = props.externalFiltersValue ? props.externalFiltersValue[props.filterData.code] : null
 
-            if(props.externalFiltersValue && externalValue) {
-                defaultStartValue = externalValue.from;
-                defaultEndValue = externalValue.to;
+            if(props.externalFiltersValue) {
+                defaultStartValue = externalValue ? externalValue.from : '';
+                defaultEndValue = externalValue ? externalValue.to : '';
             } else {
                 const { startValue, endValue } = getRangeFieldsValues(props.lastFilterValue, startFieldId, endFieldId);
                 defaultStartValue = startValue;
