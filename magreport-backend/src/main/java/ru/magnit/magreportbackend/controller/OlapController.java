@@ -193,7 +193,14 @@ public class OlapController {
 
         if (outService) {
             try {
-                emitter.send(externalOlapService.getCubeNew(request));
+
+                var response = ResponseBody.<OlapCubeResponse>builder()
+                        .success(true)
+                        .message("")
+                        .data(externalOlapService.getCubeNew(request))
+                        .build();
+
+                emitter.send(response);
                 emitter.complete();
             } catch (Exception ex) {
                 emitter.completeWithError(ex);
@@ -206,24 +213,26 @@ public class OlapController {
                 if (emitters.containsKey(emitter)) {
                     emitters.put(emitter, Thread.currentThread());
                     try {
-                        emitter.send(olapService.getCubeNew(request, userId), APPLICATION_JSON);
-                        emitter.complete();
-                        log.info("Run is success");
+                        var response = ResponseBody.<OlapCubeResponse>builder()
+                                .success(true)
+                                .message("")
+                                .data(olapService.getCubeNew(request, userId))
+                                .build();
+
                         emitters.remove(emitter);
+                        emitter.send(response, APPLICATION_JSON);
+                        emitter.complete();
+
                     } catch (Exception e) {
-                        log.info("Run is failed: " + e.getMessage());
                         emitter.completeWithError(e);
                         emitters.remove(emitter);
                     }
-                } else
-                    log.info("Emitter not in map: run stop");
-
+                }
             });
 
         }
 
         LogHelper.logInfoUserMethodEnd();
-
         return new ResponseEntity<>(emitter, HttpStatus.OK);
     }
 
@@ -602,9 +611,8 @@ public class OlapController {
     private void checkEmitters() {
         emitters.forEach((emitter, thread) -> {
                     try {
-                        emitter.send(" ");
+                        emitter.send(" ", APPLICATION_JSON);
                     } catch (Exception ex) {
-                        log.info("Schedule check emitter: " + ex.getMessage());
                         if (!thread.getName().equals("Empty")) thread.interrupt();
                         emitters.remove(emitter);
                     }
