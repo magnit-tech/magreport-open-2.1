@@ -6,14 +6,19 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 import ru.magnit.magreportbackend.dto.inner.olap.OlapUserRequestLog;
 import ru.magnit.magreportbackend.dto.request.DatePeriodRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapConfigRequest;
@@ -54,9 +59,11 @@ import ru.magnit.magreportbackend.util.MultipartFileSender;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
@@ -107,8 +114,13 @@ public class OlapController {
     private final ReportJobService reportJobService;
 
     private final TokenService tokenService;
-
     private Semaphore semaphore;
+
+
+    @Qualifier("OlapRequestExecutor")
+    private final ThreadPoolTaskExecutor olapExecutor;
+
+    ConcurrentHashMap<ResponseBodyEmitter, Thread> emitters = new ConcurrentHashMap<>();
 
     @PostConstruct
     private void init() {
@@ -159,38 +171,69 @@ public class OlapController {
     @PostMapping(value = OLAP_GET_CUBE_NEW,
             consumes = APPLICATION_JSON_VALUE,
             produces = APPLICATION_JSON_VALUE)
-    public ResponseBody<OlapCubeResponse> getCubeNew(
-            @RequestBody
-            OlapCubeRequestNew request) throws JsonProcessingException, InterruptedException {
-        ResponseBody<OlapCubeResponse> response;
-        LogHelper.logInfoUserMethodStart();
+    public ResponseEntity<ResponseBodyEmitter> getCubeNew(@RequestBody OlapCubeRequestNew request) throws JsonProcessingException {
 
+        LogHelper.logInfoUserMethodStart();
         LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_GET_CUBE_NEW, request, userService.getCurrentUserName()));
 
-        if (outService) {
-            response = ResponseBody.<OlapCubeResponse>builder()
-                    .success(true)
-                    .message("")
-                    .data(externalOlapService.getCubeNew(request))
-                    .build();
+        ResponseBodyEmitter emitter = new ResponseBodyEmitter();
+        emitter.onCompletion(() -> {
+            emitter.complete();
+            emitters.remove(emitter);
+        });
 
-        } else {
-            semaphore.acquire();
+        emitter.onError(throwable -> {
+            emitter.completeWithError(throwable);
+            emitters.remove(emitter);
+        });
+
+        emitter.onTimeout(() -> emitters.remove(emitter));
+
+        emitters.put(emitter, new Thread("Empty"));
+
+        if (outService) {
             try {
-                response = ResponseBody.<OlapCubeResponse>builder()
+
+                var response = ResponseBody.<OlapCubeResponse>builder()
                         .success(true)
                         .message("")
-                        .data(olapService.getCubeNew(request))
+                        .data(externalOlapService.getCubeNew(request))
                         .build();
+
+                emitter.send(response);
+                emitter.complete();
             } catch (Exception ex) {
-                throw new OlapException(START_ERROR_MASSAGE + ex.getMessage(), ex);
-            } finally {
-                semaphore.release();
+                emitter.completeWithError(ex);
             }
+
+        } else {
+            var userId = userService.getCurrentUserId();
+
+            olapExecutor.execute(() -> {
+                if (emitters.containsKey(emitter)) {
+                    emitters.put(emitter, Thread.currentThread());
+                    try {
+                        var response = ResponseBody.<OlapCubeResponse>builder()
+                                .success(true)
+                                .message("")
+                                .data(olapService.getCubeNew(request, userId))
+                                .build();
+
+                        emitters.remove(emitter);
+                        emitter.send(response, APPLICATION_JSON);
+                        emitter.complete();
+
+                    } catch (Exception e) {
+                        emitter.completeWithError(e);
+                        emitters.remove(emitter);
+                    }
+                }
+            });
+
         }
 
         LogHelper.logInfoUserMethodEnd();
-        return response;
+        return new ResponseEntity<>(emitter, HttpStatus.OK);
     }
 
     @Operation(summary = "Получение списка уникальных значений поля с учетом фильтра")
@@ -200,7 +243,8 @@ public class OlapController {
             produces = APPLICATION_JSON_VALUE)
     public ResponseBody<OlapFieldItemsResponse> getFilteredFieldValues(
             @RequestBody
-            OlapFieldItemsRequestNew request) throws OlapException, InterruptedException, JsonProcessingException {
+            OlapFieldItemsRequestNew request) throws
+            OlapException, InterruptedException, JsonProcessingException {
         ResponseBody<OlapFieldItemsResponse> response;
         LogHelper.logInfoUserMethodStart();
 
@@ -563,4 +607,16 @@ public class OlapController {
         }
     }
 
+    @Scheduled(fixedDelayString = "500", initialDelay = 1000L)
+    private void checkEmitters() {
+        emitters.forEach((emitter, thread) -> {
+                    try {
+                        emitter.send(" ", APPLICATION_JSON);
+                    } catch (Exception ex) {
+                        if (!thread.getName().equals("Empty")) thread.interrupt();
+                        emitters.remove(emitter);
+                    }
+                }
+        );
+    }
 }
