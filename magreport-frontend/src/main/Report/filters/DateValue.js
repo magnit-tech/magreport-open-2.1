@@ -34,8 +34,8 @@ import {getValueField, getValueFieldValue} from "utils/reportFiltersFunctions";
  * */
 export default function DateValue(props) {
 
-    const [dt, setDt] = React.useState(null);
-    const [toggleFilter, setToggleFilter] = React.useState(false);
+    const [dt, setDt] = useState(null);
+    const [toggleFilter, setToggleFilter] = useState(false);
     const [checkStatus, setCheckStatus] = useState("error")
     const classes = DateValueCSS();
     const mandatory = props.filterData.mandatory
@@ -59,8 +59,8 @@ export default function DateValue(props) {
             return null;
         }
 
-        if (props.externalFiltersValue && externalValue) {
-            checkDate(externalValue.date)
+        if (props.externalFiltersValue) {
+            checkDate((externalValue && externalValue.date) ? externalValue.date : null)
         } else if (dt === null){
             const defaultDate = getValueFieldValue(props.lastFilterValue, fieldId);
 
