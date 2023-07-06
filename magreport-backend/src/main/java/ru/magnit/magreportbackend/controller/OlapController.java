@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -177,6 +178,7 @@ public class OlapController {
         LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_GET_CUBE_NEW, request, userService.getCurrentUserName()));
 
         ResponseBodyEmitter emitter = new ResponseBodyEmitter();
+
         emitter.onCompletion(() -> {
             emitter.complete();
             emitters.remove(emitter);
@@ -200,7 +202,7 @@ public class OlapController {
                         .data(externalOlapService.getCubeNew(request))
                         .build();
 
-                emitter.send(response);
+                emitter.send(response, APPLICATION_JSON);
                 emitter.complete();
             } catch (Exception ex) {
                 emitter.completeWithError(ex);
@@ -233,7 +235,11 @@ public class OlapController {
         }
 
         LogHelper.logInfoUserMethodEnd();
-        return new ResponseEntity<>(emitter, HttpStatus.OK);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE);
+
+        return new ResponseEntity<>(emitter, headers, HttpStatus.OK);
     }
 
     @Operation(summary = "Получение списка уникальных значений поля с учетом фильтра")
@@ -567,6 +573,7 @@ public class OlapController {
     public ResponseBody<TokenResponse> exportPivotTableExcel(
             @RequestBody OlapExportPivotTableRequest dataRequest) throws JsonProcessingException {
 
+        log.debug(String.format("Current count connect: %s. Маx connect count: %s", countDop.get(), maxDopPivot));
 
         if (countDop.get() < maxDopPivot) {
             LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_GET_PIVOT_TABLE_EXCEL, dataRequest, userService.getCurrentUserName()));
