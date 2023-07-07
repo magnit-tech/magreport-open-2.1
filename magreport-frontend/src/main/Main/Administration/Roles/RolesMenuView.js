@@ -30,8 +30,8 @@ function RolesMenuView(props){
     const [reload, setReload] = useState({needReload : state.needReload});
     const folderItemsType = SidebarItems.admin.subItems.roles.folderItemType;
     const sidebarItemType = SidebarItems.admin.subItems.roles.key;
-    const showAddBtn = searchParams.get("isRecursive") === 'true' ? false : true;
-
+    const showAddBtn = (searchParams.get("isRecursive") === 'true' || !id) ? false : true;
+    
     useEffect(() => {
         setReload({needReload: true})
     }, [searchParams, state.needReload])
