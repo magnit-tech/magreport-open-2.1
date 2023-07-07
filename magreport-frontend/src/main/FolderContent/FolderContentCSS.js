@@ -117,7 +117,14 @@ export const FolderContentCSS = makeStyles(theme => ({
     },
     openSearchBtnHeightHollyday: {
         top: StyleConsts.headerHeightHollyday
-    }  
+    },
+    notfoundComponent: {
+        margin: '12px 0px 4px 16px',
+        fontSize: '22px',
+        fontStyle: 'italic',
+        //color: "#b2b2b2",
+        color: "#8b887d"
+    }
 }));
 
 

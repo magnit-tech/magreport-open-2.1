@@ -29,7 +29,8 @@ function FilterWrapper(props){
         return(
             <SingleValueUnbounded
                 filterData={props.filterData} 
-                lastFilterValue={props.lastFilterValue} 
+                lastFilterValue={props.lastFilterValue}
+                externalFiltersValue = {props.externalFiltersValue}
                 toggleClearFilter={props.toggleClearFilters}
                 onChangeFilterValue={props.onChangeFilterValue}
             />
@@ -40,6 +41,7 @@ function FilterWrapper(props){
             <ValueList
                 filterData={props.filterData} 
                 lastFilterValue={props.lastFilterValue} 
+                externalFiltersValue = {props.externalFiltersValue}
                 toggleClearFilter={props.toggleClearFilters}
                 onChangeFilterValue={props.onChangeFilterValue}
                 unbounded = {filterType === 'VALUE_LIST_UNBOUNDED'}
@@ -81,8 +83,9 @@ function FilterWrapper(props){
     else if (filterType === 'DATE_RANGE'){
         return(
             <DateRange 
-                filterData={props.filterData} 
-                lastFilterValue={props.lastFilterValue} 
+                filterData={props.filterData}
+                lastFilterValue={props.lastFilterValue}
+                externalFiltersValue = {props.externalFiltersValue}
                 toggleClearFilter={props.toggleClearFilters}
                 onChangeFilterValue={props.onChangeFilterValue}
             />
@@ -92,7 +95,8 @@ function FilterWrapper(props){
         return(
             <DateValue
                 filterData={props.filterData} 
-                lastFilterValue={props.lastFilterValue} 
+                lastFilterValue={props.lastFilterValue}
+                externalFiltersValue = {props.externalFiltersValue}
                 toggleClearFilter={props.toggleClearFilters}
                 onChangeFilterValue={props.onChangeFilterValue}
             />
@@ -103,6 +107,7 @@ function FilterWrapper(props){
             <Range
                 filterData={props.filterData}
                 lastFilterValue={props.lastFilterValue}
+                externalFiltersValue = {props.externalFiltersValue}
                 toggleClearFilter={props.toggleClearFilters}
                 onChangeFilterValue={props.onChangeFilterValue}
             />

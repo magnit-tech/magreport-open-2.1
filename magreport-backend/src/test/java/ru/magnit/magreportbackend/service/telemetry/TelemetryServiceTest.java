@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+import ru.magnit.magreportbackend.dto.inner.TaskInfo;
 import ru.magnit.magreportbackend.service.telemetry.state.TelemetryState;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,7 +33,7 @@ class TelemetryServiceTest {
 
     @Test
     void testTelemetryService() {
-        final var serial = service.init(TelemetryTestEnum.TEST_STATE_1);
+        final var serial = service.init(TelemetryTestEnum.TEST_STATE_1, new TaskInfo("", 0L));
 
         pause(100);
 

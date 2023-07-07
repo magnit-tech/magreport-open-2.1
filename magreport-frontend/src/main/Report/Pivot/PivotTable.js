@@ -543,8 +543,8 @@ export default function(props){
         if (cell.type === "metricValues" && (cell.conditionalFormatting && cell.conditionalFormatting.length > 0)) {
             if (cell.conditionalFormatting.length === 1) {
                 return {backgroundColor: cell.conditionalFormatting[0].color}
-            } 
-            
+            }
+
             const cellData = Number(cell.data.replace(/\s/g,'').replace('%', ''))
 
             for (let i = 0; i < cell.conditionalFormatting.length; i++) {
@@ -566,8 +566,9 @@ export default function(props){
         if (cell.type === "metricValues" && cell.fieldId) {
 
             if (cell.conditionalFormatting && cell.conditionalFormatting.length > 0) {
-                
+
                 if (cell.conditionalFormatting.length === 1) {
+                   
                     styleObj = {   
                         margin: '2px',
                         height: cell.conditionalFormatting[0].fontSize ? `${cell.conditionalFormatting[0].fontSize + 5}px` : 'auto',
@@ -593,6 +594,7 @@ export default function(props){
                                 color: cell.conditionalFormatting[i].fontColor,
                                 whiteSpace: 'nowrap'
                             }
+                            break
                         }
                     }
                 }
@@ -618,6 +620,18 @@ export default function(props){
         return styleObj
     }
 
+    function handleOnWheel(event) {
+        const { deltaY } = event;
+        const { rowFrom } = props.pivotConfiguration;
+        const { totalRows } = props.tableData;
+
+        if(Math.sign(deltaY) === -1 && rowFrom !== 0) {
+            props.onWheelScrolling(rowFrom - 1)
+        } else if(Math.sign(deltaY) === 1 && !(totalRows <= Math.min(rowFrom + props.count, totalRows))) {
+            props.onWheelScrolling(rowFrom + 1)
+        }
+    }
+
     return(
         <div className={clsx(styles.pivotTable)}>
              <Scrollbars 
@@ -625,7 +639,7 @@ export default function(props){
             >
                 {/*Без Measure скролл не реагирует на изменение размера других компонентов*/}
                 
-                <table style={{borderCollapse: 'collapse'}} className={styles.table}>
+                <table style={{borderCollapse: 'collapse'}} className={styles.table} onWheel={handleOnWheel}>
                     <Measure
 						bounds
 						onResize={contentRect => {

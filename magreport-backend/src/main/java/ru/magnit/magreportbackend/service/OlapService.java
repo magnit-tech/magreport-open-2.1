@@ -10,6 +10,8 @@ import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.domain.olap.AggregationType;
 import ru.magnit.magreportbackend.domain.olap.SortDirection;
 import ru.magnit.magreportbackend.domain.olap.SortingOrder;
+import ru.magnit.magreportbackend.dto.inner.TaskInfo;
+import ru.magnit.magreportbackend.dto.inner.UserView;
 import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
 import ru.magnit.magreportbackend.dto.inner.olap.ExportPivotConfiguration;
 import ru.magnit.magreportbackend.dto.inner.olap.MeasureData;
@@ -36,6 +38,7 @@ import ru.magnit.magreportbackend.dto.response.olap.OlapMetricResponse;
 import ru.magnit.magreportbackend.dto.response.olap.OlapMetricResponse2;
 import ru.magnit.magreportbackend.dto.response.report.ReportFieldMetadataResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.TokenResponse;
+import ru.magnit.magreportbackend.exception.InvalidParametersException;
 import ru.magnit.magreportbackend.exception.OlapMaxDataVolumeExceeded;
 import ru.magnit.magreportbackend.mapper.olap.OlapCubeRequestMapper;
 import ru.magnit.magreportbackend.mapper.olap.OlapFieldItemsRequestMerger;
@@ -288,8 +291,9 @@ public class OlapService {
     public TokenResponse exportPivotTableExcel(OlapExportPivotTableRequest request) throws JsonProcessingException {
         request.getCubeRequest().getRowsInterval().setFrom(0).setCount(Integer.MAX_VALUE);
         request.getCubeRequest().getColumnsInterval().setFrom(0).setCount(Integer.MAX_VALUE);
+        var currentUser = userDomainService.getCurrentUser();
 
-        var resultCube = getCubeNew(request.getCubeRequest());
+        var resultCube = getCubeNew(request.getCubeRequest(), currentUser.getId());
         List<ReportFieldMetadataResponse> metadata;
         OlapCubeRequest cubeRequest;
         if (request.getCubeRequest().hasDerivedFields()) {
@@ -305,7 +309,7 @@ public class OlapService {
             cubeRequest = getCubeRequest(request.getCubeRequest());
         }
         var config = olapConfigurationDomainService.getReportOlapConfiguration(request.getConfiguration());
-        var encrypt = jobDomainService.getJobData(request.getCubeRequest().getJobId()).reportData().encryptFile();
+        var jobData = jobDomainService.getJobData(request.getCubeRequest().getJobId());
 
         var code = (long) (Math.random() * 1000000);
 
@@ -315,9 +319,10 @@ public class OlapService {
                         resultCube,
                         code,
                         request.isStylePivotTable(),
-                        encrypt,
+                        jobData.reportData().encryptFile(),
                         objectMapper.readTree(config.getOlapConfig().getData()),
-                        metadata
+                        metadata,
+                        new TaskInfo(jobData.userName(), jobData.id())
                 )
         );
 
@@ -406,6 +411,7 @@ public class OlapService {
                                 yield time1.compareTo(time2);
                             }
                             case BOOLEAN -> Boolean.compare(Boolean.parseBoolean(var1), Boolean.parseBoolean(var2));
+                            case UNKNOWN ->  throw new InvalidParametersException("Not supported datatype field");
                         };
                         i++;
                     }
@@ -687,6 +693,7 @@ public class OlapService {
                             var v2 = value2.isEmpty() ? Double.MIN_VALUE : Double.parseDouble(value2);
                             yield Double.compare(v1, v2);
                         }
+                        case UNKNOWN ->  throw new InvalidParametersException("Not supported datatype field");
                     };
 
                     if (compare == 0)
@@ -795,9 +802,9 @@ public class OlapService {
         return result;
     }
 
-    public OlapCubeResponse getCubeNew(OlapCubeRequestNew request) {
-        var currentUser = userDomainService.getCurrentUser();
-        jobDomainService.checkAccessForJob(request.getJobId());
+    public OlapCubeResponse getCubeNew(OlapCubeRequestNew request, Long currentUserId) {
+
+        jobDomainService.checkAccessForJob(request.getJobId(), currentUserId);
 
         jobDomainService.updateJobStats(request.getJobId(), false, true, false);
 
@@ -807,7 +814,7 @@ public class OlapService {
         var endTime = System.currentTimeMillis() - startTime;
         log.debug("Job data acquired: " + endTime);
 
-        olapUserChoiceDomainService.setOlapUserChoice(jobData.reportId(), currentUser.getId(), true);
+        olapUserChoiceDomainService.setOlapUserChoice(jobData.reportId(), currentUserId, true);
 
         startTime = System.currentTimeMillis();
         var sourceCube = olapDomainService.getCubeData(jobData);

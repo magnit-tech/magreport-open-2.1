@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 // dataHub
 import dataHub from 'ajax/DataHub';
@@ -97,6 +97,10 @@ export default function FolderContent(props){
    // const defaultStatuses = Object.values(JobStatuses);
     const [searchOpen, setSearchOpen] = useState(false);
     const [panelOpen, setPanelOpen] = useState(false);
+
+    useEffect(() => {
+        if(props.searchParams?.open) setSearchOpen(true)
+    }, [props.searchParams])
 
     const [openWindow, setOpenWindow] = useState(false);
     const [windowType, setWindowType] = useState('');
@@ -520,6 +524,15 @@ export default function FolderContent(props){
             setCountElement(prev => prev + 100)
         }
     }
+    
+    const NotFoundComponent = () => {
+        
+        if (props.searchParams?.searchString) {
+            return <span className={classes.notfoundComponent}> Результат по параметру "{props.searchParams.searchString}" не найден </span>
+        } else {
+            return <span className={classes.notfoundComponent}> Ничего не найдено </span> 
+        }
+    }
 
     return(
         <div className={classes.relative}>
@@ -631,12 +644,19 @@ export default function FolderContent(props){
                             searchWithoutRecursive = {props.searchWithoutRecursive}
 				        />
 			        }
-					<Grid container>
-						{gridFolders}
-					</Grid>
-					<Grid container>
-						{gridItems}
-					</Grid>
+                    { ( gridFolders.length > 0 || gridItems.length > 0 ) ?
+                        <>
+                            <Grid container>
+                                {gridFolders}
+                            </Grid>
+                            <Grid container>
+                                {gridItems}
+                            </Grid>
+                        </>
+                        :
+                        <NotFoundComponent/>
+                    }
+
 				</div>
             </div>
             {
@@ -651,7 +671,7 @@ export default function FolderContent(props){
                 (props.itemsType !== FolderItemTypes.roles || props.data.id !== null) &&
                 <AddButton
                     showCreateFolder = {canCreateFolder && props.showAddFolder}
-                    showCreateItem = {canCreateItem && props.showAddItem && (props.data.id && props.data.id !== null)}
+                    showCreateItem = {canCreateItem && props.showAddItem}
                     itemName = {itemName}
                     onAddFolder = {handleAddFolder}
                     onAddItemClick = {handleAddItemClick}

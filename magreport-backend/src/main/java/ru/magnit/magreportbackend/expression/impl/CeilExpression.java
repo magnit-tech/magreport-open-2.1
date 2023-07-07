@@ -6,6 +6,8 @@ import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
+import java.util.Objects;
+
 public class CeilExpression extends ParameterizedExpression {
     private final Pair<String, DataTypeEnum> result = new Pair<>(null, DataTypeEnum.INTEGER);
 
@@ -20,6 +22,8 @@ public class CeilExpression extends ParameterizedExpression {
         final var firstValue = firstParameter.calculate(rowNumber);
 
         checkParameterHasAnyType(firstParameter, firstValue, DataTypeEnum.DOUBLE, DataTypeEnum.INTEGER);
+
+        if (Objects.isNull(firstValue.getL())) return result;
 
         if (firstValue.getR() == DataTypeEnum.DOUBLE) {
             final var value = Double.parseDouble(firstValue.getL());

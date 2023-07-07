@@ -20,6 +20,7 @@ import FilterStatus from './FilterStatus';
  * @param {Object} props - свойства компонента
  * @param {boolean} props.disabled - компонент используется для просмотра
  * @param {Object} props.filterData - данные фильтра (объект ответа от сервиса)
+ * @param {Object} props.externalFiltersValue - параметров фильтров через URL. {"SINGLE_VALUE_CODE":{"value": <(Любое значение): string>}}
  * @param {Object} props.lastFilterValue - объект со значениями фильтра из последнего запуска (как приходит от сервиса)
  * @param {boolean} props.toggleClearFilter - при изменении значения данного свойства требуется очистить выбор в фильтре
  * @param {onChangeFilterValue} props.onChangeFilterValue - function(filterValue) - callback для передачи значения изменившегося параметра фильтра
@@ -54,7 +55,7 @@ export default function SingleValueUnbounded(props) {
 
     let tf = props.lastFilterValue?.parameters[0].values.find((item) => item.fieldId === codeFieldId).value;
 
-    const [textValue, setTextValue] = useState(tf ? tf : '');
+    const [textValue, setTextValue] = useState('');
     const [checkStatus, setCheckStatus] = useState(mandatory && !textValue.length ? "error" : "success");
 
     // Необходимость очистки фильтров
@@ -66,6 +67,13 @@ export default function SingleValueUnbounded(props) {
     }, [props.filterData, props.lastFilterValue]);
 */
     useEffect(() => {
+        const externalValue = props.externalFiltersValue ? props.externalFiltersValue[props.filterData.code] : null
+
+        if (props.externalFiltersValue) {
+            handleTextChange((externalValue && externalValue.value) ? externalValue.value : '')
+        } else {
+            handleTextChange(tf ? tf : '')
+        }
 
         if (props.toggleClearFilter !== toggleFilter){
             setToggleFilter(props.toggleClearFilter);

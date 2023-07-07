@@ -14,6 +14,7 @@ import ru.magnit.magreportbackend.dto.inner.reportjob.ReportFieldData;
 import ru.magnit.magreportbackend.dto.request.olap.FilterDefinition;
 import ru.magnit.magreportbackend.dto.request.olap.FilterGroup;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -117,7 +118,7 @@ class OlapDomainServiceTest {
                                         List.of("10")
                                 )))
                 ),
-                null
+                Collections.emptyList()
         );
     }
 

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="ADD-DEFAULT-FILTER-MODE-001" author="vyushin_aa">
+        <sql>
+            INSERT INTO REPOSITORY.FILTER_REPORT_MODE (FILTER_REPORT_ID, FILTER_REPORT_MODE_TYPE_ID)
+                SELECT FR.FILTER_REPORT_ID, 0
+                FROM REPOSITORY.FILTER_REPORT AS FR
+                     JOIN REPOSITORY.FILTER_INSTANCE AS FI ON FI.FILTER_INSTANCE_ID = FR.FILTER_INSTANCE_ID
+                WHERE FI.FILTER_TEMPLATE_ID IN (3, 4, 5)
+        </sql>
+    </changeSet>
+
+</databaseChangeLog>

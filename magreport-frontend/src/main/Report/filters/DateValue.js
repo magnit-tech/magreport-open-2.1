@@ -27,14 +27,15 @@ import {getValueField, getValueFieldValue} from "utils/reportFiltersFunctions";
  * @param {Object} props - свойства компонента
  * @param {Object} props.filterData - данные фильтра (объект ответа от сервиса)
  * @param {Object} props.lastFilterValue - объект со значениями фильтра из последнего запуска (как приходит от сервиса)
+ * @param {Object} props.externalFiltersValue - параметров фильтров через URL. {"DATE_VALUE_CODE":{"date": <(дата в формате YYYY-MM-DD): string>}}
  * @param {boolean} props.toggleClearFilter - при изменении значения данного свойства требуется очистить выбор в фильтре
  * @param {onChangeFilterValue} props.onChangeFilterValue - function(filterValue) - callback для передачи значения изменившегося параметра фильтра
  *                                                  filterValue - объект для передачи в сервис в массиве parameters
  * */
 export default function DateValue(props) {
 
-    const [dt, setDt] = React.useState(null);
-    const [toggleFilter, setToggleFilter] = React.useState(false);
+    const [dt, setDt] = useState(null);
+    const [toggleFilter, setToggleFilter] = useState(false);
     const [checkStatus, setCheckStatus] = useState("error")
     const classes = DateValueCSS();
     const mandatory = props.filterData.mandatory
@@ -47,7 +48,20 @@ export default function DateValue(props) {
 
     // Задаём значения по-умолчанию
     useEffect(() => {
-        if (dt === null){
+        const externalValue = props.externalFiltersValue ? props.externalFiltersValue[props.filterData.code] : null
+
+        function checkDate(dateString) {
+            if (/^\d{4}-\d{2}-\d{2}/.test(dateString)) {
+                setDt(dateString);
+                setValue(dateString)
+                setCheckStatus(dateString || !mandatory ? 'success' : 'error')
+            };
+            return null;
+        }
+
+        if (props.externalFiltersValue) {
+            checkDate((externalValue && externalValue.date) ? externalValue.date : null)
+        } else if (dt === null){
             const defaultDate = getValueFieldValue(props.lastFilterValue, fieldId);
 
             setCheckStatus(defaultDate || !mandatory ? 'success' : 'error');
@@ -66,12 +80,7 @@ export default function DateValue(props) {
 
     function handleDateChange(date){
         setDt(date);
-        if (date){
-            setValue(date ? dateToStringFormat(date) : null)
-        }
-        else {
-            setValue(null)
-        }
+        setValue(date ? dateToStringFormat(date) : null)
         setCheckStatus(date || !mandatory ? 'success' : 'error')
     };
 

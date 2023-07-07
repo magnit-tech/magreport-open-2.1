@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import ru.magnit.magreportbackend.domain.filterreport.FilterReportOperationTypeEnum;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,4 +28,5 @@ public class FilterAddRequest {
     private Long filterInstanceId;
     private Long maxCountItems;
     private List<FilterFieldAddRequest> fields = Collections.emptyList();
+    private List<FilterReportOperationTypeEnum> filterReportModes = Collections.emptyList();
 }

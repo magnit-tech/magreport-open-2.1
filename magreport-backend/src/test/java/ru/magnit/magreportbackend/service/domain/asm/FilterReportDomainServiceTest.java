@@ -248,9 +248,8 @@ class FilterReportDomainServiceTest {
 
     private FilterValueListRequestData getFilterValueListRequestData() {
         return new FilterValueListRequestData(
-                null, null, null, null, null, null,
-                null, null, null, null,
-                null, false, null, 0L, null);
+                null, null, null, null,  null,
+                null, null, true, null,   0L, null);
     }
 
     private ListValuesRequest getListValuesRequest() {

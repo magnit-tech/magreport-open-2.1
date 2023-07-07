@@ -12,6 +12,8 @@ public record FilterInstanceFieldBackupTuple(
         boolean expand,
         String name,
         String description,
+        Boolean showField,
+        Boolean searchByField,
         LocalDateTime created,
         LocalDateTime modified
 ){ }

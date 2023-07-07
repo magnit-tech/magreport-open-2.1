@@ -45,7 +45,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class ScheduleController {
 
     public static final String SCHEDULE_ADD_CALENDAR_DATE = "/api/v1/schedule/add-date";
-
     public static final String SCHEDULE_ADD = "/api/v1/schedule/add";
     public static final String SCHEDULE_TASK_ADD = "/api/v1/schedule/task-add";
     public static final String SCHEDULE_GET = "/api/v1/schedule/get";
@@ -63,6 +62,7 @@ public class ScheduleController {
     public static final String SCHEDULE_TASK_RUN = "/api/v1/schedule/task-run";
     public static final String SCHEDULE_TASK_SWITCH = "/api/v1/schedule/task-switch";
     public static final String SCHEDULE_TASK_GET_MANUAL_LINK = "/api/v1/schedule/task-get-manual-link";
+    public static final String SCHEDULE_GET_TASKS = "/api/v1/schedule/get-tasks";
 
     private static final String CONTENT_LENGTH = "Content-Length";
     private final ScheduleService service;
@@ -430,6 +430,26 @@ public class ScheduleController {
                 .success(true)
                 .message("")
                 .data(host + SCHEDULE_TASK_MANUAL_START + "?code=")
+                .build();
+
+        LogHelper.logInfoUserMethodEnd();
+        return response;
+    }
+
+    @Operation(summary = "Получение списка всех задач расписания")
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping(value = SCHEDULE_GET_TASKS,
+            consumes = APPLICATION_JSON_VALUE,
+            produces = APPLICATION_JSON_VALUE)
+    public ResponseList<ScheduleTaskResponse> getAllScheduleTaskForSchedule(
+            @RequestBody ScheduleRequest request) {
+
+        LogHelper.logInfoUserMethodStart();
+
+        var response = ResponseList.<ScheduleTaskResponse>builder()
+                .success(true)
+                .message("")
+                .data(service.getAllScheduleTaskForSchedule(request))
                 .build();
 
         LogHelper.logInfoUserMethodEnd();

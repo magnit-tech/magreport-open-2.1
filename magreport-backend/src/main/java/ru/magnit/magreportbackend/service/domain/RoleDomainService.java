@@ -68,7 +68,7 @@ public class RoleDomainService {
 
     @Transactional
     public Long saveRole(RoleAddRequest request) {
-        if (repository.existsByName(request.getName()))
+        if (repository.existsByNameIgnoreCase(request.getName()))
             throw new InvalidParametersException("Role already exists: " + request.getName());
 
         var role = roleMapper.from(request);
@@ -150,6 +150,12 @@ public class RoleDomainService {
     public boolean isRoleExists(Long id) {
         return repository.existsById(id);
     }
+
+    @Transactional
+    public boolean isRoleExists(String name) {
+        return repository.existsByNameIgnoreCase(name);
+    }
+
 
     @Transactional
     public void clearUsersFromRole(Long id, List<Long> users) {
