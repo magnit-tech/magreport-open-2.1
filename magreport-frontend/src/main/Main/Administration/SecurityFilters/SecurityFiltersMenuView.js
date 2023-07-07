@@ -28,7 +28,7 @@ function SecurityFiltersMenuView(props){
 
     const [reload, setReload] = useState({needReload : state.needReload});
     const folderItemsType = SidebarItems.admin.subItems.securityFilters.folderItemType;
-    const showAddBtn = searchParams.get("isRecursive") === 'true' ? false : true;
+    const showAddBtn = (searchParams.get("isRecursive") === 'true' || !id) ? false : true;
 
     useEffect(() => {
         setReload({needReload: true})
