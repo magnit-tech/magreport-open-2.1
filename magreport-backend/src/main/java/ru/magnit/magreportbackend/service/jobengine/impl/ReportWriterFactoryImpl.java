@@ -21,9 +21,12 @@ public class ReportWriterFactoryImpl implements ReportWriterFactory {
     @Value("${magreport.jobengine.max-rows}")
     private Long maxRows;
 
+    @Value("${magreport.jobengine.wait-time-write-avro-file}")
+    private Long waitWriteAvro;
+
     @Override
     public ReportWriter getWriter(ReportWriterData writerData) {
 
-        return new ReportWriterImpl(schemaBuilder, writerData, replaceHomeShortcut(reportsPath), maxRows);
+        return new ReportWriterImpl(schemaBuilder, writerData, replaceHomeShortcut(reportsPath), maxRows, waitWriteAvro);
     }
 }
