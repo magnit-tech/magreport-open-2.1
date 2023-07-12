@@ -56,11 +56,14 @@ import ru.magnit.magreportbackend.service.UserService;
 import ru.magnit.magreportbackend.service.domain.TokenService;
 import ru.magnit.magreportbackend.util.LogHelper;
 import ru.magnit.magreportbackend.util.MultipartFileSender;
+import ru.magnit.magreportbackend.util.Pair;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -121,7 +124,7 @@ public class OlapController {
     @Qualifier("OlapRequestExecutor")
     private final ThreadPoolTaskExecutor olapExecutor;
 
-    ConcurrentHashMap<ResponseBodyEmitter, Thread> emitters = new ConcurrentHashMap<>();
+    ConcurrentHashMap<ResponseBodyEmitter, Pair<Long, Future<?>>> emitters = new ConcurrentHashMap<>();
 
     @PostConstruct
     private void init() {
@@ -191,30 +194,33 @@ public class OlapController {
 
         emitter.onTimeout(() -> emitters.remove(emitter));
 
-        emitters.put(emitter, new Thread("Empty"));
 
         if (outService) {
-            try {
 
-                var response = ResponseBody.<OlapCubeResponse>builder()
-                        .success(true)
-                        .message("")
-                        .data(externalOlapService.getCubeNew(request))
-                        .build();
+            var task = olapExecutor.submit(() -> {
+                try {
+                    var response = ResponseBody.<OlapCubeResponse>builder()
+                            .success(true)
+                            .message("")
+                            .data(externalOlapService.getCubeNew(request))
+                            .build();
 
-                emitter.send(response, APPLICATION_JSON);
-                emitter.complete();
-            } catch (Exception ex) {
-                emitter.completeWithError(ex);
-            }
+                    emitters.remove(emitter);
+                    emitter.send(response, APPLICATION_JSON);
+                    emitter.complete();
+                    log.debug("Processing of cube completed. Job id: " + request.getJobId());
+                } catch (Exception ex) {
+                    emitter.completeWithError(ex);
+                }
+            });
+
+            emitters.put(emitter, new Pair<>(request.getJobId(),task));
 
         } else {
-            var userId = userService.getCurrentUserId();
 
-            olapExecutor.execute(() -> {
-                if (emitters.containsKey(emitter)) {
-                    emitters.put(emitter, Thread.currentThread());
-                    try {
+            var userId = userService.getCurrentUserId();
+            var task = olapExecutor.submit(() -> {
+                try {
                         var response = ResponseBody.<OlapCubeResponse>builder()
                                 .success(true)
                                 .message("")
@@ -224,14 +230,16 @@ public class OlapController {
                         emitters.remove(emitter);
                         emitter.send(response, APPLICATION_JSON);
                         emitter.complete();
+                        log.debug("Processing of cube completed. Job id: " + request.getJobId());
 
                     } catch (Exception e) {
+                        log.error(String.format("Processing of cube completed with error! Job id: %s. Error: %s", request.getJobId(),e.getMessage()),e);
                         emitter.completeWithError(e);
                         emitters.remove(emitter);
                     }
-                }
             });
 
+            emitters.put(emitter, new Pair<>(request.getJobId(),task));
         }
 
         LogHelper.logInfoUserMethodEnd();
@@ -616,12 +624,14 @@ public class OlapController {
 
     @Scheduled(fixedDelayString = "500", initialDelay = 1000L)
     private void checkEmitters() {
-        emitters.forEach((emitter, thread) -> {
+        emitters.forEach((emitter, task) -> {
                     try {
                         emitter.send(" ", APPLICATION_JSON);
                     } catch (Exception ex) {
-                        if (!thread.getName().equals("Empty")) thread.interrupt();
+                        task.getR().cancel(true);
+                        emitter.completeWithError(ex);
                         emitters.remove(emitter);
+                        log.debug("Processing of cube aborted! Job id: " + task.getL());
                     }
                 }
         );
