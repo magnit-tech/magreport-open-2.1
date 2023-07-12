@@ -1,6 +1,7 @@
 package ru.magnit.magreportbackend.service.domain;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ldap.core.AttributesMapper;
 import org.springframework.stereotype.Service;
 import ru.magnit.magreportbackend.config.AuthConfig;
@@ -22,6 +23,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class LdapService {
@@ -128,23 +130,32 @@ public class LdapService {
                 .collect(Collectors.joining()) + ")";
 
         return Arrays.stream(ldapProperties.getUserPaths())
-                .map(path ->
-                        ldapTemplate.search(
-                                path,
-                                filter,
-                                SearchControls.SUBTREE_SCOPE,
-                                (AttributesMapper<Triple<String, String, String>>) attributes -> {
-                                    var result = new Triple<String, String, String>();
-                                    result.setA(domainName + "\\" + attributes.get(ldapProperties.getLoginParamName()).get().toString().toLowerCase());
-                                    try {
-                                        result.setB(String.valueOf(attributes.get(ldapProperties.getMailParamName()).get()));
-                                    } catch (Exception ex) {
-                                        result.setB("");
-                                    }
+
+                .map(path -> ldapTemplate.search(
+                            path,
+                            filter,
+                            SearchControls.SUBTREE_SCOPE,
+                            (AttributesMapper<Triple<String, String, String>>) attributes -> {
+                                var result = new Triple<String, String, String>();
+                                result.setA(domainName + "\\" + attributes.get(ldapProperties.getLoginParamName()).get().toString().toLowerCase());
+                                try {
+                                    result.setB(String.valueOf(attributes.get(ldapProperties.getMailParamName()).get()));
+                                } catch (Exception ex) {
+                                    result.setB("");
+                                }
+                                try {
                                     result.setC(String.valueOf(attributes.get(ldapProperties.getFullNameParamName()).get()));
-                                    return result;
-                                }))
+                                } catch (Exception ex) {
+                                    result.setC("");
+                                }
+                                return result;
+                            }))
                 .flatMap(Collection::stream)
-                .collect(Collectors.toMap(Triple::getA, t -> new Pair<String, String>().setL(t.getB()).setR(t.getC())));
+                .collect(
+                        Collectors.toMap(
+                                Triple::getA,
+                                t -> new Pair<String, String>().setL(t.getB()).setR(t.getC()),
+                                (pair1, pair2) -> pair1
+                 ));
     }
 }
