@@ -220,7 +220,6 @@ function PivotPanel(props){
     */
 
     function handleMetadataLoaded(data){
-        setTableDataLoadStatus(1);
         let fieldIdToNameMapping = new Map();
         let derivedFieldIdToNameMapping = new Map();
         for(let v of data.fields){
@@ -228,7 +227,8 @@ function PivotPanel(props){
         }
         for(let v of data.derivedFields){
             derivedFieldIdToNameMapping.set(v.id, v.name);
-        }        
+        }
+
         dataProviderRef.current.setFieldIdToNameMapping(fieldIdToNameMapping);
 
         let newConfiguration = new PivotConfiguration(pivotConfiguration);
@@ -1456,9 +1456,11 @@ function PivotPanel(props){
 
                                 setTableSize({ dimensions: contentRect.bounds });
 
-                                if ((cc !== columnCount || rc !== rowCount) && tableDataLoadStatus !==1){
+                                if ((cc !== columnCount || rc !== rowCount) && tableDataLoadStatus !== 1){
                                     setColumnCount(cc);
                                     setRowCount(rc);
+                                    setTableDataLoadStatus(1);
+
                                     // if(!dataProviderRef.current.changeWindow(pivotConfiguration.columnFrom, cc, pivotConfiguration.rowFrom, rc)){
                                     //     setTableDataLoadStatus(1);
                                     // }
