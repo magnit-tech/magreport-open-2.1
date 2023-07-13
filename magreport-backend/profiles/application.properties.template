@@ -54,6 +54,7 @@ magreport.jobengine.thread-pool-size=10
 magreport.jobengine.thread-name-prefix=JobEngine-Worker-Thread
 magreport.jobengine.max-rows=1000000
 magreport.jobengine.max-rows-excel=10000000
+magreport.jobengine.max-cols-excel=16000
 magreport.mvc.excel-exporter.thread-pool-size=20
 magreport.jobengine.wait-time-write-avro-file=600000
 
