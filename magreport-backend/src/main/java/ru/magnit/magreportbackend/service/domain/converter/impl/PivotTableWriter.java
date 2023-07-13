@@ -32,6 +32,7 @@ import ru.magnit.magreportbackend.service.telemetry.state.ExcelExportTelemetry;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -148,7 +149,7 @@ public class PivotTableWriter implements Writer {
             telemetryService.logTimings(telemetryId);
             telemetryService.clear(telemetryId);
 
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             throw new ReportExportException("Error export report to excel file", ex);
         }
     }
@@ -361,6 +362,7 @@ public class PivotTableWriter implements Writer {
             config.get("fieldsLists").get("metricFields").elements().forEachRemaining(f -> metricUserNames.add(f.get("newName") == null ? "" : f.get("newName").textValue()));
 
         initValues();
+        controlPivotSize();
         initCellStyles(wb);
 
         mappingFields = fields.stream().collect(Collectors.toMap(ReportFieldMetadataResponse::id, ReportFieldMetadataResponse::name));
@@ -417,11 +419,17 @@ public class PivotTableWriter implements Writer {
             totalRow = shiftRowCount;
         }
 
-        if (cubeData.getColumnValues().get(0).isEmpty() && cubeData.getMetricValues().isEmpty()) {
+        if (cubeData.getColumnValues().get(0).isEmpty() && cubeData.getMetricValues().isEmpty())
             totalColumn = shiftColCount;
-        }
 
+    }
 
+    private void controlPivotSize() {
+        if (totalRow > configuration.getMaxRowCount())
+            throw new ReportExportException("Превышено максимально допустимое количество строк сводной таблицы: " + configuration.getMaxRowCount());
+
+        if (totalColumn > configuration.getMaxColCount())
+            throw new ReportExportException("Превышено максимально допустимое количество столбцов сводной таблицы: " + configuration.getMaxColCount());
     }
 
     private CellStyle initCellStyle(Workbook wb, short dataType, short color) {

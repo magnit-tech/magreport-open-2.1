@@ -82,6 +82,10 @@ import java.util.stream.IntStream;
 public class OlapService {
     @Value("${magreport.olap.max-data-volume}")
     private long maxDataVolume = 1000;
+    @Value("${magreport.jobengine.max-rows-excel}")
+    private long maxRowsExcel;
+    @Value("${magreport.jobengine.max-cols-excel}")
+    private long maxColsExcel;
     private static final int DEFAULT_MEASURE_TUPLES_COUNT = 1000;
     private final OlapDomainService olapDomainService;
     private final JobDomainService jobDomainService;
@@ -322,7 +326,9 @@ public class OlapService {
                         jobData.reportData().encryptFile(),
                         objectMapper.readTree(config.getOlapConfig().getData()),
                         metadata,
-                        new TaskInfo(jobData.userName(), jobData.id())
+                        new TaskInfo(jobData.userName(), jobData.id()),
+                        maxRowsExcel,
+                        maxColsExcel
                 )
         );
 

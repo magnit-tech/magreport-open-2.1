@@ -594,7 +594,7 @@ public class OlapController {
                 response = olapService.exportPivotTableExcel(dataRequest);
             } catch (Exception ex) {
                 countDop.decrementAndGet();
-                throw new OlapException(ex.getMessage());
+                throw new OlapException(ex.getMessage(), ex);
             }
 
             var dataResponse = ResponseBody.<TokenResponse>builder()

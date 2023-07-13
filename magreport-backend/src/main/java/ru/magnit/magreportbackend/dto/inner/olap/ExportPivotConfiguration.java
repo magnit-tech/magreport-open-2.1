@@ -9,7 +9,6 @@ import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequest;
 import ru.magnit.magreportbackend.dto.response.olap.OlapCubeResponse;
 import ru.magnit.magreportbackend.dto.response.report.ReportFieldMetadataResponse;
 
-import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -23,8 +22,10 @@ public class ExportPivotConfiguration {
     private boolean stylePivotTable;
     private boolean encrypt;
     private JsonNode config;
-    private List<ReportFieldMetadataResponse> metadataFields = Collections.emptyList();
+    private List<ReportFieldMetadataResponse> metadataFields;
     private TaskInfo taskInfo;
+    private Long maxRowCount;
+    private Long maxColCount;
 
 
 }
