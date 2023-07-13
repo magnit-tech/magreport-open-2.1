@@ -55,4 +55,20 @@ export default function FilterValues() {
 
         return parameters;
     }
+
+    this.getExternalFiltersURL = () => {
+        const globalUrl = new URL(document.location);
+        const params = globalUrl.searchParams;
+
+        let resultUrl = globalUrl.origin + globalUrl.pathname
+
+        console.log(this.values);
+
+
+        if (params.get("jobId")) {
+            resultUrl += `?jobId=${params.get("jobId")}`
+        }
+
+        return resultUrl
+    }
 }
