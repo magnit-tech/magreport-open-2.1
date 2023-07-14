@@ -61,8 +61,8 @@ export default function FilterValues() {
         const params = globalUrl.searchParams;
 
         let resultUrl = globalUrl.origin + globalUrl.pathname
-
-        console.log(this.values);
+        
+        console.log(this.getParameters());
 
 
         if (params.get("jobId")) {

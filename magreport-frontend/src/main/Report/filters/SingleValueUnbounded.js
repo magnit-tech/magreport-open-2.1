@@ -99,7 +99,9 @@ export default function SingleValueUnbounded(props) {
                 filterId : props.filterData.id,
                 operationType: operationType,
                 validation: mandatory && !parameters.length ? "error" : "success",
-                parameters: parameters
+                parameters: parameters,
+                filterType: props.filterData.type.name || props.filterData.type,
+                filterCode: props.filterData.code
             }
         );
 
