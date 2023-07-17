@@ -68,6 +68,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum.COMPLETE;
+import static ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum.RUNNING;
 
 @ExtendWith(MockitoExtension.class)
 class ReportJobServiceTest {
@@ -165,7 +167,7 @@ class ReportJobServiceTest {
         when(userDomainService.getCurrentUser()).thenReturn(new UserView().setId(1L));
         when(reportDomainService.getReport(anyLong())).thenReturn(reportResponse);
         when(jobDomainService.addJob(any())).thenReturn(ID);
-        when(jobDomainService.getJob(anyLong())).thenReturn(getReportJobResponse());
+        when(jobDomainService.getJob(anyLong())).thenReturn(getReportJobResponse(COMPLETE));
         when(folderDomainService.getReportsFolders(anyLong())).thenReturn(Collections.singletonList(1L));
         when(folderPermissionsDomainService.getFoldersReportPermissionsForRoles(any(), any())).thenReturn(Collections.singletonList(permissionsResponse));
         when(userDomainService.getCurrentUserRoles(any())).thenReturn(Collections.emptyList());
@@ -239,20 +241,36 @@ class ReportJobServiceTest {
     }
 
     @Test
-    void getJob() {
+    void getJobTest1() {
 
-        when(jobDomainService.getJob(anyLong())).thenReturn(getReportJobResponse());
-        when(userDomainService.getCurrentUser()).thenReturn(new UserView());
+        when(jobDomainService.getJob(anyLong())).thenReturn(getReportJobResponse(COMPLETE));
 
         var response = service.getJob(ID);
         assertNotNull(response);
 
         verify(jobDomainService).getJob(anyLong());
         verifyNoMoreInteractions(jobDomainService);
+    }
 
-        Mockito.reset(jobDomainService);
 
-        when(jobDomainService.getJob(anyLong())).thenReturn(getReportJobResponse());
+    @Test
+    void getJobTest2() {
+
+        when(jobDomainService.getJob(anyLong())).thenReturn(getReportJobResponse(RUNNING));
+
+        var response = service.getJob(getReportJobRequest());
+        assertNotNull(response);
+
+        verify(jobDomainService).getJob(anyLong());
+        verifyNoMoreInteractions(jobDomainService);
+    }
+
+
+
+        @Test
+        void checkAccessForJob() {
+        when(userDomainService.getCurrentUser()).thenReturn(new UserView());
+        when(jobDomainService.getJob(anyLong())).thenReturn(getReportJobResponse(COMPLETE));
         when(userDomainService.getCurrentUserRoles(null)).thenReturn(Collections.singletonList(new RoleView().setName("ADMIN")));
 
         assertNotNull(service.getJob(getReportJobRequest()));
@@ -341,7 +359,7 @@ class ReportJobServiceTest {
 
         ReportJobRequest request = spy(getReportJobRequest());
 
-        when(jobDomainService.getJob(anyLong())).thenReturn(getReportJobResponse());
+        when(jobDomainService.getJob(anyLong())).thenReturn(getReportJobResponse(COMPLETE));
 
         final var result = service.cancelJob(request);
 
@@ -360,7 +378,7 @@ class ReportJobServiceTest {
         when(jobDomainService.getJobData(any())).thenReturn(getReportJobData(false));
         when(excelTemplateDomainService.getTemplatePathForReport(anyLong(), anyLong())).thenReturn("path");
         when(tokenService.getToken(any(), any())).thenReturn("token");
-        when(jobDomainService.getJob(anyLong())).thenReturn(getReportJobResponse());
+        when(jobDomainService.getJob(anyLong())).thenReturn(getReportJobResponse(COMPLETE));
 
         var response = service.createExcelReport(new ExcelReportRequest().setId(ID).setExcelTemplateId(ID));
         assertNotNull(response);
@@ -397,7 +415,7 @@ class ReportJobServiceTest {
         verify(jobDomainService).getJobData(any());
         verify(excelTemplateDomainService).getTemplatePathForReport(anyLong(), anyLong());
         verify(excelReportDomainService).saveReportToExcel(any(), any(), anyLong());
-        verify(excelReportDomainService).moveReportToRms(anyLong(), anyLong(),any(Boolean.class));
+        verify(excelReportDomainService).moveReportToRms(anyLong(), anyLong(), any(Boolean.class));
         verifyNoMoreInteractions(jobDomainService, excelTemplateDomainService, excelReportDomainService);
     }
 
@@ -445,7 +463,7 @@ class ReportJobServiceTest {
                 5L,
                 4L,
                 "User",
-                isComplete ? ReportJobStatusEnum.COMPLETE.getId() : ReportJobStatusEnum.RUNNING.getId(),
+                isComplete ? COMPLETE.getId() : ReportJobStatusEnum.RUNNING.getId(),
                 2L,
                 3L,
                 isComplete,
@@ -465,11 +483,11 @@ class ReportJobServiceTest {
                 .setJobId(JOB_ID);
     }
 
-    private ReportJobResponse getReportJobResponse() {
+    private ReportJobResponse getReportJobResponse(ReportJobStatusEnum status) {
         return new ReportJobResponse(1L,
                 new ReportShortResponse(1L, 1L, "Report"),
                 new UserShortResponse(1L, "User", "Domain"),
-                ReportJobStatusEnum.RUNNING,
+                status,
                 ReportJobStateEnum.NORMAL,
                 "msg",
                 100L,
@@ -477,7 +495,7 @@ class ReportJobServiceTest {
                 LocalDateTime.now(),
                 Collections.emptyList(),
                 true,
-            0L,
+                0L,
                 "comment",
                 true,
                 0,
