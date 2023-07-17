@@ -57,6 +57,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum.PENDING_DB_CONNECTION;
+import static ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum.RUNNING;
 import static ru.magnit.magreportbackend.domain.user.SystemRoles.UNBOUNDED_JOB_ACCESS;
 
 @Slf4j
@@ -301,19 +303,18 @@ public class ReportJobService {
     }
 
     public ReportJobResponse getJob(ReportJobRequest request) {
-        if (request.getJobId() != null) {
+
             var response = jobDomainService.getJob(request.getJobId());
+
+            if (response.getStatus().equals(RUNNING) || response.getStatus().equals(PENDING_DB_CONNECTION))
+                return response;
+
             var currentUser = userDomainService.getCurrentUser();
             checkAccessForJob(response.getId(), response.getReport().id(), response.getReport().name());
             response.setCanExecute(checkReportPermission(response.getReport().id()));
             response.setOlapLastUserChoice(olapUserChoiceDomainService.getOlapUserChoice(response.getReport().id(), currentUser.getId()));
             response.setExcelRowLimit(excelRowLimit);
             return response;
-        } else {
-            var user = userDomainService.getCurrentUser();
-            log.warn(String.format("JobId is null! User: %s/%s", user.getDomain().name(), user.getName()));
-            return null;
-        }
     }
 
     public ReportJobResponse getJob(Long jobId) {
