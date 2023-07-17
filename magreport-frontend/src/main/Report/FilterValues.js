@@ -55,4 +55,51 @@ export default function FilterValues() {
 
         return parameters;
     }
+
+    this.getExternalFiltersParams = (arr) => {
+        let resultParams = [];
+
+        arr.forEach((filter) => {
+            if(filter.filterCode && filter.filterType) {
+                console.log(filter.operationType);
+                switch(filter.filterType) {
+                    case "VALUE_LIST":
+                       resultParams.push(`"${filter.filterCode}":{"operationType":"${filter.operationType === 'IS_IN_LIST' ? 'IN_LIST' : 'NOT_IN_LIST'}","value":"[${filter.parameters[0].values.map((item) => item.value)}]"}`);
+                       break
+                    case "DATE_RANGE":
+                       resultParams.push(`"${filter.filterCode}":{"begin_dt":"${filter.parameters[0].values[0].value}","end_dt":"${filter.parameters[0].values[1].value}"}`);
+                       break
+                    case "RANGE":
+                       resultParams.push(`"${filter.filterCode}":{"from":"${filter.parameters[0].values[0].value}","to":"${filter.parameters[0].values[1].value}"}`);
+                       break
+                    case "SINGLE_VALUE_UNBOUNDED":
+                       resultParams.push(`"${filter.filterCode}":{"value":"${filter.parameters[0].values[0].value}"}`);
+                       break
+                    case "DATE_VALUE":
+                       resultParams.push(`"${filter.filterCode}":{"date":"${filter.parameters[0].values[0].value}"}`);
+                       break
+                    default:
+                        return
+                }
+            }
+        })
+
+        return resultParams.join(',')
+    }
+
+    this.getExternalFiltersURL = () => {
+        const globalUrl = new URL(document.location);
+        const params = globalUrl.searchParams;
+
+        let resultUrl = globalUrl.origin + globalUrl.pathname
+        let externalFiltersParams = this.getParameters().length > 0 ? this.getExternalFiltersParams(this.getParameters()) : ''
+        
+        if (params.get("jobId")) {
+            resultUrl += `?jobId=${params.get("jobId")}${externalFiltersParams ? `&externalFiltersValue={${externalFiltersParams}}` : ''}`
+        } else {
+            resultUrl += `${externalFiltersParams ? `?externalFiltersValue={${externalFiltersParams}}` : ''}`
+        }
+
+        return encodeURI(resultUrl)
+    }
 }

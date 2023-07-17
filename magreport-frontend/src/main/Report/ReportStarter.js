@@ -8,7 +8,8 @@ import { addReportStarterNavbar } from "redux/actions/navbar/actionNavbar";
 import SidebarItems from '../Main/Sidebar/SidebarItems';   //'../../   /Main/Sidebar/SidebarItems' ;
 
 // mui
-import {Button} from '@material-ui/core';
+import {Button, IconButton, Tooltip} from '@material-ui/core';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 // dataHub
 import dataHub from 'ajax/DataHub';
@@ -68,9 +69,6 @@ export default function ReportStarter(props){
         }, 
         [] // eslint-disable-line
     );
-
-
-
     
     const lastFilterValues = useRef(new FilterValues()); // Значения параметров предыдущего запуска отчёта
 
@@ -256,9 +254,6 @@ export default function ReportStarter(props){
     }
 
     function handleReportStarted(data){
-        // data - ответ от /report-job/add
-        // console.log(data.id);
-        // setReportJobId(data.id);
         navigate(`/ui/report/${data.id}`)
 
     }
@@ -269,6 +264,15 @@ export default function ReportStarter(props){
         setReloadReportMetadata({needReload: true});
         setFlowState("filters");
     }
+
+    function handleCopyExternalFilters() {
+		navigator.clipboard.writeText(filterValues.current.getExternalFiltersURL());
+		enqueueSnackbar(`Название функции успешно скопировано в буфер обмен`, {
+			variant: 'success',
+            autoHideDuration: 1000
+		});
+    }
+
 
     return (
         id 
@@ -302,6 +306,12 @@ export default function ReportStarter(props){
                                         }
                                         <Button variant="contained" color="primary" size = "small" className={classes.filterButton} onClick={handleClearFilters}> Очистить </Button>
                                         <Button variant="contained" color="primary" size = "small" className={classes.filterButton} onClick={handleCancel}> Отменить </Button>
+                                        <Tooltip title={'Скопировать URL для данных значений фильтров'}>
+                                            <IconButton color="primary" onClick={handleCopyExternalFilters}>
+                                                <FileCopyIcon className={classes.iconButton}></FileCopyIcon>
+                                            </IconButton>
+                                            {/* <Button variant="contained" color="primary" size = "small" className={classes.filterButton} onClick={handleCancel}> <FileCopyIcon className={classes.iconButton}></FileCopyIcon> </Button> */}
+                                        </Tooltip>
                                     </div>
                                     
                                 </div>

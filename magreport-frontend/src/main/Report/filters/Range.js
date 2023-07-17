@@ -138,6 +138,8 @@ export default function Range(props) {
             validation: (isStartValid && isEndValid && newEndValue >= newStartValue)
             || (!mandatory && !isStartValid && !isEndValid) ? 'success' : 'error',
             parameters,
+            filterType: props.filterData.type.name || props.filterData.type,
+            filterCode: props.filterData.code
         });
     }
 
