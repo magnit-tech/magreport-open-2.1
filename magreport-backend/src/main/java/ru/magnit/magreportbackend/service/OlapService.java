@@ -11,7 +11,6 @@ import ru.magnit.magreportbackend.domain.olap.AggregationType;
 import ru.magnit.magreportbackend.domain.olap.SortDirection;
 import ru.magnit.magreportbackend.domain.olap.SortingOrder;
 import ru.magnit.magreportbackend.dto.inner.TaskInfo;
-import ru.magnit.magreportbackend.dto.inner.UserView;
 import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
 import ru.magnit.magreportbackend.dto.inner.olap.ExportPivotConfiguration;
 import ru.magnit.magreportbackend.dto.inner.olap.MeasureData;
@@ -101,9 +100,9 @@ public class OlapService {
     private final OlapCubeRequestMapper olapCubeRequestMapper;
     private final OlapFieldItemsRequestMerger olapFieldItemsRequestMerger;
 
-    public OlapCubeResponse getCube(OlapCubeRequest request) {
-        var currentUser = userDomainService.getCurrentUser();
-        jobDomainService.checkAccessForJob(request.getJobId());
+    public OlapCubeResponse getCubeNew(OlapCubeRequestNew request, Long currentUserId) {
+
+        jobDomainService.checkAccessForJob(request.getJobId(), currentUserId);
 
         jobDomainService.updateJobStats(request.getJobId(), false, true, false);
 
@@ -113,37 +112,49 @@ public class OlapService {
         var endTime = System.currentTimeMillis() - startTime;
         log.debug("Job data acquired: " + endTime);
 
-        olapUserChoiceDomainService.setOlapUserChoice(jobData.reportId(), currentUser.getId(), true);
+        olapUserChoiceDomainService.setOlapUserChoice(jobData.reportId(), currentUserId, true);
 
         startTime = System.currentTimeMillis();
-        final var sourceCube = olapDomainService.getCubeData(jobData);
+        var sourceCube = olapDomainService.getCubeData(jobData);
         endTime = System.currentTimeMillis() - startTime;
         log.debug("Report data acquired: " + endTime);
 
+        OlapCubeRequest cubeRequest;
+        if (request.hasDerivedFields()) {
+            startTime = System.currentTimeMillis();
+            final var result = derivedFieldService.preProcessCube(sourceCube, request);
+            sourceCube = result.getL();
+            cubeRequest = result.getR();
+            endTime = System.currentTimeMillis() - startTime;
+            log.debug("Derived fields calculated: " + endTime);
+        } else {
+            cubeRequest = getCubeRequest(request);
+        }
+
         startTime = System.currentTimeMillis();
-        final var checkedFilterRows = olapDomainService.filterCubeData(sourceCube, request.getFilterGroup());
+        final var checkedFilterRows = olapDomainService.filterCubeData(sourceCube, cubeRequest.getFilterGroup());
         endTime = System.currentTimeMillis() - startTime;
         log.debug("Cube filtered: " + endTime);
 
         startTime = System.currentTimeMillis();
-        var measures = getRequestedMeasures(sourceCube, request.getColumnFields(), request.getRowFields(), checkedFilterRows);
+        var measures = getRequestedMeasures(sourceCube, cubeRequest.getColumnFields(), cubeRequest.getRowFields(), checkedFilterRows);
         endTime = System.currentTimeMillis() - startTime;
         log.debug("Measures acquired: " + endTime);
 
-        checkMaxDataVolume(measures, request.getMetrics());
+        checkMaxDataVolume(measures, cubeRequest.getMetrics());
 
         startTime = System.currentTimeMillis();
-        var metricValues = calculateMetricsValues(measures, request.getMetrics(), request.getColumnFields(), request.getRowFields(), request.getMetricFilterGroup(), sourceCube, checkedFilterRows, false);
+        var metricValues = calculateMetricsValues(measures, cubeRequest.getMetrics(), cubeRequest.getColumnFields(), cubeRequest.getRowFields(), cubeRequest.getMetricFilterGroup(), sourceCube, checkedFilterRows, false);
         endTime = System.currentTimeMillis() - startTime;
         log.debug("Metrics calculation: " + endTime);
 
         startTime = System.currentTimeMillis();
-        var metricResults = collectMetricResult(metricValues, request.getMetrics());
+        var metricResults = collectMetricResult(metricValues, cubeRequest.getMetrics());
         endTime = System.currentTimeMillis() - startTime;
         log.debug("Metrics collection: " + endTime);
 
         startTime = System.currentTimeMillis();
-        var sortedMetrics = sortedResults(request, sourceCube, metricResults, measures);
+        var sortedMetrics = sortedResults(cubeRequest, sourceCube, metricResults, measures);
         endTime = System.currentTimeMillis() - startTime;
         log.debug("Metrics sorting: " + endTime);
 
@@ -153,45 +164,28 @@ public class OlapService {
         log.debug("Get result measures: " + endTime);
 
 
-        if (request.getMetricFilterGroup() != null && (!request.getMetricFilterGroup().getFilters().isEmpty() || !request.getMetricFilterGroup().getChildGroups().isEmpty())) {
+        if (cubeRequest.getMetricFilterGroup() != null && (!cubeRequest.getMetricFilterGroup().getFilters().isEmpty() || !cubeRequest.getMetricFilterGroup().getChildGroups().isEmpty())) {
             startTime = System.currentTimeMillis();
-            var dataTypesMetrics = getDataTypesForMetrics(sourceCube, request.getMetrics());
-            var metricResultFilters = olapDomainService.filterMetricResult(sortedMetrics, request.getMetricFilterGroup(), dataTypesMetrics);
+            var dataTypesMetrics = getDataTypesForMetrics(sourceCube, cubeRequest.getMetrics());
+            var metricResultFilters = olapDomainService.filterMetricResult(sortedMetrics, cubeRequest.getMetricFilterGroup(), dataTypesMetrics);
             endTime = System.currentTimeMillis() - startTime;
             log.debug("Metrics filtered: " + endTime);
 
 
-            return getOlapCubeFilterMetricResponse(request, sortedMetrics, metricResultFilters, sortedMeasures, sourceCube);
+            return getOlapCubeFilterMetricResponse(cubeRequest, sortedMetrics, metricResultFilters, sortedMeasures, sourceCube);
 
         } else {
 
-            var columValues = sortedMeasures.getL().stream().skip(request.getColumnsInterval().getFrom()).limit(request.getColumnsInterval().getCount()).toList();
-            var rowValues = sortedMeasures.getR().stream().skip(request.getRowsInterval().getFrom()).limit(request.getRowsInterval().getCount()).toList();
-            sortedMetrics = getPageResult(sortedMetrics, new Pair<>(columValues, rowValues), request);
+            var columValues = sortedMeasures.getL().stream().skip(cubeRequest.getColumnsInterval().getFrom()).limit(cubeRequest.getColumnsInterval().getCount()).toList();
+            var rowValues = sortedMeasures.getR().stream().skip(cubeRequest.getRowsInterval().getFrom()).limit(cubeRequest.getRowsInterval().getCount()).toList();
+            sortedMetrics = getPageResult(sortedMetrics, new Pair<>(columValues, rowValues), cubeRequest);
 
             return new OlapCubeResponse()
                     .setColumnValues(columValues)
                     .setRowValues(rowValues)
-                    .setMetricValues(getOlapMetricResponse(request, sortedMetrics, sourceCube))
-                    .setTotalColumns(measures.getL().totalCount())
-                    .setTotalRows(measures.getR().totalCount());
-        }
-    }
-
-    private void checkMaxDataVolume(Pair<MeasureData, MeasureData> measures, List<MetricDefinition> metrics) {
-        final var numColumns = (long) (measures.getL().values().isEmpty() ? 1 : measures.getL().values().size());
-        final var numRows = (long) (measures.getR().values().isEmpty() ? 1 : measures.getR().values().size());
-        final var numMetrics = (long) (metrics.isEmpty() ? 1 : metrics.size());
-
-        if (numColumns * numRows * numMetrics > maxDataVolume) {
-            throw new OlapMaxDataVolumeExceeded(
-                    "Превышен допустимый объем обрабатываемых данных:" +
-                            "\nМаксимальный объем - " + maxDataVolume +
-                            "\nЗапрашиваемый объем - " + numColumns * numRows * numMetrics +
-                            "\nКол-во столбцов - " + numColumns +
-                            "\nКол-во строк - " + numRows +
-                            "\nКол-во метрик - " + numMetrics
-            );
+                    .setMetricValues(getOlapMetricResponse(cubeRequest, sortedMetrics, sourceCube))
+                    .setTotalColumns(calcTotalSize(measures.getL(), request.getMetrics().size()))
+                    .setTotalRows(calcTotalSize(measures.getR(), request.getMetrics().size()));
         }
     }
 
@@ -363,8 +357,12 @@ public class OlapService {
             }
         }
 
+        var columnSize = columnTuples.size();
+        var rowSize = rowTuples.size();
+
         if (columnTuples.isEmpty()) columnTuples.add(Collections.emptyList());
         if (rowTuples.isEmpty()) rowTuples.add(Collections.emptyList());
+
 
         var endTime = System.currentTimeMillis() - startTime;
         log.debug("Measures tuples collected: " + endTime);
@@ -376,7 +374,7 @@ public class OlapService {
         endTime = System.currentTimeMillis() - startTime;
         log.debug("Measures tuples sorted and trimmed: " + endTime);
 
-        return new Pair<>(new MeasureData(result.getL(), columnTuples.size()), new MeasureData(result.getR(), rowTuples.size()));
+        return new Pair<>(new MeasureData(result.getL(), columnSize), new MeasureData(result.getR(), rowSize));
     }
 
     private Set<List<String>> sortRowSet(Set<List<String>> rowSet, List<DataTypeEnum> dataTypes) {
@@ -417,7 +415,7 @@ public class OlapService {
                                 yield time1.compareTo(time2);
                             }
                             case BOOLEAN -> Boolean.compare(Boolean.parseBoolean(var1), Boolean.parseBoolean(var2));
-                            case UNKNOWN ->  throw new InvalidParametersException("Not supported datatype field");
+                            case UNKNOWN -> throw new InvalidParametersException("Not supported datatype field");
                         };
                         i++;
                     }
@@ -699,7 +697,7 @@ public class OlapService {
                             var v2 = value2.isEmpty() ? Double.MIN_VALUE : Double.parseDouble(value2);
                             yield Double.compare(v1, v2);
                         }
-                        case UNKNOWN ->  throw new InvalidParametersException("Not supported datatype field");
+                        case UNKNOWN -> throw new InvalidParametersException("Not supported datatype field");
                     };
 
                     if (compare == 0)
@@ -808,95 +806,6 @@ public class OlapService {
         return result;
     }
 
-    public OlapCubeResponse getCubeNew(OlapCubeRequestNew request, Long currentUserId) {
-
-        jobDomainService.checkAccessForJob(request.getJobId(), currentUserId);
-
-        jobDomainService.updateJobStats(request.getJobId(), false, true, false);
-
-        log.debug("Start processing cube");
-        var startTime = System.currentTimeMillis();
-        final var jobData = jobDomainService.getJobData(request.getJobId());
-        var endTime = System.currentTimeMillis() - startTime;
-        log.debug("Job data acquired: " + endTime);
-
-        olapUserChoiceDomainService.setOlapUserChoice(jobData.reportId(), currentUserId, true);
-
-        startTime = System.currentTimeMillis();
-        var sourceCube = olapDomainService.getCubeData(jobData);
-        endTime = System.currentTimeMillis() - startTime;
-        log.debug("Report data acquired: " + endTime);
-
-        OlapCubeRequest cubeRequest;
-        if (request.hasDerivedFields()) {
-            startTime = System.currentTimeMillis();
-            final var result = derivedFieldService.preProcessCube(sourceCube, request);
-            sourceCube = result.getL();
-            cubeRequest = result.getR();
-            endTime = System.currentTimeMillis() - startTime;
-            log.debug("Derived fields calculated: " + endTime);
-        } else {
-            cubeRequest = getCubeRequest(request);
-        }
-
-        startTime = System.currentTimeMillis();
-        final var checkedFilterRows = olapDomainService.filterCubeData(sourceCube, cubeRequest.getFilterGroup());
-        endTime = System.currentTimeMillis() - startTime;
-        log.debug("Cube filtered: " + endTime);
-
-        startTime = System.currentTimeMillis();
-        var measures = getRequestedMeasures(sourceCube, cubeRequest.getColumnFields(), cubeRequest.getRowFields(), checkedFilterRows);
-        endTime = System.currentTimeMillis() - startTime;
-        log.debug("Measures acquired: " + endTime);
-
-        checkMaxDataVolume(measures, cubeRequest.getMetrics());
-
-        startTime = System.currentTimeMillis();
-        var metricValues = calculateMetricsValues(measures, cubeRequest.getMetrics(), cubeRequest.getColumnFields(), cubeRequest.getRowFields(), cubeRequest.getMetricFilterGroup(), sourceCube, checkedFilterRows, false);
-        endTime = System.currentTimeMillis() - startTime;
-        log.debug("Metrics calculation: " + endTime);
-
-        startTime = System.currentTimeMillis();
-        var metricResults = collectMetricResult(metricValues, cubeRequest.getMetrics());
-        endTime = System.currentTimeMillis() - startTime;
-        log.debug("Metrics collection: " + endTime);
-
-        startTime = System.currentTimeMillis();
-        var sortedMetrics = sortedResults(cubeRequest, sourceCube, metricResults, measures);
-        endTime = System.currentTimeMillis() - startTime;
-        log.debug("Metrics sorting: " + endTime);
-
-        startTime = System.currentTimeMillis();
-        var sortedMeasures = getResultMeasures(sortedMetrics, measures);
-        endTime = System.currentTimeMillis() - startTime;
-        log.debug("Get result measures: " + endTime);
-
-
-        if (cubeRequest.getMetricFilterGroup() != null && (!cubeRequest.getMetricFilterGroup().getFilters().isEmpty() || !cubeRequest.getMetricFilterGroup().getChildGroups().isEmpty())) {
-            startTime = System.currentTimeMillis();
-            var dataTypesMetrics = getDataTypesForMetrics(sourceCube, cubeRequest.getMetrics());
-            var metricResultFilters = olapDomainService.filterMetricResult(sortedMetrics, cubeRequest.getMetricFilterGroup(), dataTypesMetrics);
-            endTime = System.currentTimeMillis() - startTime;
-            log.debug("Metrics filtered: " + endTime);
-
-
-            return getOlapCubeFilterMetricResponse(cubeRequest, sortedMetrics, metricResultFilters, sortedMeasures, sourceCube);
-
-        } else {
-
-            var columValues = sortedMeasures.getL().stream().skip(cubeRequest.getColumnsInterval().getFrom()).limit(cubeRequest.getColumnsInterval().getCount()).toList();
-            var rowValues = sortedMeasures.getR().stream().skip(cubeRequest.getRowsInterval().getFrom()).limit(cubeRequest.getRowsInterval().getCount()).toList();
-            sortedMetrics = getPageResult(sortedMetrics, new Pair<>(columValues, rowValues), cubeRequest);
-
-            return new OlapCubeResponse()
-                    .setColumnValues(columValues)
-                    .setRowValues(rowValues)
-                    .setMetricValues(getOlapMetricResponse(cubeRequest, sortedMetrics, sourceCube))
-                    .setTotalColumns(measures.getL().totalCount())
-                    .setTotalRows(measures.getR().totalCount());
-        }
-    }
-
     private FilterGroup fromNew(FilterGroupNew filterGroup) {
         return new FilterGroup(
                 filterGroup.getOperationType(),
@@ -939,5 +848,26 @@ public class OlapService {
                 .setMetrics(fromNew(request.getMetrics()))
                 .setFilterGroup(request.getFilterGroup() == null ? null : fromNew(request.getFilterGroup()))
                 .setMetricFilterGroup(request.getMetricFilterGroup());
+    }
+
+    private void checkMaxDataVolume(Pair<MeasureData, MeasureData> measures, List<MetricDefinition> metrics) {
+        final var numColumns = (long) (measures.getL().values().isEmpty() ? 1 : measures.getL().values().size());
+        final var numRows = (long) (measures.getR().values().isEmpty() ? 1 : measures.getR().values().size());
+        final var numMetrics = (long) (metrics.isEmpty() ? 1 : metrics.size());
+
+        if (numColumns * numRows * numMetrics > maxDataVolume) {
+            throw new OlapMaxDataVolumeExceeded(
+                    "Превышен допустимый объем обрабатываемых данных:" +
+                            "\nМаксимальный объем - " + maxDataVolume +
+                            "\nЗапрашиваемый объем - " + numColumns * numRows * numMetrics +
+                            "\nКол-во столбцов - " + numColumns +
+                            "\nКол-во строк - " + numRows +
+                            "\nКол-во метрик - " + numMetrics
+            );
+        }
+    }
+
+    private int calcTotalSize(MeasureData measure, int metricSize) {
+        return measure.values().size() == 1 && measure.values().contains(Collections.emptyList()) ? metricSize : measure.totalCount();
     }
 }

@@ -131,44 +131,6 @@ public class OlapController {
         semaphore = new Semaphore(maxDop);
     }
 
-    @Operation(summary = "Получение среза OLAP куба")
-    @ResponseStatus(HttpStatus.OK)
-    @PostMapping(value = OLAP_GET_CUBE,
-            consumes = APPLICATION_JSON_VALUE,
-            produces = APPLICATION_JSON_VALUE)
-    public ResponseBody<OlapCubeResponse> getCube(
-            @RequestBody
-            OlapCubeRequest request) throws JsonProcessingException, InterruptedException {
-        ResponseBody<OlapCubeResponse> response;
-        LogHelper.logInfoUserMethodStart();
-
-        LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_GET_CUBE, request, userService.getCurrentUserName()));
-
-        if (outService) {
-            response = ResponseBody.<OlapCubeResponse>builder()
-                    .success(true)
-                    .message("")
-                    .data(externalOlapService.getCube(request))
-                    .build();
-
-        } else {
-            semaphore.acquire();
-            try {
-                response = ResponseBody.<OlapCubeResponse>builder()
-                        .success(true)
-                        .message("")
-                        .data(olapService.getCube(request))
-                        .build();
-            } catch (Exception ex) {
-                throw new OlapException(START_ERROR_MASSAGE + ex.getMessage(), ex);
-            } finally {
-                semaphore.release();
-            }
-        }
-
-        LogHelper.logInfoUserMethodEnd();
-        return response;
-    }
 
     @Operation(summary = "Получение среза OLAP куба с производными полями")
     @ResponseStatus(HttpStatus.OK)
