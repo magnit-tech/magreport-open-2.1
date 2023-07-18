@@ -220,6 +220,8 @@ function PivotPanel(props){
     */
 
     function handleMetadataLoaded(data){
+        // setTableDataLoadStatus(1);
+
         let fieldIdToNameMapping = new Map();
         let derivedFieldIdToNameMapping = new Map();
         for(let v of data.fields){
@@ -307,6 +309,8 @@ function PivotPanel(props){
 
     // Получение текущей конфигурации
     function handleGetCurrentConfig(responseData, newConfiguration){
+        setTableDataLoadStatus(1);
+
         configOlap.current.createLists(responseData)
         
         if (responseData.olapConfig.data.length > 0) {
@@ -354,6 +358,8 @@ function PivotPanel(props){
 
     // Получение выбранной конфигурации
     function handleGetChoosenCurrentConfig(responseData, newConfiguration, configId){
+        setTableDataLoadStatus(1);
+
         configOlap.current.createLists(responseData)
         
         dataHub.olapController.getChoosenConfig(configId, ({ok, data}) => { if(ok) {
@@ -730,11 +736,11 @@ function PivotPanel(props){
         const { destination, source, draggableId } = result; // eslint-disable-line
 
         // Логирование события
-
+        
         pivotRegister({
             eventType: manipulationType === manipulationTypes.dragAndDrop ? eventTypes.fieldDragAndDrop : eventTypes.removeFieldByDelButton,
-            source: source.droppableId,
-            destination: destination.droppableId
+            source: source?.droppableId,
+            destination: destination?.droppableId
         });
 
         if (destination &&
@@ -1459,7 +1465,6 @@ function PivotPanel(props){
                                 if ((cc !== columnCount || rc !== rowCount) && tableDataLoadStatus !== 1){
                                     setColumnCount(cc);
                                     setRowCount(rc);
-                                    setTableDataLoadStatus(1);
 
                                     // if(!dataProviderRef.current.changeWindow(pivotConfiguration.columnFrom, cc, pivotConfiguration.rowFrom, rc)){
                                     //     setTableDataLoadStatus(1);
