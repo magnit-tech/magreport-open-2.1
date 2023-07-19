@@ -22,7 +22,8 @@ public class ExternalAuthMapper implements Mapper<ExternalAuth, AsmSecurityAddRe
                 .setDescription(source.getDescription())
                 .setIsDefaultDomain(source.getIsDefaultDomain() == null || source.getIsDefaultDomain())
                 .setRoleType(new RoleType(source.getRoleTypeId()))
-                .setSources(sourceMapper.from(source.getSecuritySources()));
+                .setSources(sourceMapper.from(source.getSecuritySources()))
+                .setIsActive(source.getIsActive() == null || source.getIsActive());
 
         externalAuth.getSources().forEach(externalAuthSource -> externalAuthSource.setExternalAuth(externalAuth));
 
