@@ -52,7 +52,8 @@ function FilterWrapper(props){
         return(
             <HierTree 
                 filterData={props.filterData} 
-                lastFilterValue={props.lastFilterValue} 
+                lastFilterValue={props.lastFilterValue}
+                externalFiltersValue = {props.externalFiltersValue}
                 toggleClearFilter={props.toggleClearFilters}
                 onChangeFilterValue={props.onChangeFilterValue}
                 strict={true}
@@ -63,7 +64,8 @@ function FilterWrapper(props){
         return(
             <HierTree 
                 filterData={props.filterData} 
-                lastFilterValue={props.lastFilterValue} 
+                lastFilterValue={props.lastFilterValue}
+                externalFiltersValue = {props.externalFiltersValue}
                 toggleClearFilter={props.toggleClearFilters}
                 onChangeFilterValue={props.onChangeFilterValue}
                 strict={false}
@@ -75,6 +77,7 @@ function FilterWrapper(props){
             <TokenInput 
                 filterData={props.filterData} 
                 lastFilterValue={props.lastFilterValue} 
+                externalFiltersValue = {props.externalFiltersValue}
                 toggleClearFilter={props.toggleClearFilters}
                 onChangeFilterValue={props.onChangeFilterValue}
             />
@@ -118,6 +121,7 @@ function FilterWrapper(props){
             <TupleList
                 filterData={props.filterData} 
                 lastFilterValue={props.lastFilterValue} 
+                externalFiltersValue = {props.externalFiltersValue}
                 toggleClearFilter={props.toggleClearFilters}
                 onChangeFilterValue={props.onChangeFilterValue}
                 unbounded = {true}

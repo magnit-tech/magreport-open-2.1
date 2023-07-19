@@ -48,8 +48,9 @@ export default function  TokenInput(props){
     const [openAsyncEntity, setOpenAsyncEntity] = React.useState(false);
     const [optionsAsyncEntity, setOptionsAsyncEntity] = React.useState([]);
     const defaultInputValues = useRef([]);
+
     useEffect(() => {
-        if (defaultInputValues.current.length === 0){
+        if (!props.externalFiltersValue && defaultInputValues.current.length === 0){
             defaultInputValues.current = getInputValuesFromLastValueAndSetNewParameters(props.lastFilterValue, props.filterData.maxCountItems);
         }
     }, []) // eslint-disable-line
