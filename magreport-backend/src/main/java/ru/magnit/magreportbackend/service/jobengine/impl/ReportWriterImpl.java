@@ -59,14 +59,8 @@ public class ReportWriterImpl implements ReportWriter {
             fileWriter.create(schema, file);
 
             var waitTime = 0L;
-            var waitCache = System.currentTimeMillis();
             var firstRow = true;
             while (true) {
-
-                if (System.currentTimeMillis() - waitCache > waitTimeWriteAvro) {
-                    errorDescription = "Превышено максимально допустимое ожидание записи avro файла";
-                    throw new ReportExportException(errorDescription);
-                }
 
                 var cacheRow = writerData.cache().poll();
                 if (cacheRow == null) {
@@ -92,8 +86,6 @@ public class ReportWriterImpl implements ReportWriter {
                         errorDescription = "Превышено максимально допустимое количество строк отчета:" + maxRows;
                         throw new ReportExportException(errorDescription);
                     }
-
-                    waitCache = System.currentTimeMillis();
                 }
             }
             log.debug("Total time of writer waiting reader (jobId:" + writerData.jobId() + "): " + waitTime / 1000.0);

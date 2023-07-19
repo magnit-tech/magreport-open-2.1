@@ -14,4 +14,4 @@ WHERE
     </#if><#--
 --></#list>
 GROUP BY
-${idField().fieldName},${codeField().fieldName},  <#list nameFields() as nameField > <#if nameField.showField > ${nameField.fieldName}<#sep>,</#if></#list>;
+1, 2, <#list nameFields() as nameField > <#if nameField.showField > ${nameFields().indexOf(nameField) + 3}<#sep>,</#if></#list>;
