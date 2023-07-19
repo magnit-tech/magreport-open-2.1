@@ -61,7 +61,6 @@ export default function FilterValues() {
 
         arr.forEach((filter) => {
             if(filter.filterCode && filter.filterType) {
-                console.log(filter.operationType);
                 switch(filter.filterType) {
                     case "VALUE_LIST":
                        resultParams.push(`"${filter.filterCode}":{"operationType":"${filter.operationType === 'IS_IN_LIST' ? 'IN_LIST' : 'NOT_IN_LIST'}","value":"[${filter.parameters[0].values.map((item) => item.value)}]"}`);
@@ -89,16 +88,11 @@ export default function FilterValues() {
 
     this.getExternalFiltersURL = () => {
         const globalUrl = new URL(document.location);
-        const params = globalUrl.searchParams;
 
         let resultUrl = globalUrl.origin + globalUrl.pathname
         let externalFiltersParams = this.getParameters().length > 0 ? this.getExternalFiltersParams(this.getParameters()) : ''
-        
-        if (params.get("jobId")) {
-            resultUrl += `?jobId=${params.get("jobId")}${externalFiltersParams ? `&externalFiltersValue={${externalFiltersParams}}` : ''}`
-        } else {
-            resultUrl += `${externalFiltersParams ? `?externalFiltersValue={${externalFiltersParams}}` : ''}`
-        }
+
+        resultUrl += `${externalFiltersParams ? `?externalFiltersValue={${externalFiltersParams}}` : ''}`
 
         return encodeURI(resultUrl)
     }

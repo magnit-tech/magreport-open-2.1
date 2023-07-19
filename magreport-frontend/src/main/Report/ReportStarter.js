@@ -310,7 +310,6 @@ export default function ReportStarter(props){
                                             <IconButton color="primary" onClick={handleCopyExternalFilters}>
                                                 <FileCopyIcon className={classes.iconButton}></FileCopyIcon>
                                             </IconButton>
-                                            {/* <Button variant="contained" color="primary" size = "small" className={classes.filterButton} onClick={handleCancel}> <FileCopyIcon className={classes.iconButton}></FileCopyIcon> </Button> */}
                                         </Tooltip>
                                     </div>
                                     
