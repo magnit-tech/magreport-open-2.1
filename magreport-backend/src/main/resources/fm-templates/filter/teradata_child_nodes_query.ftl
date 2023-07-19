@@ -16,5 +16,4 @@ FROM ${schemaName()}.${tableName()}
         <#sep> AND </#sep>
     </#list>
 </#if>
-GROUP BY
-${idFieldName()}, ${nameFieldName()};
+GROUP BY 1,2;

@@ -14,6 +14,6 @@ ${filter().getFieldNameByFieldId(getFieldId())} IN (<#--
 -->
 GROUP BY
 <#list filter().fields() as field><#--
--->    ${field.fieldName()}<#sep>,</#sep>
+-->    ${filter().fields().indexOf(field)}<#sep>,</#sep>
 </#list><#--
 -->
