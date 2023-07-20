@@ -237,6 +237,7 @@ function PivotPanel(props){
         newConfiguration.create({}, data);
 
         const configId = searchParams.get('configId')
+        
 
         if(configId) {
             // Загрузка определенной конфигурации
@@ -344,11 +345,12 @@ function PivotPanel(props){
                     setOtherDerivedFields(otherDeriverdFields)
     
                 } else {
+                    setTableDataLoadStatus(0)
                     enqueueSnackbar('Не удалось загрузить конфигурацию. Поля в конфигурации не соответсвуют отчету', {variant : "error"});
                 }
             })
-
-
+        } else {
+            setTimeout(() => setTableDataLoadStatus(0), 1000)
         }
 
         setSearchParams({view: 'pivot'})
@@ -362,7 +364,8 @@ function PivotPanel(props){
 
         configOlap.current.createLists(responseData)
         
-        dataHub.olapController.getChoosenConfig(configId, ({ok, data}) => { if(ok) {
+        dataHub.olapController.getChoosenConfig(configId, ({ok, data}) => { 
+            if(ok) {
             const configData = JSON.parse(data.olapConfig.data),
                     { columnFrom, columnCount, rowFrom, rowCount } = configData
 
@@ -395,11 +398,13 @@ function PivotPanel(props){
                         handleSetConfigDialog('closeConfigDialog')
                         enqueueSnackbar('Конфигурация "' + data.olapConfig.name + '" успешно загружена' , {variant : "success"});
                     } else {
+                        setTableDataLoadStatus(0)
                         enqueueSnackbar('Не удалось загрузить конфигурацию "' + data.olapConfig.name + '". Некорректные данные.', {variant : "error"});
                     }
                 })
 
             } else {
+                setTableDataLoadStatus(0)
                 enqueueSnackbar('Не удалось загрузить конфигурацию. Поля в конфигурации не соответсвуют отчету', {variant : "error"});
             }
         }})
