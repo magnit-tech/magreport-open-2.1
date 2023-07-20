@@ -14,6 +14,6 @@ ${filter().getFieldNameByFieldId(getFieldId())} IN (<#--
 -->
 GROUP BY
 <#list filter().fields() as field><#--
--->    ${filter().fields().indexOf(field)}<#sep>,</#sep>
+-->    ${filter().fields().indexOf(field) + 1}<#sep>,</#sep>
 </#list><#--
 -->
