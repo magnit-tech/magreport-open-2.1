@@ -419,7 +419,11 @@ public class ReportJobService {
 
     @SuppressWarnings("java:S3776")
     private boolean isConformToFilter(ReportJobResponse source, ReportJobHistoryRequestFilter filter) {
-        if (filter.getFrom() == null && filter.getTo() == null && (filter.getStatuses() == null || filter.getStatuses().isEmpty()) && (filter.getUsers() == null || filter.getUsers().isEmpty()))
+        if ( filter.getFrom() == null && filter.getTo() == null &&
+                (filter.getStatuses() == null || filter.getStatuses().isEmpty()) &&
+                (filter.getUsers() == null || filter.getUsers().isEmpty()) &&
+                (filter.getReportIds() == null || filter.getReportIds().isEmpty())
+        )
             return true;
         var result = filter.getFrom() == null || (filter.getFrom().isBefore(source.getCreated()) || filter.getFrom().isEqual(source.getCreated()));
         if (filter.getTo() != null && !(filter.getTo().isAfter(source.getCreated()) || filter.getTo().isEqual(source.getCreated())))
