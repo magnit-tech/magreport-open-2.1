@@ -212,15 +212,11 @@ function ASMDesigner(props) {
         }
     }
 
-    function handleCancelButtonClick(e) {
+    function handleCancelButtonClick() {
         const handleAlertDialogAction = (isOk) => {
             if (isOk) {
-                if (!id) {
-                    props.actionAsmListShow();
-                    navigate('/ui/asm')
-                } else {
-                    navigate(`/ui/asm/view/${id}`)
-                }
+                props.actionAsmListShow();
+                navigate('/ui/asm')
             }
             props.hideAlertDialog();
         };
