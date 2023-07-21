@@ -101,9 +101,10 @@ public class LdapService {
     public Map<String, Pair<String, String>> getUserInfo(List<UserResponse> users) {
         var batch = new HashMap<String, ArrayList<String>>();
         var results = new HashMap<String, Pair<String, String>>();
+
         users.forEach(user -> {
             final var ldapProperties = authConfig.getDomainProperties(user.getDomain().name());
-            if (Objects.isNull(ldapProperties)) return;
+            if (Objects.isNull(ldapProperties) || !user.getName().matches("^[a-zA-Z0-9._-]{3,}$")) return;
 
             batch.putIfAbsent(user.getDomain().name(), new ArrayList<>());
             if (batch.get(user.getDomain().name()).size() < ldapProperties.getBatchSize())
@@ -115,7 +116,6 @@ public class LdapService {
         });
 
         batch.forEach((key, value) -> results.putAll(searchInLdap(key, value)));
-
         return results;
     }
 
@@ -132,30 +132,30 @@ public class LdapService {
         return Arrays.stream(ldapProperties.getUserPaths())
 
                 .map(path -> ldapTemplate.search(
-                            path,
-                            filter,
-                            SearchControls.SUBTREE_SCOPE,
-                            (AttributesMapper<Triple<String, String, String>>) attributes -> {
-                                var result = new Triple<String, String, String>();
-                                result.setA(domainName + "\\" + attributes.get(ldapProperties.getLoginParamName()).get().toString().toLowerCase());
-                                try {
-                                    result.setB(String.valueOf(attributes.get(ldapProperties.getMailParamName()).get()));
-                                } catch (Exception ex) {
-                                    result.setB("");
-                                }
-                                try {
-                                    result.setC(String.valueOf(attributes.get(ldapProperties.getFullNameParamName()).get()));
-                                } catch (Exception ex) {
-                                    result.setC("");
-                                }
-                                return result;
-                            }))
+                        path,
+                        filter,
+                        SearchControls.SUBTREE_SCOPE,
+                        (AttributesMapper<Triple<String, String, String>>) attributes -> {
+                            var result = new Triple<String, String, String>();
+                            result.setA(domainName + "\\" + attributes.get(ldapProperties.getLoginParamName()).get().toString().toLowerCase());
+                            try {
+                                result.setB(String.valueOf(attributes.get(ldapProperties.getMailParamName()).get()));
+                            } catch (Exception ex) {
+                                result.setB("");
+                            }
+                            try {
+                                result.setC(String.valueOf(attributes.get(ldapProperties.getFullNameParamName()).get()));
+                            } catch (Exception ex) {
+                                result.setC("");
+                            }
+                            return result;
+                        }))
                 .flatMap(Collection::stream)
                 .collect(
                         Collectors.toMap(
                                 Triple::getA,
                                 t -> new Pair<String, String>().setL(t.getB()).setR(t.getC()),
                                 (pair1, pair2) -> pair1
-                 ));
+                        ));
     }
 }
