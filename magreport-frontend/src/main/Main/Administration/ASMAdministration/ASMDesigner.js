@@ -146,7 +146,6 @@ function ASMDesigner(props) {
     const sourceItems = [];
 
     const [uploading, setUploading] = useState(false);
-    //const [ASMId, setASMId] = useState(props.state.data.id)
 
     function handleRoleTypesLoaded(data) {
         setRoleTypes(data);
@@ -156,8 +155,7 @@ function ASMDesigner(props) {
         enqueueSnackbar(`Ошибка при загрузке типов ролей: ${error}`, {variant: "error"});
     }
 
-    function handleSave(needExit=true /*e*/) {
-        //console.log(data);
+    function handleSave(needExit = true) {
         const hasErrors = selectHasErrors(props.state);
 
         if (hasErrors) {
@@ -226,9 +224,10 @@ function ASMDesigner(props) {
     securitySources.forEach((securitySource, index) => {
         sourceItems.push(<ExternalSecuritySource key={index} index={index} />);
     })
-    function handleTabChange(newValue){
-        handleSave(false);
-    }
+    
+    // function handleTabChange(newValue){
+    //     handleSave(false);
+    // }
 
     let tabs = []
     let progressClasses = classes.progress;
@@ -303,7 +302,7 @@ function ASMDesigner(props) {
                 >
                     <PageTabs
                         tabsdata={tabs}
-                        onTabChange={handleTabChange}
+                        // onTabChange={handleTabChange}
                         pageName={id ? "Редактирование объекта ASM: " + name : "Создание объекта ASM"}
                     />
                 </DataLoader>
