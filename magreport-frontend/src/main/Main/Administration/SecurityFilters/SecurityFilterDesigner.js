@@ -356,7 +356,6 @@ export default function SecurityFilterDesigner(){
         <DesignerPage 
             onSaveClick={handleSave}
             onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/securityFilters/${folderId}`)}
-            //name = {pagename}
         >
             <DesignerTextField
                 label = {fieldLabels.securityFilterName}
@@ -395,7 +394,7 @@ export default function SecurityFilterDesigner(){
         tabcontent: uploading ? <CircularProgress className={classes.progress}/>:
         <DesignerPage
             onSaveClick={handleSave}
-            onCancelClick={() => () => location.state ? navigate(location.state) : navigate(`/ui/securityFilters/${folderId}`)}
+            onCancelClick={() => location.state ? navigate(location.state) : navigate(`/ui/securityFilters/${folderId}`)}
         >
             <div style={{marginTop: '8px'}}>
             {data.dataSets.map((item, index) => 
