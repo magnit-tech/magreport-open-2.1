@@ -10,6 +10,7 @@ import ru.magnit.magreportbackend.dto.backup.folder.FolderReportBackupTuple;
 import ru.magnit.magreportbackend.dto.backup.report.ReportBackupTuple;
 import ru.magnit.magreportbackend.dto.backup.report.ReportFieldBackupTuple;
 import ru.magnit.magreportbackend.dto.backup.report.ReportFolderBackupTuple;
+import ru.magnit.magreportbackend.dto.backup.user.UserTuple;
 import ru.magnit.magreportbackend.dto.response.dataset.DataSetTypeResponse;
 import ru.magnit.magreportbackend.dto.response.report.PivotFieldTypeResponse;
 
@@ -27,6 +28,7 @@ public record DataGovernanceResponse(
     List<ReportFieldBackupTuple> reportFields,
     List<ReportFolderBackupTuple> devReportFolders,
     List<FolderReportBackupTuple> reportFolderLinks,
-    List<FolderBackupTuple> reportFolders
+    List<FolderBackupTuple> reportFolders,
+    List<UserTuple> users
     ) {
 }
