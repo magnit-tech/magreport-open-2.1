@@ -31,4 +31,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "select u.* from REPOSITORY.USERS u where USER_STATUS_ID != :statusId ",nativeQuery = true)
     List<User> getUserByStatusIsNotEquals(@Param("statusId") Long statusId);
 
+    @Query(value = "SELECT U FROM USERS U WHERE U IN " +
+            "(SELECT DISTINCT D.user FROM DATASET D) OR " +
+            "U IN (SELECT DISTINCT R.user FROM REPORT R)")
+    List<User> getAuthoringUsers();
 }
