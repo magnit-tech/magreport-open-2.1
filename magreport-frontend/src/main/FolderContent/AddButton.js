@@ -41,10 +41,11 @@ export default function AddButton(props){
                 open={Boolean(anchorEl)}
                 onClose={handleMenuClose}
             >
-                {props.showCreateFolder && <MenuItem onClick={handleAddFolder}>Добавить каталог</MenuItem>}
-                {props.showCreateItem && <MenuItem onClick={handleAddItemClick}>Добавить {props.itemName}</MenuItem>}
+                {props.showCreateFolder && <MenuItem id = "addFolder" onClick={handleAddFolder}>Добавить каталог</MenuItem>}
+                {props.showCreateItem && <MenuItem id = "addItem" onClick={handleAddItemClick}>Добавить {props.itemName}</MenuItem>}
             </Menu>
-            <Fab      
+            <Fab
+                id = "addButton"
                 size = "medium"
                 color="primary" 
                 aria-label="add"
