@@ -108,7 +108,7 @@ export default function(props){
     }
 
     function printMetricNamesRow(tableRow) {
-        for(let j = 0; j < props.tableData.columnDimensionsValues.length; j++){
+        for(let j = 0; j < Math.max(props.tableData.columnDimensionsValues.length, 1); j++){
             for(let mIndex in props.tableData.metrics){
                 let m = props.tableData.metrics[mIndex];
                 tableRow.push({
@@ -131,7 +131,7 @@ export default function(props){
             colSpan : 1,
             rowSpan : 1
         });
-        for(let j = 0; j < props.tableData.columnDimensionsValues.length; j++){
+        for(let j = 0; j < Math.max(props.tableData.columnDimensionsValues.length, 1); j++){
             tableRow.push({
                 fieldId : props.pivotConfiguration.fieldsLists.metricFields[metricNum]?.fieldId,
                 index: metricNum,
@@ -153,7 +153,7 @@ export default function(props){
     }
 
     function printAllMetricInColumnsValues(tableRow, rowNum) {
-        for(let j = 0; j < props.tableData.columnDimensionsValues.length; j++){
+        for(let j = 0; j < Math.max(props.tableData.columnDimensionsValues.length, 1); j++){
             for(let m = 0; m < props.tableData.metrics.length; m++){
                 
                 tableRow.push({
@@ -305,6 +305,7 @@ export default function(props){
             tableRows.push([]);
             rowNum++;
             printRowDimensionNames(tableRows[rowNum]);
+
             // Далее строки со значениями измерений по столбцам в начале, затем название метрики и затем значения данной метрики
             for(let i = 0; i < props.tableData.rowDimensionsValues.length; i++){
                 tableRows.push([]);
