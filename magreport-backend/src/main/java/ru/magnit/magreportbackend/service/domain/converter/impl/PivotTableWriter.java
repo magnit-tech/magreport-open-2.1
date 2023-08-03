@@ -400,26 +400,26 @@ public class PivotTableWriter implements Writer {
             shiftRowCount = cubeData.getColumnValues().get(0).size();
             shiftColCount = cubeData.getRowValues().get(0).isEmpty() ? 1 : cubeData.getRowValues().get(0).size();
 
-            totalColumn = shiftColCount + cubeData.getTotalColumns() * (cubeData.getMetricValues().isEmpty() ? 1 : cubeData.getMetricValues().size());
-            totalRow = shiftRowCount + cubeData.getTotalRows() + 1;
+            totalColumn = shiftColCount + (cubeData.getTotalColumns() == 0 ? 1 : cubeData.getTotalColumns())* (cubeData.getMetricValues().isEmpty() ? 1 : cubeData.getMetricValues().size());
+            totalRow = shiftRowCount + (cubeData.getTotalRows() == 0 ? cubeData.getMetricValues().size() : cubeData.getTotalRows() + 1);
         } else {
             shiftRowCount = cubeData.getColumnValues().get(0).isEmpty() ? 1 : cubeData.getColumnValues().get(0).size();
             shiftColCount = cubeData.getRowValues().get(0).size();
 
-            totalColumn = shiftColCount + cubeData.getTotalColumns() + 1;
-            totalRow = shiftRowCount + cubeData.getTotalRows() * (cubeData.getMetricValues().isEmpty() ? 1 : cubeData.getMetricValues().size());
+            totalColumn = shiftColCount + (cubeData.getTotalColumns() == 0 ? cubeData.getMetricValues().size()  :  cubeData.getTotalColumns() + 1);
+            totalRow = shiftRowCount + (cubeData.getTotalRows() == 0 ? 1 : cubeData.getTotalRows()) * (cubeData.getMetricValues().isEmpty() ? 1 : cubeData.getMetricValues().size());
         }
 
-        if (cubeData.getRowValues().get(0).isEmpty() && cubeData.getColumnValues().get(0).isEmpty() && cubeData.getMetricValues().isEmpty())
+        if (cubeData.getTotalRows() == 0 && cubeData.getTotalColumns() == 0 && cubeData.getMetricValues().isEmpty())
             totalColumn = totalRow = shiftRowCount = shiftColCount = 0;
 
 
-        if (cubeData.getRowValues().get(0).isEmpty() && cubeData.getMetricValues().isEmpty()) {
+        if (cubeData.getTotalRows() == 0 && cubeData.getMetricValues().isEmpty()) {
             shiftColCount = 0;
             totalRow = shiftRowCount;
         }
 
-        if (cubeData.getColumnValues().get(0).isEmpty() && cubeData.getMetricValues().isEmpty())
+        if (cubeData.getTotalColumns() == 0 && cubeData.getMetricValues().isEmpty())
             totalColumn = shiftColCount;
 
     }
