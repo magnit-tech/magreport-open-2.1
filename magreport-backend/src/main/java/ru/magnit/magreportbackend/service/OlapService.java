@@ -184,8 +184,8 @@ public class OlapService {
                     .setColumnValues(columValues)
                     .setRowValues(rowValues)
                     .setMetricValues(getOlapMetricResponse(cubeRequest, sortedMetrics, sourceCube))
-                    .setTotalColumns(calcTotalSize(measures.getL(), request.getMetrics().size()))
-                    .setTotalRows(calcTotalSize(measures.getR(), request.getMetrics().size()));
+                    .setTotalColumns(measures.getL().totalCount())
+                    .setTotalRows(measures.getR().totalCount());
         }
     }
 
@@ -865,9 +865,5 @@ public class OlapService {
                             "\nКол-во метрик - " + numMetrics
             );
         }
-    }
-
-    private int calcTotalSize(MeasureData measure, int metricSize) {
-        return measure.values().size() == 1 && measure.values().contains(Collections.emptyList()) ? metricSize : measure.totalCount();
     }
 }
