@@ -66,7 +66,6 @@ import ru.magnit.magreportbackend.repository.FilterInstanceFolderRepository;
 import ru.magnit.magreportbackend.repository.FilterInstanceFolderRoleRepository;
 import ru.magnit.magreportbackend.repository.FilterInstanceRepository;
 import ru.magnit.magreportbackend.service.jobengine.filter.FilterQueryExecutor;
-import ru.magnit.magreportbackend.util.Pair;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -77,7 +76,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -249,14 +247,14 @@ public class FilterInstanceDomainService {
     @Transactional
     public FilterInstanceResponse getFilterInstance(Long id) {
         var filterInstance = filterRepository.getReferenceById(id);
-        var response =  filterInstanceResponseMapper.from(filterInstance);
+        var response = filterInstanceResponseMapper.from(filterInstance);
         response.setPath(getPathToFolder(filterInstance.getFolder().getId()));
 
         return response;
     }
 
     @Transactional
-    public Long editFilterInstance(FilterInstanceAddRequest request, FilterTemplateResponse filterTemplate) {
+    public Long editFilterInstance(FilterInstanceAddRequest request) {
 
         var filterInstance = filterRepository.getReferenceById(request.getId());
         checkDataSetTypeProcedure(filterInstance.getDataSet());
@@ -264,7 +262,6 @@ public class FilterInstanceDomainService {
 
         if (!filterInstance.getCode().equals(request.getCode()) || filterInstance.getCode().equals(""))
             checkCodeUnique(request.getCode());
-        request.getFields().forEach(field -> field.setTemplateFieldId(Objects.requireNonNull(filterTemplate.getFields().stream().filter(o -> o.getType() == field.getType()).findFirst().orElse(null)).getId()));
         filterInstance.setFields(checkEditFilterInstance(request));
         filterInstanceMerger.merge(filterInstance, request);
         return request.getId();
@@ -435,11 +432,11 @@ public class FilterInstanceDomainService {
                 folderCopy = copyFolder(originalFolder, destFolder, user, null);
 
             if (Boolean.TRUE.equals(request.isInheritParentRights())) {
-                folderCopy.setFolderRoles(mergeFolderRoles(folderCopy.getFolderRoles(),destFolderRoles));
+                folderCopy.setFolderRoles(mergeFolderRoles(folderCopy.getFolderRoles(), destFolderRoles));
                 folderCopy.getFolderRoles().forEach(fr -> fr.setFolder(folderCopy));
             }
 
-            Long newFolderId =  folderRepository.save(folderCopy).getId();
+            Long newFolderId = folderRepository.save(folderCopy).getId();
             folderCopyIds.add(newFolderId);
         });
         return folderCopyIds;
@@ -558,18 +555,13 @@ public class FilterInstanceDomainService {
         var filterInstance = filterRepository.getReferenceById(request.getId());
         var mapCurrentFields = filterInstance.getFields()
                 .stream()
-                .collect(Collectors.toMap(f -> new Pair<>(f.getTemplateField().getType().getId(), f.getLevel()), field -> field));
-
-        var mapNewFields = request.getFields()
-                .stream()
-                .collect(Collectors.toMap(f -> new Pair<>((long) f.getType().ordinal(), f.getLevel()), f -> f));
+                .collect(Collectors.toMap(BaseEntity::getId, field -> field));
 
         var filterUseFlag = filterInstance.getSecurityFilters().isEmpty() && filterInstance.getFilterReports().isEmpty();
-        var flagEqualsFields = checkEqualsEditFilterInstance(mapCurrentFields.keySet(), mapNewFields.keySet());
-        var flagCheckDatasets = checkDatasetEquals(mapCurrentFields, mapNewFields);
-        var result = updateFields(mapCurrentFields, mapNewFields, filterUseFlag);
+        var flagCheckDatasets = checkDatasetEquals(mapCurrentFields, request.getFields());
+        var result = updateFields(mapCurrentFields,  request.getFields(), filterUseFlag);
 
-        return getResultCheckEdit(flagEqualsFields && flagCheckDatasets, result, filterUseFlag);
+        return getResultCheckEdit(flagCheckDatasets, result, filterUseFlag);
     }
 
     private List<FilterInstanceField> getResultCheckEdit(boolean status, List<FilterInstanceField> result, boolean flagUsed) {
@@ -580,46 +572,43 @@ public class FilterInstanceDomainService {
             throw new InvalidParametersException("Нельзя изменить состав полей данного фильтра, т.к. он используется в отчетах и/или фильтрах безопасности.");
     }
 
-    private boolean checkDatasetEquals(Map<Pair<Long, Long>, FilterInstanceField> currentFields, Map<Pair<Long, Long>, FilterInstanceFieldAddRequest> newFields) {
+    private boolean checkDatasetEquals(Map<Long, FilterInstanceField> currentFields, List<FilterInstanceFieldAddRequest> newFields) {
 
         var flag = new AtomicBoolean(true);
 
-        newFields.keySet()
+        newFields
                 .stream()
-                .filter(currentFields::containsKey)
-                .forEach(key -> {
-                    var currentField = currentFields.get(key);
-                    var newField = newFields.get(key);
+                .filter(newField -> currentFields.containsKey(newField.getId()))
+                .forEach(newField -> {
+            var currentField = currentFields.get(newField.getId());
 
-                    var currentDataSetId = currentField.getDataSetField() == null ? -1L : currentField.getDataSetField().getId();
-                    var newDataSetId = newField.getDataSetFieldId() == null ? -1L : newField.getDataSetFieldId();
+            var currentDataSetId = currentField.getDataSetField() == null ? -1L : currentField.getDataSetField().getId();
+            var newDataSetId = newField.getDataSetFieldId() == null ? -1L : newField.getDataSetFieldId();
 
-                    if (currentDataSetId != newDataSetId) {
-                        flag.set(false);
-                    }
-                });
+            if (currentDataSetId != newDataSetId) {
+                flag.set(false);
+            }
+        });
 
         return flag.get();
     }
 
-    private boolean checkEqualsEditFilterInstance(Set<Pair<Long, Long>> currentMapKey, Set<Pair<Long, Long>> newMapKey) {
-        return currentMapKey.equals(newMapKey);
-    }
-
-    private List<FilterInstanceField> updateFields(Map<Pair<Long, Long>, FilterInstanceField> currentFields, Map<Pair<Long, Long>, FilterInstanceFieldAddRequest> newFields, boolean filterUseFlag) {
+    private List<FilterInstanceField> updateFields(Map<Long, FilterInstanceField> currentFields, List<FilterInstanceFieldAddRequest> newFields, boolean filterUseFlag) {
 
         var result = new ArrayList<FilterInstanceField>();
-        newFields.keySet().forEach(key -> {
-            var newField = newFields.get(key);
-            if (currentFields.containsKey(key)) {
+        newFields.forEach(newField -> {
+
+            if (newField.getId() != null && currentFields.containsKey(newField.getId())) {
                 var currentField =
-                        currentFields.get(key)
+                        currentFields.get(newField.getId())
                                 .setName(newField.getName())
                                 .setDescription(newField.getDescription())
                                 .setDataSetField(newField.getDataSetFieldId() == null ? null : new DataSetField(newField.getDataSetFieldId()))
-                                .setExpand(newField.getExpand() != null && newField.getExpand());
+                                .setExpand(newField.getExpand() != null && newField.getExpand())
+                                .setShowField(newField.getShowField())
+                                .setSearchByField(newField.getSearchByField());
                 result.add(currentField);
-                currentFields.remove(key);
+                currentFields.remove(newField.getId());
             } else
                 result.add(filterInstanceFieldMapper.from(newField));
         });
