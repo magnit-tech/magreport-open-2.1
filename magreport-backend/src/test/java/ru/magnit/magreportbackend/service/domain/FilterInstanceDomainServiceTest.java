@@ -374,28 +374,24 @@ class FilterInstanceDomainServiceTest {
     @Test
     void editFilterInstance() {
 
-        var template = new FilterTemplateResponse().setFields(Arrays.asList(
-                new FilterTemplateFieldResponse()
-                        .setId(ID)
-                        .setType(FilterFieldTypeEnum.ID_FIELD),
-                new FilterTemplateFieldResponse()
-                        .setId(ID)
-                        .setType(FilterFieldTypeEnum.CODE_FIELD)));
-
         var request = getFilterInstanceAddRequest();
 
         when(filterInstanceRepository.getReferenceById(any())).thenReturn(getFilterInstance(getDataset()));
 
-        assertThrows(InvalidParametersException.class, () -> domainService.editFilterInstance(request, template));
+        assertThrows(InvalidParametersException.class, () -> domainService.editFilterInstance(request));
 
         when(filterInstanceFieldMapper.from(any(FilterInstanceFieldAddRequest.class))).thenReturn(new FilterInstanceField());
 
         request.setCode("1234");
 
-        assertNotNull(domainService.editFilterInstance(request, template));
+        assertNotNull(domainService.editFilterInstance(request));
+    }
 
+    @Test
+    void editFilterInstanceException() {
         when(filterInstanceRepository.getReferenceById(any())).thenReturn(getFilterInstance(getDataset()).setSecurityFilters(Collections.singletonList(new SecurityFilter())));
-        assertThrows(InvalidParametersException.class, () -> domainService.editFilterInstance(request, template));
+        var request = getFilterInstanceAddRequest();
+        assertThrows(InvalidParametersException.class, () -> domainService.editFilterInstance(request));
     }
 
     @Test
