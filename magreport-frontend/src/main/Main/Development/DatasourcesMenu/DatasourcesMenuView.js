@@ -54,7 +54,7 @@ function DatasourcesMenuView(props){
     }, [searchParams, state.needReload]) // eslint-disable-line
 
     const folderItemsType = SidebarItems.development.subItems.datasources.folderItemType;
-    const showAddBtn = (searchParams.get("isRecursive") === 'true' || !id) ? false : true;
+    const showAddBtn = (searchParams.get("isRecursive") === 'true' ) ? false : true;
 
 
     function handleFolderClick(folderId) {

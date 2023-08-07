@@ -33,7 +33,7 @@ function ReportsMenuView(props){
 
     const [reload, setReload] = useState({needReload : state.needReload});
     const folderItemsType = SidebarItems.reports.folderItemType;
-    const showAddBtn = (searchParams.get("isRecursive") === 'true' || !id) ? false : true
+    const showAddBtn = (searchParams.get("isRecursive") === 'true' ) ? false : true
     
     useEffect(() => {
         setReload({needReload: true})
