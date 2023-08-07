@@ -82,14 +82,14 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
         ) {
             while (resultSet.next()) {
                 var tuple = new Tuple();
-                if (Boolean.TRUE.equals(requestData.idField().getShowField()))
+                if (requestData.idField().getShowField() == null || Boolean.TRUE.equals(requestData.idField().getShowField()))
                     tuple.getValues().add(new TupleValue(requestData.idField().getFieldId(), resultSet.getString(1)));
-                if (Boolean.TRUE.equals(requestData.codeField().getShowField()))
+                if (requestData.codeField().getShowField() == null || Boolean.TRUE.equals(requestData.codeField().getShowField()))
                     tuple.getValues().add(new TupleValue(requestData.codeField().getFieldId(), resultSet.getString(2)));
                 int columnIndex = 3;
 
                 for (FilterFieldRequestData f : requestData.nameFields()) {
-                    if (Boolean.TRUE.equals(f.getShowField())) {
+                    if (f.getShowField() == null || Boolean.TRUE.equals(f.getShowField())) {
                         tuple.getValues().add(new TupleValue(f.getFieldId(), resultSet.getString(columnIndex)));
                         columnIndex += 1;
                     }
