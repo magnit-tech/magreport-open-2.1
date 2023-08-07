@@ -110,19 +110,19 @@ export default function  TokenInput(props){
         } else if(filterValues && filterValues.parameters){
             for(let p of filterValues.parameters){
                 let idValue = -1;
-                let nameValue = '???';
+                let nameValue =''
                 for(let v of p.values){
                     if(v.fieldId === codeFieldId){
                         idValue = v.value;
                         valuesIds.push(v.value);
                     }
                     else if(v.fieldId === nameFieldId){
-                        nameValue = v.value;
+                        nameValue = nameValue + v.value;
                     }
                 }
                 values.push({
                     value: idValue,
-                    label: '(' + idValue + ') ' + nameValue
+                    label: nameValue === '' ? '???' : nameValue
                 });
             }
         }
@@ -161,18 +161,20 @@ export default function  TokenInput(props){
             for (let element of magrepResponse.data.tuples){
                 let code
                 let name
+                let fullName = ''
                 for (let i of element.values){
                     if (i.fieldId === fieldIDs.CODE_FIELD){
                         code = i.value;
                     }
                     else if (i.fieldId === fieldIDs.NAME_FIELD){
                         name = i.value;
+                        fullName = fullName + i.value
                     };
                 };
 
                 arr.push({
-                    value: code,
-                    label: '(' + code + ') ' + name        
+                    value: name,
+                    label: fullName        
                 });
             };
             let sort_arr = arr.sort(

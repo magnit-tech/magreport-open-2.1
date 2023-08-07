@@ -4,6 +4,10 @@ import {useState, useRef} from 'react';
 // material-ui
 
 import Grid from '@material-ui/core/Grid';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import IconButton from '@material-ui/core/IconButton';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 
 // dataHub
 import dataHub from 'ajax/DataHub';
@@ -14,7 +18,7 @@ import {FolderItemTypes} from 'main/FolderContent/FolderItemTypes';
 import DesignerFolderItemPicker from '../../Designer/DesignerFolderItemPicker'
 import DesignerSelectField from '../../Designer/DesignerSelectField';
 import DesignerTextField from '../../Designer/DesignerTextField';
-import {convertTokenInputLocalToFilterData, convertTokenInputFilterToLocalData} from "./converters";
+import {addTokenInputNewNameField, convertTokenInputLocalToFilterData, convertTokenInputFilterToLocalData} from "./converters";
 
 /**
  * @callback onChange
@@ -62,23 +66,22 @@ export default function TokenInputFields(props){
         handleChangeData();
     }
 
-    function handleChangeField(fieldName, value){
+    function handleChangeField(i, fieldName, value){
         let parts = fieldName.split('.');
-
         if(parts[1] === 'id'){
-            let oldDatasetFieldName = datasetFieldsNameMap.current.get(localData.datasetFields[parts[0]][parts[1]]);
+            let oldDatasetFieldName = datasetFieldsNameMap.current.get(localData.datasetFields[i][parts[1]]);
             let newDatasetFieldName = datasetFieldsNameMap.current.get(value);
-            let currentFieldName = localData.datasetFields[parts[0]].name;
-            let currentFieldDescription = localData.datasetFields[parts[0]].description;
+            let currentFieldName = localData.datasetFields[i].name;
+            let currentFieldDescription = localData.datasetFields[i].description;
             if(currentFieldName.trim() === '' || currentFieldName === oldDatasetFieldName){
-                localData.datasetFields[parts[0]].name = newDatasetFieldName;
+                localData.datasetFields[i].name = newDatasetFieldName;
             }
             if(currentFieldDescription.trim() === '' || currentFieldDescription === oldDatasetFieldName){
-                localData.datasetFields[parts[0]].description = newDatasetFieldName;
+                localData.datasetFields[i].description = newDatasetFieldName;
             }            
         }
-
-        localData.datasetFields[parts[0]][parts[1]] = value;
+        localData.datasetFields[i][parts[1]] = value;
+      
         handleChangeData();
     }
 
@@ -89,6 +92,86 @@ export default function TokenInputFields(props){
 
     function handleDataLoadFailed(message){
 
+    }
+
+    function handleAddNameField(){
+        let {dtsFlds, errFlds} = addTokenInputNewNameField(localData.datasetFields, errorFields)
+        localData.datasetFields = dtsFlds
+        errorFields = errFlds
+        handleChangeData()
+    }
+
+    let fieldsGrid = []
+    for (let i = 0; i < localData.datasetFields.length; i++){
+        let f = localData.datasetFields[i]
+        fieldsGrid.push(
+            <Grid container key = {i}>
+                <Grid item xs={3} style={{paddingRight: '16px'}}>
+                    <DesignerTextField
+                        key = { f.type + i}
+                        label = {"Название поля " + f.type}
+                        value = {f.name}
+                        fullWidth
+                        displayBlock
+                        onChange = {(value) => {handleChangeField(i, f.type + '.name',value)}}
+                        error = {errorFields.find(i=>i.type === f.type).name}
+                    />
+                </Grid>
+
+                <Grid item xs={3} style={{paddingRight: '16px'}}>
+                    <DesignerTextField
+                        label = {"Описание поля "+ f.type}
+                        value = {f.description}
+                        fullWidth
+                        displayBlock
+                        onChange = {(value) => {handleChangeField(i, f.type + '.description',value)}}
+                        error = {errorFields.find(i=>i.type === f.type).description}
+                    />
+                </Grid>                                          
+            
+                <Grid item xs={4}>
+                    <DesignerSelectField
+                        label = "Поле ID набора данных"
+                        data = {datasetData ? datasetData.fields : []}
+                        value = {f.id}
+                        fullWidth
+                        displayBlock
+                        onChange = {(value) => {handleChangeField(i, f.type + '.id',value)}}
+                        error = {errorFields.find(i=>i.type === f.type).id}
+                    />
+                </Grid>
+                
+                <Grid item xs={2}>
+                    {   f.type === "NAME_FIELD" &&
+                        <div style={{marginLeft: '16px'}}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox 
+                                        size = "small"
+                                        checked = {f.showField}
+                                        onChange={(e)=>handleChangeField(i, f.type + ".showField", e.target.checked)} 
+                                        name="show" 
+                                    />
+                                }
+                                label="Показывать"
+                            />
+
+                            <FormControlLabel
+                                control={
+                                    <Checkbox 
+                                        size = "small"
+                                        checked = {f.searchByField}
+                                        onChange={(e)=>handleChangeField(i, f.type + ".searchByField", e.target.checked)} 
+                                        name="search" 
+                                    />
+                                }
+                                label="Искать по полю"
+                            />
+                        </div>
+                    }
+                </Grid>
+            </Grid>
+        )
     }
 
     return(
@@ -112,81 +195,18 @@ export default function TokenInputFields(props){
                 />
 
                 {datasetData && 
-                <div>
-                    <Grid container>
-
-                        <Grid item xs={4} style={{paddingRight: '16px'}}>
-                            <DesignerTextField
-                                label = "Название поля ID"
-                                value = {localData.datasetFields.idField.name}
-                                fullWidth
-                                displayBlock
-                                onChange = {(value) => {handleChangeField('idField.name',value)}}
-                                error = {errorFields.idField.name}
-                            />
-                        </Grid>
-
-                        <Grid item xs={4} style={{paddingRight: '16px'}}>
-                            <DesignerTextField
-                                label = "Описание поля ID"
-                                value = {localData.datasetFields.idField.description}
-                                fullWidth
-                                displayBlock
-                                onChange = {(value) => {handleChangeField('idField.description',value)}}
-                                error = {errorFields.idField.description}
-                            />
-                        </Grid>                                          
-                        
-                        <Grid item xs={4}>
-                            <DesignerSelectField
-                                label = "Поле ID набора данных"
-                                data = {datasetData ? datasetData.fields : []}
-                                value = {localData.datasetFields.idField.id}
-                                fullWidth
-                                displayBlock
-                                onChange = {(value) => {handleChangeField('idField.id',value)}}
-                                error = {errorFields.idField.id}
-                            />
-                        </Grid>
-
-                    </Grid>
-
-                    <Grid container>
-                        <Grid item xs={4} style={{paddingRight: '16px'}}>
-                            <DesignerTextField
-                                label = "Название поля NAME"
-                                value = {localData.datasetFields.nameField.name}
-                                fullWidth
-                                displayBlock
-                                onChange = {(value) => {handleChangeField('nameField.name',value)}}
-                                error = {errorFields.nameField.name}
-                            />
-                        </Grid>
-
-                        <Grid item xs={4} style={{paddingRight: '16px'}}>
-                            <DesignerTextField
-                                label = "Описание поля NAME"
-                                value = {localData.datasetFields.nameField.description}
-                                fullWidth
-                                displayBlock
-                                onChange = {(value) => {handleChangeField('nameField.description',value)}}
-                                error = {errorFields.nameField.description}
-                            />
-                        </Grid>                                          
-                        
-                        <Grid item xs={4}>
-                            <DesignerSelectField
-                                label = "Поле NAME набора данных"
-                                data = {datasetData ? datasetData.fields : []}
-                                value = {localData.datasetFields.nameField.id}
-                                fullWidth
-                                displayBlock
-                                onChange = {(value) => {handleChangeField('nameField.id',value)}}
-                                error = {errorFields.nameField.id}
-                            />
-                        </Grid>
-                    </Grid>                    
-                </div>
+                    <div>
+                        {
+                            fieldsGrid
+                        }
+                        <IconButton
+                            aria-label="add"
+                            color="primary"
+                            onClick={handleAddNameField}
+                        >
+                            <AddCircleOutlineIcon fontSize='large'/>
+                        </IconButton>
+                    </div>
                 }             
 
             </DataLoader>
