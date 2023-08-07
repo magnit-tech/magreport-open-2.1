@@ -54,8 +54,7 @@ function DatasetsMenuView(props){
     }, [searchParams, state.needReload]) // eslint-disable-line
 
     const folderItemsType = SidebarItems.development.subItems.datasets.folderItemType;
-    const showAddBtn = (searchParams.get("isRecursive") === 'true' || !id) ? false : true;
-    
+    const showAddBtn = (searchParams.get("isRecursive") === 'true' ) ? false : true;
 
     function handleFolderClick(folderId) {
         navigate(`/ui/dataset/${folderId}`)
