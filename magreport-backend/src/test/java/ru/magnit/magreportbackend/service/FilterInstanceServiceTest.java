@@ -299,13 +299,15 @@ class FilterInstanceServiceTest {
 
     @Test
     void editFilterInstance() {
-        when(domainService.editFilterInstance(any())).thenReturn(ID);
+        when(domainService.editFilterInstance(any(),any())).thenReturn(ID);
         when(domainService.getFilterInstance(any())).thenReturn(getFilterInstanceResponse());
+        when(filterTemplateDomainService.getFilterTemplate(any())).thenReturn(new FilterTemplateResponse());
 
         var response = service.editFilterInstance(getFilterInstanceAddRequest());
         assertNotNull(response);
 
-        verify(domainService).editFilterInstance(any());
+        verify(filterTemplateDomainService).getFilterTemplate(any());
+        verify(domainService).editFilterInstance(any(),any());
         verifyNoMoreInteractions(filterTemplateDomainService, domainService);
     }
 

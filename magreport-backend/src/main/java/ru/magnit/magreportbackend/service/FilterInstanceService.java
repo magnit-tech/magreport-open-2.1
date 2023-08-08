@@ -149,7 +149,8 @@ public class FilterInstanceService {
 
     public FilterInstanceResponse editFilterInstance(FilterInstanceAddRequest request) {
 
-        var filterId = domainService.editFilterInstance(request);
+        final var filterTemplate = filterTemplateDomainService.getFilterTemplate(request.getTemplateId());
+        var filterId = domainService.editFilterInstance(request, filterTemplate);
         filterReportDomainService.updateExpandFields(filterId);
         return domainService.getFilterInstance(filterId);
     }
