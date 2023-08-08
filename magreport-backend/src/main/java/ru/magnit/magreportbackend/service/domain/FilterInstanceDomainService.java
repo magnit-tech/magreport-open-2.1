@@ -254,7 +254,7 @@ public class FilterInstanceDomainService {
     }
 
     @Transactional
-    public Long editFilterInstance(FilterInstanceAddRequest request) {
+    public Long editFilterInstance(FilterInstanceAddRequest request, FilterTemplateResponse filterTemplate) {
 
         var filterInstance = filterRepository.getReferenceById(request.getId());
         checkDataSetTypeProcedure(filterInstance.getDataSet());
@@ -262,6 +262,12 @@ public class FilterInstanceDomainService {
 
         if (!filterInstance.getCode().equals(request.getCode()) || filterInstance.getCode().equals(""))
             checkCodeUnique(request.getCode());
+
+        request.getFields().forEach(field ->
+                field.setTemplateFieldId(
+                        Objects.requireNonNull(
+                                filterTemplate.getFields().stream().filter(o -> o.getType() == field.getType()).findFirst().orElse(null)).getId()));
+
         filterInstance.setFields(checkEditFilterInstance(request));
         filterInstanceMerger.merge(filterInstance, request);
         return request.getId();
