@@ -173,7 +173,7 @@ export default function  TokenInput(props){
                 };
 
                 arr.push({
-                    value: name,
+                    value: code,
                     label: fullName        
                 });
             };

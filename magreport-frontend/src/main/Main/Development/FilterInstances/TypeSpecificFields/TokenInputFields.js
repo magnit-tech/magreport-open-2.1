@@ -5,6 +5,7 @@ import {useState, useRef} from 'react';
 
 import Grid from '@material-ui/core/Grid';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import DeleteIcon from '@material-ui/icons/Delete';
 import IconButton from '@material-ui/core/IconButton';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -101,6 +102,15 @@ export default function TokenInputFields(props){
         handleChangeData()
     }
 
+    function handleDelNameField(i)
+    {
+        let dtsFlds = localData.datasetFields.filter((item, index) => index !== i)
+        let errFlds = errorFields.filter((item, index) => index !== i)
+        localData.datasetFields = dtsFlds
+        errorFields = errFlds
+        handleChangeData()
+    }
+
     let fieldsGrid = []
     for (let i = 0; i < localData.datasetFields.length; i++){
         let f = localData.datasetFields[i]
@@ -129,7 +139,7 @@ export default function TokenInputFields(props){
                     />
                 </Grid>                                          
             
-                <Grid item xs={4}>
+                <Grid item xs={3}>
                     <DesignerSelectField
                         label = "Поле ID набора данных"
                         data = {datasetData ? datasetData.fields : []}
@@ -147,6 +157,7 @@ export default function TokenInputFields(props){
                             <FormControlLabel
                                 control={
                                     <Checkbox 
+                                        key = {"showField" + i}
                                         size = "small"
                                         checked = {f.showField}
                                         onChange={(e)=>handleChangeField(i, f.type + ".showField", e.target.checked)} 
@@ -158,7 +169,8 @@ export default function TokenInputFields(props){
 
                             <FormControlLabel
                                 control={
-                                    <Checkbox 
+                                    <Checkbox
+                                        key = {"searchByField" + i}
                                         size = "small"
                                         checked = {f.searchByField}
                                         onChange={(e)=>handleChangeField(i, f.type + ".searchByField", e.target.checked)} 
@@ -168,6 +180,18 @@ export default function TokenInputFields(props){
                                 label="Искать по полю"
                             />
                         </div>
+                    }
+                </Grid>
+                <Grid item xs={1}>
+                    { i>1 &&
+                        <IconButton
+                           // size = "small"
+                            aria-label="delete"
+                            color="primary"
+                            onClick={() => handleDelNameField(i)}
+                        >
+                            <DeleteIcon />
+                        </IconButton>
                     }
                 </Grid>
             </Grid>
@@ -207,6 +231,7 @@ export default function TokenInputFields(props){
                             <AddCircleOutlineIcon fontSize='large'/>
                         </IconButton>
                     </div>
+                    
                 }             
 
             </DataLoader>
