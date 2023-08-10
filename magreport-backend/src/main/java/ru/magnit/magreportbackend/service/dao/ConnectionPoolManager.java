@@ -68,7 +68,7 @@ public class ConnectionPoolManager {
         hikariConfig.setIdleTimeout(600000);
         hikariConfig.setMinimumIdle(3);
         hikariConfig.setMaximumPoolSize(dataSource.poolSize());
-        hikariConfig.setConnectionTimeout(6000);
+        hikariConfig.setConnectionTimeout(10000);
         return hikariConfig;
     }
 
