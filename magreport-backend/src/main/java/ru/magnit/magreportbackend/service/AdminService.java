@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.magnit.magreportbackend.dto.backup.BackupRequest;
 import ru.magnit.magreportbackend.dto.backup.BackupRestoreRequest;
+import ru.magnit.magreportbackend.dto.response.admin.CurrentLoadResponse;
 import ru.magnit.magreportbackend.dto.response.data_governance.DataGovernanceResponse;
 import ru.magnit.magreportbackend.service.domain.AdminDomainService;
 import ru.magnit.magreportbackend.service.domain.BackupService;
@@ -50,5 +51,9 @@ public class AdminService {
                 dataLineageService.getAllUserReportFolders(),
                 dataLineageService.getAllUsers()
         );
+    }
+
+    public CurrentLoadResponse getCurrentLoad(){
+        return domainService.getCurrentLoad();
     }
 }
