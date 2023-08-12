@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import ru.magnit.magreportbackend.dto.backup.BackupRequest;
 import ru.magnit.magreportbackend.dto.backup.BackupRestoreRequest;
+import ru.magnit.magreportbackend.dto.response.admin.CurrentLoadResponse;
 import ru.magnit.magreportbackend.dto.response.data_governance.DataGovernanceResponse;
 import ru.magnit.magreportbackend.service.AdminService;
 import ru.magnit.magreportbackend.util.LogHelper;
@@ -33,6 +34,7 @@ public class AdminController {
     public static final String CREATE_BACKUP = "/api/v1/admin/create-backup";
     public static final String LOAD_BACKUP = "/api/v1/admin/load-backup";
     public static final String DATA_LINEAGE_PATH = "/api/v1/admin/data-lineage";
+    public static final String CURRENT_LOAD = "/api/v1/admin/get-current-load";
 
     private final AdminService adminService;
 
@@ -101,6 +103,22 @@ public class AdminController {
             .message("")
             .data(adminService.getDataLineage())
             .build();
+        LogHelper.logInfoUserMethodEnd();
+        return response;
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Получение  ")
+    @PostMapping(value = CURRENT_LOAD , produces = APPLICATION_JSON_VALUE)
+    public ru.magnit.magreportbackend.dto.response.ResponseBody<CurrentLoadResponse> getCurrentLoad() {
+        LogHelper.logInfoUserMethodStart();
+
+        var response = ru.magnit.magreportbackend.dto.response.ResponseBody.<CurrentLoadResponse>builder()
+                .success(true)
+                .message("")
+                .data(adminService.getCurrentLoad())
+                .build();
+
         LogHelper.logInfoUserMethodEnd();
         return response;
     }

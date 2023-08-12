@@ -7,12 +7,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum;
 import ru.magnit.magreportbackend.dto.inner.datasource.DataSourceData;
+import ru.magnit.magreportbackend.dto.response.admin.DataSourceConnectInfo;
 import ru.magnit.magreportbackend.service.security.CryptoService;
 
 import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -70,6 +73,28 @@ public class ConnectionPoolManager {
         hikariConfig.setMaximumPoolSize(dataSource.poolSize());
         hikariConfig.setConnectionTimeout(10000);
         return hikariConfig;
+    }
+
+
+    public List<DataSourceConnectInfo> getDataSourcePoolInfo() {
+
+        var responses = new ArrayList<DataSourceConnectInfo>();
+
+        dataSources.forEach((key, value) -> {
+
+            var response = new DataSourceConnectInfo();
+            var datasource = (HikariDataSource) value;
+
+            response
+                    .setDataSourceId(key.id())
+                    .setConnectPoolSize(datasource.getMaximumPoolSize())
+                    .setActiveConnectSize(datasource.getHikariPoolMXBean().getActiveConnections())
+                    .setQueueConnectSize(datasource.getHikariPoolMXBean().getThreadsAwaitingConnection());
+
+            responses.add(response);
+        });
+
+        return responses;
     }
 
     @PreDestroy
