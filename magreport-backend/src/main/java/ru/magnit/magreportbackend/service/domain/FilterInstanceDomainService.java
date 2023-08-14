@@ -565,7 +565,7 @@ public class FilterInstanceDomainService {
 
         var filterUseFlag = filterInstance.getSecurityFilters().isEmpty() && filterInstance.getFilterReports().isEmpty();
         var flagCheckDatasets = checkDatasetEquals(mapCurrentFields, request.getFields());
-        var result = updateFields(mapCurrentFields,  request.getFields(), filterUseFlag);
+        var result = updateFields(mapCurrentFields, request.getFields(), filterUseFlag);
 
         return getResultCheckEdit(flagCheckDatasets, result, filterUseFlag);
     }
@@ -586,20 +586,22 @@ public class FilterInstanceDomainService {
                 .stream()
                 .filter(newField -> currentFields.containsKey(newField.getId()))
                 .forEach(newField -> {
-            var currentField = currentFields.get(newField.getId());
+                    var currentField = currentFields.get(newField.getId());
 
-            var currentDataSetId = currentField.getDataSetField() == null ? -1L : currentField.getDataSetField().getId();
-            var newDataSetId = newField.getDataSetFieldId() == null ? -1L : newField.getDataSetFieldId();
+                    var currentDataSetId = currentField.getDataSetField() == null ? -1L : currentField.getDataSetField().getId();
+                    var newDataSetId = newField.getDataSetFieldId() == null ? -1L : newField.getDataSetFieldId();
 
-            if (currentDataSetId != newDataSetId) {
-                flag.set(false);
-            }
-        });
+                    if (currentDataSetId != newDataSetId) {
+                        flag.set(false);
+                    }
+                });
 
         return flag.get();
     }
 
     private List<FilterInstanceField> updateFields(Map<Long, FilterInstanceField> currentFields, List<FilterInstanceFieldAddRequest> newFields, boolean filterUseFlag) {
+
+        AtomicBoolean changeCountFieldsFlag = new AtomicBoolean(false);
 
         var result = new ArrayList<FilterInstanceField>();
         newFields.forEach(newField -> {
@@ -615,13 +617,22 @@ public class FilterInstanceDomainService {
                                 .setSearchByField(newField.getSearchByField());
                 result.add(currentField);
                 currentFields.remove(newField.getId());
-            } else
+            } else {
+                changeCountFieldsFlag.set(true);
                 result.add(filterInstanceFieldMapper.from(newField));
+            }
         });
 
-        if (filterUseFlag) {
+        if (!currentFields.isEmpty())
+            changeCountFieldsFlag.set(true);
+
+        if (!filterUseFlag && changeCountFieldsFlag.get())
+            throw new InvalidParametersException("Нельзя изменить состав полей фильтра, пока он используется в отчетах");
+
+
+        if (filterUseFlag)
             fieldRepository.deleteAllById(currentFields.values().stream().map(BaseEntity::getId).toList());
-        }
+
 
         return result;
     }
