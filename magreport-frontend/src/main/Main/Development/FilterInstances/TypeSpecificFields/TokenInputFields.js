@@ -69,7 +69,7 @@ export default function TokenInputFields(props){
 
     function handleChangeField(i, fieldName, value){
         let parts = fieldName.split('.');
-        if(parts[1] === 'id'){
+        if(parts[1] === 'dataSetFieldId'){
             let oldDatasetFieldName = datasetFieldsNameMap.current.get(localData.datasetFields[i][parts[1]]);
             let newDatasetFieldName = datasetFieldsNameMap.current.get(value);
             let currentFieldName = localData.datasetFields[i].name;
@@ -87,7 +87,10 @@ export default function TokenInputFields(props){
     }
 
     function handleChangeData(){
+        console.log("handleChangeData")
+       
         let {filterInstanceData, errors} = convertTokenInputLocalToFilterData(props.filterInstanceData, localData);
+        console.log(filterInstanceData)
         props.onChange(filterInstanceData, errors);
     }
 
@@ -102,18 +105,22 @@ export default function TokenInputFields(props){
         handleChangeData()
     }
 
-    function handleDelNameField(i)
-    {
-        let dtsFlds = localData.datasetFields.filter((item, index) => index !== i)
-        let errFlds = errorFields.filter((item, index) => index !== i)
-        localData.datasetFields = dtsFlds
-        errorFields = errFlds
+    function handleDelNameField(i){
+        console.log("handleDelNameField: " + i)
+        let datasetFlds = localData.datasetFields.filter((item, index) => index !== i)
+        let errorFlds = errorFields.filter((item, index) => index !== i)
+        localData.datasetFields = datasetFlds
+        errorFields = errorFlds
+
+        console.log(datasetFlds)
+
         handleChangeData()
     }
 
     let fieldsGrid = []
     for (let i = 0; i < localData.datasetFields.length; i++){
         let f = localData.datasetFields[i]
+        if (f.type !== 'CODE_FIELD'){
         fieldsGrid.push(
             <Grid container key = {i}>
                 <Grid item xs={3} style={{paddingRight: '16px'}}>
@@ -143,16 +150,16 @@ export default function TokenInputFields(props){
                     <DesignerSelectField
                         label = "Поле ID набора данных"
                         data = {datasetData ? datasetData.fields : []}
-                        value = {f.id}
+                        value = {f.dataSetFieldId}
                         fullWidth
                         displayBlock
-                        onChange = {(value) => {handleChangeField(i, f.type + '.id',value)}}
-                        error = {errorFields.find(i=>i.type === f.type).id}
+                        onChange = {(value) => {handleChangeField(i, f.type + '.dataSetFieldId',value)}}
+                        error = {errorFields.find(i=>i.type === f.type).dataSetFieldId}
                     />
                 </Grid>
                 
                 <Grid item xs={2}>
-                    {   f.type === "NAME_FIELD" &&
+                    {  /* f.type === "NAME_FIELD" &&*/
                         <div style={{marginLeft: '16px'}}>
                             <FormControlLabel
                                 control={
@@ -195,7 +202,7 @@ export default function TokenInputFields(props){
                     }
                 </Grid>
             </Grid>
-        )
+        )}
     }
 
     return(

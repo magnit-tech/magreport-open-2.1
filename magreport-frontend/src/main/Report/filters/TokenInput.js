@@ -28,7 +28,7 @@ export default function  TokenInput(props){
     const mandatory = props.filterData.mandatory
     const [checkStatus, setCheckStatus] = useState("error")
 
-    let codeFieldId = -1;
+    let codeFieldId = -1; //props.filterData?.fields.find(i=>i.type === 'CODE_FIELD').id || -1;
     let nameFieldId = -1;
     let nameFilterInstanceFieldId = -1;
 
@@ -42,7 +42,7 @@ export default function  TokenInput(props){
                 nameFilterInstanceFieldId = f.filterInstanceFieldId;
             }
         }
-    }    
+    }  
 
     const [toggleFilter, setToggleFilter] = React.useState(false);
     const [openAsyncEntity, setOpenAsyncEntity] = React.useState(false);
@@ -110,14 +110,14 @@ export default function  TokenInput(props){
         } else if(filterValues && filterValues.parameters){
             for(let p of filterValues.parameters){
                 let idValue = -1;
-                let nameValue =''
+                let nameValue = ''
                 for(let v of p.values){
                     if(v.fieldId === codeFieldId){
                         idValue = v.value;
                         valuesIds.push(v.value);
                     }
                     else if(v.fieldId === nameFieldId){
-                        nameValue = nameValue + v.value;
+                        nameValue = (nameValue === '' ? nameValue : nameValue + ', ') + v.value;
                     }
                 }
                 values.push({
@@ -152,31 +152,35 @@ export default function  TokenInput(props){
         
         let arr = [];
         if(magrepResponse.ok){
-
-            let fieldIDs={}
-            for (let f of magrepResponse.data.filter.fields){
-                fieldIDs[f.type]=f.id
-            }
+            console.log( magrepResponse.data)
+            let fields =  magrepResponse.data.filter.fields.map(i =>{ return {
+                id: i.id,
+                type: i.type,
+                showField: i.showField
+            }})
 
             for (let element of magrepResponse.data.tuples){
                 let code
                 let name
-                let fullName = ''
                 for (let i of element.values){
-                    if (i.fieldId === fieldIDs.CODE_FIELD){
+                    let curField = fields.find(item=>i.fieldId === item.id)
+                    console.log("curField")
+                    console.log(curField)
+                    if (curField.type === "CODE_FIELD"){
                         code = i.value;
                     }
-                    else if (i.fieldId === fieldIDs.NAME_FIELD){
-                        name = i.value;
-                        fullName = fullName + i.value
+                    else if (curField.showField){
+                        name = (name ? name + ', ' : '') + i.value
                     };
                 };
 
                 arr.push({
                     value: code,
-                    label: fullName        
+                    label: name        
                 });
             };
+
+            console.log(arr)
             let sort_arr = arr.sort(
                 function (a, b) {
                     if (a.label < b.label) {

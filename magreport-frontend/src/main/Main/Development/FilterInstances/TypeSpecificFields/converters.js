@@ -251,6 +251,7 @@ export function addTokenInputNewNameField(dataSetFields, errorFields){
         id : null,
         name : '',
         description : '',
+        dataSetFieldId: null,
         showField: true,
         searchByField: false
     };
@@ -261,9 +262,10 @@ export function addTokenInputNewNameField(dataSetFields, errorFields){
     let newErrorFields = errorFields
     newErrorFields.push({
         type: "NAME_FIELD",
-        id : true,
+       // id : true,
         name : true,
         description : true,
+        dataSetFieldId: true,
         showField: false,
         searchByField: false
     })
@@ -274,50 +276,42 @@ export function addTokenInputNewNameField(dataSetFields, errorFields){
 }
 
 export function convertTokenInputFilterToLocalData(filterInstanceData){
-
-    let idField = {
+    let fieldTemplate = {
         level: 1,
-        type: "ID_FIELD",
         id : null,
         name : '',
         description : '',
-        showField: null,
-        searchByField: null
-    };
-    let nameField = {
-        level: 1,
-        type: "NAME_FIELD",
-        id : null,
-        name : '',
-        description : '',
-        showField: true,
-        searchByField: true
+        dataSetFieldId: null,
+        showField: false,
+        searchByField: false
     };
 
     let hasIdField = false
     let hasNameField = false
+    let hasCodeField  = false
     let datasetFields = []
 
     for(let f of filterInstanceData.fields){
 
         if (f.type === "ID_FIELD")     hasIdField = true
         if (f.type === "NAME_FIELD") hasNameField = true
+        if (f.type === "CODE_FIELD") hasCodeField = true
 
-        if (f.type === "ID_FIELD" || f.type === "NAME_FIELD"){
-            datasetFields.push({
+        datasetFields.push({
                 level: 1,
                 type: f.type,
-                id: f.dataSetFieldId,
+                id: f.id,
                 name: f.name,
                 description: f.description,
                 showField: f.showField,
-                searchByField: f.searchByField
-            })
-        }
+                searchByField: f.searchByField,
+                dataSetFieldId: f.dataSetFieldId
+        })
     }
 
-    if (!hasIdField)   datasetFields.push(idField)
-    if (!hasNameField) datasetFields.push(nameField)
+    if (!hasIdField)   datasetFields.push({...fieldTemplate, type: 'ID_FIELD'})
+    if (!hasNameField) datasetFields.push({...fieldTemplate, type: 'NAME_FIELD'})
+    if (!hasCodeField) datasetFields.push({...fieldTemplate, type: 'CODE_FIELD'})
 
     let data = {
         dataSetId : filterInstanceData.dataSetId,
@@ -328,9 +322,10 @@ export function convertTokenInputFilterToLocalData(filterInstanceData){
     for(let f of datasetFields){
         errorFields.push({
             type: f.type,
-            id : (f.id === null),
+            id : f.id,
             name : (f.name.trim() === ''),
-            description : (f.description.trim() === '')
+            description : (f.description.trim() === ''),
+            dataSetFieldId: (f.dataSetFieldId === null)
         })
     }
     return {
@@ -340,16 +335,16 @@ export function convertTokenInputFilterToLocalData(filterInstanceData){
 }
 
 export function convertTokenInputLocalToFilterData(filterInstanceData, localData){
-    let fields = localData.datasetFields
-    fields.push({
-        level : 1,
-        type : "CODE_FIELD",
-        id : fields.find(i=>i.type === "ID_FIELD")?.id || null,
-        name : fields.find(i=>i.type === "ID_FIELD")?.name || '',
-        description : fields.find(i=>i.type === "ID_FIELD")?.description || '',
-        showField: fields.find(i=>i.type === "ID_FIELD")?.showField || null,
-        searchByField: fields.find(i=>i.type === "ID_FIELD")?.searchByField || null
-    })
+    let fields    = localData.datasetFields
+    let codeIndex = fields.findIndex(i=>i.type === 'CODE_FIELD')
+
+    let idField   = fields.find(i=>i.type === 'ID_FIELD')
+    let codeField = fields.find(i=>i.type === 'CODE_FIELD')
+
+    //Нужно переписать CODE_FIELD данными из ID_FIELD
+
+    
+    fields[codeIndex] = {...idField, type: 'CODE_FIELD', id: codeField.id}
 
     let newFilterInstanceData = {
         id: filterInstanceData.id,
@@ -360,9 +355,10 @@ export function convertTokenInputLocalToFilterData(filterInstanceData, localData
         code: filterInstanceData.code,
         description: filterInstanceData.description,
         fields : fields.map(i=>{ return {
+            id: i.id,
             level: i.level,
             type: i.type,
-            dataSetFieldId: i.id,
+            dataSetFieldId: i.dataSetFieldId,
             name: i.name,
             description: i.description,
             showField: i.showField,
@@ -374,10 +370,10 @@ export function convertTokenInputLocalToFilterData(filterInstanceData, localData
         dataSetId : localData.dataSetId === undefined ? "Не определён набор данных справочника" : undefined,
         fieldIdName : localData.datasetFields.find(i=>i.type === "ID_FIELD")?.name.trim() === '' ? "Не задано имя поля типа ID" : undefined,
         fieldIdDescription : localData.datasetFields.find(i=>i.type === "ID_FIELD")?.description.trim() === '' ? "Не задано описание поля типа ID" : undefined,
-        fieldIdId : localData.datasetFields.find(i=>i.type === "ID_FIELD")?.id === null ? "Не выбрано поле типа ID" : undefined,
-        fieldNameName : localData.datasetFields.find(i=>i.type === "NAME_FIELD")?.name.trim() === '' ? "Не задано имя поля типа CODE" : undefined,
-        fieldNameDescription : localData.datasetFields.find(i=>i.type === "NAME_FIELD")?.description.trim() === '' ? "Не задано описание поля типа CODE" : undefined,
-        fieldNameId : localData.datasetFields.find(i=>i.type === "NAME_FIELD")?.id === null ? "Не выбрано поле типа CODE" : undefined
+        fieldIdDataSetFieldId : localData.datasetFields.find(i=>i.type === "ID_FIELD")?.dataSetFieldId === null ? "Не выбрано поле типа ID" : undefined,
+        fieldNameName : localData.datasetFields.find(i=>i.type === "NAME_FIELD")?.name.trim() === '' ? "Не задано имя поля типа NAME" : undefined,
+        fieldNameDescription : localData.datasetFields.find(i=>i.type === "NAME_FIELD")?.description.trim() === '' ? "Не задано описание поля типа NAME" : undefined,
+        fieldNameDataSetFieldId : localData.datasetFields.find(i=>i.type === "NAME_FIELD")?.dataSetFieldId === null ? "Не выбрано поле типа NAME" : undefined
     };
 
     return {
