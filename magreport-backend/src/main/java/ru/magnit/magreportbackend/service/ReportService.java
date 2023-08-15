@@ -378,8 +378,8 @@ public class ReportService {
                         throw new InvalidParametersException("Dest folder is not available: Permission denied" + f.getFolderId());
                 });
 
-        var newFolders = reportDomainService.copyReportFolder(request, userDomainService.getCurrentUser());
-        return newFolders.stream().map(f -> reportDomainService.getFolder(userDomainService.getCurrentUser().getId(), f)).toList();
+        var newFolders = reportDomainService.copyReportFolder(request, currentUser);
+        return newFolders.stream().map(f -> reportDomainService.getFolder(currentUser.getId(), f)).toList();
     }
 
     private List<FilterAddRequest> unWind(FilterGroupAddRequest reportFilterGroupData, List<FilterAddRequest> reportFilterData) {
