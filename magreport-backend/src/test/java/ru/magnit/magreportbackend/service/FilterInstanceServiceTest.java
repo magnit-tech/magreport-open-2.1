@@ -16,6 +16,7 @@ import ru.magnit.magreportbackend.dto.request.filterinstance.ChildNodesRequest;
 import ru.magnit.magreportbackend.dto.request.filterinstance.FilterInstanceAddRequest;
 import ru.magnit.magreportbackend.dto.request.filterinstance.FilterInstanceRequest;
 import ru.magnit.magreportbackend.dto.request.filterinstance.ListValuesRequest;
+import ru.magnit.magreportbackend.dto.request.folder.CopyFolderRequest;
 import ru.magnit.magreportbackend.dto.request.folder.FolderAddRequest;
 import ru.magnit.magreportbackend.dto.request.folder.FolderChangeParentRequest;
 import ru.magnit.magreportbackend.dto.request.folder.FolderRenameRequest;
@@ -31,6 +32,7 @@ import ru.magnit.magreportbackend.dto.response.filterinstance.FilterNodeResponse
 import ru.magnit.magreportbackend.dto.response.filterreport.FilterReportResponse;
 import ru.magnit.magreportbackend.dto.response.filtertemplate.FilterTemplateResponse;
 import ru.magnit.magreportbackend.dto.response.folder.FolderNodeResponse;
+import ru.magnit.magreportbackend.dto.response.folder.FolderRoleResponse;
 import ru.magnit.magreportbackend.dto.response.folder.FolderSearchResponse;
 import ru.magnit.magreportbackend.dto.response.permission.FilterInstanceFolderPermissionsResponse;
 import ru.magnit.magreportbackend.dto.response.permission.RolePermissionResponse;
@@ -299,7 +301,7 @@ class FilterInstanceServiceTest {
 
     @Test
     void editFilterInstance() {
-        when(domainService.editFilterInstance(any(),any())).thenReturn(ID);
+        when(domainService.editFilterInstance(any(), any())).thenReturn(ID);
         when(domainService.getFilterInstance(any())).thenReturn(getFilterInstanceResponse());
         when(filterTemplateDomainService.getFilterTemplate(any())).thenReturn(new FilterTemplateResponse());
 
@@ -307,7 +309,7 @@ class FilterInstanceServiceTest {
         assertNotNull(response);
 
         verify(filterTemplateDomainService).getFilterTemplate(any());
-        verify(domainService).editFilterInstance(any(),any());
+        verify(domainService).editFilterInstance(any(), any());
         verifyNoMoreInteractions(filterTemplateDomainService, domainService);
     }
 
@@ -367,29 +369,29 @@ class FilterInstanceServiceTest {
     }
 
     @Test
-    void changeExcelTemplateParentFolder(){
+    void changeExcelTemplateParentFolder() {
 
         service.changeFilterInstanceParentFolder(getChangeParentFolderRequest());
 
-        verify(permissionCheckerSystem).checkPermissionsOnAllFolders(any(),any(),any());
+        verify(permissionCheckerSystem).checkPermissionsOnAllFolders(any(), any(), any());
         verify(domainService).changeFilterInstanceParentFolder(any());
-        verifyNoMoreInteractions(permissionCheckerSystem,domainService);
+        verifyNoMoreInteractions(permissionCheckerSystem, domainService);
 
     }
 
     @Test
-    void copyFilterInstance(){
+    void copyFilterInstance() {
 
         service.copyFilterInstance(getChangeParentFolderRequest());
 
-        verify(permissionCheckerSystem).checkPermissionsOnAllFolders(any(),any(),any());
-        verify(domainService).copyFilterInstance(any(),any());
-        verifyNoMoreInteractions(permissionCheckerSystem,domainService);
+        verify(permissionCheckerSystem).checkPermissionsOnAllFolders(any(), any(), any());
+        verify(domainService).copyFilterInstance(any(), any());
+        verifyNoMoreInteractions(permissionCheckerSystem, domainService);
 
     }
 
     @Test
-    void getFilterInstanceDependants(){
+    void getFilterInstanceDependants() {
 
         when(domainService.getFilterInstanceDependants(any())).thenReturn(getFilterInstanceDependenciesResponse());
         when(reportDomainService.getPathReport(any())).thenReturn(Collections.emptyList());
@@ -409,15 +411,110 @@ class FilterInstanceServiceTest {
         assertEquals(1, response.getReportFilters().size());
         assertTrue(response.getValid());
         assertTrue(response.getPath().isEmpty());
-        assertEquals(1,response.getSecurityFilters().size());
+        assertEquals(1, response.getSecurityFilters().size());
 
 
         verify(domainService).getFilterInstanceDependants(any());
         verify(domainService).getPathFilter(any());
         verify(reportDomainService).getPathReport(any());
         verify(securityFilterDomainService).getPathSecurityFilter(any());
-        verifyNoMoreInteractions(domainService,reportDomainService,securityFilterDomainService);
+        verifyNoMoreInteractions(domainService, reportDomainService, securityFilterDomainService);
 
+    }
+
+    @Test
+    void copyFilterInstanceFolderTest() {
+
+        when(userDomainService.getCurrentUser()).thenReturn(getCurrentUser());
+        when(userDomainService.getUserRoles(any(), any(), any())).thenReturn(Collections.singletonList(new RoleView()));
+        when(domainService.copyFilterInstanceFolder(any(), any())).thenReturn(Collections.singletonList(ID));
+        when(domainService.getFolder(any())).thenReturn(getFolderResponse());
+
+        var response = service.copyFilterInstanceFolder(getCopyFolderRequest()).get(0);
+
+        assertEquals(ID, response.getId());
+        assertEquals(NAME, response.getName());
+        assertEquals(DESCRIPTION, response.getDescription());
+        assertNotNull(response.getChildFolders());
+        assertEquals(CREATED_TIME, response.getCreated());
+        assertEquals(MODIFIED_TIME, response.getModified());
+
+        verify(userDomainService).getCurrentUser();
+        verify(userDomainService).getUserRoles(any(), any(), any());
+        verify(domainService).copyFilterInstanceFolder(any(), any());
+        verify(domainService).getFolder(any());
+        verifyNoMoreInteractions(userDomainService, domainService);
+    }
+
+    @Test
+    void copyFilterInstanceFolderExceptionTest1() {
+
+        when(userDomainService.getCurrentUser()).thenReturn(getCurrentUser());
+        when(userDomainService.getUserRoles(any(), any(), any())).thenReturn(Collections.singletonList(new RoleView()));
+        when(folderPermissionsDomainService.getFilterInstanceFolderPermissionsForRoles(anyList(), anyList())).thenReturn(Collections.singletonList(new FolderRoleResponse(ID, FolderAuthorityEnum.NONE)));
+
+        var request = getCopyFolderRequest();
+        assertThrows(InvalidParametersException.class, () -> service.copyFilterInstanceFolder(request));
+
+        verify(userDomainService).getCurrentUser();
+        verify(userDomainService).getUserRoles(any(), any(), any());
+        verifyNoMoreInteractions(userDomainService, domainService);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void copyFilterInstanceFolderExceptionTest2() {
+
+        when(userDomainService.getCurrentUser()).thenReturn(getCurrentUser());
+        when(userDomainService.getUserRoles(any(), any(), any())).thenReturn(Collections.singletonList(new RoleView()));
+        when(folderPermissionsDomainService.getFilterInstanceFolderPermissionsForRoles(anyList(), anyList()))
+                .thenReturn(
+                        Collections.singletonList(new FolderRoleResponse(ID, FolderAuthorityEnum.WRITE)),
+                        Collections.singletonList(new FolderRoleResponse(ID, FolderAuthorityEnum.NONE)));
+
+        var request = getCopyFolderRequest();
+        assertThrows(InvalidParametersException.class, () -> service.copyFilterInstanceFolder(request));
+
+        verify(userDomainService).getCurrentUser();
+        verify(userDomainService).getUserRoles(any(), any(), any());
+        verifyNoMoreInteractions(userDomainService, domainService);
+    }
+
+    @Test
+    void changeParentFolderExceptionTest1() {
+
+        when(userDomainService.getCurrentUser()).thenReturn(getCurrentUser());
+        when(userDomainService.getUserRoles(any(), any(), any())).thenReturn(Collections.singletonList(new RoleView()));
+        when(folderPermissionsDomainService.getFilterInstanceFolderPermissionsForRoles(anyList(), anyList())).thenReturn(Collections.singletonList(new FolderRoleResponse(ID, FolderAuthorityEnum.NONE)));
+
+        var request = new FolderChangeParentRequest();
+
+        assertThrows(InvalidParametersException.class, () -> service.changeParentFolder(request));
+
+        verify(userDomainService).getCurrentUser();
+        verify(userDomainService).getUserRoles(any(), any(), any());
+        verify(folderPermissionsDomainService).getFilterInstanceFolderPermissionsForRoles(anyList(), anyList());
+        verifyNoMoreInteractions(domainService, folderPermissionsDomainService);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void changeParentFolderExceptionTest2() {
+
+        when(userDomainService.getCurrentUser()).thenReturn(getCurrentUser());
+        when(userDomainService.getUserRoles(any(), any(), any())).thenReturn(Collections.singletonList(new RoleView()));
+        when(folderPermissionsDomainService.getFilterInstanceFolderPermissionsForRoles(anyList(), anyList()))
+                .thenReturn(Collections.singletonList(new FolderRoleResponse(ID, FolderAuthorityEnum.WRITE)),
+                        Collections.singletonList(new FolderRoleResponse(ID, FolderAuthorityEnum.NONE)));
+
+        var request = new FolderChangeParentRequest();
+
+        assertThrows(InvalidParametersException.class, () -> service.changeParentFolder(request));
+
+        verify(userDomainService).getCurrentUser();
+        verify(userDomainService).getUserRoles(any(), any(), any());
+        verify(folderPermissionsDomainService, times(2)).getFilterInstanceFolderPermissionsForRoles(anyList(), anyList());
+        verifyNoMoreInteractions(domainService, folderPermissionsDomainService);
     }
 
     private FolderRenameRequest getFolderRenameRequest() {
@@ -484,7 +581,7 @@ class FilterInstanceServiceTest {
                 .setObjIds(Collections.emptyList());
     }
 
-    private FilterInstanceDependenciesResponse getFilterInstanceDependenciesResponse(){
+    private FilterInstanceDependenciesResponse getFilterInstanceDependenciesResponse() {
         return new FilterInstanceDependenciesResponse()
                 .setId(ID)
                 .setName(NAME)
@@ -496,15 +593,25 @@ class FilterInstanceServiceTest {
                 .setFields(Collections.singletonList(new FilterInstanceFieldResponse()))
                 .setReportFilters(Collections.singletonList(new FilterReportResponse()))
                 .setValid(true)
-                .setPath(Collections.singletonList(new FolderNodeResponse(null,null,null,null, null, null)))
+                .setPath(Collections.singletonList(new FolderNodeResponse(null, null, null, null, null, null)))
                 .setReports(Collections.singletonList(new ReportResponse()))
-                .setSecurityFilters(Collections.singletonList(new SecurityFilterResponse(null,null,null,null,null,null,null,null,null,null,null,new ArrayList<>())));
+                .setSecurityFilters(Collections.singletonList(new SecurityFilterResponse(null, null, null, null, null, null, null, null, null, null, null, new ArrayList<>())));
 
     }
 
-    private UserView getCurrentUser(){
+    private UserView getCurrentUser() {
         return new UserView()
+                .setId(ID)
                 .setName("TestUser")
-                .setDomain(new DomainShortResponse(ID,NAME));
+                .setDomain(new DomainShortResponse(ID, NAME));
     }
+
+    private CopyFolderRequest getCopyFolderRequest() {
+        return new CopyFolderRequest()
+                .setDestFolderId(ID)
+                .setFolderIds(Collections.singletonList(ID))
+                .setInheritParentRights(true)
+                .setInheritRightsRecursive(true);
+    }
+
 }
