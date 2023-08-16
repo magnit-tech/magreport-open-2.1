@@ -17,10 +17,12 @@ export const LoginFormCSS = makeStyles(theme => ({
       marginTop: theme.spacing(1),
     },
     submit: {
-      margin: theme.spacing(3, 0, 2),
+      marginTop: '10px !important',
     },
-    failLogginLink: {
-        textAlign: 'center',
+    failLoggin: {
+      display: 'flex',
+      justifyContent: 'center',
+      marginTop: '10px'
     },
     circularProgress: {
         display: 'flex',

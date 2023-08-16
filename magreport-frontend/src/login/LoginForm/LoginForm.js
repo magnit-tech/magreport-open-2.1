@@ -9,22 +9,14 @@ import { connect } from 'react-redux';
 import { showLoader, hideLoader } from '../../redux/actions/UI/actionLoader'
 import { showAlert, hideAlert } from '../../redux/actions/UI/actionsAlert'
 
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import Link from '@material-ui/core/Link';
-import Grid from '@material-ui/core/Grid';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-import Typography from '@material-ui/core/Typography';
+// mui
+import { Avatar, Button, TextField, IconButton, Typography } from '@material-ui/core/';
+import { FormControl, CircularProgress, OutlinedInput, InputLabel, InputAdornment } from '@material-ui/core/';
 
-import CircularProgress from '@material-ui/core/CircularProgress';
-import IconButton from '@material-ui/core/IconButton';
-import OutlinedInput from '@material-ui/core/OutlinedInput';
-import InputLabel from '@material-ui/core/InputLabel';
-import InputAdornment from '@material-ui/core/InputAdornment';
-import FormControl from '@material-ui/core/FormControl';
+// icons
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 
 //local
 import StyleConsts from 'StyleConsts.js';
@@ -128,22 +120,6 @@ function LoginForm(props){
                     />
                 </FormControl>
 
-                {/*
-                <TextField
-                    variant="outlined"
-                    margin="normal"
-                    required
-                    fullWidth
-                    id="password"
-                    label="Пароль"
-                    type="password"
-                    name="password"
-                    value={form.password}
-                    autoComplete="current-password"
-                    onChange={handleChange}
-                    error={props.alertData.data.open}
-                    /> */
-                }
                 <Button     
                     id="loginSubmit"                     
                     type="submit"
@@ -152,16 +128,21 @@ function LoginForm(props){
                     color="primary"
                     className={classes.submit}
                     disabled={loader}
-                    onClick={handleSubmit}> Войти
+                    onClick={handleSubmit}
+                > 
+                    Войти
                 </Button>
+
                 { loader ? <div className={classes.circularProgress}><CircularProgress /></div> : null}
-                <Grid container>
-                    <Grid item xs className={classes.failLogginLink}>
-                        <Link variant="body2" href="mailto:sopr_magreport@magnit.ru?subject=Магрепорт: ошибка при входе">
-                            Ошибка при входе? 
-                        </Link>
-                    </Grid>
-                </Grid>
+
+                <div className={classes.failLoggin}>
+                    <Button 
+                        color="secondary"
+                        href="mailto:sopr_magreport@magnit.ru?subject=Магрепорт: ошибка при входе"
+                    >
+                        Ошибка при входе? 
+                    </Button>
+                </div>
             </form>
         </div>
      );
