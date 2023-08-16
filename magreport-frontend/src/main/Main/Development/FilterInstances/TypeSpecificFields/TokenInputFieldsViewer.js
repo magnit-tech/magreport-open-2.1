@@ -51,29 +51,28 @@ export default function TokenInputFieldsViewer(props) {
     let fieldsGrid = []
     for (let i = 0; i < localData.datasetFields.length; i++){
         let f = localData.datasetFields[i]
-
-        fieldsGrid.push(
-            <Grid container key = {i}>
-                <Grid item xs={3} style={{paddingRight: '16px'}}>
-                    <ViewerTextField
-                        label={"Название поля " + f.type}
-                        value={f.name}
-                    />
-                </Grid>
-                <Grid item xs={3} style={{paddingRight: '16px'}}>
-                    <ViewerTextField
-                        label={"Описание поля " + f.type}
-                        value={f.description}
-                    />
-                </Grid>
-                <Grid item xs={4}>
-                    <ViewerTextField
-                        label="Поле ID набора данных"
-                        value={datasetFieldsNameMap.current.get(f.id)}
-                    />
-                </Grid>
-                <Grid item xs={2}>
-                    {   f.type === "NAME_FIELD" &&
+        if (f.type !== 'CODE_FIELD'){
+            fieldsGrid.push(
+                <Grid container key = {i}>
+                    <Grid item xs={3} style={{paddingRight: '16px'}}>
+                        <ViewerTextField
+                            label={"Название поля " + f.type}
+                            value={f.name}
+                        />
+                    </Grid>
+                    <Grid item xs={3} style={{paddingRight: '16px'}}>
+                        <ViewerTextField
+                            label={"Описание поля " + f.type}
+                            value={f.description}
+                        />
+                    </Grid>
+                    <Grid item xs={4}>
+                        <ViewerTextField
+                            label="Поле ID набора данных"
+                            value={datasetFieldsNameMap.current.get(f.id)}
+                        />
+                    </Grid>
+                    <Grid item xs={2}>
                         <div style={{marginLeft: '16px'}}>
                             <FormControlLabel
                                 control={
@@ -98,10 +97,10 @@ export default function TokenInputFieldsViewer(props) {
                                 label="Искать по полю"
                             />
                         </div>
-                    }
+                    </Grid>
                 </Grid>
-            </Grid>
-        )
+            )
+        }
     }
     return (
         <div>

@@ -34,7 +34,7 @@ import {addTokenInputNewNameField, convertTokenInputLocalToFilterData, convertTo
  */
 export default function TokenInputFields(props){
 
-    let {localData, errorFields} = convertTokenInputFilterToLocalData(props.filterInstanceData);
+    let {localData, errorData} = convertTokenInputFilterToLocalData(props.filterInstanceData);
 
     const [datasetData, setDatasetData] = useState(null);
     const datasetFieldsNameMap = useRef(new Map());
@@ -86,12 +86,9 @@ export default function TokenInputFields(props){
         handleChangeData();
     }
 
-    function handleChangeData(){
-        console.log("handleChangeData")
-       
-        let {filterInstanceData, errors} = convertTokenInputLocalToFilterData(props.filterInstanceData, localData);
-        console.log(filterInstanceData)
-        props.onChange(filterInstanceData, errors);
+    function handleChangeData(){ 
+        let {filterInstanceData, errorData} = convertTokenInputLocalToFilterData(props.filterInstanceData, localData);
+        props.onChange(filterInstanceData, errorData);
     }
 
     function handleDataLoadFailed(message){
@@ -99,27 +96,20 @@ export default function TokenInputFields(props){
     }
 
     function handleAddNameField(){
-        let {dtsFlds, errFlds} = addTokenInputNewNameField(localData.datasetFields, errorFields)
-        localData.datasetFields = dtsFlds
-        errorFields = errFlds
+        localData.datasetFields = addTokenInputNewNameField(localData.datasetFields)
         handleChangeData()
     }
 
     function handleDelNameField(i){
-        console.log("handleDelNameField: " + i)
         let datasetFlds = localData.datasetFields.filter((item, index) => index !== i)
-        let errorFlds = errorFields.filter((item, index) => index !== i)
         localData.datasetFields = datasetFlds
-        errorFields = errorFlds
-
-        console.log(datasetFlds)
-
         handleChangeData()
     }
 
     let fieldsGrid = []
     for (let i = 0; i < localData.datasetFields.length; i++){
         let f = localData.datasetFields[i]
+        let e = errorData.fields.find(i=>i.id === f.id)
         if (f.type !== 'CODE_FIELD'){
         fieldsGrid.push(
             <Grid container key = {i}>
@@ -131,7 +121,7 @@ export default function TokenInputFields(props){
                         fullWidth
                         displayBlock
                         onChange = {(value) => {handleChangeField(i, f.type + '.name',value)}}
-                        error = {errorFields.find(i=>i.type === f.type).name}
+                        error = {Boolean(e.name)}
                     />
                 </Grid>
 
@@ -142,7 +132,7 @@ export default function TokenInputFields(props){
                         fullWidth
                         displayBlock
                         onChange = {(value) => {handleChangeField(i, f.type + '.description',value)}}
-                        error = {errorFields.find(i=>i.type === f.type).description}
+                        error = {Boolean(e.description)}
                     />
                 </Grid>                                          
             
@@ -154,7 +144,7 @@ export default function TokenInputFields(props){
                         fullWidth
                         displayBlock
                         onChange = {(value) => {handleChangeField(i, f.type + '.dataSetFieldId',value)}}
-                        error = {errorFields.find(i=>i.type === f.type).dataSetFieldId}
+                        error = {Boolean(e.dataSetFieldId)}
                     />
                 </Grid>
                 
@@ -189,7 +179,7 @@ export default function TokenInputFields(props){
                         </div>
                     }
                 </Grid>
-                <Grid item xs={1}>
+                <Grid item xs={1} style={{display: 'flex', alignItems: 'center'}}>
                     { i>1 &&
                         <IconButton
                            // size = "small"
@@ -222,7 +212,7 @@ export default function TokenInputFields(props){
                     onChange = {handleChangeDataset}
                     displayBlock
                     fullWidth
-                    error = {errorFields.dataSetId}
+                    error = {errorData.dataSetId}
                 />
 
                 {datasetData && 

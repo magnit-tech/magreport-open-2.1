@@ -152,7 +152,6 @@ export default function  TokenInput(props){
         
         let arr = [];
         if(magrepResponse.ok){
-            console.log( magrepResponse.data)
             let fields =  magrepResponse.data.filter.fields.map(i =>{ return {
                 id: i.id,
                 type: i.type,
@@ -164,8 +163,6 @@ export default function  TokenInput(props){
                 let name
                 for (let i of element.values){
                     let curField = fields.find(item=>i.fieldId === item.id)
-                    console.log("curField")
-                    console.log(curField)
                     if (curField.type === "CODE_FIELD"){
                         code = i.value;
                     }
@@ -180,7 +177,6 @@ export default function  TokenInput(props){
                 });
             };
 
-            console.log(arr)
             let sort_arr = arr.sort(
                 function (a, b) {
                     if (a.label < b.label) {

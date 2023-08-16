@@ -124,11 +124,11 @@ export default function FilterInstanceDesigner(){
             });
 
             setErrorFields({
-                filterInstanceName: errorFields.filterInstanceName,
-                filterInstanceCode: errorFields.filterInstanceCode,
-                filterInstanceDescription: errorFields.filterInstanceDescription,
-                templateId : false,
-                specificFields : "Не заполнены все необходимые поля фильтра"
+                name: errorFields.filterInstanceName,
+                code: errorFields.filterInstanceCode,
+                description: errorFields.filterInstanceDescription,
+                templateId : undefined,
+                fields : "Не заполнены все необходимые поля фильтра"
             });  
         }
     }
@@ -142,9 +142,10 @@ export default function FilterInstanceDesigner(){
             ...filterInstanceData,
             [field] : value
         });
+
         setErrorFields({
             ...errorFields,
-            [field]: (value === '') ? "Поле " + fieldLabels[field] + " не может быть пустым" : false
+            [field]: (value === '') ? "Поле " + fieldLabels[field] + " не может быть пустым" : undefined
         });
     }
 
@@ -153,10 +154,10 @@ export default function FilterInstanceDesigner(){
             ...filterInstanceData,
             fields : newFields});
         setErrorFields({
-            filterInstanceName: errorFields.filterInstanceName,
-            filterInstanceCode: errorFields.filterInstanceCode,
-            filterInstanceDescription: errorFields.filterInstanceDescription,
-            templateId : errorFields.filterInstanceDescription,
+            name: errorFields.name,
+            code: errorFields.code,
+            description: errorFields.description,
+            templateId : errorFields.templateId,
             ...errors
         });
     }
@@ -164,10 +165,7 @@ export default function FilterInstanceDesigner(){
     function handleChangeSpecificField(newFilterInstanceData, errors){
         setFilterInstanceData(newFilterInstanceData);
         setErrorFields({
-            filterInstanceName: errorFields.filterInstanceName,
-            filterInstanceCode: errorFields.filterInstanceCode,
-            filterInstanceDescription: errorFields.filterInstanceDescription,
-            templateId : errorFields.filterInstanceDescription,
+            ...errorFields,
             ...errors
         });
     }
@@ -177,7 +175,9 @@ export default function FilterInstanceDesigner(){
     */
 
     function handleSave(){
-        let errors = {};
+
+        let errors = errorFields;
+        errors.fields = undefined;
         let errorExists = false;
 
         // Проверка корректности заполнения полей
@@ -207,15 +207,20 @@ export default function FilterInstanceDesigner(){
             .reverse()
             .forEach( ([fieldName, fieldValue]) => 
                 {
-                    errors[fieldName] = true;
-                    enqueueSnackbar("Недопустимо пустое значение в поле " + fieldLabels[fieldName], {variant : "error"});
-                    errorExists = true;
+                    errors[fieldName] = "Недопустимо пустое значение в поле " + fieldLabels[fieldName] ;
                 } );
-        
-        if(errorExists){
-            setErrorFields(errors);
+
+        for (let key in errors){
+            let val = errors[key]
+            if (val !== undefined || val === true ){
+                errorExists = true
+                enqueueSnackbar(val, {variant : "error"});
+            }
         }
-        else{
+
+        if (errorExists){
+            setErrorFields(errors)
+        } else {
             let func = id ? dataHub.filterInstanceController.edit : dataHub.filterInstanceController.add;
             setUploading(true);
             func(filterInstanceData, handleAddEditResult);
@@ -261,7 +266,7 @@ export default function FilterInstanceDesigner(){
                             onChange = {data => {handleChangeField('name', data)}}
                             //displayBlock
                             fullWidth
-                            error = {errorFields.name}
+                            error = {Boolean(errorFields.name)}
                         />
 
                         <DesignerTextField
@@ -271,7 +276,7 @@ export default function FilterInstanceDesigner(){
                             onChange = {data => {handleChangeField('code', data)}}
                             //displayBlock
                             fullWidth
-                            error = {errorFields.code}
+                            error = {Boolean(errorFields.code)}
                         />
 
                         <DesignerTextField
@@ -281,7 +286,7 @@ export default function FilterInstanceDesigner(){
                             onChange = {data => handleChangeField('description', data)}
                            // displayBlock
                             fullWidth
-                            error = {errorFields.description}
+                            error = {Boolean(errorFields.description)}
                         />
 
                         <DesignerFolderItemPicker
@@ -292,7 +297,7 @@ export default function FilterInstanceDesigner(){
                             onChange = {handleChangeFilterTemplate}
                            // displayBlock
                             fullWidth
-                            error = {errorFields.templateId}
+                            error = {Boolean(errorFields.templateId)}
                         />
                         {
                             filterTemplateData.type.name === 'SINGLE_VALUE_UNBOUNDED' || filterTemplateData.type.name === 'VALUE_LIST_UNBOUNDED'?

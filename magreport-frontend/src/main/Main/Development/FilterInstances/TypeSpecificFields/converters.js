@@ -243,7 +243,7 @@ export function convertHierTreeLocalToFilterData(filterInstanceData, localData){
 }
 
 // Token Input
-export function addTokenInputNewNameField(dataSetFields, errorFields){
+export function addTokenInputNewNameField(dataSetFields){
 
     let nameField = {
         level: 1,
@@ -259,20 +259,7 @@ export function addTokenInputNewNameField(dataSetFields, errorFields){
     let newDataSetFields = dataSetFields
     newDataSetFields.push(nameField)
 
-    let newErrorFields = errorFields
-    newErrorFields.push({
-        type: "NAME_FIELD",
-       // id : true,
-        name : true,
-        description : true,
-        dataSetFieldId: true,
-        showField: false,
-        searchByField: false
-    })
-    return {
-        dtsFlds : newDataSetFields,
-        errFlds : errorFields
-    }
+    return newDataSetFields
 }
 
 export function convertTokenInputFilterToLocalData(filterInstanceData){
@@ -290,6 +277,9 @@ export function convertTokenInputFilterToLocalData(filterInstanceData){
     let hasNameField = false
     let hasCodeField  = false
     let datasetFields = []
+    let errorFields = []
+    let errShowField = true
+    let errSearchByField = true
 
     for(let f of filterInstanceData.fields){
 
@@ -318,19 +308,25 @@ export function convertTokenInputFilterToLocalData(filterInstanceData){
         datasetFields : datasetFields
     };
 
-    let errorFields = []
     for(let f of datasetFields){
+        if (f.showField) errShowField = false
+        if (f.searchByField) errSearchByField = false
         errorFields.push({
             type: f.type,
             id : f.id,
-            name : (f.name.trim() === ''),
-            description : (f.description.trim() === ''),
-            dataSetFieldId: (f.dataSetFieldId === null)
+            name : (f.name.trim() === '') ? "Не задано имя поля типа " + f.type : undefined,
+            description : (f.description.trim() === '') ? "Не задано описание поля типа " + f.type : undefined,
+            dataSetFieldId: (f.dataSetFieldId === null) ? "Не выбрано поле типа " + f.type : undefined
         })
     }
     return {
         localData : data,
-        errorFields : errorFields
+        errorData : {
+            datasetId: filterInstanceData.dataSetId  ? "Не определён набор данных справочника" : undefined,
+            showField: errShowField ? "Не задано поле для вывода": undefined,
+            searchByField: errSearchByField ? "Не задано поле для поиска": undefined,
+            fields: errorFields
+        }
     };
 }
 
@@ -343,7 +339,6 @@ export function convertTokenInputLocalToFilterData(filterInstanceData, localData
 
     //Нужно переписать CODE_FIELD данными из ID_FIELD
 
-    
     fields[codeIndex] = {...idField, type: 'CODE_FIELD', id: codeField.id}
 
     let newFilterInstanceData = {
@@ -366,19 +361,26 @@ export function convertTokenInputLocalToFilterData(filterInstanceData, localData
         }})
     }
 
-    let errors = {
-        dataSetId : localData.dataSetId === undefined ? "Не определён набор данных справочника" : undefined,
-        fieldIdName : localData.datasetFields.find(i=>i.type === "ID_FIELD")?.name.trim() === '' ? "Не задано имя поля типа ID" : undefined,
-        fieldIdDescription : localData.datasetFields.find(i=>i.type === "ID_FIELD")?.description.trim() === '' ? "Не задано описание поля типа ID" : undefined,
-        fieldIdDataSetFieldId : localData.datasetFields.find(i=>i.type === "ID_FIELD")?.dataSetFieldId === null ? "Не выбрано поле типа ID" : undefined,
-        fieldNameName : localData.datasetFields.find(i=>i.type === "NAME_FIELD")?.name.trim() === '' ? "Не задано имя поля типа NAME" : undefined,
-        fieldNameDescription : localData.datasetFields.find(i=>i.type === "NAME_FIELD")?.description.trim() === '' ? "Не задано описание поля типа NAME" : undefined,
-        fieldNameDataSetFieldId : localData.datasetFields.find(i=>i.type === "NAME_FIELD")?.dataSetFieldId === null ? "Не выбрано поле типа NAME" : undefined
-    };
+    let errorFields = {}
+    let errShowField = true
+    let errSearchByField =true
+
+    for(let f of fields){
+        if (f.showField) errShowField = false
+        if (f.searchByField) errSearchByField = false
+        errorFields[f.id + 'name'] = (f.name.trim() === '') ? "Не задано имя поля типа " + f.type : undefined;
+        errorFields[f.id + 'description'] = (f.description.trim() === '') ? "Не задано описание поля типа " + f.type : undefined;
+        errorFields[f.id + 'dataSetFieldId'] = (f.dataSetFieldId === null) ? "Не выбрано поле типа " + f.type : undefined;
+    }
 
     return {
         filterInstanceData: newFilterInstanceData,
-        errors: errors
+        errorData: {
+            ...errorFields,
+            dataSetId : localData.dataSetId === undefined ? "Не определён набор данных справочника" : undefined,
+            showField: errShowField ? "Не задано поле для вывода": undefined,
+            searchByField: errSearchByField ? "Не задано поле для поиска": undefined
+        }
     };
 }
 
