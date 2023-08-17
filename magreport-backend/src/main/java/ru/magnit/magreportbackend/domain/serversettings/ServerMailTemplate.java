@@ -15,6 +15,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import java.io.Serial;
+import java.time.LocalDateTime;
 
 import static javax.persistence.FetchType.LAZY;
 
@@ -48,4 +49,33 @@ public class ServerMailTemplate extends EntityWithName {
     @JoinColumn(name = "SERVER_MAIL_TEMPLATE_TYPE_ID")
     private ServerMailTemplateType type;
 
+    @Override
+    public ServerMailTemplate setId(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    @Override
+    public ServerMailTemplate setCreatedDateTime(LocalDateTime createdDateTime) {
+       this.createdDateTime = createdDateTime;
+       return this;
+    }
+
+    @Override
+    public ServerMailTemplate setModifiedDateTime(LocalDateTime modifiedDateTime) {
+        this.modifiedDateTime = modifiedDateTime;
+        return this;
+    }
+
+    @Override
+    public ServerMailTemplate setName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    @Override
+    public ServerMailTemplate setDescription(String description) {
+        this.description = description;
+        return this;
+    }
 }
