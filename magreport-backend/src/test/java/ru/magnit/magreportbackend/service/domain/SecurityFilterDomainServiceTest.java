@@ -7,13 +7,30 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import ru.magnit.magreportbackend.domain.dataset.DataSetField;
+import ru.magnit.magreportbackend.domain.dataset.DataType;
+import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.domain.filterinstance.FilterInstance;
+import ru.magnit.magreportbackend.domain.filterinstance.FilterInstanceField;
+import ru.magnit.magreportbackend.domain.filtertemplate.FilterOperationType;
 import ru.magnit.magreportbackend.domain.filtertemplate.FilterOperationTypeEnum;
+import ru.magnit.magreportbackend.domain.filtertemplate.FilterTemplate;
+import ru.magnit.magreportbackend.domain.filtertemplate.FilterType;
 import ru.magnit.magreportbackend.domain.filtertemplate.FilterTypeEnum;
+import ru.magnit.magreportbackend.domain.folderreport.FolderAuthority;
 import ru.magnit.magreportbackend.domain.securityfilter.SecurityFilter;
 import ru.magnit.magreportbackend.domain.securityfilter.SecurityFilterFolder;
+import ru.magnit.magreportbackend.domain.securityfilter.SecurityFilterFolderRole;
+import ru.magnit.magreportbackend.domain.securityfilter.SecurityFilterFolderRolePermission;
+import ru.magnit.magreportbackend.domain.securityfilter.SecurityFilterRole;
+import ru.magnit.magreportbackend.domain.securityfilter.SecurityFilterRoleTuple;
+import ru.magnit.magreportbackend.domain.securityfilter.SecurityFilterRoleTupleValue;
+import ru.magnit.magreportbackend.domain.user.Role;
 import ru.magnit.magreportbackend.dto.inner.UserView;
 import ru.magnit.magreportbackend.dto.inner.filter.FilterData;
+import ru.magnit.magreportbackend.dto.inner.securityfilter.SecurityFilterFieldMapping;
+import ru.magnit.magreportbackend.dto.request.ChangeParentFolderRequest;
+import ru.magnit.magreportbackend.dto.request.filterinstance.ListValuesCheckRequest;
 import ru.magnit.magreportbackend.dto.request.folder.FolderAddRequest;
 import ru.magnit.magreportbackend.dto.request.folder.FolderChangeParentRequest;
 import ru.magnit.magreportbackend.dto.request.folder.FolderRenameRequest;
@@ -24,20 +41,26 @@ import ru.magnit.magreportbackend.dto.response.securityfilter.RoleSettingsRespon
 import ru.magnit.magreportbackend.dto.response.securityfilter.SecurityFilterFolderResponse;
 import ru.magnit.magreportbackend.dto.response.securityfilter.SecurityFilterResponse;
 import ru.magnit.magreportbackend.dto.response.securityfilter.SecurityFilterRoleSettingsResponse;
+import ru.magnit.magreportbackend.dto.response.securityfilter.SecurityFilterShortResponse;
 import ru.magnit.magreportbackend.dto.response.user.RoleResponse;
+import ru.magnit.magreportbackend.dto.tuple.TupleValue;
 import ru.magnit.magreportbackend.exception.InvalidParametersException;
 import ru.magnit.magreportbackend.mapper.filterinstance.FilterDataFIMapper;
 import ru.magnit.magreportbackend.mapper.securityfilter.FolderNodeResponseSecurityFilterFolderMapper;
+import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterDataMapper;
 import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterFolderMapper;
 import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterFolderResponseMapper;
+import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterFolderRolePermissionMapper;
 import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterMapper;
 import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterMerger;
 import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterResponseMapper;
 import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterRoleMapper;
 import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterRoleSettingsResponseMapper;
+import ru.magnit.magreportbackend.mapper.securityfilter.SecurityFilterShortResponseMapper;
 import ru.magnit.magreportbackend.repository.SecurityFilterDataSetFieldRepository;
 import ru.magnit.magreportbackend.repository.SecurityFilterDataSetRepository;
 import ru.magnit.magreportbackend.repository.SecurityFilterFolderRepository;
+import ru.magnit.magreportbackend.repository.SecurityFilterFolderRoleRepository;
 import ru.magnit.magreportbackend.repository.SecurityFilterRepository;
 import ru.magnit.magreportbackend.repository.SecurityFilterRoleRepository;
 import ru.magnit.magreportbackend.repository.custom.SecurityFilterReportFieldsMappingRepository;
@@ -46,9 +69,14 @@ import ru.magnit.magreportbackend.service.jobengine.filter.FilterQueryExecutor;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -56,6 +84,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static ru.magnit.magreportbackend.domain.folderreport.FolderAuthorityEnum.WRITE;
+import static ru.magnit.magreportbackend.dto.backup.BackupObjectTypeEnum.SECURITY_FILTER;
 
 @ExtendWith(MockitoExtension.class)
 class SecurityFilterDomainServiceTest {
@@ -74,6 +104,9 @@ class SecurityFilterDomainServiceTest {
 
     @Mock
     private SecurityFilterDataSetFieldRepository dataSetFieldRepository;
+
+    @Mock
+    private SecurityFilterFolderRoleRepository folderRoleRepository;
 
     @Mock
     private SecurityFilterReportFieldsMappingRepository fieldsMappingRepository;
@@ -108,13 +141,23 @@ class SecurityFilterDomainServiceTest {
     @Mock
     private FolderNodeResponseSecurityFilterFolderMapper folderNodeResponseSecurityFilterFolderMapper;
 
+    @Mock
+    private SecurityFilterFolderRolePermissionMapper securityFilterFolderRolePermissionMapper;
+
+    @Mock
+    private SecurityFilterShortResponseMapper securityFilterShortResponseMapper;
+
+    @Mock
+    private SecurityFilterDataMapper securityFilterDataMapper;
+
     @InjectMocks
     SecurityFilterDomainService domainService;
 
     private final static Long ID = 1L;
     private final static String NAME = "name";
     private final static String DESCRIPTION = "description";
-    private final static LocalDateTime NOW = LocalDateTime.now();
+    private final static LocalDateTime CREATED = LocalDateTime.now();
+    private final static LocalDateTime MODIFIED = LocalDateTime.now().plusDays(1);
 
     @Test
     void addSecurityFilter() {
@@ -314,6 +357,18 @@ class SecurityFilterDomainServiceTest {
     }
 
     @Test
+    void getEffectiveSettingsTest() {
+        when(fieldsMappingRepository.getFieldsMappings(any())).thenReturn(Collections.singletonList(getSecurityFilterFieldMapping()));
+        when(repository.getAllByIdIn(anyList())).thenReturn(Collections.singletonList(getFilter()));
+
+        assertNotNull(domainService.getEffectiveSettingsForReport(ID, Set.of(ID)));
+
+        verify(fieldsMappingRepository).getFieldsMappings(any());
+
+        verifyNoMoreInteractions(fieldsMappingRepository);
+    }
+
+    @Test
     void deleteRole() {
 
         domainService.deleteRole(ID, ID);
@@ -359,16 +414,190 @@ class SecurityFilterDomainServiceTest {
         verifyNoMoreInteractions(dataSetFieldRepository);
     }
 
+    @Test
+    void getFoldersPermittedToRoleTest() {
+
+        when(folderRoleRepository.getAllByRoleId(anyLong())).thenReturn(Collections.singletonList(getSecurityFilterFolderRole()));
+
+        var result = domainService.getFoldersPermittedToRole(ID);
+
+        assertEquals(1, result.size());
+
+        assertEquals(ID, result.get(0).folderId());
+        assertEquals(NAME, result.get(0).folderName());
+        assertEquals(WRITE, result.get(0).roleAuthority());
+        assertEquals(SECURITY_FILTER.name(), result.get(0).typeFolder().name());
+
+        verify(folderRoleRepository).getAllByRoleId(anyLong());
+        verifyNoMoreInteractions(folderRoleRepository);
+
+    }
+
+    @Test
+    void addFolderPermittedToRoleTest() {
+        when(securityFilterFolderRolePermissionMapper.from(anyList())).thenReturn(Collections.singletonList(new SecurityFilterFolderRolePermission(ID)));
+
+        domainService.addFolderPermittedToRole(Collections.singletonList(ID), ID, Collections.singletonList(WRITE));
+
+        verify(securityFilterFolderRolePermissionMapper).from(anyList());
+        verify(folderRoleRepository).saveAll(anyList());
+        verifyNoMoreInteractions(folderRoleRepository);
+    }
+
+    @Test
+    void deleteFolderPermittedToRoleTest() {
+
+        domainService.deleteFolderPermittedToRole(Collections.singletonList(ID), ID);
+
+        verify(folderRoleRepository).deleteAllByFolderIdInAndRoleId(anyList(), anyLong());
+        verifyNoMoreInteractions(folderRoleRepository);
+    }
+
+    @Test
+    void getFiltersWithSettingsForRoleTest() {
+
+        when(roleRepository.getAllByRoleId(anyLong())).thenReturn(Collections.singletonList(getSecurityFilterRole()));
+        when(securityFilterShortResponseMapper.from(anyList())).thenReturn(Collections.singletonList(getSecurityFilterShortResponse()));
+
+        var result = domainService.getFiltersWithSettingsForRole(ID);
+
+        assertFalse(result.isEmpty());
+        assertEquals(ID, result.get(0).id());
+        assertEquals(NAME, result.get(0).name());
+        assertEquals(DESCRIPTION, result.get(0).description());
+        assertEquals("", result.get(0).userName());
+        assertEquals(CREATED, result.get(0).created());
+        assertEquals(MODIFIED, result.get(0).modified());
+        assertTrue(result.get(0).path().isEmpty());
+
+        verify(roleRepository).getAllByRoleId(anyLong());
+        verify(securityFilterShortResponseMapper).from(anyList());
+        verifyNoMoreInteractions(roleRepository, securityFilterShortResponseMapper);
+
+    }
+
+    @Test
+    void addFolderExceptionTest() {
+
+        when(securityFilterFolderMapper.from(any(FolderAddRequest.class))).thenReturn(new SecurityFilterFolder());
+        when(folderRepository.save(any())).thenReturn(new SecurityFilterFolder().setId(ID));
+
+        ReflectionTestUtils.setField(domainService, "maxLevel", 0L);
+
+        var request = new FolderAddRequest();
+
+        assertThrows(InvalidParametersException.class, () -> domainService.addFolder(request));
+
+        verify(securityFilterFolderMapper).from(any(FolderAddRequest.class));
+        verify(folderRepository).save(any());
+    }
+
+    @Test
+    void getEffectiveSettingsForFilterTest() {
+
+        when(repository.getAllByDataSetIdsAndRoleIds(any(),any())).thenReturn(Collections.singletonList(getFilter()));
+
+        var result = domainService.getEffectiveSettingsForFilter(ID, Set.of(ID));
+
+        verify(repository).getAllByDataSetIdsAndRoleIds(any(),any());
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    void getFolderIdsTest() {
+
+        when(repository.getAllByIdIn(anyList())).thenReturn(Collections.singletonList(getFilter()));
+
+        var result = domainService.getFolderIds(Collections.singletonList(ID));
+
+        assertFalse(result.isEmpty());
+        assertEquals(ID, result.get(0));
+
+        verify(repository).getAllByIdIn(anyList());
+        verifyNoMoreInteractions(repository);
+
+    }
+
+    @Test
+    void changeFilterInstanceParentFolderTest() {
+
+        when(repository.getAllByIdIn(anyList())).thenReturn(Collections.singletonList(getFilter()));
+
+        domainService.changeFilterInstanceParentFolder(new ChangeParentFolderRequest().setDestFolderId(ID).setObjIds(Collections.emptyList()));
+
+        verify(repository).getAllByIdIn(anyList());
+        verify(repository).saveAll(anyList());
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    void checkFilterReportValuesTest() {
+
+        when(repository.getReferenceById(anyLong())).thenReturn(getFilter());
+        when(queryExecutor.getFieldsValues(any())).thenReturn(Collections.emptyList());
+        when(securityFilterDataMapper.from((SecurityFilter) any())).thenReturn(getFilterData());
+        when(securityFilterResponseMapper.from((SecurityFilter) any())).thenReturn(getSecurityFilterResponse());
+
+        var result = domainService.checkFilterReportValues(getListValuesCheckRequest());
+
+        assertEquals(ID, result.filter().getId());
+        assertFalse(result.values().isEmpty());
+
+        verify(repository).getReferenceById(anyLong());
+        verify(queryExecutor).getFieldsValues(any());
+        verifyNoMoreInteractions(repository, queryExecutor);
+    }
+
+    @Test
+    void getReportFieldsMappingTest() {
+
+        when(fieldsMappingRepository.getFieldsMappings(anyLong())).thenReturn(Collections.singletonList(getSecurityFilterFieldMapping()));
+
+        var result = domainService.getReportFieldsMapping(ID);
+
+        assertTrue(result.containsKey(ID));
+        assertTrue(result.containsValue("name"));
+
+        verify(fieldsMappingRepository).getFieldsMappings(anyLong());
+        verifyNoMoreInteractions(fieldsMappingRepository);
+    }
+
+
     private SecurityFilter getFilter() {
         return new SecurityFilter()
                 .setId(ID)
                 .setName(NAME)
                 .setDescription(DESCRIPTION)
-                .setCreatedDateTime(NOW)
-                .setModifiedDateTime(NOW)
+                .setCreatedDateTime(CREATED)
+                .setModifiedDateTime(CREATED)
                 .setFolder(new SecurityFilterFolder().setId(ID).setParentFolder(new SecurityFilterFolder()))
-                .setFilterInstance(new FilterInstance()
-                        .setId(ID));
+                .setFilterInstance(new FilterInstance().setId(ID))
+                .setFilterRoles(
+                        Collections.singletonList(
+                                new SecurityFilterRole(ID)
+                                        .setRole(new Role(ID))
+                                        .setSecurityFilter(new SecurityFilter(ID)
+                                                .setFilterInstance(
+                                                        new FilterInstance(ID)
+                                                                .setFilterTemplate(
+                                                                        new FilterTemplate(ID)
+                                                                                .setType(new FilterType().setId(ID))
+                                                                )
+                                                )
+                                                .setOperationType(new FilterOperationType(FilterOperationTypeEnum.IS_EQUAL))
+                                        )
+                                        .setFilterRoleTuples(Collections.singletonList(
+                                                new SecurityFilterRoleTuple(ID)
+                                                        .setTupleValues(Collections.singletonList(
+                                                                new SecurityFilterRoleTupleValue(ID)
+                                                                        .setField(new FilterInstanceField(ID)
+                                                                                .setDataSetField(new DataSetField(ID)
+                                                                                        .setType(new DataType(DataTypeEnum.DATE))
+                                                                                )
+                                                                        )
+                                                        ))
+                                        ))
+                        ));
 
     }
 
@@ -391,8 +620,8 @@ class SecurityFilterDomainServiceTest {
                 new ArrayList<>(),
                 new ArrayList<>(),
                 "",
-                NOW,
-                NOW,
+                CREATED,
+                CREATED,
                 new ArrayList<>()
         );
     }
@@ -418,6 +647,58 @@ class SecurityFilterDomainServiceTest {
                         new RoleResponse(),
                         Collections.emptyList()
                 ))
+        );
+    }
+
+    private SecurityFilterFolderRole getSecurityFilterFolderRole() {
+        return new SecurityFilterFolderRole()
+                .setId(ID)
+                .setRole(new Role(ID))
+                .setFolder(new SecurityFilterFolder(ID).setName(NAME))
+                .setPermissions(Collections.singletonList(
+                        new SecurityFilterFolderRolePermission(ID)
+                                .setAuthority(new FolderAuthority(WRITE))
+                ))
+                .setCreatedDateTime(CREATED)
+                .setModifiedDateTime(MODIFIED);
+    }
+
+    private SecurityFilterRole getSecurityFilterRole() {
+        return new SecurityFilterRole()
+                .setId(ID)
+                .setSecurityFilter(new SecurityFilter(ID))
+                .setRole(new Role(ID))
+                .setCreatedDateTime(CREATED)
+                .setModifiedDateTime(MODIFIED);
+
+    }
+
+
+    private SecurityFilterShortResponse getSecurityFilterShortResponse() {
+        return new SecurityFilterShortResponse(
+                ID,
+                NAME,
+                DESCRIPTION,
+                "",
+                CREATED,
+                MODIFIED,
+                Collections.emptyList()
+        );
+    }
+
+    private ListValuesCheckRequest getListValuesCheckRequest() {
+        return new ListValuesCheckRequest()
+                .setFilterId(ID)
+                .setValues(Collections.singletonList(new TupleValue(ID, "")));
+
+    }
+
+    private SecurityFilterFieldMapping getSecurityFilterFieldMapping() {
+        return new SecurityFilterFieldMapping(
+                ID,
+                ID,
+                ID,
+                NAME
         );
     }
 }
