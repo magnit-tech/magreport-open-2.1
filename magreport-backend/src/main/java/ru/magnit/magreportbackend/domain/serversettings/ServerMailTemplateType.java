@@ -14,6 +14,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -36,4 +37,33 @@ public class ServerMailTemplateType extends EntityWithName {
     @OneToMany(cascade = ALL, mappedBy = "type")
     private List<ServerMailTemplate> serverMailTemplates = Collections.emptyList();
 
+    @Override
+    public ServerMailTemplateType setId(Long id) {
+         this.id = id;
+         return this;
+    }
+
+    @Override
+    public ServerMailTemplateType setCreatedDateTime(LocalDateTime createdDateTime) {
+      this.createdDateTime = createdDateTime;
+      return this;
+    }
+
+    @Override
+    public ServerMailTemplateType setModifiedDateTime(LocalDateTime modifiedDateTime) {
+      this.modifiedDateTime = modifiedDateTime;
+      return this;
+    }
+
+    @Override
+    public ServerMailTemplateType setName(String name) {
+       this.name = name;
+       return this;
+    }
+
+    @Override
+    public ServerMailTemplateType setDescription(String description) {
+       this.description = description;
+       return this;
+    }
 }
