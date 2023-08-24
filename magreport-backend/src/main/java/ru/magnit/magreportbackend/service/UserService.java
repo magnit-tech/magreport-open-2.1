@@ -15,6 +15,7 @@ import ru.magnit.magreportbackend.dto.inner.UserView;
 import ru.magnit.magreportbackend.dto.request.user.RoleRequest;
 import ru.magnit.magreportbackend.dto.request.user.UserEditRequest;
 import ru.magnit.magreportbackend.dto.request.user.UserRequest;
+import ru.magnit.magreportbackend.dto.request.user.UserPageRequest;
 import ru.magnit.magreportbackend.dto.request.user.UserStatusSetRequest;
 import ru.magnit.magreportbackend.dto.response.user.UserNameResponse;
 import ru.magnit.magreportbackend.dto.response.user.UserResponse;
@@ -101,6 +102,10 @@ public class UserService {
 
     public List<UserResponse> getAllActualUsers() {
         return userDomainService.getNotArchiveUsers();
+    }
+
+    public List<UserResponse> getUsersPage(UserPageRequest request) {
+        return userDomainService.getUsersPage(request);
     }
 
     public UserStatusEnum getUserStatus(String userName, String domainName) {

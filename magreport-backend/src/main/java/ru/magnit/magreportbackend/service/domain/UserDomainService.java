@@ -17,6 +17,7 @@ import ru.magnit.magreportbackend.dto.inner.RoleView;
 import ru.magnit.magreportbackend.dto.inner.UserInfo;
 import ru.magnit.magreportbackend.dto.inner.UserView;
 import ru.magnit.magreportbackend.dto.request.user.UserEditRequest;
+import ru.magnit.magreportbackend.dto.request.user.UserPageRequest;
 import ru.magnit.magreportbackend.dto.response.user.UserNameResponse;
 import ru.magnit.magreportbackend.dto.response.user.UserResponse;
 import ru.magnit.magreportbackend.mapper.auth.RoleViewMapper;
@@ -253,7 +254,7 @@ public class UserDomainService {
     }
 
     @Transactional
-    public UserResponse editUser(UserEditRequest request) {
+    public void editUser(UserEditRequest request) {
 
         var user = userRepository.getReferenceById(request.getId());
 
@@ -265,8 +266,7 @@ public class UserDomainService {
                 .setDescription(request.getDescription())
                 .setModifiedDateTime(LocalDateTime.now());
 
-        user = userRepository.save(user);
-        return userResponseMapper.from(user);
+        userRepository.save(user);
     }
 
     @Transactional
@@ -274,6 +274,21 @@ public class UserDomainService {
         return userRepository
                 .getUserByStatusIsNotEquals(ARCHIVE.getId())
                 .stream()
+                .map(userResponseMapper::from)
+                .toList();
+    }
+
+    @Transactional
+    public List<UserResponse> getUsersPage(UserPageRequest request) {
+
+        var statuses = request.getStatuses().stream().map(UserStatusEnum::getId).toList();
+
+        return userRepository.findAll()
+                .stream()
+                .filter(u -> statuses.contains(u.getUserStatus().getId()))
+                .filter(u -> u.getName().contains(request.getSearchValue()))
+                .skip((request.getPageNumber() - 1) * request.getUsersPerPage())
+                .limit(request.getUsersPerPage())
                 .map(userResponseMapper::from)
                 .toList();
     }
