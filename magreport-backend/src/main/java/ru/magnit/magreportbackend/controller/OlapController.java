@@ -23,7 +23,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter
 import ru.magnit.magreportbackend.dto.inner.olap.OlapUserRequestLog;
 import ru.magnit.magreportbackend.dto.request.DatePeriodRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapConfigRequest;
-import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequestNew;
 import ru.magnit.magreportbackend.dto.request.olap.OlapExportPivotTableRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldItemsRequestNew;
@@ -61,11 +60,10 @@ import ru.magnit.magreportbackend.util.Pair;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -84,10 +82,8 @@ public class OlapController {
 
     @Value("${magreport.olap.max-dop-pivot}")
     private int maxDopPivot;
+    private final ConcurrentHashMap<Thread, LocalDateTime> currentDop = new ConcurrentHashMap<>();
 
-    private final AtomicInteger countDop = new AtomicInteger(0);
-
-    public static final String OLAP_GET_CUBE = "/api/v1/olap/get-cube";
     public static final String OLAP_GET_CUBE_NEW = "/api/v1/olap/get-cube-new";
     public static final String OLAP_GET_FIELD_VALUES = "/api/v1/olap/get-field-values";
     public static final String OLAP_CONFIGURATION_REPORT_ADD = "/api/v1/olap/configuration/report-add";
@@ -543,19 +539,27 @@ public class OlapController {
     public ResponseBody<TokenResponse> exportPivotTableExcel(
             @RequestBody OlapExportPivotTableRequest dataRequest) throws JsonProcessingException {
 
-        log.debug(String.format("Current count connect: %s. Маx connect count: %s", countDop.get(), maxDopPivot));
+        currentDop.forEach((key,value) -> {
 
-        if (countDop.get() < maxDopPivot) {
+            if (value.isAfter(LocalDateTime.now().plusHours(1))){
+                key.interrupt();
+                currentDop.remove(key);
+            }
+
+        });
+
+        LogHelper.logInfoUserMethodStart();
+        log.debug(String.format("%nCurrent count connect:%s.%nМаx connect count: %s", currentDop, maxDopPivot));
+
+        if (currentDop.size() < maxDopPivot) {
             LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_GET_PIVOT_TABLE_EXCEL, dataRequest, userService.getCurrentUserName()));
-            LogHelper.logInfoUserMethodStart();
-            countDop.incrementAndGet();
-
+            currentDop.put(Thread.currentThread(), LocalDateTime.now());
             TokenResponse response;
 
             try {
                 response = olapService.exportPivotTableExcel(dataRequest);
             } catch (Exception ex) {
-                countDop.decrementAndGet();
+                currentDop.remove(Thread.currentThread());
                 throw new OlapException(ex.getMessage(), ex);
             }
 
@@ -565,13 +569,13 @@ public class OlapController {
                     .data(response)
                     .build();
 
-            countDop.decrementAndGet();
+            currentDop.remove(Thread.currentThread());
             LogHelper.logInfoUserMethodEnd();
 
             return dataResponse;
         } else {
 
-            LogHelper.logInfoUserMethodStart();
+
             var dataResponse = ResponseBody.<TokenResponse>builder()
                     .success(false)
                     .message("Нет свободных подключений, повторите попытку позднее")
