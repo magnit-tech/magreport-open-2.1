@@ -293,6 +293,11 @@ public class UserDomainService {
                 .toList();
     }
 
+    @Transactional
+    public void deleteUserRolesByUser(List<Long> userIds) {
+        userRoleRepository.deleteAllByUserIdIn(userIds);
+    }
+
     private Domain getDomain(String domainName) {
         var domain = domainRepository.getByName(domainName);
         if (domain == null) {
