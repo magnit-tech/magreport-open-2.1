@@ -294,11 +294,8 @@ public class UserDomainService {
     }
 
     @Transactional
-    public void deleteUserRolesByUser (List<Long> userIds) {
-        var users = userRepository.getAllByIdIn(userIds);
-        users.forEach(u -> u.setUserRoles(Collections.emptyList()));
-        userRepository.saveAll(users);
-
+    public void deleteUserRolesByUser(List<Long> userIds) {
+        userRoleRepository.deleteAllByUserIdIn(userIds);
     }
 
     private Domain getDomain(String domainName) {
