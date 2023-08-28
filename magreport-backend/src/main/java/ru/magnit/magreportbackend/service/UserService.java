@@ -179,6 +179,7 @@ public class UserService {
         });
 
         userDomainService.setUserStatus(setArchiveStatus, UserStatusEnum.ARCHIVE);
+        userDomainService.deleteUserRolesByUser(setArchiveStatus);
     }
 
 
