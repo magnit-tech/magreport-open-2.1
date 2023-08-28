@@ -371,6 +371,7 @@ class UserServiceTest {
         verify(ldapService).getUserInfo(anyList());
         verify(domainService).setUserStatus(anyList(),eq(UserStatusEnum.ARCHIVE));
         verify(domainService, times(2)).editUser(any());
+        verify(domainService).deleteUserRolesByUser(anyList());
         verifyNoMoreInteractions(domainService, ldapService);
     }
 
