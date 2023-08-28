@@ -82,6 +82,10 @@ public class OlapController {
 
     @Value("${magreport.olap.max-dop-pivot}")
     private int maxDopPivot;
+
+    @Value("${magreport.olap.max-export-time}")
+    private int maxExportTime;
+
     private final ConcurrentHashMap<Thread, LocalDateTime> currentDop = new ConcurrentHashMap<>();
 
     public static final String OLAP_GET_CUBE_NEW = "/api/v1/olap/get-cube-new";
@@ -541,7 +545,7 @@ public class OlapController {
 
         currentDop.forEach((key,value) -> {
 
-            if (value.isAfter(LocalDateTime.now().plusHours(1))){
+            if (value.isAfter(LocalDateTime.now().plusMinutes(maxExportTime))){
                 key.interrupt();
                 currentDop.remove(key);
             }
