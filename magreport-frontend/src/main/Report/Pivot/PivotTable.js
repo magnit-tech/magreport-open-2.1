@@ -384,8 +384,8 @@ export default function(props){
     }
 
     function handleClickOnAddSortingArrow(position, order, {cell}) {
-        const fullMetricNameWithRowNames = cell.rowName.length > 0 ? `${cell.rowName.join(' - ')} - ${cell.metricName}` : cell.metricName
-        const fullMetricNameWithColumnNames = cell.columnName.length > 0 ? `${cell.columnName.join(' - ')} - ${cell.metricName}` : cell.metricName
+        const fullMetricNameWithRowNames = cell.rowName?.length > 0 ? `${cell.rowName.join(' - ')} - ${cell.metricName}` : cell.metricName
+        const fullMetricNameWithColumnNames = cell.columnName?.length > 0 ? `${cell.columnName.join(' - ')} - ${cell.metricName}` : cell.metricName
 
         if (position === 'row') {
             const checkColumnSort = props.sortingValues.columnSort ? {...props.sortingValues.columnSort} : {
