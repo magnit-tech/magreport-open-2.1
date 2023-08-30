@@ -46,6 +46,13 @@ public record FilterReportFieldResponse(
         Boolean expand,
 
         @JsonFormat(shape = JsonFormat.Shape.BOOLEAN)
-        Boolean valid
+        Boolean valid,
+
+        @JsonFormat(shape = JsonFormat.Shape.BOOLEAN)
+        Boolean searchByField,
+
+        @JsonFormat(shape = JsonFormat.Shape.BOOLEAN)
+        Boolean showField
+
 ) {
 }

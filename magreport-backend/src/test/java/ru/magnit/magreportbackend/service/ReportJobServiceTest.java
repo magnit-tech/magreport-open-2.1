@@ -89,7 +89,6 @@ import static ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum.CO
 import static ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum.EXPORT;
 import static ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum.FAILED;
 import static ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum.RUNNING;
-import static ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum.SCHEDULED;
 
 @ExtendWith(MockitoExtension.class)
 class ReportJobServiceTest {
@@ -872,6 +871,8 @@ class ReportJobServiceTest {
                                                         null,
                                                         null,
                                                         FilterFieldTypeEnum.CODE_FIELD,
+                                                        null,
+                                                        null,
                                                         null,
                                                         null,
                                                         null,
