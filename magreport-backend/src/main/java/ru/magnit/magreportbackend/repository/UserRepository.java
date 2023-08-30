@@ -35,4 +35,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "(SELECT DISTINCT D.user FROM DATASET D) OR " +
             "U IN (SELECT DISTINCT R.user FROM REPORT R)")
     List<User> getAuthoringUsers();
+
+    List<User> getAllByDomainIdIn (List<Long> domains);
 }

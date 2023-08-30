@@ -18,6 +18,7 @@ import ru.magnit.magreportbackend.dto.request.user.UserRequest;
 import ru.magnit.magreportbackend.dto.request.user.UserPageRequest;
 import ru.magnit.magreportbackend.dto.request.user.UserStatusSetRequest;
 import ru.magnit.magreportbackend.dto.response.user.UserNameResponse;
+import ru.magnit.magreportbackend.dto.response.user.UserPageResponse;
 import ru.magnit.magreportbackend.dto.response.user.UserResponse;
 import ru.magnit.magreportbackend.exception.InvalidAuthenticationException;
 import ru.magnit.magreportbackend.mapper.auth.GrantedAuthorityMapper;
@@ -104,7 +105,7 @@ public class UserService {
         return userDomainService.getNotArchiveUsers();
     }
 
-    public List<UserResponse> getUsersPage(UserPageRequest request) {
+    public UserPageResponse getUsersPage(UserPageRequest request) {
         return userDomainService.getUsersPage(request);
     }
 
