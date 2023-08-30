@@ -20,6 +20,7 @@ import java.util.List;
 public class UserPageRequest {
 
     private String searchValue;
+    private List<String> domains;
     private Long pageNumber;
     private Long usersPerPage;
     private List<UserStatusEnum> statuses = Collections.emptyList();

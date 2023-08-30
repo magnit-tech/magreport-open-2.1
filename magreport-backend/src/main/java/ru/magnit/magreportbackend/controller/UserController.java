@@ -15,6 +15,7 @@ import ru.magnit.magreportbackend.dto.request.user.UserPageRequest;
 import ru.magnit.magreportbackend.dto.request.user.UserStatusSetRequest;
 import ru.magnit.magreportbackend.dto.response.ResponseBody;
 import ru.magnit.magreportbackend.dto.response.ResponseList;
+import ru.magnit.magreportbackend.dto.response.user.UserPageResponse;
 import ru.magnit.magreportbackend.dto.response.user.UserResponse;
 import ru.magnit.magreportbackend.service.UserService;
 import ru.magnit.magreportbackend.util.LogHelper;
@@ -218,10 +219,10 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     @PostMapping(value = USERS_GET_PAGE,
             produces = APPLICATION_JSON_VALUE)
-    public ResponseList<UserResponse> getUsersPage(@RequestBody UserPageRequest request) {
+    public ResponseBody<UserPageResponse> getUsersPage(@RequestBody UserPageRequest request) {
         LogHelper.logInfoUserMethodStart();
 
-        var response = ResponseList.<UserResponse>builder()
+        var response = ResponseBody.<UserPageResponse>builder()
                 .success(true)
                 .message("")
                 .data(service.getUsersPage(request))
