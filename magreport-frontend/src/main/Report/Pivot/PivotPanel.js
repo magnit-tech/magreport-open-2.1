@@ -1078,6 +1078,8 @@ function PivotPanel(props){
         newPivotConfiguration.replaceFilter();
         newPivotConfiguration.setColumnFrom(0)
         newPivotConfiguration.setRowFrom(0);
+        newPivotConfiguration.changeSortOrder({});
+        setSortingValues({})
         oldAndNewConfiguration.current = {
             newFieldIndex : i,
             oldConfiguration: new PivotConfiguration(pivotConfiguration),
