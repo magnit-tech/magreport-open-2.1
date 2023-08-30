@@ -78,6 +78,8 @@ class FilterReportResponseMapperTest {
                 CREATED_DATE_TIME,
                 MODIFIED_DATE_TIME,
                 true,
+                true,
+                true,
                 true);
     }
 
