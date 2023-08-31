@@ -87,6 +87,7 @@ public class ConnectionPoolManager {
 
             response
                     .setDataSourceId(key.id())
+                    .setDataSourceName(key.dataSourceName())
                     .setConnectPoolSize(datasource.getMaximumPoolSize())
                     .setActiveConnectSize(datasource.getHikariPoolMXBean().getActiveConnections())
                     .setQueueConnectSize(datasource.getHikariPoolMXBean().getThreadsAwaitingConnection());

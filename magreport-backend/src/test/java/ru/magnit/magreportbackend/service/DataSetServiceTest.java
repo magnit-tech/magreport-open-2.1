@@ -277,7 +277,7 @@ class DataSetServiceTest {
     void createDataSetFromDBMetaData() {
 
         when(userDomainService.getCurrentUser()).thenReturn(new UserView().setId(1L));
-        when(dataSourceDomainService.getDataSourceView(anyLong())).thenReturn(new DataSourceData(ID, DataSourceTypeEnum.H2, URL, USER_NAME, PASSWORD, POOL_SIZE));
+        when(dataSourceDomainService.getDataSourceView(anyLong())).thenReturn(new DataSourceData(ID, DataSourceTypeEnum.H2, URL, USER_NAME, PASSWORD, POOL_SIZE, NAME));
         when(metaDataService.getObjectFields(any(), any(), any(), any())).thenReturn(Collections.singletonList(new ObjectFieldResponse()));
         when(dataSetDomainService.createDataSetFromMetaData(any(), any(), anyList())).thenReturn(ID);
         when(dataSetDomainService.getDataSet(anyLong())).thenReturn(getDataSetResponse(TYPE_ID_TABLE));
@@ -303,7 +303,7 @@ class DataSetServiceTest {
     void createDataSetFromDBMetaDataProcedure() {
 
         when(userDomainService.getCurrentUser()).thenReturn(new UserView().setId(1L));
-        when(dataSourceDomainService.getDataSourceView(anyLong())).thenReturn(new DataSourceData(ID, DataSourceTypeEnum.H2, URL, USER_NAME, PASSWORD, POOL_SIZE));
+        when(dataSourceDomainService.getDataSourceView(anyLong())).thenReturn(new DataSourceData(ID, DataSourceTypeEnum.H2, URL, USER_NAME, PASSWORD, POOL_SIZE, NAME));
         when(dataSetDomainService.getDataSet(anyLong())).thenReturn(getDataSetResponse(TYPE_ID_PROCEDURE));
         when(procedureReportService.checkProcedureReportSchemaMetaData(any(), any())).thenReturn(false);
 
@@ -412,7 +412,7 @@ class DataSetServiceTest {
     void refreshDataSet() {
         //check Procedure type
         when(dataSetDomainService.getDataSet(any())).thenReturn(getDataSetResponse(ID).setTypeId(1L));
-        when(dataSourceDomainService.getDataSourceView(any())).thenReturn(new DataSourceData(ID, DataSourceTypeEnum.H2, URL, USER_NAME, PASSWORD, POOL_SIZE));
+        when(dataSourceDomainService.getDataSourceView(any())).thenReturn(new DataSourceData(ID, DataSourceTypeEnum.H2, URL, USER_NAME, PASSWORD, POOL_SIZE, NAME));
         when(metaDataService.getProcedureFields2(any(), any(), any(), any())).thenReturn(Collections.emptyList());
         when(dataSetDomainService.getUnlinkedInvalidFields(any(), any())).thenReturn(Collections.emptyList());
         when(dataSetDomainService.refreshDataSet(any(), anyList())).thenReturn(Collections.emptyList());
@@ -434,7 +434,7 @@ class DataSetServiceTest {
 
         //check refresh
         when(dataSetDomainService.getDataSet(any())).thenReturn(getDataSetResponse(ID).setTypeId(0L));
-        when(dataSourceDomainService.getDataSourceView(any())).thenReturn(new DataSourceData(ID, DataSourceTypeEnum.H2, URL, USER_NAME, PASSWORD, POOL_SIZE));
+        when(dataSourceDomainService.getDataSourceView(any())).thenReturn(new DataSourceData(ID, DataSourceTypeEnum.H2, URL, USER_NAME, PASSWORD, POOL_SIZE, NAME));
         when(metaDataService.getObjectFields(any(), any(), any(), any())).thenReturn(Collections.emptyList());
         when(dataSetDomainService.getUnlinkedInvalidFields(any(), any())).thenReturn(Collections.emptyList());
         when(dataSetDomainService.refreshDataSet(any(), anyList())).thenReturn(Collections.emptyList());
@@ -477,7 +477,7 @@ class DataSetServiceTest {
     void addDataSetFromProcedure() {
 
         when(userDomainService.getCurrentUser()).thenReturn(new UserView());
-        when(dataSourceDomainService.getDataSourceView(any())).thenReturn(new DataSourceData(ID, DataSourceTypeEnum.H2, URL, USER_NAME, PASSWORD, POOL_SIZE));
+        when(dataSourceDomainService.getDataSourceView(any())).thenReturn(new DataSourceData(ID, DataSourceTypeEnum.H2, URL, USER_NAME, PASSWORD, POOL_SIZE, NAME));
         when(procedureReportService.checkProcedureReportSchemaMetaData(any(), any())).thenReturn(true);
         when(metaDataService.getProcedureFields2(any(), any(), any(), any())).thenReturn(Collections.emptyList());
         when(dataSetDomainService.addDataSetFromProcedure(any(), any(), anyList())).thenReturn(ID);

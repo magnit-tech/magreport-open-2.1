@@ -66,7 +66,7 @@ class ExternalAuthRoleRefreshServiceTest {
         source.put(ExternalAuthSourceTypeEnum.GROUP_SOURCE,
                 new ExternalAuthSourceView()
                         .setDataSet(new DataSetView(null, null, null, null, null,
-                                new DataSourceData(1L, DataSourceTypeEnum.H2, null, null, null, null),
+                                new DataSourceData(1L, DataSourceTypeEnum.H2, null, null, null, null, null),
                                 null)));
 
         return new ExternalAuthSecurityView()

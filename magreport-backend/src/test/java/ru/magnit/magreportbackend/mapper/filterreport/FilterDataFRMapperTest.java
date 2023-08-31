@@ -71,7 +71,6 @@ class FilterDataFRMapperTest {
 
         verify(dataSourceViewMapper).from(any(DataSource.class));
         verify(filterFieldDataFRMapper).from(anyList());
-        ;
     }
 
     private FilterReport getFilterReport() {
@@ -105,6 +104,6 @@ class FilterDataFRMapperTest {
     }
 
     private DataSourceData getDataSourceData() {
-        return new DataSourceData(ID, DataSourceTypeEnum.IMPALA, "url", "username", "******", (short) 5);
+        return new DataSourceData(ID, DataSourceTypeEnum.IMPALA, "url", "username", "******", (short) 5, "name");
     }
 }

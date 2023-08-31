@@ -251,7 +251,7 @@ class DataSourceServiceTest {
     @Test
     void editDataSource() {
         when(dataSourceDomainService.editDataSource(any())).thenReturn(getRenameDataSourceResponse());
-        when(dataSourceDomainService.getDataSourceView(any())).thenReturn(new DataSourceData(null, null, null, null, null, null));
+        when(dataSourceDomainService.getDataSourceView(any())).thenReturn(new DataSourceData(null, null, null, null, null, null, null));
 
         DataSourceResponse response = service.editDataSource(getRenameDataSourceAddRequest());
 

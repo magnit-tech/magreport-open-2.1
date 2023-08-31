@@ -10,7 +10,8 @@ public record DataSourceData(
         String url,
         String userName,
         String password,
-        Short poolSize
+        Short poolSize,
+        String dataSourceName
 ) {
 
     @Override
