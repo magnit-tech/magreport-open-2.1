@@ -38,4 +38,8 @@ public class SettingsService {
     public String getValueSetting (String code){
         return domainService.getValueSetting(code);
     }
+
+    public ServerSettingsResponse getSettingsFolder(String codeFolder) {
+        return domainService.getSettingsFolder(codeFolder);
+    }
 }
