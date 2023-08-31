@@ -626,7 +626,8 @@ class DataSourceDomainServiceTest {
                 URL,
                 USER_NAME,
                 PASSWORD,
-                POOL_SIZE);
+                POOL_SIZE,
+                NAME);
     }
 
     private DataSource getDataSourceObject() {

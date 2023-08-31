@@ -88,6 +88,6 @@ class DataSetViewMapperTest {
     }
 
     private DataSourceData getDataSourceData() {
-        return new DataSourceData(ID, DataSourceTypeEnum.IMPALA, "url", "username", "******", (short) 5);
+        return new DataSourceData(ID, DataSourceTypeEnum.IMPALA, "url", "username", "******", (short) 5, "name");
     }
 }

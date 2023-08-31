@@ -8,7 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.magnit.magreportbackend.domain.dataset.DataSet;
 import ru.magnit.magreportbackend.domain.dataset.DataSetField;
 import ru.magnit.magreportbackend.domain.dataset.DataType;
-import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.domain.datasource.DataSource;
 import ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum;
 import ru.magnit.magreportbackend.domain.filterinstance.FilterInstance;
@@ -152,7 +151,7 @@ class FilterReportQueryDataMergerTest {
     }
 
     private DataSourceData getDataSourceData() {
-        return new DataSourceData(ID, DataSourceTypeEnum.IMPALA, "url", "username", "******", (short) 5);
+        return new DataSourceData(ID, DataSourceTypeEnum.IMPALA, "url", "username", "******", (short) 5, "name");
     }
 
     private FilterFieldRequestData getFilterFieldRequestData() {

@@ -12,6 +12,7 @@ import lombok.experimental.Accessors;
 public class DataSourceConnectInfo {
 
     private Long dataSourceId;
+    private String dataSourceName;
     private int connectPoolSize;
     private int activeConnectSize;
     private int queueConnectSize;

@@ -382,7 +382,7 @@ class JobDomainServiceTest {
     private ReportJobData getReportJobData() {
         return new ReportJobData(
                 ID, ID, ID, ID, ID, NAME, ID, ID, ID, true,
-                new DataSourceData(ID, DataSourceTypeEnum.TERADATA, "URL", NAME, "PWD", (short) 1),
+                new DataSourceData(ID, DataSourceTypeEnum.TERADATA, "URL", NAME, "PWD", (short) 1, "name"),
                 new ReportData(ID, NAME, DESCRIPTION, "SCHEMA", "TABLE", Collections.emptyList(),
                         new ReportFilterGroupData(ID,
                                 null,
