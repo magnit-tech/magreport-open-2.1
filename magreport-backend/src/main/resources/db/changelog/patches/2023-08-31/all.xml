@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.11.xsd">
+
+    <changeSet id="ADD-SETTING-SUPPORT-EMAIL-001" author="vyushin_aa">
+
+        <insert tableName="SERVER_SETTINGS">
+            <column name="FOLDER_ID" valueComputed="SELECT SERVER_SETTINGS_FOLDER_ID FROM REPOSITORY.SERVER_SETTINGS_FOLDER WHERE CODE='LOGIN_CONFIG'"/>
+            <column name="ORDINAL" valueNumeric="2"/>
+            <column name="CODE" value="supportEmail"/>
+            <column name="NAME" value= "Почтовый адрес сопровождения Магрепорт"/>
+            <column name="DESCRIPTION" value="Почтовый адрес для заявок пользователей"/>
+        </insert>
+
+    </changeSet>
+</databaseChangeLog>

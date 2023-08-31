@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import ru.magnit.magreportbackend.dto.request.serversettings.ServerSettingFolderRequest;
 import ru.magnit.magreportbackend.dto.request.serversettings.ServerSettingSetRequest;
 import ru.magnit.magreportbackend.dto.request.serversettings.ServerSettingsJournalRequest;
 import ru.magnit.magreportbackend.dto.response.ResponseBody;
@@ -33,6 +34,7 @@ public class ServerSettingsController {
     public static final String SERVER_SETTINGS_JOURNAL = "/api/v1/server-settings/get-journal";
     public static final String SERVER_SETTINGS_GET_DATE_TIME = "/api/v1/server-settings/get-date-time";
 
+    public static final String SERVER_SETTINGS_GET_FOLDER = "/api/v1/server-settings/get-folder";
     private final SettingsService service;
 
     @Operation(summary = "Получение текущих настроек")
@@ -108,6 +110,24 @@ public class ServerSettingsController {
                 .message("")
                 .data(OffsetDateTime.now().toString())
                 .build();
+        LogHelper.logInfoUserMethodEnd();
+        return response;
+    }
+
+    @Operation(summary = "Получение группы настроек по коду")
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping(value = SERVER_SETTINGS_GET_FOLDER,
+            produces = APPLICATION_JSON_VALUE)
+    public ResponseBody<ServerSettingsResponse> getServerSettingsFolder(@RequestBody ServerSettingFolderRequest codeFolder) {
+
+        LogHelper.logInfoUserMethodStart();
+
+        var response = ResponseBody.<ServerSettingsResponse>builder()
+                .success(true)
+                .message("")
+                .data(service.getSettingsFolder(codeFolder.getCodeFolder()))
+                .build();
+
         LogHelper.logInfoUserMethodEnd();
         return response;
     }

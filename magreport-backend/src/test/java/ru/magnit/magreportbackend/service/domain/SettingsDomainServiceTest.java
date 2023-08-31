@@ -14,6 +14,8 @@ import ru.magnit.magreportbackend.domain.user.User;
 import ru.magnit.magreportbackend.dto.inner.UserView;
 import ru.magnit.magreportbackend.dto.request.serversettings.ServerSettingSetRequest;
 import ru.magnit.magreportbackend.dto.request.serversettings.ServerSettingsJournalRequest;
+import ru.magnit.magreportbackend.dto.response.serversettings.ServerSettingsFolderResponse;
+import ru.magnit.magreportbackend.mapper.serversettings.ServerSettingFolderResponseMapper;
 import ru.magnit.magreportbackend.repository.ServerSettingsFolderRepository;
 import ru.magnit.magreportbackend.repository.ServerSettingsJournalRepository;
 import ru.magnit.magreportbackend.repository.ServerSettingsRepository;
@@ -23,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -45,12 +48,16 @@ class SettingsDomainServiceTest {
     @Mock
     private CryptoService cryptoService;
 
+    @Mock
+    private ServerSettingFolderResponseMapper serverSettingFolderResponseMapper;
+
     @InjectMocks
     SettingsDomainService domainService;
 
     @Test
     void getSettings() {
         when(folderRepository.findAll()).thenReturn(Collections.singletonList(getServerSettingsFolder()));
+        when(serverSettingFolderResponseMapper.from(anyList())).thenReturn(Collections.singletonList(getServerSettingsFolderResponse()));
 
         Assertions.assertNotNull(domainService.getSettings());
 
@@ -135,5 +142,8 @@ class SettingsDomainServiceTest {
                 .setModifiedDateTime(LocalDateTime.now());
     }
 
+    private ServerSettingsFolderResponse getServerSettingsFolderResponse(){
+        return new ServerSettingsFolderResponse();
+    }
 
 }
