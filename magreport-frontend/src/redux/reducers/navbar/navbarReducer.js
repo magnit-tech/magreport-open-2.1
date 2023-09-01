@@ -38,6 +38,7 @@ function buildNavigationPathToFolder(itemsType, path){
                      :itemsType === FolderItemTypes.scheduleTasks ? SidebarItems.schedule.subItems.scheduleTasks
                      :itemsType === FolderItemTypes.systemMailTemplates ? SidebarItems.admin.subItems.mailTexts
                      :itemsType === FolderItemTypes.theme ? SidebarItems.admin.subItems.theme
+                     :itemsType === FolderItemTypes.loadMonitoring ? SidebarItems.admin.subItems.loadMonitoring
                      :itemsType === FolderItemTypes.cubes ? SidebarItems.admin.subItems.cubes
                      :  SidebarItems.reports;
 

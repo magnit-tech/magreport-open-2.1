@@ -97,7 +97,13 @@ const SidebarItems = {
                 text : 'Дизайн',
                 folderTree : false,
                 folderItemType: FolderItemTypes.theme
-            }
+            },
+            loadMonitoring: {
+                key: "LOAD_MONITORING",
+                text: "Мониторинг нагрузки",
+                folderTree : true,
+                folderItemType: FolderItemTypes.loadMonitoring
+            },
 
         }
     },
