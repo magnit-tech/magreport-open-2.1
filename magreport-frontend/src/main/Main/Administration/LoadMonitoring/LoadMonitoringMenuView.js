@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 
 import { LoadMonitoringCSS as useStyles } from "./LoadMonitoringCSS";
@@ -12,11 +12,14 @@ import SidebarItems from '../../Sidebar/SidebarItems';
 import DataLoader from "../../../DataLoader/DataLoader";
 import { JobThreadsChart } from './ui/jobThreadsChart';
 import { DataSourceChart } from './ui/dataSourceChart';
+import RefreshButton from 'main/FolderContent/RefreshButton';
 
 
 function LoadMonitoringMenuView(props) {
 
     const classes = useStyles();
+
+    const [reloadCharts, setReloadCharts] = useState({ needReload: false });
 
     const state = props.state?.currentFolderData;
 
@@ -35,7 +38,7 @@ function LoadMonitoringMenuView(props) {
             <DataLoader
                 loadFunc={dataHub.adminController.getCurrentLoad}
                 loadParams={[]}
-                reload={false}
+                reload={reloadCharts}
                 onDataLoaded={(data) => props.actionFolderLoaded(folderItemsType, data)}
                 onDataLoadFailed={(error) => props.actionFolderLoadFailed(folderItemsType, error)}
             >
@@ -71,6 +74,7 @@ function LoadMonitoringMenuView(props) {
                         </div>
                     </div>
                 }
+                <RefreshButton onRefreshClick={() => setReloadCharts({ needReload: true })} />
             </DataLoader>
         </div>
     );
