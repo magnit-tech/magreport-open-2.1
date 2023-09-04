@@ -51,13 +51,25 @@ export const HeaderCSS = makeStyles(theme => ({
 		height: '140px',
 		width: '140px',
 	},
-/*	roses: {
-		backgroundImage: 'url(' + RosesPng + ')',
-		backgroundSize: 'contain',
-		backgroundRepeat: 'round',
-		backgroundPosition: 'center',
-		//marginTop : '48px',
-		height: '100%',
+	helpDialogWrapp: {
+		display: 'flex',
+		flexDirection: 'column',
+		alignItems: 'center',
+		'& p': {
+			fontSize: '16px',
+			fontWeight: 500
+		}
+	},
+	helpDialogIconBtn: {
+		marginRight: '5px'
 	}
-*/
+	/*	roses: {
+			backgroundImage: 'url(' + RosesPng + ')',
+			backgroundSize: 'contain',
+			backgroundRepeat: 'round',
+			backgroundPosition: 'center',
+			//marginTop : '48px',
+			height: '100%',
+		}
+	*/
 }));

@@ -1,41 +1,38 @@
-import React from 'react';
+import React, { useState } from 'react';
 import clsx from 'clsx';
-import { useAuth } from 'router/useAuth';
 import Draggable from 'react-draggable';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
-import IconButton from '@material-ui/core/IconButton';
-import LogoIcon from '../LogoIcon/LogoIcon';
-import HelpIcon from '@material-ui/icons/Help';
-import { HeaderCSS } from './HeaderCSS';
+import { useAuth } from 'router/useAuth';
 
-import { connect } from 'react-redux';
+import { HeaderCSS } from './HeaderCSS';
 
 import ConfigLocal from '../../../ajax/config/Config-local';
 import ConfigProd from '../../../ajax/config/Config-prod';
 
-import Brightness5Icon from '@material-ui/icons/Brightness5';
-import Brightness4Icon from '@material-ui/icons/Brightness4';
-import Tooltip from '@material-ui/core/Tooltip';
-
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import Paper from '@material-ui/core/Paper';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
+import HollydayPanel from './HollydayPanel';
 import isHollyday from '../../../HollydayFunctions';
 
+// redux
+import { connect } from 'react-redux';
 import {
 	setLightTheme,
 	setDarkTheme,
 } from '../../../redux/actions/admin/actionThemeDesign';
-import HollydayPanel from './HollydayPanel';
+
+// mui
+import { AppBar, Toolbar, Typography, IconButton, Tooltip } from '@material-ui/core';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Paper, Menu, MenuItem } from '@material-ui/core';
+
+// components 
+import HeaderHelp from '../ui/HeaderHelp';
+
+// icons
+import LogoIcon from '../LogoIcon/LogoIcon';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import HelpIcon from '@material-ui/icons/Help';
+import ImportContactsIcon from '@material-ui/icons/ImportContacts';
+import Brightness5Icon from '@material-ui/icons/Brightness5';
+import Brightness4Icon from '@material-ui/icons/Brightness4';
+
 
 function PaperComponent(props) {
 	return (
@@ -61,32 +58,6 @@ function Header(props) {
 	const themeLightness = props.themeLightness;
 	const tooltipTitle = props.themeLightness ? 'Светлый фон' : 'Тёмный фон';
 
-	const [openAbout, setOpenAbout] = React.useState(false);
-
-	const handleClickOpenAbout = () => {
-		setOpenAbout(true);
-		handleCloseMenu();
-	};
-
-	const handleCloseAbout = () => {
-		setOpenAbout(false);
-	};
-
-	const [anchorEl, setAnchorEl] = React.useState(null);
-
-	const handleOpenMenu = event => {
-		setAnchorEl(event.currentTarget);
-	};
-
-	const handleCloseMenu = () => {
-		setAnchorEl(null);
-	};
-
-	function handleClick() {
-		// props.appLogout();
-		signout();
-	}
-
 	function handleThemeClick() {
 		localStorage.setItem('isDarkTheme', !themeLightness);
 		if (themeLightness) {
@@ -95,6 +66,20 @@ function Header(props) {
 			props.setDarkTheme();
 		}
 	}
+
+	const [openAbout, setOpenAbout] = useState(false);
+	const [openHelp, setOpenHelp] = useState(false);
+
+	const handleClickOpenAbout = () => {
+		setOpenAbout(true);
+		setAnchorEl(null);
+	};
+
+	const handleCloseAbout = () => {
+		setOpenAbout(false);
+	};
+
+	const [anchorEl, setAnchorEl] = useState(null);
 
 	return (
 		<AppBar
@@ -105,22 +90,21 @@ function Header(props) {
 			})}
 		>
 			<HollydayPanel />
+
 			<Menu
 				id='simple-menu'
 				anchorEl={anchorEl}
 				keepMounted
 				open={Boolean(anchorEl)}
-				onClose={handleCloseMenu}
+				onClose={() => setAnchorEl(null)}
 			>
 				<MenuItem onClick={handleClickOpenAbout}>О программе</MenuItem>
-				<MenuItem
-					onClick={() => {
-						window.open(`${config}`);
-					}}
+				<MenuItem onClick={() => window.open(`${config}`)}
 				>
 					Руководство пользователя
 				</MenuItem>
 			</Menu>
+
 			<Dialog
 				open={openAbout}
 				onClose={handleCloseAbout}
@@ -139,7 +123,6 @@ function Header(props) {
 							<Typography variant='h6'> Версия: {props.version}</Typography>
 						</div>
 					</div>
-					<DialogContentText></DialogContentText>
 				</DialogContent>
 				<DialogActions>
 					<Button
@@ -153,12 +136,22 @@ function Header(props) {
 				</DialogActions>
 			</Dialog>
 
+			<HeaderHelp
+				open={openHelp}
+				onClose={() => setOpenHelp(!openHelp)}
+			/>
+
 			<Toolbar variant='dense' className={classes.iconIndent}>
 				<LogoIcon />
 				<Typography className={classes.logoText}>МАГРЕПОРТ</Typography>
-				<Tooltip title={'Справка'}>
-					<IconButton onClick={handleOpenMenu}>
+				<Tooltip title={'Помощь'}>
+					<IconButton onClick={() => setOpenHelp(true)}>
 						<HelpIcon className={classes.iconButton}></HelpIcon>
+					</IconButton>
+				</Tooltip>
+				<Tooltip title={'Справка'}>
+					<IconButton onClick={(event) => setAnchorEl(event.currentTarget)}>
+						<ImportContactsIcon className={classes.iconButton}></ImportContactsIcon>
 					</IconButton>
 				</Tooltip>
 				<Tooltip title={tooltipTitle}>
@@ -170,7 +163,7 @@ function Header(props) {
 						)}
 					</IconButton>
 				</Tooltip>
-				<Typography 
+				<Typography
 					id="userNameLabel"
 					variant='overline'
 					className={classes.userNameClass}
@@ -182,7 +175,7 @@ function Header(props) {
 						<IconButton
 							className={classes.iconButton}
 							aria-label='logout'
-							onClick={handleClick}
+							onClick={() => signout()}
 						>
 							<ExitToAppIcon />
 						</IconButton>
@@ -197,13 +190,11 @@ function Header(props) {
 
 const mapStateToProps = state => {
 	return {
-		// userName: state.login,
 		themeLightness: state.themesMenuView.darkTheme,
 	};
 };
 
 const mapDispatchToProps = {
-	// appLogout,
 	setLightTheme,
 	setDarkTheme,
 };
