@@ -67,7 +67,7 @@ function Header(props) {
 		}
 	}
 
-	const [openAbout, setOpenAbout] = React.useState(false);
+	const [openAbout, setOpenAbout] = useState(false);
 	const [openHelp, setOpenHelp] = useState(false);
 
 	const handleClickOpenAbout = () => {
@@ -79,8 +79,7 @@ function Header(props) {
 		setOpenAbout(false);
 	};
 
-	const [anchorEl, setAnchorEl] = React.useState(null);
-	const [anchorEl2, setAnchorEl2] = React.useState(null);
+	const [anchorEl, setAnchorEl] = useState(null);
 
 	return (
 		<AppBar

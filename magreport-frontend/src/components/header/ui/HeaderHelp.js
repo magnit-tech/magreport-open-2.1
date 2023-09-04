@@ -13,7 +13,7 @@ import dataHub from 'ajax/DataHub';
 export default function HeaderHelp(props) {
 	const classes = HeaderCSS();
 
-	const [configEmail, setConfigEmail] = useState(null)
+	const [configEmail, setConfigEmail] = useState('sopr_magreport@magnit.ru')
 
 	useEffect(() => {
 		if (props.open) {

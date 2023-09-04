@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 
 import { LoginFormCSS } from './LoginFormCSS'
 
@@ -20,34 +20,35 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 
 //local
 import StyleConsts from 'StyleConsts.js';
+import FailLoginLink from 'login/ui/FailLoginLink';
 
 
-function LoginForm(props){
+function LoginForm(props) {
     const classes = LoginFormCSS();
 
     const location = useLocation()
     const navigate = useNavigate()
-    const {signin} = useAuth()
+    const { signin } = useAuth()
 
     const { loader } = props;
 
-    const [form, setForm] = useState({login: '', password: ''});
+    const [form, setForm] = useState({ login: '', password: '' });
     const [showPassword, setShowPassword] = useState(false);
 
     const handleClickShowPassword = () => {
-        setShowPassword(!showPassword );
+        setShowPassword(!showPassword);
     };
 
     const handleMouseDownPassword = (event) => {
         event.preventDefault();
     };
 
-    function handleChange(e){
+    function handleChange(e) {
         props.hideAlert();
-        setForm( {...form, [e.target.name]: e.target.value}, );
+        setForm({ ...form, [e.target.name]: e.target.value },);
     }
 
-    function handleSubmit(e){
+    function handleSubmit(e) {
         e.preventDefault();
         props.showLoader()
 
@@ -55,22 +56,22 @@ function LoginForm(props){
         let domainName;
         let userName;
 
-        if(loginParts.length > 1){
+        if (loginParts.length > 1) {
             domainName = loginParts[0];
             userName = loginParts[1];
         }
-        else{
+        else {
             userName = loginParts[0];
         }
 
         if (!localStorage.getItem('drawerWidth')) {
             localStorage.setItem('drawerWidth', StyleConsts.drawerWidth);
         }
-        
-        signin(userName, domainName, form.password, () => navigate(location.state?.from?.pathname || '/ui/reports', {replace: true}))
+
+        signin(userName, domainName, form.password, () => navigate(location.state?.from?.pathname || '/ui/reports', { replace: true }))
     }
 
-    return(
+    return (
         <div className={classes.paper}>
             <Avatar className={classes.avatar}>
                 <LockOutlinedIcon />
@@ -92,27 +93,27 @@ function LoginForm(props){
                     onChange={handleChange}
                     error={props.alertData.data.open}
                 />
-                <FormControl variant="outlined" fullWidth style={{margin: '16px 0px 8px'}}>
+                <FormControl variant="outlined" fullWidth style={{ margin: '16px 0px 8px' }}>
                     <InputLabel htmlFor="password" required error={props.alertData.data.open}>Пароль</InputLabel>
                     <OutlinedInput
                         id="password"
-                        name = "password"
+                        name="password"
                         type={showPassword ? 'text' : 'password'}
                         value={form.password}
                         required
                         onChange={handleChange}
-                       // autoComplete="current-password"
+                        // autoComplete="current-password"
                         error={props.alertData.data.open}
                         endAdornment={
                             <InputAdornment position="end">
                                 <IconButton
-                                    style={{marginLeft: '-8px'}}
+                                    style={{ marginLeft: '-8px' }}
                                     aria-label="toggle password visibility"
                                     onClick={handleClickShowPassword}
                                     onMouseDown={handleMouseDownPassword}
                                     edge="end"
                                 >
-                                    {showPassword ? <Visibility/> : <VisibilityOff/>}
+                                    {showPassword ? <Visibility /> : <VisibilityOff />}
                                 </IconButton>
                             </InputAdornment>
                         }
@@ -120,8 +121,8 @@ function LoginForm(props){
                     />
                 </FormControl>
 
-                <Button     
-                    id="loginSubmit"                     
+                <Button
+                    id="loginSubmit"
                     type="submit"
                     fullWidth
                     variant="contained"
@@ -129,23 +130,16 @@ function LoginForm(props){
                     className={classes.submit}
                     disabled={loader}
                     onClick={handleSubmit}
-                > 
+                >
                     Войти
                 </Button>
 
-                { loader ? <div className={classes.circularProgress}><CircularProgress /></div> : null}
+                {loader ? <div className={classes.circularProgress}><CircularProgress /></div> : null}
 
-                <div className={classes.failLoggin}>
-                    <Button 
-                        color="secondary"
-                        href="mailto:sopr_magreport@magnit.ru?subject=Магрепорт: ошибка при входе"
-                    >
-                        Ошибка при входе? 
-                    </Button>
-                </div>
+                <FailLoginLink />
             </form>
         </div>
-     );
+    );
 }
 
 const mapStateToProps = state => {
@@ -158,7 +152,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = {
     showAlert,
     hideAlert,
-    showLoader, 
+    showLoader,
     hideLoader
 }
 
