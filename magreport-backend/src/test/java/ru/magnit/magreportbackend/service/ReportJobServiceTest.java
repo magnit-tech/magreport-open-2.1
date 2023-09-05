@@ -35,7 +35,13 @@ import ru.magnit.magreportbackend.dto.request.user.UserRequest;
 import ru.magnit.magreportbackend.dto.response.filterreport.FilterGroupResponse;
 import ru.magnit.magreportbackend.dto.response.filterreport.FilterReportFieldResponse;
 import ru.magnit.magreportbackend.dto.response.filterreport.FilterReportResponse;
+import ru.magnit.magreportbackend.dto.response.folder.FolderNodeResponse;
 import ru.magnit.magreportbackend.dto.response.folder.FolderRoleResponse;
+import ru.magnit.magreportbackend.dto.response.folder.FolderSearchResultResponse;
+import ru.magnit.magreportbackend.dto.response.folderreport.FolderResponse;
+import ru.magnit.magreportbackend.dto.response.permission.FolderPermissionsResponse;
+import ru.magnit.magreportbackend.dto.response.permission.RolePermissionResponse;
+import ru.magnit.magreportbackend.dto.response.report.PublishedReportResponse;
 import ru.magnit.magreportbackend.dto.response.report.ReportJobFilterResponse;
 import ru.magnit.magreportbackend.dto.response.report.ReportResponse;
 import ru.magnit.magreportbackend.dto.response.report.ReportShortResponse;
@@ -43,6 +49,7 @@ import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobMetadataRespon
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportJobResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportPageResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportSqlQueryResponse;
+import ru.magnit.magreportbackend.dto.response.user.RoleResponse;
 import ru.magnit.magreportbackend.dto.response.user.UserResponse;
 import ru.magnit.magreportbackend.dto.response.user.UserShortResponse;
 import ru.magnit.magreportbackend.dto.tuple.Tuple;
@@ -653,7 +660,9 @@ class ReportJobServiceTest {
 
         when(userDomainService.getCurrentUser()).thenReturn(new UserView().setId(ID).setName(USERNAME));
         when(jobDomainService.getJob(anyLong())).thenReturn(getReportJobResponse(COMPLETE));
-        when(userDomainService.getUserResponse(anyString(), anyString())).thenReturn(new UserResponse());
+        when(userDomainService.getUserResponse(anyString(), anyString())).thenReturn(getUserResponse());
+        when(folderPermissionsDomainService.getFolderReportPermissions(anyLong())).thenReturn(getFolderPermissionsResponse());
+        when(folderDomainService.getPublishedReports(any())).thenReturn(getPublishedReportResponse());
 
         service.shareJob(getReportJobShareRequest());
 
@@ -662,7 +671,9 @@ class ReportJobServiceTest {
         verify(reportJobUserDomainService).addUsersJob(any(), any(), any());
         verify(olapConfigurationDomainService).createCurrentConfigurationForUsers(any(), anyLong(), anyLong());
         verify(jobDomainService).updateJobStats(anyLong(), anyBoolean(), anyBoolean(), anyBoolean());
-        verifyNoMoreInteractions(userDomainService, jobDomainService, reportJobUserDomainService, olapConfigurationDomainService);
+        verify(folderPermissionsDomainService).getFolderReportPermissions(anyLong());
+        verify(folderDomainService).getPublishedReports(any());
+        verifyNoMoreInteractions(userDomainService, jobDomainService, reportJobUserDomainService, olapConfigurationDomainService, folderDomainService, folderPermissionsDomainService);
     }
 
     @Test
@@ -670,6 +681,8 @@ class ReportJobServiceTest {
 
         when(userDomainService.getCurrentUser()).thenReturn(new UserView().setId(ID).setName(""));
         when(jobDomainService.getJob(anyLong())).thenReturn(getReportJobResponse(COMPLETE));
+        when(folderDomainService.getPublishedReports(any())).thenReturn(getPublishedReportResponse());
+        when(folderPermissionsDomainService.getFolderReportPermissions(ID)).thenReturn(getFolderPermissionsResponse());
 
         var request = getReportJobShareRequest();
 
@@ -677,7 +690,7 @@ class ReportJobServiceTest {
 
         verify(userDomainService).getCurrentUser();
         verify(jobDomainService).getJob(anyLong());
-        verifyNoMoreInteractions(userDomainService, jobDomainService, reportJobUserDomainService, olapConfigurationDomainService);
+        verifyNoMoreInteractions(userDomainService, jobDomainService, reportJobUserDomainService, olapConfigurationDomainService, folderDomainService, folderPermissionsDomainService);
     }
 
     @Test
@@ -937,5 +950,41 @@ class ReportJobServiceTest {
                 .setStatuses(statuses)
                 .setFrom(from)
                 .setTo(to);
+    }
+
+    private FolderPermissionsResponse getFolderPermissionsResponse(){
+        return new FolderPermissionsResponse(
+                new FolderResponse(),
+                Collections.singletonList(
+                        new RolePermissionResponse(
+                                new RoleResponse(),
+                                Collections.singletonList(FolderAuthorityEnum.READ)
+                        )
+                )
+        );
+    }
+
+    private PublishedReportResponse getPublishedReportResponse(){
+        return new PublishedReportResponse()
+                .setFolders(
+                        Collections.singletonList(
+                                new FolderSearchResultResponse(
+                                        Collections.emptyList(),
+                                        new FolderNodeResponse(
+                                                ID,
+                                                ID,
+                                                "",
+                                                "",
+                                                LocalDateTime.now(),
+                                                LocalDateTime.now())
+                                )));
+    }
+
+    private UserResponse getUserResponse(){
+        return new UserResponse()
+                .setRoles(Collections.singletonList(
+                        new RoleResponse()
+                                .setId(ID)
+                ));
     }
 }

@@ -363,10 +363,10 @@ public class ReportJobController {
             @RequestBody
             ReportJobShareRequest request) {
         LogHelper.logInfoUserMethodStart();
-        service.shareJob(request);
+
         var response = ResponseBody.builder()
                 .success(true)
-                .message("Job share success")
+                .message(service.shareJob(request))
                 .data(null)
                 .build();
 
