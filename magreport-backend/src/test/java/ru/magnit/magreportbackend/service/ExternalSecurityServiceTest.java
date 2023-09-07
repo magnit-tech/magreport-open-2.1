@@ -218,7 +218,9 @@ class ExternalSecurityServiceTest {
                 ASM_SECURITY_DESCRIPTION,
                 0L,
                 true,
+                true,
                 Collections.emptyList()
+
         );
     }
 }

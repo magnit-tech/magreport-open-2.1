@@ -33,7 +33,7 @@ public class ReportFieldMapperDataSet implements Mapper<ReportField, DataSetFiel
 
         return sources
                 .stream()
-                .filter(d -> !d.getTypeName().equals(DataTypeEnum.UNKNOWN.name()))
+                .filter(d -> d.getTypeId() != DataTypeEnum.UNKNOWN.ordinal())
                 .map(this::from)
                 .toList();
     }

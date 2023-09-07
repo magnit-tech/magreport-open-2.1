@@ -230,7 +230,7 @@ public class FilterInstanceService {
                         throw new InvalidParametersException("Dest folder is not available: Permission denied" + f.getFolderId());
                 });
 
-        var newFolders = domainService.copyFilterInstanceFolder(request, userDomainService.getCurrentUser());
+        var newFolders = domainService.copyFilterInstanceFolder(request, currentUser);
         return newFolders.stream().map(domainService::getFolder).toList();
     }
 }

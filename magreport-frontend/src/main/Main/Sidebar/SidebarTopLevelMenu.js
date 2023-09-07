@@ -84,7 +84,8 @@ function SidebarTopLevelMenu(props){
         <React.Fragment>       
 			<List className={classes.listClassMain}>
 				<Paper key={props.sidebarItem.key} className={classes.paperRoot} elevation={5}>
-					<ListItem 
+					<ListItem
+                        id = {props.sidebarItem.key}
 						// className={classes.listItem + ' ' + (location.pathname.indexOf(locationName.current) !== -1 ? classes.folderListItemActive : null)} 
 						className={classes.listItem + ' '} 
                         // className={classes.listItem + ' ' + (menuExpanded ? classes.folderListItemActive : null)}

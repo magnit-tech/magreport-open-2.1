@@ -13,19 +13,24 @@ public class SubtractExpression extends ParameterizedExpression {
         super(fieldExpression, context);
     }
 
-    @SuppressWarnings("DuplicatedCode")
+    @SuppressWarnings({"DuplicatedCode", "java:S135"})
     @Override
     public Pair<String, DataTypeEnum> calculate(int rowNumber) {
         var calcResult = 0D;
         var resultType = DataTypeEnum.INTEGER;
         var firstValue = true;
+        var isNull = false;
         for (var parameter : parameters) {
             final var parameterValue = parameter.calculate(rowNumber);
 
-            checkParameterNotNull(parameter, parameterValue);
             checkParameterHasAnyType(parameter, parameterValue, DataTypeEnum.INTEGER, DataTypeEnum.DOUBLE);
 
             resultType = resultType.widerNumeric(parameterValue.getR());
+
+            if (parameterValue.getL() == null) {
+                isNull = true;
+                break;
+            }
 
             if (firstValue) {
                 calcResult = Double.parseDouble(parameterValue.getL());
@@ -36,7 +41,7 @@ public class SubtractExpression extends ParameterizedExpression {
             calcResult -= Double.parseDouble(parameterValue.getL());
         }
         return result
-            .setL(resultType.toTypedString(calcResult))
+            .setL(isNull ? null : resultType.toTypedString(calcResult))
             .setR(resultType);
     }
 }

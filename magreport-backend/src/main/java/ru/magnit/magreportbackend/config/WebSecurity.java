@@ -45,6 +45,7 @@ import static ru.magnit.magreportbackend.controller.ScheduleController.SCHEDULE_
 import static ru.magnit.magreportbackend.controller.ScheduleController.SCHEDULE_TASK_PROLONGATION;
 import static ru.magnit.magreportbackend.controller.UserController.USERS_GET;
 import static ru.magnit.magreportbackend.controller.UserController.USERS_GET_ONE;
+import static ru.magnit.magreportbackend.controller.UserController.USERS_GET_PAGE;
 import static ru.magnit.magreportbackend.controller.UserController.USERS_WHO_AM_I;
 import static ru.magnit.magreportbackend.controller.UserServicesController.DOMAIN_LIST_SERVICE;
 import static ru.magnit.magreportbackend.domain.user.SystemRoles.ADMIN;
@@ -85,7 +86,7 @@ public class WebSecurity {
                 .antMatchers(DOMAIN_LIST_SERVICE).permitAll()
                 .antMatchers(EVENT_REGISTER).permitAll()
                 .antMatchers(SCHEDULE_TASK_PROLONGATION, SCHEDULE_TASK_GET_EXCEL_REPORT, SCHEDULE_TASK_MANUAL_START).permitAll()
-                .antMatchers(USERS_GET).authenticated()
+                .antMatchers(USERS_GET, USERS_GET_PAGE).authenticated()
                 .antMatchers(REPORT_JOB_GET_ALL_JOBS).hasAnyAuthority(ADMIN.name())
                 .antMatchers("/api/v1/report-job/**").hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())
                 .antMatchers("/api/v1/olap/**").hasAnyAuthority(ADMIN.name(), DEVELOPER.name(), USER.name())

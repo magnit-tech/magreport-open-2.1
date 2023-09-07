@@ -38,6 +38,7 @@ import ServerMailTemplateDesigner from '../main/Main/Administration/ServerMailTe
 import EmailMenuView from '../main/Main/Administration/MailSender/EmailMenuView';
 import CubesMenuView from '../main/Main/Administration/Cubes/CubesMenuView';
 import ThemesMenuView from '../main/Main/Administration/Theme/ThemesMenuView';
+import LoadMonitoringMenuView from '../main/Main/Administration/LoadMonitoring/LoadMonitoringMenuView';
 
 // Разработка
 import DatasourcesMenuView from '../main/Main/Development/DatasourcesMenu/DatasourcesMenuView';
@@ -130,6 +131,7 @@ export default function AppRoutes(props) {
 					<Route path="/ui/mailSender" element={<EmailMenuView/>} />
 					<Route path="/ui/cubes" element={<CubesMenuView/>} />
 					<Route path="/ui/theme" element={<ThemesMenuView/>} />  {/* !!!!!!!! */}
+					<Route path="/ui/loadMonitoring" element={<LoadMonitoringMenuView/>} />
 
 					{/********** Разработка **********/}
 					<Route path="/ui/datasource" element={<DatasourcesMenuView />} />

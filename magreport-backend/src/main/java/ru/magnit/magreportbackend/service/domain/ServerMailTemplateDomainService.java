@@ -29,7 +29,6 @@ public class ServerMailTemplateDomainService {
     private final ServerMailTemplateRepository repository;
     private final ServerMailTemplateTypeRepository serverMailTemplateTypeRepository;
     private final ServerMailTemplateResponseMapper mapper;
-
     private final FolderNodeResponseServerMailTemplateTypeMapper folderNodeResponseServerMailTemplateTypeMapper;
     @Transactional
     public ServerMailTemplateResponse getServerMailTemplate (Long id) {

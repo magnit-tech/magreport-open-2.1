@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.magnit.magreportbackend.dto.request.user.RoleRequest;
 import ru.magnit.magreportbackend.dto.request.user.UserRequest;
+import ru.magnit.magreportbackend.dto.request.user.UserPageRequest;
 import ru.magnit.magreportbackend.dto.request.user.UserStatusSetRequest;
 import ru.magnit.magreportbackend.dto.response.ResponseBody;
 import ru.magnit.magreportbackend.dto.response.ResponseList;
+import ru.magnit.magreportbackend.dto.response.user.UserPageResponse;
 import ru.magnit.magreportbackend.dto.response.user.UserResponse;
 import ru.magnit.magreportbackend.service.UserService;
 import ru.magnit.magreportbackend.util.LogHelper;
@@ -37,6 +39,7 @@ public class UserController {
     public static final String USERS_WHO_AM_I = "/api/v1/users/who-am-i";
     public static final String USERS_GET_BY_ROLE = "/api/v1/users/get-by-role";
     public static final String USERS_GET_ACTUAL = "/api/v1/users/actual";
+    public static final String USERS_GET_PAGE = "/api/v1/users/get-page";
 
     private final UserService service;
 
@@ -206,6 +209,23 @@ public class UserController {
                 .success(true)
                 .message("")
                 .data(service.getAllActualUsers())
+                .build();
+
+        LogHelper.logInfoUserMethodEnd();
+        return response;
+    }
+
+    @Operation(summary = "Получение страницы списка пользователей")
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping(value = USERS_GET_PAGE,
+            produces = APPLICATION_JSON_VALUE)
+    public ResponseBody<UserPageResponse> getUsersPage(@RequestBody UserPageRequest request) {
+        LogHelper.logInfoUserMethodStart();
+
+        var response = ResponseBody.<UserPageResponse>builder()
+                .success(true)
+                .message("")
+                .data(service.getUsersPage(request))
                 .build();
 
         LogHelper.logInfoUserMethodEnd();

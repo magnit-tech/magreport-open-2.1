@@ -662,16 +662,15 @@ export default function FolderContent(props){
             {
                 (props.itemsType === FolderItemTypes.reports || props.itemsType === FolderItemTypes.dataset || 
                 props.itemsType === FolderItemTypes.datasource || props.itemsType === FolderItemTypes.filterTemplate ||
-                props.itemsType === FolderItemTypes.filterInstance || (props.itemsType === FolderItemTypes.roles && props.data.name !== 'SYSTEM') ||
+                props.itemsType === FolderItemTypes.filterInstance || (props.itemsType === FolderItemTypes.roles && (props.data.name !== 'SYSTEM' && props.data.id !== null)) ||
                 props.itemsType === FolderItemTypes.reportsDev || props.itemsType === FolderItemTypes.securityFilters ||
                 props.itemsType === FolderItemTypes.schedules||props.itemsType === FolderItemTypes.scheduleTasks||
                 props.itemsType === FolderItemTypes.theme) &&
                 (canCreateFolder || canCreateItem) && 
-                (props.showAddFolder  || props.showAddItem) && 
-                (props.itemsType !== FolderItemTypes.roles || props.data.id !== null) &&
+                (props.showAddFolder  || props.showAddItem) &&
                 <AddButton
-                    showCreateFolder = {canCreateFolder && props.showAddFolder}
-                    showCreateItem = {canCreateItem && props.showAddItem}
+                    showCreateFolder = {canCreateFolder && props.showAddFolder }
+                    showCreateItem = {canCreateItem && props.showAddItem && (props.data.id !== null)}
                     itemName = {itemName}
                     onAddFolder = {handleAddFolder}
                     onAddItemClick = {handleAddItemClick}

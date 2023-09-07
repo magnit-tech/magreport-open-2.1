@@ -15,7 +15,6 @@ import ru.magnit.magreportbackend.dto.inner.jobengine.CacheRow;
 import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportJobData;
-import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequest;
 import ru.magnit.magreportbackend.exception.ReportExportException;
 import ru.magnit.magreportbackend.service.domain.converter.Reader;
 import ru.magnit.magreportbackend.service.domain.converter.ReaderFactory;
@@ -170,7 +169,8 @@ class ExcelReportDomainServiceTest {
                         "",
                         "",
                         "",
-                        (short) 1),
+                        (short) 1,
+                        "name"),
                 new ReportData(
                         ID,
                         "",

@@ -92,6 +92,7 @@ public class ScheduleTaskDomainService {
         if (task == null) return "Код активации не действителен или уже использован!";
 
         task.setExpirationCode(null);
+        task.setExpirationDate(LocalDate.now().plusDays(task.getRenewalPeriod()));
         repository.save(task);
 
         if (task.getStatus().getId().equals(EXPIRED.getId())){

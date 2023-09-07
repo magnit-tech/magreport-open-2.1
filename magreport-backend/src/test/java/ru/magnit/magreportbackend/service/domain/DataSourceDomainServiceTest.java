@@ -9,22 +9,34 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import ru.magnit.magreportbackend.domain.datasource.DataSource;
 import ru.magnit.magreportbackend.domain.datasource.DataSourceFolder;
+import ru.magnit.magreportbackend.domain.datasource.DataSourceFolderRole;
+import ru.magnit.magreportbackend.domain.datasource.DataSourceFolderRolePermission;
 import ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum;
-import ru.magnit.magreportbackend.domain.filterinstance.FilterInstanceFolder;
+import ru.magnit.magreportbackend.domain.folderreport.FolderAuthority;
+import ru.magnit.magreportbackend.domain.folderreport.FolderAuthorityEnum;
+import ru.magnit.magreportbackend.domain.user.Role;
 import ru.magnit.magreportbackend.dto.inner.UserView;
 import ru.magnit.magreportbackend.dto.inner.datasource.DataSourceData;
+import ru.magnit.magreportbackend.dto.request.ChangeParentFolderRequest;
 import ru.magnit.magreportbackend.dto.request.datasource.DataSourceAddRequest;
+import ru.magnit.magreportbackend.dto.request.datasource.DataSourceCheckRequest;
+import ru.magnit.magreportbackend.dto.request.folder.CopyFolderRequest;
 import ru.magnit.magreportbackend.dto.request.folder.FolderAddRequest;
 import ru.magnit.magreportbackend.dto.request.folder.FolderChangeParentRequest;
 import ru.magnit.magreportbackend.dto.request.folder.FolderRenameRequest;
+import ru.magnit.magreportbackend.dto.request.folder.FolderTypes;
 import ru.magnit.magreportbackend.dto.response.datasource.DataSourceDependenciesResponse;
 import ru.magnit.magreportbackend.dto.response.datasource.DataSourceFolderResponse;
 import ru.magnit.magreportbackend.dto.response.datasource.DataSourceResponse;
 import ru.magnit.magreportbackend.dto.response.datasource.DataSourceTypeResponse;
 import ru.magnit.magreportbackend.exception.InvalidParametersException;
+import ru.magnit.magreportbackend.mapper.datasource.DataSourceCloner;
 import ru.magnit.magreportbackend.mapper.datasource.DataSourceDependenciesResponseMapper;
+import ru.magnit.magreportbackend.mapper.datasource.DataSourceFolderCloner;
 import ru.magnit.magreportbackend.mapper.datasource.DataSourceFolderMapper;
 import ru.magnit.magreportbackend.mapper.datasource.DataSourceFolderResponseMapper;
+import ru.magnit.magreportbackend.mapper.datasource.DataSourceFolderRoleCloner;
+import ru.magnit.magreportbackend.mapper.datasource.DataSourceFolderRolePermissionMapper;
 import ru.magnit.magreportbackend.mapper.datasource.DataSourceMapper;
 import ru.magnit.magreportbackend.mapper.datasource.DataSourceMerger;
 import ru.magnit.magreportbackend.mapper.datasource.DataSourceResponseMapper;
@@ -32,6 +44,7 @@ import ru.magnit.magreportbackend.mapper.datasource.DataSourceTypeResponseMapper
 import ru.magnit.magreportbackend.mapper.datasource.DataSourceViewMapper;
 import ru.magnit.magreportbackend.mapper.datasource.FolderNodeResponseDataSourceFolderMapper;
 import ru.magnit.magreportbackend.repository.DataSourceFolderRepository;
+import ru.magnit.magreportbackend.repository.DataSourceFolderRoleRepository;
 import ru.magnit.magreportbackend.repository.DataSourceRepository;
 import ru.magnit.magreportbackend.repository.DataSourceTypeRepository;
 
@@ -40,6 +53,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -49,6 +63,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static ru.magnit.magreportbackend.domain.folderreport.FolderAuthorityEnum.WRITE;
 
 @ExtendWith(MockitoExtension.class)
 class DataSourceDomainServiceTest {
@@ -73,6 +88,8 @@ class DataSourceDomainServiceTest {
     @Mock
     private DataSourceRepository dataSourceRepository;
 
+    @Mock
+    private DataSourceFolderRoleRepository dataSourceFolderRoleRepository;
     @Mock
     private DataSourceFolderResponseMapper dataSourceFolderResponseMapper;
 
@@ -105,6 +122,17 @@ class DataSourceDomainServiceTest {
 
     @Mock
     private FolderNodeResponseDataSourceFolderMapper folderNodeResponseDataSourceFolderMapper;
+
+    @Mock
+    private DataSourceFolderRolePermissionMapper dataSourceFolderRolePermissionMapper;
+
+    @Mock
+    private DataSourceCloner dataSourceCloner;
+
+    @Mock
+    private DataSourceFolderRoleCloner dataSourceFolderRoleCloner;
+    @Mock
+    private DataSourceFolderCloner dataSourceFolderCloner;
 
     @Test
     void getFolder() {
@@ -267,7 +295,7 @@ class DataSourceDomainServiceTest {
         when(dataSourceRepository.getReferenceById(anyLong())).thenReturn(getDataSourceObject());
         when(dataSourceResponseMapper.from((DataSource) any())).thenReturn(getDataSourceResponse());
         when(folderRepository.existsById(anyLong())).thenReturn(true);
-        when(folderRepository.getReferenceById(anyLong())).thenReturn(new DataSourceFolder());
+        when(folderRepository.getReferenceById(anyLong())).thenReturn(new DataSourceFolder().setParentFolder(new DataSourceFolder(ID)));
 
         DataSourceResponse response = domainService.getDataSource(ID);
 
@@ -423,6 +451,174 @@ class DataSourceDomainServiceTest {
         verifyNoMoreInteractions(folderRepository, dataSourceFolderResponseMapper);
     }
 
+
+    @Test
+    void addFolderExceptionTest() {
+        when(dataSourceFolderMapper.from((FolderAddRequest) any())).thenReturn(new DataSourceFolder());
+        when(folderRepository.saveAndFlush(any())).thenReturn(new DataSourceFolder().setId(ID));
+        when(folderRepository.checkRingPath(anyLong())).thenReturn(Collections.emptyList());
+
+        ReflectionTestUtils.setField(domainService, "maxLevel", 0L);
+
+        var request = getAddRequest();
+
+        assertThrows(InvalidParametersException.class, () -> domainService.addFolder(request));
+
+        verify(dataSourceFolderMapper).from((FolderAddRequest) any());
+        verify(folderRepository).saveAndFlush(any());
+        verifyNoMoreInteractions(dataSourceFolderMapper, folderRepository, dataSourceFolderResponseMapper);
+    }
+
+    @Test
+    void getFoldersPermittedToRoleTest() {
+
+        when(dataSourceFolderRoleRepository.getAllByRoleId(anyLong())).thenReturn(Collections.singletonList(getDataSourceFolderRole()));
+
+        var result = domainService.getFoldersPermittedToRole(ID);
+
+        assertFalse(result.isEmpty());
+
+        assertEquals(ID, result.get(0).folderId());
+        assertEquals(NAME, result.get(0).folderName());
+        assertEquals(WRITE, result.get(0).roleAuthority());
+        assertEquals(FolderTypes.DATASOURCE.name(), result.get(0).typeFolder().name());
+
+        verify(dataSourceFolderRoleRepository).getAllByRoleId(anyLong());
+        verifyNoMoreInteractions(dataSourceFolderRoleRepository);
+    }
+
+    @Test
+    void addFolderPermittedToRoleTest() {
+        domainService.addFolderPermittedToRole(Collections.singletonList(ID), ID, Collections.singletonList(FolderAuthorityEnum.WRITE));
+
+        verify(dataSourceFolderRoleRepository).saveAll(anyList());
+        verifyNoMoreInteractions(dataSourceFolderRoleRepository);
+    }
+
+    @Test
+    void deleteFolderPermittedToRoleTest() {
+
+        domainService.deleteFolderPermittedToRole(Collections.singletonList(ID), ID);
+
+        verify(dataSourceFolderRoleRepository).deleteAllByFolderIdInAndRoleId(anyList(),anyLong());
+        verifyNoMoreInteractions(dataSourceFolderRoleRepository);
+    }
+
+    @Test
+    void changeParentFolderExceptionTest() {
+
+        when(folderRepository.getReferenceById(anyLong())).thenReturn(new DataSourceFolder());
+        when(folderRepository.checkRingPath(anyLong())).thenReturn(Collections.emptyList());
+
+        ReflectionTestUtils.setField(domainService, "maxLevel", 0L);
+
+        var request = new FolderChangeParentRequest().setId(ID);
+
+        assertThrows(InvalidParametersException.class, () -> domainService.changeParentFolder(request));
+
+        verify(folderRepository).getReferenceById(anyLong());
+        verify(folderRepository).save(any());
+        verify(folderRepository).checkRingPath(anyLong());
+        verifyNoMoreInteractions(folderRepository, dataSourceFolderResponseMapper);
+
+    }
+
+    @Test
+    void changeDataSourceParentFolderTest() {
+
+        when(dataSourceRepository.getAllByIdIn(anyList())).thenReturn(Collections.singletonList(getDataSourceObject()));
+
+        domainService.changeDataSourceParentFolder(new ChangeParentFolderRequest().setObjIds(Collections.singletonList(ID)));
+
+        verify(dataSourceRepository).saveAll(anyList());
+        verify(dataSourceRepository).getAllByIdIn(anyList());
+        verifyNoMoreInteractions(dataSourceRepository);
+
+    }
+
+    @Test
+    void getFolderIdsTest() {
+
+        when(dataSourceRepository.getAllByIdIn(anyList())).thenReturn(Collections.singletonList(getDataSourceObject()));
+
+        var result = domainService.getFolderIds(Collections.singletonList(ID));
+
+        assertFalse(result.isEmpty());
+
+        assertEquals(ID, result.get(0));
+
+        verify(dataSourceRepository).getAllByIdIn(anyList());
+        verifyNoMoreInteractions(dataSourceRepository);
+
+    }
+
+    @Test
+    void copyDataSourceTest() {
+
+        when(dataSourceRepository.getAllByIdIn(anyList())).thenReturn(Collections.singletonList(getDataSourceObject()));
+        when(dataSourceCloner.clone(anyList())).thenReturn(Collections.singletonList(getDataSourceObject()));
+
+        domainService.copyDataSource(getChangeParentFolderRequest(), new UserView().setId(ID));
+
+        verify(dataSourceRepository).saveAll(anyList());
+        verify(dataSourceCloner).clone(anyList());
+        verify(dataSourceRepository).getAllByIdIn(anyList());
+        verifyNoMoreInteractions(dataSourceRepository, dataSourceCloner);
+
+    }
+
+    @Test
+    void copyDataSetFolderTest1() {
+
+        when(folderRepository.getReferenceById(anyLong())).thenReturn(new DataSourceFolder(ID));
+        when(dataSourceFolderRoleCloner.clone(anyList())).thenReturn(Collections.singletonList(getDataSourceFolderRole()));
+        when(dataSourceFolderCloner.clone((DataSourceFolder) any())).thenReturn(getDataSourceFolder());
+        when(folderRepository.save(any())).thenReturn(getDataSourceFolder());
+
+        var result = domainService.copyDataSetFolder(getCopyFolderRequest(ID, true), new UserView().setId(ID));
+
+        assertFalse(result.isEmpty());
+        assertEquals(ID, result.get(0));
+
+        verify(folderRepository, times(2)).getReferenceById(anyLong());
+        verify(dataSourceFolderRoleCloner).clone(anyList());
+        verify(dataSourceFolderCloner).clone((DataSourceFolder) any());
+        verifyNoMoreInteractions(folderRepository,dataSourceFolderRoleCloner,dataSourceFolderCloner);
+
+    }
+
+    @Test
+    void copyDataSetFolderTest2() {
+
+        when(folderRepository.getReferenceById(anyLong())).thenReturn(new DataSourceFolder(ID));
+        when(dataSourceFolderCloner.clone((DataSourceFolder) any())).thenReturn(getDataSourceFolder());
+        when(folderRepository.save(any())).thenReturn(getDataSourceFolder());
+
+        var result = domainService.copyDataSetFolder(getCopyFolderRequest(null, false), new UserView().setId(ID));
+
+        assertFalse(result.isEmpty());
+        assertEquals(ID, result.get(0));
+
+        verify(folderRepository).getReferenceById(anyLong());
+        verify(dataSourceFolderCloner).clone((DataSourceFolder) any());
+        verifyNoMoreInteractions(folderRepository,dataSourceFolderRoleCloner,dataSourceFolderCloner);
+    }
+
+    @Test
+    void checkDataSourceConnectivityTest1() {
+        var request = new DataSourceCheckRequest(URL,USER_NAME,PASSWORD);
+        assertThrows(InvalidParametersException.class, () -> domainService.checkDataSourceConnectivity(request));
+    }
+
+
+    @Test
+    void checkDataSourceConnectivityTest2() {
+
+        var request = new DataSourceCheckRequest(URL,USER_NAME,PASSWORD);
+        assertThrows(InvalidParametersException.class, () -> domainService.checkDataSourceConnectivity(request));
+    }
+
+
     private DataSourceData getView() {
         return new DataSourceData(
                 ID,
@@ -430,11 +626,20 @@ class DataSourceDomainServiceTest {
                 URL,
                 USER_NAME,
                 PASSWORD,
-                POOL_SIZE);
+                POOL_SIZE,
+                NAME);
     }
 
-    private DataSource getDataSourceObject(){
+    private DataSource getDataSourceObject() {
         return new DataSource()
+                .setId(ID)
+                .setName(NAME)
+                .setDescription(DESCRIPTION)
+                .setPassword(PASSWORD)
+                .setUrl(URL)
+                .setPoolSize(POOL_SIZE)
+                .setCreatedDateTime(CREATED_TIME)
+                .setModifiedDateTime(MODIFIED_TIME)
                 .setFolder(new DataSourceFolder().setId(ID));
     }
 
@@ -503,4 +708,45 @@ class DataSourceDomainServiceTest {
                 MODIFIED_TIME
         );
     }
+
+    private DataSourceFolderRole getDataSourceFolderRole(){
+        return new DataSourceFolderRole(ID)
+                .setRole(new Role(ID))
+                .setFolder(
+                        new DataSourceFolder(ID)
+                                .setName(NAME)
+                )
+                .setPermissions(Collections.singletonList(
+                        new DataSourceFolderRolePermission(ID)
+                                .setAuthority(new FolderAuthority(WRITE))
+                ))
+                .setCreatedDateTime(CREATED_TIME)
+                .setModifiedDateTime(MODIFIED_TIME);
+    }
+
+    private ChangeParentFolderRequest getChangeParentFolderRequest() {
+        return new ChangeParentFolderRequest()
+                .setDestFolderId(ID)
+                .setObjIds(Collections.singletonList(ID));
+    }
+
+    private CopyFolderRequest getCopyFolderRequest(Long folderId, Boolean flag){
+        return new CopyFolderRequest()
+                .setDestFolderId(folderId)
+                .setInheritParentRights(flag)
+                .setInheritRightsRecursive(flag)
+                .setFolderIds(Collections.singletonList(ID));
+    }
+
+    private DataSourceFolder getDataSourceFolder(){
+        return new DataSourceFolder(ID)
+                .setId(ID)
+                .setName(NAME)
+                .setDescription(DESCRIPTION)
+                .setDataSources(Collections.singletonList(getDataSourceObject()))
+                .setChildFolders(Collections.emptyList())
+                .setCreatedDateTime(CREATED_TIME)
+                .setModifiedDateTime(MODIFIED_TIME);
+    }
+
 }

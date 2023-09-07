@@ -102,6 +102,8 @@ export default function DateValue(props) {
             operationType: "IS_EQUAL",
             validation: dt || !mandatory ? 'success' : 'error',
             parameters,
+            filterType: props.filterData.type.name || props.filterData.type,
+            filterCode: props.filterData.code
         });      
     }
 

@@ -308,6 +308,7 @@ export default function DatasetDesigner(){
             //name = {pagename}
         >
             <DesignerTextField
+                id = "datasetName"
                 minWidth = {StyleConsts.designerTextFieldMinWidth}
                 label = {fieldLabels.datasetName}
                 value = {data.datasetName}
@@ -318,6 +319,7 @@ export default function DatasetDesigner(){
             />
 
             <DesignerTextField
+                id = "datasetDescription"
                 minWidth = {StyleConsts.designerTextFieldMinWidth}
                 label = {fieldLabels.datasetDescription}
                 value = {data.datasetDescription}
@@ -338,6 +340,7 @@ export default function DatasetDesigner(){
             />
 
             <DesignerTextField
+                id = "catalogName"
                 minWidth = {StyleConsts.designerTextFieldMinWidth}
                 label = {fieldLabels.catalogName}
                 value = {data.catalogName}
@@ -348,6 +351,7 @@ export default function DatasetDesigner(){
             />
 
             <DesignerTextField
+                id = "schemeName"
                 minWidth = {StyleConsts.designerTextFieldMinWidth}
                 label = {fieldLabels.schemaName}
                 value = {data.schemaName}
@@ -358,6 +362,7 @@ export default function DatasetDesigner(){
             />
 
             <DesignerTextField
+                id = "objectName"
                 minWidth = {StyleConsts.designerTextFieldMinWidth}
                 label = {fieldLabels.objectName}
                 value = {data.objectName}
@@ -368,6 +373,7 @@ export default function DatasetDesigner(){
             />
 
             <DesignerSelectField
+                id = "idSelectInputLabel"
                 minWidth = {StyleConsts.designerTextFieldMinWidth}
                 label = {fieldLabels.datasetTypeId}
                 data = {typesData}

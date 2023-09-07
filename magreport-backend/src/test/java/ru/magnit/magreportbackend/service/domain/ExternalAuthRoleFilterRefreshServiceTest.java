@@ -109,7 +109,7 @@ class ExternalAuthRoleFilterRefreshServiceTest {
                                                                 0L, 0, "name", null, "field_name", null, FilterFieldTypeEnum.CODE_FIELD)
                                                 )))))
                 .setDataSet(new DataSetView(null, null, null, null, null,
-                        new DataSourceData(1L, DataSourceTypeEnum.H2, null, null, null, null),
+                        new DataSourceData(1L, DataSourceTypeEnum.H2, null, null, null, null, null),
                         null));
     }
 

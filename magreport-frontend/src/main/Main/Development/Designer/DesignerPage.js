@@ -36,6 +36,7 @@ export default function DesignerPage(props){
                 <Paper elevation={3} className={classes.pageBtnPanel}>
                     {props.onSaveClick ?
                         <Button
+                            id="saveButton"
                             className={classes.pageBtn}
                             type="submit"
                             variant="contained"

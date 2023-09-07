@@ -74,7 +74,8 @@ class ProcedureReportServiceTest {
                 "url",
                 "user",
                 "pwd",
-                (short) 5
+                (short) 5,
+                "name"
         );
     }
 

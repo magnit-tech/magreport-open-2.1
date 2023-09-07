@@ -8,10 +8,12 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import ru.magnit.magreportbackend.domain.filtertemplate.FilterFieldTypeEnum;
 import ru.magnit.magreportbackend.domain.filtertemplate.FilterTypeEnum;
+import ru.magnit.magreportbackend.domain.folderreport.FolderAuthorityEnum;
 import ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum;
 import ru.magnit.magreportbackend.domain.reportjob.ReportJobUserTypeEnum;
 import ru.magnit.magreportbackend.domain.user.SystemRoles;
 import ru.magnit.magreportbackend.dto.inner.RoleView;
+import ru.magnit.magreportbackend.dto.request.report.ReportIdRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ExcelReportRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobAddRequest;
 import ru.magnit.magreportbackend.dto.request.reportjob.ReportJobCommentRequest;
@@ -31,6 +33,7 @@ import ru.magnit.magreportbackend.dto.response.reportjob.ReportPageResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ReportSqlQueryResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.ScheduledReportResponse;
 import ru.magnit.magreportbackend.dto.response.reportjob.TokenResponse;
+import ru.magnit.magreportbackend.dto.response.user.RoleResponse;
 import ru.magnit.magreportbackend.dto.response.user.UserResponse;
 import ru.magnit.magreportbackend.dto.tuple.Tuple;
 import ru.magnit.magreportbackend.dto.tuple.TupleValue;
@@ -52,11 +55,15 @@ import ru.magnit.magreportbackend.service.domain.TokenService;
 import ru.magnit.magreportbackend.service.domain.UserDomainService;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum.PENDING_DB_CONNECTION;
+import static ru.magnit.magreportbackend.domain.reportjob.ReportJobStatusEnum.RUNNING;
+import static ru.magnit.magreportbackend.domain.user.SystemRoles.ADMIN;
 import static ru.magnit.magreportbackend.domain.user.SystemRoles.UNBOUNDED_JOB_ACCESS;
 
 @Slf4j
@@ -301,19 +308,18 @@ public class ReportJobService {
     }
 
     public ReportJobResponse getJob(ReportJobRequest request) {
-        if (request.getJobId() != null) {
+
             var response = jobDomainService.getJob(request.getJobId());
+
+            if (response.getStatus().equals(RUNNING) || response.getStatus().equals(PENDING_DB_CONNECTION))
+                return response;
+
             var currentUser = userDomainService.getCurrentUser();
             checkAccessForJob(response.getId(), response.getReport().id(), response.getReport().name());
             response.setCanExecute(checkReportPermission(response.getReport().id()));
             response.setOlapLastUserChoice(olapUserChoiceDomainService.getOlapUserChoice(response.getReport().id(), currentUser.getId()));
             response.setExcelRowLimit(excelRowLimit);
             return response;
-        } else {
-            var user = userDomainService.getCurrentUser();
-            log.warn(String.format("JobId is null! User: %s/%s", user.getDomain().name(), user.getName()));
-            return null;
-        }
     }
 
     public ReportJobResponse getJob(Long jobId) {
@@ -386,19 +392,50 @@ public class ReportJobService {
         return jobDomainService.getJobMetaData(request.getJobId());
     }
 
-    public void shareJob(ReportJobShareRequest request) {
+    public String shareJob(ReportJobShareRequest request) {
 
         var currentUser = userDomainService.getCurrentUser();
         var job = jobDomainService.getJob(request.getJobId());
+
+        var userWithoutPermissions = new ArrayList<UserResponse>();
+
+        var userRoleIds =
+                folderDomainService
+                        .getPublishedReports(new ReportIdRequest().setId(job.getReport().id()))
+                        .getFolders()
+                        .stream()
+                        .map(f -> folderPermissionsDomainService.getFolderReportPermissions(f.folder().id()))
+                        .flatMap(f -> f.rolePermissions().stream())
+                        .filter(r -> !r.permissions().contains(FolderAuthorityEnum.NONE))
+                        .map(r -> r.role().getId())
+                        .toList();
+
         if (job.getUser().name().equals(currentUser.getName())) {
-            var users = request.getUsers().stream().map(u -> userDomainService.getUserResponse(u.getUserName(), u.getDomain())).toList();
+            var users = request.getUsers().stream().map(u -> userDomainService.getUserResponse(u.getUserName(), u.getDomain())).collect(Collectors.toList());
+
+            users.forEach(u -> {
+                var roles = u.getRoles()
+                        .stream()
+                        .map(RoleResponse::getId)
+                        .filter(r ->  r.equals(ADMIN.getId()) || userRoleIds.contains(r))
+                        .toList();
+
+                if (roles.isEmpty()) userWithoutPermissions.add(u);
+            });
+
+            users.removeAll(userWithoutPermissions);
+
             reportJobUserDomainService.addUsersJob(ReportJobUserTypeEnum.SHARE, request.getJobId(), users);
             olapConfigurationDomainService.createCurrentConfigurationForUsers(users.stream().map(UserResponse::getId).toList(), request.getJobId(), currentUser.getId());
-        } else {
+        } else
             throw new InvalidParametersException("Only the author can share the task");
-        }
 
         jobDomainService.updateJobStats(request.getJobId(), false, false, true);
+
+        if (userWithoutPermissions.isEmpty())
+            return "Job share success";
+        else
+            return "Permission denied for users: " + userWithoutPermissions.stream().map(UserResponse::getName).collect(Collectors.joining(","));
 
     }
 
@@ -418,7 +455,11 @@ public class ReportJobService {
 
     @SuppressWarnings("java:S3776")
     private boolean isConformToFilter(ReportJobResponse source, ReportJobHistoryRequestFilter filter) {
-        if (filter.getFrom() == null && filter.getTo() == null && (filter.getStatuses() == null || filter.getStatuses().isEmpty()) && (filter.getUsers() == null || filter.getUsers().isEmpty()))
+        if ( filter.getFrom() == null && filter.getTo() == null &&
+                (filter.getStatuses() == null || filter.getStatuses().isEmpty()) &&
+                (filter.getUsers() == null || filter.getUsers().isEmpty()) &&
+                (filter.getReportIds() == null || filter.getReportIds().isEmpty())
+        )
             return true;
         var result = filter.getFrom() == null || (filter.getFrom().isBefore(source.getCreated()) || filter.getFrom().isEqual(source.getCreated()));
         if (filter.getTo() != null && !(filter.getTo().isAfter(source.getCreated()) || filter.getTo().isEqual(source.getCreated())))

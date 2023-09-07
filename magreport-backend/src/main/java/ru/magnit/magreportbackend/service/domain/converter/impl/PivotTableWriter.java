@@ -32,6 +32,7 @@ import ru.magnit.magreportbackend.service.telemetry.state.ExcelExportTelemetry;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -148,7 +149,7 @@ public class PivotTableWriter implements Writer {
             telemetryService.logTimings(telemetryId);
             telemetryService.clear(telemetryId);
 
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             throw new ReportExportException("Error export report to excel file", ex);
         }
     }
@@ -361,6 +362,7 @@ public class PivotTableWriter implements Writer {
             config.get("fieldsLists").get("metricFields").elements().forEachRemaining(f -> metricUserNames.add(f.get("newName") == null ? "" : f.get("newName").textValue()));
 
         initValues();
+        controlPivotSize();
         initCellStyles(wb);
 
         mappingFields = fields.stream().collect(Collectors.toMap(ReportFieldMetadataResponse::id, ReportFieldMetadataResponse::name));
@@ -398,30 +400,36 @@ public class PivotTableWriter implements Writer {
             shiftRowCount = cubeData.getColumnValues().get(0).size();
             shiftColCount = cubeData.getRowValues().get(0).isEmpty() ? 1 : cubeData.getRowValues().get(0).size();
 
-            totalColumn = shiftColCount + cubeData.getTotalColumns() * (cubeData.getMetricValues().isEmpty() ? 1 : cubeData.getMetricValues().size());
-            totalRow = shiftRowCount + cubeData.getTotalRows() + 1;
+            totalColumn = shiftColCount + (cubeData.getTotalColumns() == 0 ? 1 : cubeData.getTotalColumns())* (cubeData.getMetricValues().isEmpty() ? 1 : cubeData.getMetricValues().size());
+            totalRow = shiftRowCount + (cubeData.getTotalRows() == 0 ? cubeData.getMetricValues().size() : cubeData.getTotalRows() + 1);
         } else {
             shiftRowCount = cubeData.getColumnValues().get(0).isEmpty() ? 1 : cubeData.getColumnValues().get(0).size();
             shiftColCount = cubeData.getRowValues().get(0).size();
 
-            totalColumn = shiftColCount + cubeData.getTotalColumns() + 1;
-            totalRow = shiftRowCount + cubeData.getTotalRows() * (cubeData.getMetricValues().isEmpty() ? 1 : cubeData.getMetricValues().size());
+            totalColumn = shiftColCount + (cubeData.getTotalColumns() == 0 ? cubeData.getMetricValues().size()  :  cubeData.getTotalColumns() + 1);
+            totalRow = shiftRowCount + (cubeData.getTotalRows() == 0 ? 1 : cubeData.getTotalRows()) * (cubeData.getMetricValues().isEmpty() ? 1 : cubeData.getMetricValues().size());
         }
 
-        if (cubeData.getRowValues().get(0).isEmpty() && cubeData.getColumnValues().get(0).isEmpty() && cubeData.getMetricValues().isEmpty())
+        if (cubeData.getTotalRows() == 0 && cubeData.getTotalColumns() == 0 && cubeData.getMetricValues().isEmpty())
             totalColumn = totalRow = shiftRowCount = shiftColCount = 0;
 
 
-        if (cubeData.getRowValues().get(0).isEmpty() && cubeData.getMetricValues().isEmpty()) {
+        if (cubeData.getTotalRows() == 0 && cubeData.getMetricValues().isEmpty()) {
             shiftColCount = 0;
             totalRow = shiftRowCount;
         }
 
-        if (cubeData.getColumnValues().get(0).isEmpty() && cubeData.getMetricValues().isEmpty()) {
+        if (cubeData.getTotalColumns() == 0 && cubeData.getMetricValues().isEmpty())
             totalColumn = shiftColCount;
-        }
 
+    }
 
+    private void controlPivotSize() {
+        if (totalRow > configuration.getMaxRowCount())
+            throw new ReportExportException("Превышено максимально допустимое количество строк сводной таблицы: " + configuration.getMaxRowCount());
+
+        if (totalColumn > configuration.getMaxColCount())
+            throw new ReportExportException("Превышено максимально допустимое количество столбцов сводной таблицы: " + configuration.getMaxColCount());
     }
 
     private CellStyle initCellStyle(Workbook wb, short dataType, short color) {

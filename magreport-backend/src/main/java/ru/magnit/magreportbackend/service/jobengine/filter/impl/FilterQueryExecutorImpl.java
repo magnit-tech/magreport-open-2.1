@@ -71,7 +71,7 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
         log.debug(QUERY + filterInstanceValuesQuery);
         List<Tuple> tuples = new LinkedList<>();
 
-        if (requestData.dataSource().type().equals(IMPALA) && requestData.filterFields().stream().noneMatch(f -> f.getFieldType().equals(DataTypeEnum.STRING))){
+        if (requestData.dataSource().type().equals(IMPALA) && requestData.filterFields().stream().noneMatch(f -> f.getFieldType().equals(DataTypeEnum.STRING))) {
             throw new QueryExecutionException("Filter instance not contains fields with type 'String' for search values");
         }
 
@@ -82,17 +82,13 @@ public class FilterQueryExecutorImpl implements FilterQueryExecutor {
         ) {
             while (resultSet.next()) {
                 var tuple = new Tuple();
-                if (Boolean.TRUE.equals(requestData.idField().getShowField()))
-                    tuple.getValues().add(new TupleValue(requestData.idField().getFieldId(), resultSet.getString(1)));
-                if (Boolean.TRUE.equals(requestData.codeField().getShowField()))
-                    tuple.getValues().add(new TupleValue(requestData.codeField().getFieldId(), resultSet.getString(2)));
+                tuple.getValues().add(new TupleValue(requestData.idField().getFieldId(), resultSet.getString(1)));
+                tuple.getValues().add(new TupleValue(requestData.codeField().getFieldId(), resultSet.getString(2)));
                 int columnIndex = 3;
 
                 for (FilterFieldRequestData f : requestData.nameFields()) {
-                    if (Boolean.TRUE.equals(f.getShowField())) {
-                        tuple.getValues().add(new TupleValue(f.getFieldId(), resultSet.getString(columnIndex)));
-                        columnIndex += 1;
-                    }
+                    tuple.getValues().add(new TupleValue(f.getFieldId(), resultSet.getString(columnIndex)));
+                    columnIndex += 1;
                 }
 
                 tuples.add(tuple);

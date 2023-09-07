@@ -69,11 +69,26 @@ function TupleList(props){
         {name: 'Тире', value: '-', checked: false}
     ];
 
-    const [textValue, setTextValue] = useState(buildTextFromLastValues(props.lastFilterValue?.parameters, '-',';'));
-    const [rows, setRows] = useState(props.lastFilterValue?.parameters)
+    const [textValue, setTextValue] = useState('');
+    const [rows, setRows] = useState(null)
     const [checkStatus, setCheckStatus] = useState(mandatory && !textValue ? "error" : 'success')
     const [separators, setSeparators] = useState(separatorsArray);
     const [wordSeparators, setWordSeparators] = useState(wordSeparatorArray);
+
+    // Задаём значения по-умолчанию
+    useEffect(() => {
+        if(!props.externalFiltersValue) {
+            setTextValue(buildTextFromLastValues(props.lastFilterValue?.parameters, '-',';'));
+            setRows(props.lastFilterValue?.parameters)
+        }
+    }, []) // eslint-disable-line
+
+    useEffect(() => {
+        if (props.toggleClearFilter !== toggleFilter.current){
+            toggleFilter.current = props.toggleClearFilter;
+            handleTextChanged("");
+        }
+    })
 
     function buildTextFromLastValues(params=[], wordSep, sep ) {
         let textValue = "";
@@ -245,13 +260,6 @@ function TupleList(props){
         handleTextChanged(buildTextFromLastValues(newValue, '-',';'));
         setShowDialog(false);
     }
-
-    useEffect(() => {
-        if (props.toggleClearFilter !== toggleFilter.current){
-            toggleFilter.current = props.toggleClearFilter;
-            handleTextChanged("");
-        }
-    })
 
     return (
         <div>

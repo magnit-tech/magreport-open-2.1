@@ -220,7 +220,8 @@ function PivotPanel(props){
     */
 
     function handleMetadataLoaded(data){
-        setTableDataLoadStatus(1);
+        // setTableDataLoadStatus(1);
+
         let fieldIdToNameMapping = new Map();
         let derivedFieldIdToNameMapping = new Map();
         for(let v of data.fields){
@@ -228,13 +229,15 @@ function PivotPanel(props){
         }
         for(let v of data.derivedFields){
             derivedFieldIdToNameMapping.set(v.id, v.name);
-        }        
+        }
+
         dataProviderRef.current.setFieldIdToNameMapping(fieldIdToNameMapping);
 
         let newConfiguration = new PivotConfiguration(pivotConfiguration);
         newConfiguration.create({}, data);
 
         const configId = searchParams.get('configId')
+        
 
         if(configId) {
             // Загрузка определенной конфигурации
@@ -307,6 +310,8 @@ function PivotPanel(props){
 
     // Получение текущей конфигурации
     function handleGetCurrentConfig(responseData, newConfiguration){
+        setTableDataLoadStatus(1);
+
         configOlap.current.createLists(responseData)
         
         if (responseData.olapConfig.data.length > 0) {
@@ -340,11 +345,12 @@ function PivotPanel(props){
                     setOtherDerivedFields(otherDeriverdFields)
     
                 } else {
+                    setTableDataLoadStatus(0)
                     enqueueSnackbar('Не удалось загрузить конфигурацию. Поля в конфигурации не соответсвуют отчету', {variant : "error"});
                 }
             })
-
-
+        } else {
+            setTimeout(() => setTableDataLoadStatus(0), 1000)
         }
 
         setSearchParams({view: 'pivot'})
@@ -354,9 +360,12 @@ function PivotPanel(props){
 
     // Получение выбранной конфигурации
     function handleGetChoosenCurrentConfig(responseData, newConfiguration, configId){
+        setTableDataLoadStatus(1);
+
         configOlap.current.createLists(responseData)
         
-        dataHub.olapController.getChoosenConfig(configId, ({ok, data}) => { if(ok) {
+        dataHub.olapController.getChoosenConfig(configId, ({ok, data}) => { 
+            if(ok) {
             const configData = JSON.parse(data.olapConfig.data),
                     { columnFrom, columnCount, rowFrom, rowCount } = configData
 
@@ -389,11 +398,13 @@ function PivotPanel(props){
                         handleSetConfigDialog('closeConfigDialog')
                         enqueueSnackbar('Конфигурация "' + data.olapConfig.name + '" успешно загружена' , {variant : "success"});
                     } else {
+                        setTableDataLoadStatus(0)
                         enqueueSnackbar('Не удалось загрузить конфигурацию "' + data.olapConfig.name + '". Некорректные данные.', {variant : "error"});
                     }
                 })
 
             } else {
+                setTableDataLoadStatus(0)
                 enqueueSnackbar('Не удалось загрузить конфигурацию. Поля в конфигурации не соответсвуют отчету', {variant : "error"});
             }
         }})
@@ -730,11 +741,11 @@ function PivotPanel(props){
         const { destination, source, draggableId } = result; // eslint-disable-line
 
         // Логирование события
-
+        
         pivotRegister({
             eventType: manipulationType === manipulationTypes.dragAndDrop ? eventTypes.fieldDragAndDrop : eventTypes.removeFieldByDelButton,
-            source: source.droppableId,
-            destination: destination.droppableId
+            source: source?.droppableId,
+            destination: destination?.droppableId
         });
 
         if (destination &&
@@ -1067,6 +1078,8 @@ function PivotPanel(props){
         newPivotConfiguration.replaceFilter();
         newPivotConfiguration.setColumnFrom(0)
         newPivotConfiguration.setRowFrom(0);
+        newPivotConfiguration.changeSortOrder({});
+        setSortingValues({})
         oldAndNewConfiguration.current = {
             newFieldIndex : i,
             oldConfiguration: new PivotConfiguration(pivotConfiguration),
@@ -1456,9 +1469,10 @@ function PivotPanel(props){
 
                                 setTableSize({ dimensions: contentRect.bounds });
 
-                                if ((cc !== columnCount || rc !== rowCount) && tableDataLoadStatus !==1){
+                                if ((cc !== columnCount || rc !== rowCount) && tableDataLoadStatus !== 1){
                                     setColumnCount(cc);
                                     setRowCount(rc);
+
                                     // if(!dataProviderRef.current.changeWindow(pivotConfiguration.columnFrom, cc, pivotConfiguration.rowFrom, rc)){
                                     //     setTableDataLoadStatus(1);
                                     // }

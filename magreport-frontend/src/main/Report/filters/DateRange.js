@@ -160,6 +160,8 @@ export default function DatesRange(props) {
             operationType: "IS_BETWEEN",
             validation:   stat,
             parameters,
+            filterType: props.filterData.type.name || props.filterData.type,
+            filterCode: props.filterData.code
         });      
     }
 

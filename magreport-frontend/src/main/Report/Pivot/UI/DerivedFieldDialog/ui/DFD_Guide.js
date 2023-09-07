@@ -45,6 +45,7 @@ export default function DerivedFieldDialogGuied(props) {
 		navigator.clipboard.writeText(name);
 		enqueueSnackbar(`Название функции успешно скопировано в буфер обмен`, {
 			variant: 'success',
+			autoHideDuration: 1000
 		});
 	}
 

@@ -125,7 +125,9 @@ function ValueList(props){
                 {
                     filterId : props.filterData.id,
                     operationType: type === 'IN_LIST' ? 'IS_IN_LIST' : 'IS_NOT_IN_LIST',
-                    parameters: props.lastFilterValue?.parameters || []
+                    parameters: props.lastFilterValue?.parameters || [],
+                    filterType: props.filterData.type.name || props.filterData.type,
+                    filterCode: props.filterData.code
                 }
             );
         }
@@ -206,7 +208,9 @@ function ValueList(props){
                     filterId : props.filterData.id,
                     operationType: operationType === 'IN_LIST' ? 'IS_IN_LIST' : 'IS_NOT_IN_LIST',
                     validation: status,
-                    parameters: parameters
+                    parameters: parameters,
+                    filterType: props.filterData.type.name || props.filterData.type,
+                    filterCode: props.filterData.code
                 }
             );
             
@@ -224,7 +228,9 @@ function ValueList(props){
                 filterId : props.filterData.id,
                 operationType: operationType === 'IN_LIST' ? 'IS_IN_LIST' : 'IS_NOT_IN_LIST',
                 validation: mandatory ? "error" : 'success',
-                parameters: []
+                parameters: [],
+                filterType: props.filterData.type.name || props.filterData.type,
+                filterCode: props.filterData.code
             });
 
             if(!props.unbounded){
@@ -258,6 +264,8 @@ function ValueList(props){
                     operationType: operationType === 'IN_LIST' ? 'IS_IN_LIST' : 'IS_NOT_IN_LIST',
                     validation,
                     parameters,
+                    filterType: props.filterData.type.name || props.filterData.type,
+                    filterCode: props.filterData.code
                 }
             );
             setCheckStatus(validation);
@@ -288,6 +296,8 @@ function ValueList(props){
                 operationType: type === 'IN_LIST' ? 'IS_IN_LIST' : 'IS_NOT_IN_LIST',
                 validation: mandatory ? "error" : 'success',
                 parameters: props.lastFilterValue?.parameters || [],
+                filterType: props.filterData.type.name || props.filterData.type,
+                filterCode: props.filterData.code
             }
         );
         setOperationType(type);

@@ -240,7 +240,7 @@ public class ExcelReportDomainService {
             } catch (IOException e) {
                 throw new ReportExportException("Error deleting corrupted excel file", e);
             }
-            throw new ReportExportException("Error write pivot table to file", ex);
+            throw new ReportExportException(ex.getMessage(), ex);
         }
     }
 

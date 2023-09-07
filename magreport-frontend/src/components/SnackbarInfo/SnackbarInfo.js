@@ -23,7 +23,7 @@ function SnackbarInfo (props) {
 
     return (
         <Snackbar open={data.isOpen} autoHideDuration={3000} onClose={handleCloseSnackbar}>
-            <Alert onClose={handleCloseSnackbar} color={data.color}>
+            <Alert id = "snackbarInfo" onClose={handleCloseSnackbar} color={data.color}>
                 { data.text }
             </Alert>
         </Snackbar>

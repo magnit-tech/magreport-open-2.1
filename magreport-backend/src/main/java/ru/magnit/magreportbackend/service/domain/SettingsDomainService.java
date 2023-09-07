@@ -9,16 +9,16 @@ import ru.magnit.magreportbackend.domain.user.User;
 import ru.magnit.magreportbackend.dto.inner.UserView;
 import ru.magnit.magreportbackend.dto.request.serversettings.ServerSettingSetRequest;
 import ru.magnit.magreportbackend.dto.request.serversettings.ServerSettingsJournalRequest;
-import ru.magnit.magreportbackend.dto.response.serversettings.ServerParameterResponse;
-import ru.magnit.magreportbackend.dto.response.serversettings.ServerSettingsFolderResponse;
 import ru.magnit.magreportbackend.dto.response.serversettings.ServerSettingsJournalResponse;
 import ru.magnit.magreportbackend.dto.response.serversettings.ServerSettingsResponse;
+import ru.magnit.magreportbackend.mapper.serversettings.ServerSettingFolderResponseMapper;
 import ru.magnit.magreportbackend.repository.ServerSettingsFolderRepository;
 import ru.magnit.magreportbackend.repository.ServerSettingsJournalRepository;
 import ru.magnit.magreportbackend.repository.ServerSettingsRepository;
 import ru.magnit.magreportbackend.service.security.CryptoService;
 
 import javax.transaction.Transactional;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,28 +30,12 @@ public class SettingsDomainService {
     private final ServerSettingsFolderRepository folderRepository;
     private final ServerSettingsJournalRepository journalRepository;
     private final CryptoService cryptoService;
+    private final ServerSettingFolderResponseMapper serverSettingFolderResponseMapper;
 
     @Transactional
     public ServerSettingsResponse getSettings() {
-
         final var folders = folderRepository.findAll();
-
-        return new ServerSettingsResponse().setFolders(
-                folders.stream().map(folder -> new ServerSettingsFolderResponse()
-                        .setOrdinal(folder.getOrdinal())
-                        .setCode(folder.getCode())
-                        .setName(folder.getName())
-                        .setDescription(folder.getDescription())
-                        .setParameters(folder.getSettings().stream().map(parameter -> new ServerParameterResponse()
-                                .setId(parameter.getId())
-                                .setCode(parameter.getCode())
-                                .setEncoded(parameter.isEncoded())
-                                .setName(parameter.getName())
-                                .setDescription(parameter.getDescription())
-                                .setValue(parameter.isEncoded() ? "*****" : parameter.getValue())
-                        ).collect(Collectors.toList()))
-                ).collect(Collectors.toList())
-        );
+        return new ServerSettingsResponse().setFolders(serverSettingFolderResponseMapper.from(folders));
     }
 
     @Transactional
@@ -103,5 +87,16 @@ public class SettingsDomainService {
     public String getValueSetting(String code) {
         ServerSettings setting = settingsRepository.getServerSettingsByCode(code);
         return setting.getValue();
+    }
+
+
+    @Transactional
+    public ServerSettingsResponse getSettingsFolder (String codeFolder) {
+
+        final var folder = folderRepository.getServerSettingsFolderByCode(codeFolder);
+
+        return new ServerSettingsResponse().setFolders(
+                Collections.singletonList(serverSettingFolderResponseMapper.from(folder))
+        );
     }
 }

@@ -38,7 +38,8 @@ function SidebarSubMenu(props){
     return (
         props.item.text !== 'Дизайн' ?
         <div>
-            <ListItem button 
+            <ListItem button
+                id = {props.item.key}
                 className={classes.listItemSmall}
                 onClick={() => handleClick(props.item)}
             >

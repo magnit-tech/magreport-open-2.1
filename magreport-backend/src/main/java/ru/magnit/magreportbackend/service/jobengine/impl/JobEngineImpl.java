@@ -295,7 +295,7 @@ public class JobEngineImpl implements JobEngine, InitializingBean {
                         currentCountItems += size;
                     }
 
-                    if (f.maxCountItems() <=  currentCountItems && !f.filterType().equals(FilterTypeEnum.DATE_RANGE)) {
+                    if (f.maxCountItems() <  currentCountItems && !f.filterType().equals(FilterTypeEnum.DATE_RANGE)) {
                         throw new InvalidParametersException(String.format("Превышен лимит количества элементов в фильтре '%s': %s", f.filterName(), f.maxCountItems()));
                     }
 

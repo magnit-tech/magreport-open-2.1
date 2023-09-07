@@ -61,6 +61,12 @@ public class Theme extends EntityWithName {
     }
 
     @Override
+    public Theme setModifiedDateTime(LocalDateTime modifiedDateTime) {
+        this.modifiedDateTime = modifiedDateTime;
+        return this;
+    }
+
+    @Override
     public Theme setId(Long id){
         this.id = id;
         return this;

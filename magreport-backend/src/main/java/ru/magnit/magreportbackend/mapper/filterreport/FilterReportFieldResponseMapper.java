@@ -27,6 +27,9 @@ public class FilterReportFieldResponseMapper implements Mapper<FilterReportField
                 source.getCreatedDateTime(),
                 source.getModifiedDateTime(),
                 source.isExpand(),
-                source.getReportField() == null || source.getReportField().getDataSetField().getIsSync());
+                source.getReportField() == null || source.getReportField().getDataSetField().getIsSync(),
+                source.getFilterInstanceField().getSearchByField(),
+                source.getFilterInstanceField().getShowField()
+                );
     }
 }

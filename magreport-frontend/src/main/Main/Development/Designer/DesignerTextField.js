@@ -40,6 +40,7 @@ export default function DesignerTextField(props){
 
     return (
         <TextField
+            id = {props.id}
             className = {clsx(classes.field, {[classes.displayBlock] : props.displayBlock})}
             style={{minWidth: props.minWidth, margin: props.margin}}
             label = {props.label}

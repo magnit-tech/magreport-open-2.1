@@ -71,7 +71,7 @@ class ExportDataInExternalTableDomainServiceTest {
                 ID,
                 ID,
                 false,
-                new DataSourceData(ID, DataSourceTypeEnum.IMPALA, "url", NAME, "", (short) 1),
+                new DataSourceData(ID, DataSourceTypeEnum.IMPALA, "url", NAME, "", (short) 1, "name"),
                 new ReportData(
                         ID,
                         NAME,
@@ -98,7 +98,7 @@ class ExportDataInExternalTableDomainServiceTest {
                 ID,
                 ID,
                 false,
-                new DataSourceData(ID, DataSourceTypeEnum.IMPALA, "url", NAME, "", (short) 1),
+                new DataSourceData(ID, DataSourceTypeEnum.IMPALA, "url", NAME, "", (short) 1,"name"),
                 new ReportData(
                         ID,
                         NAME,
@@ -120,7 +120,8 @@ class ExportDataInExternalTableDomainServiceTest {
                                                 NAME,
                                                 NAME,
                                                 NAME,
-                                                (short) 1
+                                                (short) 1,
+                                                NAME
                                         ),
                                         ID,
                                         NAME,

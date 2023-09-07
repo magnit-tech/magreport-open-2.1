@@ -43,11 +43,9 @@ import ru.magnit.magreportbackend.mapper.datasource.DataSourceTypeResponseMapper
 import ru.magnit.magreportbackend.mapper.datasource.DataSourceViewMapper;
 import ru.magnit.magreportbackend.mapper.datasource.FolderNodeResponseDataSourceFolderMapper;
 import ru.magnit.magreportbackend.repository.DataSourceFolderRepository;
-import ru.magnit.magreportbackend.repository.DataSourceFolderRolePermissionRepository;
 import ru.magnit.magreportbackend.repository.DataSourceFolderRoleRepository;
 import ru.magnit.magreportbackend.repository.DataSourceRepository;
 import ru.magnit.magreportbackend.repository.DataSourceTypeRepository;
-import ru.magnit.magreportbackend.util.JsonUtils;
 
 import javax.transaction.Transactional;
 import java.sql.DriverManager;
@@ -69,8 +67,6 @@ public class DataSourceDomainService {
     private final DataSourceFolderRepository folderRepository;
     private final DataSourceRepository dataSourceRepository;
     private final DataSourceFolderRoleRepository dataSourceFolderRoleRepository;
-    private final DataSourceFolderRolePermissionRepository dataSourceFolderRolePermissionRepository;
-
     private final DataSourceTypeResponseMapper dataSourceTypeResponseMapper;
     private final DataSourceFolderResponseMapper dataSourceFolderResponseMapper;
     private final DataSourceResponseMapper dataSourceResponseMapper;

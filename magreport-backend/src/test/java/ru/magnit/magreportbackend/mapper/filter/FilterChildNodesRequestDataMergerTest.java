@@ -75,7 +75,7 @@ class FilterChildNodesRequestDataMergerTest {
 
     private FilterData getFilterData() {
         return new FilterData(
-                new DataSourceData(3L, DataSourceTypeEnum.TERADATA, "teradata url", "user", "password", POOL_SIZE),
+                new DataSourceData(3L, DataSourceTypeEnum.TERADATA, "teradata url", "user", "password", POOL_SIZE, "name"),
                 4L,
                 FilterTypeEnum.HIERARCHY,
                 SCHEMA_NAME,

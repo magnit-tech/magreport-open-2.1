@@ -65,7 +65,7 @@ class ExternalAuthUserRoleRefreshServiceTest {
         source.put(ExternalAuthSourceTypeEnum.USER_MAP_SOURCE,
                 new ExternalAuthSourceView()
                         .setDataSet(new DataSetView(null, null, null, null,null,
-                                new DataSourceData(null, null, null, null, null, null), null)));
+                                new DataSourceData(null, null, null, null, null, null, null), null)));
 
         return new ExternalAuthSecurityView()
                 .setSources(source);

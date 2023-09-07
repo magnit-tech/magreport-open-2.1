@@ -23,5 +23,6 @@ public class AsmSecurityAddRequest {
     private String description;
     private Long roleTypeId;
     private Boolean isDefaultDomain;
+    private Boolean isActive;
     private List<AsmSecuritySourceAddRequest> securitySources = Collections.emptyList();
 }

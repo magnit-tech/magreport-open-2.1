@@ -297,7 +297,7 @@ class FilterReportDomainServiceTest {
                 ID,
                 ID,
                 false,
-                new DataSourceData(null, null, null, null, null, null),
+                new DataSourceData(null, null, null, null, null, null, null),
                 new ReportData(ID, "", "", "", "", Collections.emptyList(), new ReportFilterGroupData(
                         ID, ID, "", "", null, Collections.emptyList(), Collections.emptyList()), true),
                 new ArrayList<>(Arrays.asList(

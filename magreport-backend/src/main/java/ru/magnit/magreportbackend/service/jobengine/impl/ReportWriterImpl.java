@@ -9,6 +9,7 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumWriter;
+import org.springframework.beans.factory.annotation.Value;
 import ru.magnit.magreportbackend.dto.inner.jobengine.ReportWriterData;
 import ru.magnit.magreportbackend.exception.ReportExportException;
 import ru.magnit.magreportbackend.service.jobengine.ReportWriter;
@@ -25,6 +26,7 @@ public class ReportWriterImpl implements ReportWriter {
     private final ReportWriterData writerData;
     private final String reportRootDir;
     private final Long maxRows;
+    private final Long waitTimeWriteAvro;
     private WriterStatus status = WriterStatus.IDLE;
     private long rowCount;
     private boolean isCanceled;
@@ -57,14 +59,8 @@ public class ReportWriterImpl implements ReportWriter {
             fileWriter.create(schema, file);
 
             var waitTime = 0L;
-            var waitCache = System.currentTimeMillis();
             var firstRow = true;
             while (true) {
-
-                if (System.currentTimeMillis() - waitCache > 300000) {
-                    errorDescription = "Превышено максимально допустимое ожидание записи avro файла";
-                    throw new ReportExportException(errorDescription);
-                }
 
                 var cacheRow = writerData.cache().poll();
                 if (cacheRow == null) {
@@ -90,8 +86,6 @@ public class ReportWriterImpl implements ReportWriter {
                         errorDescription = "Превышено максимально допустимое количество строк отчета:" + maxRows;
                         throw new ReportExportException(errorDescription);
                     }
-
-                    waitCache = System.currentTimeMillis();
                 }
             }
             log.debug("Total time of writer waiting reader (jobId:" + writerData.jobId() + "): " + waitTime / 1000.0);
