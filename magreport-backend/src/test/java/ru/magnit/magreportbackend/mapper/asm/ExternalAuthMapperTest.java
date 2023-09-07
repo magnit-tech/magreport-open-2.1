@@ -58,6 +58,7 @@ class ExternalAuthMapperTest {
         verify(request, times(2)).getIsDefaultDomain();
         verify(request).getRoleTypeId();
         verify(request).getSecuritySources();
+        verify(request).getIsActive();
         verifyNoMoreInteractions(request);
     }
 

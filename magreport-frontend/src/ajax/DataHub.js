@@ -26,6 +26,7 @@ import EmailController from "./controllers/EmailController";
 import ThemeController from "./controllers/ThemeController";
 import UserServiceController from "./controllers/UserServiceController";
 import DerivedFieldController from "./controllers/DerivedFieldController";
+import EventController from "./controllers/EventController";
 
 const USER_DATA = localStorage.getItem('userData') ? JSON.parse(localStorage.getItem('userData')) : ''
 
@@ -88,14 +89,15 @@ function DataHub(){
     /*
         Общая схема выполнения запроса к сервису
     */
-    this.requestService = (serviceUrl, method, body, callback, setCache) => {
+    this.requestService = (serviceUrl, method, body, callback, setCache, abortSignal) => {
 
         let request = {
             method: method,
             headers: {
                 'Authorization' : this.authorization,
                 'Content-Type' : 'application/json'
-            }
+            },
+            signal : abortSignal
         };
 
         let requestId = Date.now() + '-' + Math.floor(Math.random()*1000000);
@@ -368,6 +370,7 @@ function DataHub(){
     this.olapController = new OlapController(this);
     this.userServiceController = new UserServiceController(this);
     this.derivedFieldController = new DerivedFieldController(this);
+    this.eventController = new EventController(this);
 }
 
 const dataHub = new DataHub();

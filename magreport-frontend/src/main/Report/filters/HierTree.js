@@ -732,7 +732,7 @@ export default function HierTree(props){
     const [toggleClearFilter, setToggleClearFilter] = useState(false);
 
     useEffect(() => {
-        if(props.lastFilterValue && !treeDefaultsSet.current){
+        if(!props.externalFiltersValue && (props.lastFilterValue && !treeDefaultsSet.current)){
             treeDefaultsSet.current = true;
             tree.current.setValues(props.lastFilterValue);
             handleCheckedChange();

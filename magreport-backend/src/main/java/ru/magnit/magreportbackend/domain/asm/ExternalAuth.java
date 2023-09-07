@@ -54,6 +54,9 @@ public class ExternalAuth extends EntityWithName {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "externalAuth")
     private List<ExternalAuthSource> sources = Collections.emptyList();
 
+    @Column(name = "IS_ACTIVE")
+    private Boolean isActive;
+
     @Override
     public ExternalAuth setId(Long id) {
         this.id = id;

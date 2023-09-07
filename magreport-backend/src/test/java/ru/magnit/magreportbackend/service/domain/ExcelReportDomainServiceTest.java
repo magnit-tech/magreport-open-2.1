@@ -15,7 +15,6 @@ import ru.magnit.magreportbackend.dto.inner.jobengine.CacheRow;
 import ru.magnit.magreportbackend.dto.inner.olap.CubeData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportData;
 import ru.magnit.magreportbackend.dto.inner.reportjob.ReportJobData;
-import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequest;
 import ru.magnit.magreportbackend.exception.ReportExportException;
 import ru.magnit.magreportbackend.service.domain.converter.Reader;
 import ru.magnit.magreportbackend.service.domain.converter.ReaderFactory;
@@ -77,7 +76,7 @@ class ExcelReportDomainServiceTest {
         FileUtils.deleteDirectory(new File("test/"));
 
         when(readerFactory.createReader(any(ReportJobData.class), any())).thenReturn(getReader());
-        when(writerFactory.createWriter(any(Reader.class), any(ReportData.class), any())).thenReturn(getWriter());
+        when(writerFactory.createWriter(any(Reader.class), any(ReportData.class), any(),any())).thenReturn(getWriter());
 
         assertNotNull(domainService.getExcelReport(getReportJobData(), "", ID));
 
@@ -105,12 +104,12 @@ class ExcelReportDomainServiceTest {
         ReflectionTestUtils.setField(domainService, "decryptOutFolder", "test/outFolder");
 
         when(readerFactory.createReader(any(ReportJobData.class), any())).thenReturn(getReader());
-        when(writerFactory.createWriter(any(Reader.class), any(ReportData.class), any())).thenReturn(getWriter());
+        when(writerFactory.createWriter(any(Reader.class), any(ReportData.class), any(), any())).thenReturn(getWriter());
 
         domainService.createExcelReport(getReportJobData(), "", ID);
 
         verify(readerFactory).createReader(any(ReportJobData.class), any());
-        verify(writerFactory).createWriter(any(Reader.class), any(ReportData.class), any());
+        verify(writerFactory).createWriter(any(Reader.class), any(ReportData.class), any(), any());
 
         verifyNoMoreInteractions(readerFactory, writerFactory);
     }
@@ -170,7 +169,8 @@ class ExcelReportDomainServiceTest {
                         "",
                         "",
                         "",
-                        (short) 1),
+                        (short) 1,
+                        "name"),
                 new ReportData(
                         ID,
                         "",

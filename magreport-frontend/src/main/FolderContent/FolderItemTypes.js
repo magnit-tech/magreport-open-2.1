@@ -17,6 +17,7 @@ export const FolderItemTypes = {
     mailSender: 'mailSender',
     cubes: 'cubes',
     theme: 'theme',
+    loadMonitoring: 'loadMonitoring',
 
     // Development
     datasource : "datasource",
@@ -49,6 +50,7 @@ export function dataHubItemController(itemType){
                     :itemType === FolderItemTypes.scheduleTasks ? dataHub.scheduleController
                     :itemType === FolderItemTypes.systemMailTemplates ? dataHub.serverMailTemplateController
                     :itemType === FolderItemTypes.theme ? dataHub.themeController
+                    :itemType === FolderItemTypes.loadMonitoring ? dataHub.loadMonitoringController
                     :itemType === FolderItemTypes.cubes ? dataHub.olapController
                     : null;
     return controller;
@@ -70,6 +72,7 @@ export function folderItemTypeName(itemType, changeRest){
                 :itemType === FolderItemTypes.scheduleTasks ? "отчет на расписании"
                 :itemType === FolderItemTypes.systemMailTemplates ? "шаблоны системных писем"
                 :itemType === FolderItemTypes.theme ? "дизайн"
+                :itemType === FolderItemTypes.loadMonitoring ? "мониторинг нагрузки"
                 :itemType === FolderItemTypes.cubes ? "куб"
                 :"???";
     return name;
@@ -91,6 +94,7 @@ export function folderItemTypesName(itemType, changeRest){
                 :itemType === FolderItemTypes.scheduleTasks ? "Отчёты на расписании"
                 :itemType === FolderItemTypes.systemMailTemplates ? "Шаблоны системных писем"
                 :itemType === FolderItemTypes.theme ? "Дизайн"
+                :itemType === FolderItemTypes.loadMonitoring ? "Мониторинг нагрузки"
                 :"???";
     return name;
 }
@@ -107,6 +111,7 @@ export function dataHubRightsController(itemType){
                     :itemType === FolderItemTypes.securityFilters ? dataHub.securityFilterController
                     :itemType === FolderItemTypes.systemMailTemplates ? dataHub.serverMailTemplateController
                     :itemType === FolderItemTypes.theme ? dataHub.themeController
+                    :itemType === FolderItemTypes.loadMonitoring ? dataHub.loadMonitoringController
                     : null;
     return controller;
 }

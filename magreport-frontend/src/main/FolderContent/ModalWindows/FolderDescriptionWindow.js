@@ -88,7 +88,7 @@ export default function FolderDescriptionWindow(props){
                     autoFocus
                     margin="normal"
                     multiline
-                    id="name"
+                    id="folderName"
                     label="Название каталога"
                     type="text"
                     defaultValue={name}
@@ -100,7 +100,7 @@ export default function FolderDescriptionWindow(props){
                 <TextField
                     margin="normal"
                     multiline
-                    id="description"
+                    id="folderDescription"
                     label="Описание каталога"
                     type="text"
                     defaultValue={desc}
@@ -111,7 +111,8 @@ export default function FolderDescriptionWindow(props){
                 />
                 </DialogContent>
                 <DialogActions className={classes.indent}>
-                <Button 
+                <Button
+                    id = "addFolderConfirm"
                     type="submit"
                     variant="contained"
                     color="primary"

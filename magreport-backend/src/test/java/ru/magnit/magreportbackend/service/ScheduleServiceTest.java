@@ -630,6 +630,7 @@ class ScheduleServiceTest {
                 null,
                 null,
                 null,
+                null,
                 null
         );
     }
@@ -641,7 +642,7 @@ class ScheduleServiceTest {
                 null,
                 FilterFieldTypeEnum.CODE_FIELD,
                 null,
-                null, null, null, "", null, null, null, null);
+                null, null, null, "", null, null, null, null, null, null);
     }
 
 }

@@ -23,6 +23,7 @@ public class DataSourceViewMapper implements Mapper<DataSourceData, DataSource> 
                 source.getUrl(),
                 source.getUserName(),
                 source.getPassword(),
-                source.getPoolSize());
+                source.getPoolSize(),
+                source.getName());
     }
 }

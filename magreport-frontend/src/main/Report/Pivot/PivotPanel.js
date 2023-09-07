@@ -16,6 +16,7 @@ import { setAggModalParams } from 'redux/actions/olap/olapAction.js'
 
 // magreport
 import dataHub from 'ajax/DataHub'
+import { eventTypes } from 'ajax/controllers/EventController';
 import DataLoader from 'main/DataLoader/DataLoader'
 import PivotFieldsList from './PivotFieldsList'
 import PivotTable from './PivotTable'
@@ -63,6 +64,11 @@ function PivotPanel(props){
 
     const [searchParams, setSearchParams] = useSearchParams();
 
+    // Отмена выполнения Olap-запросы при выходе из панели сводной
+    useEffect(() => {
+        return () => {dataHub.olapController.abortLastOlapRequest();}
+    }, []);
+
     useEffect(() => {
         // Проверка пользователя на разработчика отчета
         dataHub.userController.whoAmI(({data}) => {
@@ -87,6 +93,7 @@ function PivotPanel(props){
     const [fieldsVisibility, setFieldsVisibility] = useState(true);
 
     function handleFieldsVisibility(value){
+        pivotRegister({eventType: eventTypes.changeFieldPanelsVisibility, mode: value ? "visible" : "invisible"});
         setFieldsVisibility(value);
     }
 
@@ -94,6 +101,7 @@ function PivotPanel(props){
     const [onlyUnused, setOnlyUnused] = useState(true);
 
     function handleOnlyUnusedClick() {
+        pivotRegister({eventType: eventTypes.changeShowAllFields, mode: onlyUnused ? "onlyUnused" : "allFields"});
         setOnlyUnused(!onlyUnused);
     }
 
@@ -101,6 +109,7 @@ function PivotPanel(props){
     const [pivotFullScreen, setPivotFullScreen] = useState(false);
 
     function handleFullScreen(value){
+        pivotRegister({eventType: eventTypes.changeFullscreen, mode: value ? "fullscreen" : "windowed"});
         setPivotFullScreen(value);
     }
 
@@ -211,6 +220,8 @@ function PivotPanel(props){
     */
 
     function handleMetadataLoaded(data){
+        // setTableDataLoadStatus(1);
+
         let fieldIdToNameMapping = new Map();
         let derivedFieldIdToNameMapping = new Map();
         for(let v of data.fields){
@@ -218,13 +229,15 @@ function PivotPanel(props){
         }
         for(let v of data.derivedFields){
             derivedFieldIdToNameMapping.set(v.id, v.name);
-        }        
+        }
+
         dataProviderRef.current.setFieldIdToNameMapping(fieldIdToNameMapping);
 
         let newConfiguration = new PivotConfiguration(pivotConfiguration);
         newConfiguration.create({}, data);
 
         const configId = searchParams.get('configId')
+        
 
         if(configId) {
             // Загрузка определенной конфигурации
@@ -273,6 +286,7 @@ function PivotPanel(props){
         switch(action) {
 
             case 'openConfigDialog':
+                pivotRegister({eventType: eventTypes.openConfigDialog});
                 handleGetAvailableConfigs('ConfigDialog')
                 break;
 
@@ -281,6 +295,7 @@ function PivotPanel(props){
                 break;
 
             case 'openConfigSaveDialog':
+                pivotRegister({eventType: eventTypes.openSaveConfigDialog});
                 handleGetAvailableConfigs('ConfigSaveDialog')
                 break;
 
@@ -295,6 +310,8 @@ function PivotPanel(props){
 
     // Получение текущей конфигурации
     function handleGetCurrentConfig(responseData, newConfiguration){
+        setTableDataLoadStatus(1);
+
         configOlap.current.createLists(responseData)
         
         if (responseData.olapConfig.data.length > 0) {
@@ -328,11 +345,12 @@ function PivotPanel(props){
                     setOtherDerivedFields(otherDeriverdFields)
     
                 } else {
+                    setTableDataLoadStatus(0)
                     enqueueSnackbar('Не удалось загрузить конфигурацию. Поля в конфигурации не соответсвуют отчету', {variant : "error"});
                 }
             })
-
-
+        } else {
+            setTimeout(() => setTableDataLoadStatus(0), 1000)
         }
 
         setSearchParams({view: 'pivot'})
@@ -342,9 +360,12 @@ function PivotPanel(props){
 
     // Получение выбранной конфигурации
     function handleGetChoosenCurrentConfig(responseData, newConfiguration, configId){
+        setTableDataLoadStatus(1);
+
         configOlap.current.createLists(responseData)
         
-        dataHub.olapController.getChoosenConfig(configId, ({ok, data}) => { if(ok) {
+        dataHub.olapController.getChoosenConfig(configId, ({ok, data}) => { 
+            if(ok) {
             const configData = JSON.parse(data.olapConfig.data),
                     { columnFrom, columnCount, rowFrom, rowCount } = configData
 
@@ -377,11 +398,13 @@ function PivotPanel(props){
                         handleSetConfigDialog('closeConfigDialog')
                         enqueueSnackbar('Конфигурация "' + data.olapConfig.name + '" успешно загружена' , {variant : "success"});
                     } else {
+                        setTableDataLoadStatus(0)
                         enqueueSnackbar('Не удалось загрузить конфигурацию "' + data.olapConfig.name + '". Некорректные данные.', {variant : "error"});
                     }
                 })
 
             } else {
+                setTableDataLoadStatus(0)
                 enqueueSnackbar('Не удалось загрузить конфигурацию. Поля в конфигурации не соответсвуют отчету', {variant : "error"});
             }
         }})
@@ -400,6 +423,8 @@ function PivotPanel(props){
     function handleSaveConfig(obj){
 
         const { type } = obj
+
+        pivotRegister({eventType: eventTypes.saveConfig, mode : type});
         
         // Cохранение новой конфигурации
         if ( type === 'saveNewConfig') {
@@ -550,6 +575,9 @@ function PivotPanel(props){
 
     // Экспорт сводной в Excel
     function handleExportToExcel() {
+
+        pivotRegister({eventType: eventTypes.exportToExcel});
+
         const payload = {
             cubeRequest: {
               jobId: props.jobId,
@@ -597,7 +625,7 @@ function PivotPanel(props){
             link.parentNode.removeChild(link);
         }
         else {
-            enqueueSnackbar("Не удалось получить файл с сервера", { variant: 'error'});
+            enqueueSnackbar(`Не удалось получить файл с сервера. Ошибка: ${resp.data ?? 'Не известно'}`, { variant: 'error'});
         }
     }
 
@@ -617,6 +645,8 @@ function PivotPanel(props){
     function handleShareJobDialog(value) {
         
         if (value === true) {
+            pivotRegister({eventType: eventTypes.openShareDialog});
+
             dataHub.reportJobController.getUsersJob(props.jobId, ({ok, data}) => {
                 if (ok) {
                     let newArrForUsersWithAccess = data.map(user => user.id)
@@ -637,6 +667,8 @@ function PivotPanel(props){
 
     // Сохранение списка пользователей, с которыми поделились этим заданием
     function handleSaveShareJob(listOfSelectedUsers) {
+
+        pivotRegister({eventType: eventTypes.saveShareList});
         
         dataHub.reportJobController.share(props.jobId, listOfSelectedUsers, ({ok}) => {
 
@@ -652,6 +684,8 @@ function PivotPanel(props){
     
     // Сохраняем "Общий доступ"
     function handleSaveGeneralAccess(eventValue, item) {
+
+        pivotRegister({eventType: eventTypes.savePublicConfiguration, mode: eventValue ? "public" : "private"});
 
         const { reportOlapConfigId } = item
 
@@ -674,6 +708,7 @@ function PivotPanel(props){
     */
 
     function handleSetMetricPlacement(placeColumn){
+        pivotRegister({eventType: eventTypes.changeMetricPlacement, mode: placeColumn ? 'column' : 'row'});
         let newPivotConfiguration = new PivotConfiguration(pivotConfiguration);
         newPivotConfiguration.columnsMetricPlacement = placeColumn;
         setPivotConfiguration(newPivotConfiguration);
@@ -681,15 +716,37 @@ function PivotPanel(props){
     }
 
     function handleSetMergeMode(mergeMode){
+        pivotRegister({eventType: eventTypes.changeMergeMode, mode: mergeMode ? "merge" : "split"});
         let newPivotConfiguration = new PivotConfiguration(pivotConfiguration);
         newPivotConfiguration.mergeMode = mergeMode;
         setPivotConfiguration(newPivotConfiguration);
         handleSaveCurrentConfig(newPivotConfiguration.stringify())
-    }    
+    }  
+    
+    const manipulationTypes = {
+        dragAndDrop : 1,
+        removeButtonClick : 2
+    }
+
+    function pivotRegister(event){
+        dataHub.eventController.pivotRegister(event, props.reportId, props.jobId);
+    }
 
     function handleDragEnd(result){
+        handleFieldManipulation(result, manipulationTypes.dragAndDrop)
+    }
+
+    function handleFieldManipulation(result, manipulationType){
 
         const { destination, source, draggableId } = result; // eslint-disable-line
+
+        // Логирование события
+        
+        pivotRegister({
+            eventType: manipulationType === manipulationTypes.dragAndDrop ? eventTypes.fieldDragAndDrop : eventTypes.removeFieldByDelButton,
+            source: source?.droppableId,
+            destination: destination?.droppableId
+        });
 
         if (destination &&
                 (destination.droppableId !== source.droppableId 
@@ -771,11 +828,11 @@ function PivotPanel(props){
         }
     }
 
-    function onRemoveFieldClick(droppableId, index) {
-        handleDragEnd({
+    function handleRemoveFieldClick(droppableId, index) {
+        handleFieldManipulation({
             destination: {droppableId: 'unusedFields', index: 0},
             source : {droppableId: droppableId, index: index}
-        })
+        }, manipulationTypes.removeButtonClick);
     }
 
     /*
@@ -831,6 +888,8 @@ function PivotPanel(props){
 
     function handleColumnFromChange(newColumnFrom) {
 
+        pivotRegister({eventType: eventTypes.scrollColumns});
+
         let newConfiguration = new PivotConfiguration(pivotConfiguration);
         newConfiguration.setColumnFrom(newColumnFrom);
         setPivotConfiguration(newConfiguration);
@@ -841,10 +900,12 @@ function PivotPanel(props){
         }
     }
 
-    function handleRowFromChange(newRowFrom) {
+    function handleRowFromChange(newRowFrom, method) {
+
+        pivotRegister({eventType: eventTypes.scrollRows, mode: method});
 
         let newConfiguration = new PivotConfiguration(pivotConfiguration);
-        newConfiguration.setRowFrom(newRowFrom);;
+        newConfiguration.setRowFrom(newRowFrom);
         setPivotConfiguration(newConfiguration);
         handleSaveCurrentConfig(newConfiguration.stringify());
 
@@ -866,6 +927,8 @@ function PivotPanel(props){
 
     // Вызывается при нажатии на метрику
     function handleMetricFieldButtonClick(event, i){
+        pivotRegister({eventType: eventTypes.editMetric});
+
         let newPivotConfiguration = new PivotConfiguration(pivotConfiguration);
 
         oldAndNewConfiguration.current = {
@@ -887,6 +950,8 @@ function PivotPanel(props){
     
     // Задание описания метрики
     function handleRenameMetric(newName){
+        pivotRegister({eventType: eventTypes.renameMetric});
+
         oldAndNewConfiguration.current.newConfiguration.setNewNameByFieldIndex('metricFields', oldAndNewConfiguration.current.newFieldIndex, newName);
         setPivotConfiguration(new PivotConfiguration(oldAndNewConfiguration.current.newConfiguration));
 
@@ -906,6 +971,9 @@ function PivotPanel(props){
     // Вызывается по нажатию на значение измерения в таблице
     function handleDimensionValueFilter(fieldId, fieldType, fieldValue) {
         if (!(pivotConfiguration.fieldsLists.findFilterFieldIdByFieldIdValueFunc(fieldId, fieldValue))){
+            
+            pivotRegister({eventType: eventTypes.addFilterByDimensionClick});
+
             let val = fieldValue === '' ? [] : [fieldValue];
 			let newConfiguration = new PivotConfiguration(pivotConfiguration);
             let filterObject = new FilterObject({field: {fieldId: fieldId, fieldType: fieldType}, values: val});
@@ -926,6 +994,9 @@ function PivotPanel(props){
     // Вызывается по нажатию на значение метрики в таблице
     function handleMetricValueFilter(fieldId, metricIndex, fieldValue, dataType){
         if (!(pivotConfiguration.fieldsLists.findFilterFieldIdByFieldIdValueFunc(fieldId, fieldValue, metricIndex))){
+
+            pivotRegister({eventType: eventTypes.addFilterByMetricClick});
+
             let val = fieldValue === '' ? [] : 
                 [dataType === 'INTEGER' ? parseInt(fieldValue.replace(/\s+/g, '').trim()):
                  dataType === 'DOUBLE'  ? parseFloat(fieldValue.replace(/\s+/g, '').trim()):
@@ -977,6 +1048,8 @@ function PivotPanel(props){
     // Вызывается по нажатию кнопки фильтрации на поле в зоне фильтров
     function handleFilterFieldButtonClick(event, i){
 
+        pivotRegister({eventType: eventTypes.editFilter});
+
         let newPivotConfiguration = new PivotConfiguration(pivotConfiguration);
         newPivotConfiguration.replaceFilter(i);
         newPivotConfiguration.setColumnFrom(0)
@@ -998,11 +1071,15 @@ function PivotPanel(props){
     }
 
     function handleFilterFieldButtonOffClick(event, i){
+        pivotRegister({eventType: eventTypes.switchFilterOnOff});
+
         let newPivotConfiguration = new PivotConfiguration(pivotConfiguration);
         newPivotConfiguration.fieldsLists.filterFields[i].setIsOff();
         newPivotConfiguration.replaceFilter();
         newPivotConfiguration.setColumnFrom(0)
         newPivotConfiguration.setRowFrom(0);
+        newPivotConfiguration.changeSortOrder({});
+        setSortingValues({})
         oldAndNewConfiguration.current = {
             newFieldIndex : i,
             oldConfiguration: new PivotConfiguration(pivotConfiguration),
@@ -1016,6 +1093,7 @@ function PivotPanel(props){
     }
 
     function handleMetricFieldContextClick(event, i){
+        pivotRegister({eventType: eventTypes.editMetricFunction});
         let dataType = pivotConfiguration.fieldsLists.metricFields[i].type;
         props.setAggModalParams({open: true, index: i, type: 'change', dataType: dataType});
     }
@@ -1033,6 +1111,9 @@ function PivotPanel(props){
     const [contextItemsValue, setContextItemsValue] = useState({});
 
     const handleContextClick = (event, type, values) => {
+
+        pivotRegister({eventType: eventTypes.openTableContextMenu});
+
         if (type === 'metricValues') {
             event.preventDefault();
 
@@ -1076,6 +1157,8 @@ function PivotPanel(props){
 
         if(action) {
             handleContextClose();
+
+            pivotRegister({eventType: eventTypes.openTableContextMenu, mode: action});
 
             switch(action) {
                 case 'conditionalFormatting':
@@ -1135,6 +1218,7 @@ function PivotPanel(props){
 
     // Отображение SortingDialog после нажатия на кнопку в панели задач
     function handleShowSortingDialog(value){
+        pivotRegister({eventType: eventTypes.openSortingDialog});
         setSortingDialogAfterTools(value)
         setSortingDialog(value)
     }
@@ -1143,6 +1227,8 @@ function PivotPanel(props){
     function handleAddMetricsSort(valuesToSort){
         
         const {rowSort, columnSort} = valuesToSort
+
+        pivotRegister({eventType: eventTypes.addMetricSort, columnSort: columnSort.data[0].order !== '', rowSort: rowSort.data[0].order !== ''});
 
         setTableDataLoadStatus(1);
         dataProviderRef.current.loadDataForNewFieldsLists(oldAndNewConfiguration.current.newConfiguration.fieldsLists, pivotConfiguration.filterGroup, pivotConfiguration.metricFilterGroup, valuesToSort, 0, columnCount, 0, rowCount)
@@ -1181,7 +1267,12 @@ function PivotPanel(props){
         ***************************************************
     */
 
-
+    function handleShowCreateFieldDialogue(open) {
+        if(open){
+            pivotRegister({eventType: eventTypes.openCreateDerivedFieldsEditor});
+        }
+        setCreateFieldDialogOpen(open);
+    }
 
     function handleDerivedFieldCloseAndUpdate(bool){
 
@@ -1255,7 +1346,7 @@ function PivotPanel(props){
                                     direction = "vertical"
                                     onClick = {(event, i) => handleFilterFieldButtonClick(event, i)}
                                     onContextClick = {(event, i) => handleFilterFieldButtonOffClick(event, i)}
-                                    onRemoveFieldClick = {(i) => onRemoveFieldClick("filterFields", i)}
+                                    onRemoveFieldClick = {(i) => handleRemoveFieldClick("filterFields", i)}
                                 />
                             }
                         </Grid>
@@ -1266,8 +1357,8 @@ function PivotPanel(props){
                                 mergeMode = {pivotConfiguration.mergeMode}
                                 fullScreen = {pivotFullScreen}
                                 onMergeModeChange = {handleSetMergeMode}
-                                onRestartReportClick = {() => props.onRestartReportClick()}
-                                onViewTypeChange = {props.onViewTypeChange}
+                                onRestartReportClick = {() => {pivotRegister({eventType: eventTypes.restartReport}); props.onRestartReportClick()}}
+                                onViewTypeChange = {(type) => {pivotRegister({eventType: eventTypes.changeViewToPlain}); props.onViewTypeChange(type);}}
                                 onFullScreen = {handleFullScreen}
                                 fieldsVisibility = {fieldsVisibility}
                                 onFieldsVisibility = {handleFieldsVisibility}
@@ -1277,7 +1368,7 @@ function PivotPanel(props){
                                 onSortingDialog = {handleShowSortingDialog}
                                 onClearAllOlap = {handleClearAllOlap}
                                 onExportToExcel = {handleExportToExcel}
-                                onShowCreateFieldDialogue = {(open) => setCreateFieldDialogOpen(open)}
+                                onShowCreateFieldDialogue = {(open) => handleShowCreateFieldDialogue(open)}
                             />
                             {fieldsVisibility &&
                                 <PivotFieldsList
@@ -1305,7 +1396,7 @@ function PivotPanel(props){
                                     droppableId = "columnFields"
                                     fields = {pivotConfiguration.fieldsLists.columnFields}
                                     direction = "horizontal"
-                                    onRemoveFieldClick = {(i) => onRemoveFieldClick("columnFields", i)}
+                                    onRemoveFieldClick = {(i) => handleRemoveFieldClick("columnFields", i)}
                                 />
                             }
                             {pivotConfiguration.columnsMetricPlacement && fieldsVisibility &&
@@ -1318,7 +1409,7 @@ function PivotPanel(props){
                                     onContextClick = {(event, i) => handleMetricFieldContextClick(event, i)}
                                     onChooseAggForMetric = {(funcName, index) => handleChooseAggForMetric(funcName, index)}
                                     onCloseAggModal = {handleAggModalClose}
-                                    onRemoveFieldClick = {(i) => onRemoveFieldClick("metricFields", i)}
+                                    onRemoveFieldClick = {(i) => handleRemoveFieldClick("metricFields", i)}
                                 />
                             }
                             <TableRangeControl
@@ -1337,7 +1428,7 @@ function PivotPanel(props){
                                         droppableId = "rowFields"
                                         fields = {pivotConfiguration.fieldsLists.rowFields}
                                         direction = "vertical"
-                                        onRemoveFieldClick = {(i) => onRemoveFieldClick("rowFields", i)}
+                                        onRemoveFieldClick = {(i) => handleRemoveFieldClick("rowFields", i)}
                                     />
                                 }
                                 {!pivotConfiguration.columnsMetricPlacement && fieldsVisibility &&
@@ -1350,7 +1441,7 @@ function PivotPanel(props){
                                         onContextClick = {(event, i) => handleMetricFieldContextClick(event, i)}
                                         onChooseAggForMetric = {(funcName, index) => handleChooseAggForMetric(funcName, index)}
                                         onCloseAggModal = {handleAggModalClose}
-                                        onRemoveFieldClick = {(i) => onRemoveFieldClick("metricFields", i)}
+                                        onRemoveFieldClick = {(i) => handleRemoveFieldClick("metricFields", i)}
                                     />
                                 }
                                 <TableRangeControl
@@ -1358,7 +1449,7 @@ function PivotPanel(props){
                                     total = {tableData.totalRows}
                                     position = {pivotConfiguration.rowFrom}
                                     count = {rowCount}
-                                    onPositionChange = {handleRowFromChange}
+                                    onPositionChange = {(newRowFrom) => {handleRowFromChange(newRowFrom, 'arrowButton');}}
                                 />
                             </Box>
                         </Grid>
@@ -1378,9 +1469,10 @@ function PivotPanel(props){
 
                                 setTableSize({ dimensions: contentRect.bounds });
 
-                                if ((cc !== columnCount || rc !== rowCount) && tableDataLoadStatus !==1){
+                                if ((cc !== columnCount || rc !== rowCount) && tableDataLoadStatus !== 1){
                                     setColumnCount(cc);
                                     setRowCount(rc);
+
                                     // if(!dataProviderRef.current.changeWindow(pivotConfiguration.columnFrom, cc, pivotConfiguration.rowFrom, rc)){
                                     //     setTableDataLoadStatus(1);
                                     // }
@@ -1407,6 +1499,8 @@ function PivotPanel(props){
                                                     onChangeInnerTableSize = {handleChangeInnerTableSize}
                                                     sortingValues = {sortingValues}
                                                     onAddSorting = {handleAddMetricsSort}
+                                                    count = {rowCount}
+                                                    onWheelScrolling = {(newRowFrom) => {handleRowFromChange(newRowFrom, "mouseWheel");}}
                                                 /> 
                                              }
                                         </Grid>

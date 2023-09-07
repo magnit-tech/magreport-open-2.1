@@ -20,6 +20,8 @@ public class FilterInstanceFieldBackupMapper implements Mapper<FilterInstanceFie
                 source.getExpand(),
                 source.getName(),
                 source.getDescription(),
+                source.getShowField(),
+                source.getSearchByField(),
                 source.getCreatedDateTime(),
                 source.getModifiedDateTime()
         );

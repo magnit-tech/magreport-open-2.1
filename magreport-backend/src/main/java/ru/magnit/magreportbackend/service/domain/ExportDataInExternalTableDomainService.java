@@ -178,7 +178,7 @@ public class ExportDataInExternalTableDomainService {
             case DATE -> getInsertReportFilterFieldValue(idJob, schema, idTuple, field.fieldId(), null, field.value(), null, null);
             case INTEGER -> getInsertReportFilterFieldValue(idJob, schema, idTuple, field.fieldId(), null, null, field.value(), null);
             case DOUBLE -> getInsertReportFilterFieldValue(idJob, schema, idTuple, field.fieldId(), null, null, null, field.value());
-            case BOOLEAN -> "";
+            case BOOLEAN, UNKNOWN -> "";
         };
     }
 

@@ -16,6 +16,8 @@ import ru.magnit.magreportbackend.domain.filtertemplate.FilterFieldTypeEnum;
 @Schema(description = "Парамеры создания поля экземпляра фильтра")
 public class FilterInstanceFieldAddRequest {
 
+    @Schema(description = "Id фильтра (заполняется только при редактировании фильтра)")
+    private Long id;
     @Schema(description ="Уровень поля")
     private Long level;
 
@@ -36,4 +38,10 @@ public class FilterInstanceFieldAddRequest {
 
     @Schema(description ="Подмена выбранного уровня дочерними элементами")
     private Boolean expand;
+
+    @Schema(description ="Показ значения поля в тексте подсказки фильтра TOKEN_INPUT")
+    private Boolean showField;
+
+    @Schema(description ="Участие поля в поиске значений для фильтра TOKEN_INPUT")
+    private Boolean searchByField;
 }

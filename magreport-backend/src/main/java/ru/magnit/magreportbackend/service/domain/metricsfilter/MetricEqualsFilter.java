@@ -3,6 +3,7 @@ package ru.magnit.magreportbackend.service.domain.metricsfilter;
 import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.dto.inner.olap.MetricResult;
 import ru.magnit.magreportbackend.dto.request.olap.MetricFilterDefinition;
+import ru.magnit.magreportbackend.exception.InvalidParametersException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -40,6 +41,7 @@ public class MetricEqualsFilter implements MetricFilterNode {
                             BigDecimal.valueOf(value.isEmpty() ? Double.MIN_VALUE : Double.parseDouble(value)).setScale(rounding, RoundingMode.HALF_UP).doubleValue();
 
             case STRING, DATE, TIMESTAMP, BOOLEAN -> currentVal.equalsIgnoreCase(value);
+            case UNKNOWN ->   throw new InvalidParametersException("Not supported datatype field");
         };
         return invert != result;
     }

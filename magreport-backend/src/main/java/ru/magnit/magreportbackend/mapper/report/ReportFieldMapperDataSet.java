@@ -3,11 +3,13 @@ package ru.magnit.magreportbackend.mapper.report;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.magnit.magreportbackend.domain.dataset.DataSetField;
+import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.domain.report.PivotFieldType;
 import ru.magnit.magreportbackend.domain.report.ReportField;
 import ru.magnit.magreportbackend.dto.response.dataset.DataSetFieldResponse;
 import ru.magnit.magreportbackend.mapper.Mapper;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -24,5 +26,15 @@ public class ReportFieldMapperDataSet implements Mapper<ReportField, DataSetFiel
                 .setName(source.getName())
                 .setDescription(source.getDescription())
                 .setDataSetField(new DataSetField(source.getId()));
+    }
+
+    @Override
+    public List<ReportField> from(List<DataSetFieldResponse> sources) {
+
+        return sources
+                .stream()
+                .filter(d -> d.getTypeId() != DataTypeEnum.UNKNOWN.ordinal())
+                .map(this::from)
+                .toList();
     }
 }

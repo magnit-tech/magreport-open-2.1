@@ -6,18 +6,23 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 import ru.magnit.magreportbackend.dto.inner.olap.OlapUserRequestLog;
 import ru.magnit.magreportbackend.dto.request.DatePeriodRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapConfigRequest;
-import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapCubeRequestNew;
 import ru.magnit.magreportbackend.dto.request.olap.OlapExportPivotTableRequest;
 import ru.magnit.magreportbackend.dto.request.olap.OlapFieldItemsRequestNew;
@@ -50,12 +55,17 @@ import ru.magnit.magreportbackend.service.UserService;
 import ru.magnit.magreportbackend.service.domain.TokenService;
 import ru.magnit.magreportbackend.util.LogHelper;
 import ru.magnit.magreportbackend.util.MultipartFileSender;
+import ru.magnit.magreportbackend.util.Pair;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
@@ -70,10 +80,16 @@ public class OlapController {
     @Value("${magreport.olap.max-dop}")
     private int maxDop;
 
-    public static final String OLAP_GET_CUBE = "/api/v1/olap/get-cube";
+    @Value("${magreport.olap.max-dop-pivot}")
+    private int maxDopPivot;
+
+    @Value("${magreport.olap.max-export-time}")
+    private int maxExportTime;
+
+    private final ConcurrentHashMap<Thread, LocalDateTime> currentDop = new ConcurrentHashMap<>();
+
     public static final String OLAP_GET_CUBE_NEW = "/api/v1/olap/get-cube-new";
     public static final String OLAP_GET_FIELD_VALUES = "/api/v1/olap/get-field-values";
-    public static final String OLAP_CONFIGURATION_UPDATE = "/api/v1/olap/configuration/update";
     public static final String OLAP_CONFIGURATION_REPORT_ADD = "/api/v1/olap/configuration/report-add";
     public static final String OLAP_CONFIGURATION_REPORT_GET = "/api/v1/olap/configuration/report-get";
     public static final String OLAP_GET_USERS_RECEIVED_MY_JOB = "/api/v1/olap/get-users-received-my-jobs";
@@ -90,6 +106,8 @@ public class OlapController {
     public static final String OLAP_GET_PIVOT_TABLE_EXCEL = "/api/v1/olap/create-excel-pivot-table";
     public static final String OLAP_GET_PIVOT_TABLE_EXCEL_GET = "/api/v1/olap/excel-pivot-table/{pivotToken}";
 
+    public static final String START_ERROR_MASSAGE = "Error executing OLAP request: ";
+
     private final OlapService olapService;
     private final ExternalOlapService externalOlapService;
     private final OlapConfigurationService olapConfigurationService;
@@ -100,90 +118,98 @@ public class OlapController {
     private final ReportJobService reportJobService;
 
     private final TokenService tokenService;
-
     private Semaphore semaphore;
+
+
+    @Qualifier("OlapRequestExecutor")
+    private final ThreadPoolTaskExecutor olapExecutor;
+
+    ConcurrentHashMap<ResponseBodyEmitter, Pair<Long, Future<?>>> emitters = new ConcurrentHashMap<>();
 
     @PostConstruct
     private void init() {
         semaphore = new Semaphore(maxDop);
     }
 
-    @Operation(summary = "Получение среза OLAP куба")
-    @ResponseStatus(HttpStatus.OK)
-    @PostMapping(value = OLAP_GET_CUBE,
-            consumes = APPLICATION_JSON_VALUE,
-            produces = APPLICATION_JSON_VALUE)
-    public ResponseBody<OlapCubeResponse> getCube(
-            @RequestBody
-            OlapCubeRequest request) throws JsonProcessingException, InterruptedException {
-        ResponseBody<OlapCubeResponse> response;
-        LogHelper.logInfoUserMethodStart();
-
-        LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_GET_CUBE, request, userService.getCurrentUserName()));
-
-        if (outService) {
-            response = ResponseBody.<OlapCubeResponse>builder()
-                    .success(true)
-                    .message("")
-                    .data(externalOlapService.getCube(request))
-                    .build();
-
-        } else {
-            semaphore.acquire();
-            try {
-                response = ResponseBody.<OlapCubeResponse>builder()
-                        .success(true)
-                        .message("")
-                        .data(olapService.getCube(request))
-                        .build();
-            } catch (Exception ex) {
-                throw new OlapException("Error executing OLAP request: " + ex.getMessage(), ex);
-            } finally {
-                semaphore.release();
-            }
-        }
-
-        LogHelper.logInfoUserMethodEnd();
-        return response;
-    }
 
     @Operation(summary = "Получение среза OLAP куба с производными полями")
     @ResponseStatus(HttpStatus.OK)
     @PostMapping(value = OLAP_GET_CUBE_NEW,
-        consumes = APPLICATION_JSON_VALUE,
-        produces = APPLICATION_JSON_VALUE)
-    public ResponseBody<OlapCubeResponse> getCubeNew(
-        @RequestBody
-        OlapCubeRequestNew request) throws JsonProcessingException, InterruptedException {
-        ResponseBody<OlapCubeResponse> response;
-        LogHelper.logInfoUserMethodStart();
+            consumes = APPLICATION_JSON_VALUE,
+            produces = APPLICATION_JSON_VALUE)
+    public ResponseEntity<ResponseBodyEmitter> getCubeNew(@RequestBody OlapCubeRequestNew request) throws JsonProcessingException {
 
-        LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_GET_CUBE, request, userService.getCurrentUserName()));
+        LogHelper.logInfoUserMethodStart();
+        LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_GET_CUBE_NEW, request, userService.getCurrentUserName()));
+
+        ResponseBodyEmitter emitter = new ResponseBodyEmitter();
+
+        emitter.onCompletion(() -> {
+            emitter.complete();
+            emitters.remove(emitter);
+        });
+
+        emitter.onError(throwable -> {
+            emitter.completeWithError(throwable);
+            emitters.remove(emitter);
+        });
+
+        emitter.onTimeout(() -> emitters.remove(emitter));
+
 
         if (outService) {
-            response = ResponseBody.<OlapCubeResponse>builder()
-                .success(true)
-                .message("")
-                .data(externalOlapService.getCubeNew(request))
-                .build();
+
+            var task = olapExecutor.submit(() -> {
+                try {
+                    var response = ResponseBody.<OlapCubeResponse>builder()
+                            .success(true)
+                            .message("")
+                            .data(externalOlapService.getCubeNew(request))
+                            .build();
+
+                    emitters.remove(emitter);
+                    emitter.send(response, APPLICATION_JSON);
+                    emitter.complete();
+                    log.debug("Processing of cube completed. Job id: " + request.getJobId());
+                } catch (Exception ex) {
+                    emitter.completeWithError(ex);
+                }
+            });
+
+            emitters.put(emitter, new Pair<>(request.getJobId(),task));
 
         } else {
-            semaphore.acquire();
-            try {
-                response = ResponseBody.<OlapCubeResponse>builder()
-                    .success(true)
-                    .message("")
-                    .data(olapService.getCubeNew(request))
-                    .build();
-            } catch (Exception ex) {
-                throw new OlapException("Error executing OLAP request: " + ex.getMessage(), ex);
-            } finally {
-                semaphore.release();
-            }
+
+            var userId = userService.getCurrentUserId();
+            var task = olapExecutor.submit(() -> {
+                try {
+                        var response = ResponseBody.<OlapCubeResponse>builder()
+                                .success(true)
+                                .message("")
+                                .data(olapService.getCubeNew(request, userId))
+                                .build();
+
+                        emitters.remove(emitter);
+                        emitter.send(response, APPLICATION_JSON);
+                        emitter.complete();
+                        log.debug("Processing of cube completed. Job id: " + request.getJobId());
+
+                    } catch (Exception e) {
+                        log.error(String.format("Processing of cube completed with error! Job id: %s. Error: %s", request.getJobId(),e.getMessage()),e);
+                        emitter.completeWithError(e);
+                        emitters.remove(emitter);
+                    }
+            });
+
+            emitters.put(emitter, new Pair<>(request.getJobId(),task));
         }
 
         LogHelper.logInfoUserMethodEnd();
-        return response;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE);
+
+        return new ResponseEntity<>(emitter, headers, HttpStatus.OK);
     }
 
     @Operation(summary = "Получение списка уникальных значений поля с учетом фильтра")
@@ -193,7 +219,8 @@ public class OlapController {
             produces = APPLICATION_JSON_VALUE)
     public ResponseBody<OlapFieldItemsResponse> getFilteredFieldValues(
             @RequestBody
-            OlapFieldItemsRequestNew request) throws OlapException, InterruptedException, JsonProcessingException {
+            OlapFieldItemsRequestNew request) throws
+            OlapException, InterruptedException, JsonProcessingException {
         ResponseBody<OlapFieldItemsResponse> response;
         LogHelper.logInfoUserMethodStart();
 
@@ -214,7 +241,7 @@ public class OlapController {
                         .data(olapService.getFieldValues(request))
                         .build();
             } catch (Exception ex) {
-                throw new OlapException("Error executing OLAP request: " + ex.getMessage(), ex);
+                throw new OlapException(START_ERROR_MASSAGE + ex.getMessage(), ex);
             } finally {
                 semaphore.release();
             }
@@ -233,7 +260,7 @@ public class OlapController {
             @RequestBody
             ReportOlapConfigAddRequest request) throws JsonProcessingException {
         LogHelper.logInfoUserMethodStart();
-        LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_CONFIGURATION_UPDATE, request, userService.getCurrentUserName()));
+        LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_CONFIGURATION_REPORT_ADD, request, userService.getCurrentUserName()));
 
         var response = ResponseBody.<ReportOlapConfigResponse>builder()
                 .success(true)
@@ -254,7 +281,7 @@ public class OlapController {
             @RequestBody
             ReportOlapConfigRequest request) throws JsonProcessingException {
         LogHelper.logInfoUserMethodStart();
-        LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_CONFIGURATION_UPDATE, request, userService.getCurrentUserName()));
+        LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_CONFIGURATION_REPORT_GET, request, userService.getCurrentUserName()));
 
         var response = ResponseBody.<ReportOlapConfigResponse>builder()
                 .success(true)
@@ -492,7 +519,7 @@ public class OlapController {
     @GetMapping(value = OLAP_GET_PIVOT_TABLE_EXCEL_GET)
     public void getExcelPivotTable(
             @PathVariable
-            String pivotToken, HttpServletRequest request, HttpServletResponse response ) throws Exception {
+            String pivotToken, HttpServletRequest request, HttpServletResponse response) throws Exception {
         LogHelper.logInfoUserMethodStart();
 
         final var value = tokenService.getAssociatedValue(pivotToken);
@@ -502,7 +529,7 @@ public class OlapController {
 
         LogHelper.logInfoUserMethodEnd();
 
-        MultipartFileSender.fromPath(olapService.getExcelPivotPath(jobId,userId), fileName)
+        MultipartFileSender.fromPath(olapService.getExcelPivotPath(jobId, userId), fileName)
                 .with(request)
                 .with(response)
                 .serveResource();
@@ -514,20 +541,69 @@ public class OlapController {
     @ResponseStatus(HttpStatus.OK)
     @PostMapping(value = OLAP_GET_PIVOT_TABLE_EXCEL)
     public ResponseBody<TokenResponse> exportPivotTableExcel(
-            @RequestBody
-            OlapExportPivotTableRequest dataRequest) throws Exception {
+            @RequestBody OlapExportPivotTableRequest dataRequest) throws JsonProcessingException {
+
+        currentDop.forEach((key,value) -> {
+
+            if (value.isAfter(LocalDateTime.now().plusMinutes(maxExportTime))){
+                key.interrupt();
+                currentDop.remove(key);
+            }
+
+        });
+
         LogHelper.logInfoUserMethodStart();
+        log.debug(String.format("%nCurrent count connect:%s.%nМаx connect count: %s", currentDop, maxDopPivot));
+
+        if (currentDop.size() < maxDopPivot) {
+            LogHelper.logInfoOlapUserRequest(objectMapper, new OlapUserRequestLog(OLAP_GET_PIVOT_TABLE_EXCEL, dataRequest, userService.getCurrentUserName()));
+            currentDop.put(Thread.currentThread(), LocalDateTime.now());
+            TokenResponse response;
+
+            try {
+                response = olapService.exportPivotTableExcel(dataRequest);
+            } catch (Exception ex) {
+                currentDop.remove(Thread.currentThread());
+                throw new OlapException(ex.getMessage(), ex);
+            }
+
+            var dataResponse = ResponseBody.<TokenResponse>builder()
+                    .success(true)
+                    .message("")
+                    .data(response)
+                    .build();
+
+            currentDop.remove(Thread.currentThread());
+            LogHelper.logInfoUserMethodEnd();
+
+            return dataResponse;
+        } else {
 
 
-        var dataResponse = ResponseBody.<TokenResponse>builder()
-                .success(true)
-                .message("")
-                .data(olapService.exportPivotTableExcel(dataRequest))
-                .build();
+            var dataResponse = ResponseBody.<TokenResponse>builder()
+                    .success(false)
+                    .message("Нет свободных подключений, повторите попытку позднее")
+                    .data(null)
+                    .build();
 
-        LogHelper.logInfoUserMethodEnd();
+            LogHelper.logInfoUserMethodEnd();
+            return dataResponse;
 
-        return dataResponse;
+        }
     }
 
+    @Scheduled(fixedDelayString = "500", initialDelay = 1000L)
+    private void checkEmitters() {
+        emitters.forEach((emitter, task) -> {
+                    try {
+                        emitter.send(" ", APPLICATION_JSON);
+                    } catch (Exception ex) {
+                        task.getR().cancel(true);
+                        emitter.completeWithError(ex);
+                        emitters.remove(emitter);
+                        log.debug("Processing of cube aborted! Job id: " + task.getL());
+                    }
+                }
+        );
+    }
 }

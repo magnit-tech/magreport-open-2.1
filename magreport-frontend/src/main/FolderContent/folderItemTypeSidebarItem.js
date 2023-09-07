@@ -20,6 +20,8 @@ export function folderItemTypeSidebarItem(itemType){
                     :itemType === FolderItemTypes.systemMailTemplates ? SidebarItems.admin.subItems.mailTexts
                     :itemType === FolderItemTypes.cubes ? SidebarItems.admin.subItems.cubes
                     :itemType === FolderItemTypes.theme ? SidebarItems.admin.subItems.theme
+                    :itemType === FolderItemTypes.asm ? SidebarItems.admin.subItems.ASMAdministration
+                    :itemType === FolderItemTypes.loadMonitoring ? SidebarItems.admin.subItems.loadMonitoring
                     :null;
     return sidebarItem;
 }

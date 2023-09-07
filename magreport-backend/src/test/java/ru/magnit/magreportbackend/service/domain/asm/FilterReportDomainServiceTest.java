@@ -248,9 +248,8 @@ class FilterReportDomainServiceTest {
 
     private FilterValueListRequestData getFilterValueListRequestData() {
         return new FilterValueListRequestData(
-                null, null, null, null, null, null,
-                null, null, null, null,
-                null, false, null, 0L, null);
+                null, null, null, null,  null,
+                null, null, true, null,   0L, null);
     }
 
     private ListValuesRequest getListValuesRequest() {
@@ -298,7 +297,7 @@ class FilterReportDomainServiceTest {
                 ID,
                 ID,
                 false,
-                new DataSourceData(null, null, null, null, null, null),
+                new DataSourceData(null, null, null, null, null, null, null),
                 new ReportData(ID, "", "", "", "", Collections.emptyList(), new ReportFilterGroupData(
                         ID, ID, "", "", null, Collections.emptyList(), Collections.emptyList()), true),
                 new ArrayList<>(Arrays.asList(

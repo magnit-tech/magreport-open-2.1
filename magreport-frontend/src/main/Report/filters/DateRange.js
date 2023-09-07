@@ -1,11 +1,12 @@
+import React, { useState, useRef, useEffect } from 'react';
 import 'date-fns';
-import React, {useEffect, useState} from 'react';
 
 // date utils
 import RuLocalizedUtils from 'utils/RuLocalizedUtils'
 import ruLocale from "date-fns/locale/ru";
 import {MuiPickersUtilsProvider, KeyboardDatePicker,} from '@material-ui/pickers';
 import {dateToStringFormat} from 'utils/dateFunctions'
+import FormHelperText from '@material-ui/core/FormHelperText';
 
 // components
 import Box from '@material-ui/core/Box';
@@ -29,19 +30,20 @@ import { Typography } from '@material-ui/core';
  * @param {Object} props - свойства компонента
  * @param {Object} props.filterData - данные фильтра (объект ответа от сервиса)
  * @param {Object} props.lastFilterValue - объект со значениями фильтра из последнего запуска (как приходит от сервиса)
+ * @param {Object} props.externalFiltersValue - параметров фильтров через URL. {"DATE_RANGE_CODE":{"begin_dt":<(дата в формате YYYY-MM-DD): string>,"end_dt":<(дата в формате YYYY-MM-DD): string>}}
  * @param {boolean} props.toggleClearFilter - при изменении значения данного свойства требуется очистить выбор в фильтре
  * @param {onChangeFilterValue} props.onChangeFilterValue - function(filterValue) - callback для передачи значения изменившегося параметра фильтра
  *                                                  filterValue - объект для передачи в сервис в массиве parameters
  * */
 export default function DatesRange(props) {
-
-    const [startDate, setStartDate] = React.useState(null);
-    const [endDate, setEndDate] = React.useState(null);
-    const [toggleFilter, setToggleFilter] = React.useState(false);
-    const [checkStatus, setCheckStatus] = useState("error")
     const classes = DatePickersCSS();
 
-    let valueList = React.useRef({});
+    let valueList = useRef({});
+
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
+    const [toggleFilter, setToggleFilter] = useState(false);
+    const [checkStatus, setCheckStatus] = useState("error")
 
     const mandatory = props.filterData.mandatory
 
@@ -58,14 +60,31 @@ export default function DatesRange(props) {
     useEffect(() => {
         if (valueList.current.startDate === undefined){
 
-            const {
-                startValue: defaultStartDate,
-                endValue: defaultEndDate
-            } = getRangeFieldsValues(props.lastFilterValue, startFieldId, endFieldId);
+            let defaultStartDate, defaultEndDate;
+
+            const externalValue = props.externalFiltersValue ? props.externalFiltersValue[props.filterData.code] : null
+
+            function checkDate(dateString) {
+                if(/^\d{4}-\d{2}-\d{2}/.test(dateString)) return dateString;
+                return null;
+            }
+
+            if(props.externalFiltersValue) {
+                defaultStartDate = externalValue ? checkDate(externalValue.begin_dt) : null;
+                defaultEndDate = externalValue ? checkDate(externalValue.end_dt) : null;
+            } else {
+                const { startValue, endValue } = getRangeFieldsValues(props.lastFilterValue, startFieldId, endFieldId);
+                defaultStartDate = startValue;
+                defaultEndDate = endValue;
+            }
+
+            let bd = new Date(defaultStartDate);
+            let ed = new Date(defaultEndDate);
 
             valueList.current.startDate = defaultStartDate;
             valueList.current.endDate = defaultEndDate;
-            setCheckStatus(defaultStartDate || ! mandatory ? 'success' : 'error')
+            setCheckStatus(Boolean(props.filterData.maxCountItems) && props.filterData.maxCountItems < ((ed.getTime() - bd.getTime())/(1000 *60*60*24) + 1) ? "limit"
+                : defaultStartDate || ! mandatory ? 'success' : 'error')
             setStartDate(defaultStartDate);
             setEndDate(defaultEndDate);
             setValue(defaultStartDate, defaultEndDate);
@@ -101,7 +120,9 @@ export default function DatesRange(props) {
             setEndDate(endDate);
         };
         if ((valueList.current.startDate && valueList.current.endDate) || (!mandatory && !valueList.current.startDate && !valueList.current.endDate)){
-            setCheckStatus('success')
+            let bd = new Date(valueList.current.startDate);
+            let ed = new Date(valueList.current.endDate);
+            setCheckStatus(Boolean(props.filterData.maxCountItems) && props.filterData.maxCountItems < ((ed.getTime() - bd.getTime())/(1000 *60*60*24) + 1) ? "limit" :  'success' );
         }
         else {
             setCheckStatus('error')
@@ -126,11 +147,21 @@ export default function DatesRange(props) {
             ]
         }
 
+        let stat = (st && en) || (!mandatory && !st && !en) ? 'success' : 'error';
+        if (en && st){
+            let bd = new Date(st);
+            let ed = new Date(en);
+            if (Boolean(props.filterData.maxCountItems) && props.filterData.maxCountItems < ((ed.getTime() - bd.getTime())/(1000 *60*60*24) + 1)){
+                stat = 'limit'
+            }
+        }
         props.onChangeFilterValue({
             filterId : props.filterData.id,
             operationType: "IS_BETWEEN",
-            validation: (st && en) || (!mandatory && !st && !en) ? 'success' : 'error',
+            validation:   stat,
             parameters,
+            filterType: props.filterData.type.name || props.filterData.type,
+            filterCode: props.filterData.code
         });      
     }
 
@@ -197,6 +228,7 @@ export default function DatesRange(props) {
                         <FilterStatus status={checkStatus} />
                     </span>
                 </div>
+                {props.filterData.maxCountItems > 0 && <FormHelperText  disabled> Допустимое кол-во значений: {props.filterData.maxCountItems}</FormHelperText>}
             </div>
         </MuiPickersUtilsProvider>
     );

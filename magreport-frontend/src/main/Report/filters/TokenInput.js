@@ -28,7 +28,7 @@ export default function  TokenInput(props){
     const mandatory = props.filterData.mandatory
     const [checkStatus, setCheckStatus] = useState("error")
 
-    let codeFieldId = -1;
+    let codeFieldId = -1; //props.filterData?.fields.find(i=>i.type === 'CODE_FIELD').id || -1;
     let nameFieldId = -1;
     let nameFilterInstanceFieldId = -1;
 
@@ -42,15 +42,16 @@ export default function  TokenInput(props){
                 nameFilterInstanceFieldId = f.filterInstanceFieldId;
             }
         }
-    }    
+    }  
 
     const [toggleFilter, setToggleFilter] = React.useState(false);
     const [openAsyncEntity, setOpenAsyncEntity] = React.useState(false);
     const [optionsAsyncEntity, setOptionsAsyncEntity] = React.useState([]);
     const defaultInputValues = useRef([]);
+
     useEffect(() => {
-        if (defaultInputValues.current.length === 0){
-            defaultInputValues.current = getInputValuesFromLastValueAndSetNewParameters(props.lastFilterValue);
+        if (!props.externalFiltersValue && defaultInputValues.current.length === 0){
+            defaultInputValues.current = getInputValuesFromLastValueAndSetNewParameters(props.lastFilterValue, props.filterData.maxCountItems);
         }
     }, []) // eslint-disable-line
     
@@ -61,8 +62,8 @@ export default function  TokenInput(props){
     /*
         Обработка изменения значений фильтра
     */
-    function handleChangeValues(newValuesIDs, arr) {
-        
+    function handleChangeValues(newValuesIDs, arr, validationStatus) {
+
         let parameters = [];
         let values = [];
 
@@ -77,12 +78,15 @@ export default function  TokenInput(props){
             parameters.push({
                 values: values
             });    
-        }        
+        }
 
         props.onChangeFilterValue({
             filterId : props.filterData.id,
             operationType: "IS_IN_LIST",
-            validation: mandatory && !parameters.length ? "error" : "success",
+            validation: validationStatus,
+            /*mandatory && !parameters.length ? "error"
+                :   (parameters.length === 0 ? 0 : parameters[0].values.length) > props.filterData.maxCountItems? "limit"
+                :    "success",*/
             parameters: parameters,
             lastParametrs: arr
         });        
@@ -93,7 +97,8 @@ export default function  TokenInput(props){
         необходимость этого специфична для фильтра типа TOKEN_INPUT - для данного типа фильтра объект lastParamters обогащается 
         дополнительным полями и не равен объекту parameters (отличается от него по формату).
     */
-    function getInputValuesFromLastValueAndSetNewParameters(filterValues){
+    function getInputValuesFromLastValueAndSetNewParameters(filterValues, maxCountItems){
+
         let values = [];
         let valuesIds = [];
 
@@ -105,25 +110,26 @@ export default function  TokenInput(props){
         } else if(filterValues && filterValues.parameters){
             for(let p of filterValues.parameters){
                 let idValue = -1;
-                let nameValue = '???';
+                let nameValue = ''
                 for(let v of p.values){
                     if(v.fieldId === codeFieldId){
                         idValue = v.value;
                         valuesIds.push(v.value);
                     }
                     else if(v.fieldId === nameFieldId){
-                        nameValue = v.value;
+                        nameValue = (nameValue === '' ? nameValue : nameValue + ', ') + v.value;
                     }
                 }
                 values.push({
                     value: idValue,
-                    label: '(' + idValue + ') ' + nameValue
+                    label: nameValue === '' ? '???' : nameValue
                 });
             }
         }
 
-        handleChangeValues(valuesIds, values);
-        setCheckStatus(mandatory && !values.length ? "error" : "success")
+        let validationStatus = mandatory && !values.length ? "error" : Boolean(maxCountItems) && values.length > maxCountItems ? "limit": "success";
+        setCheckStatus(validationStatus)
+        handleChangeValues(valuesIds, values, validationStatus);
         setInputValues(values)
 
         return values;
@@ -146,29 +152,31 @@ export default function  TokenInput(props){
         
         let arr = [];
         if(magrepResponse.ok){
-
-            let fieldIDs={}
-            for (let f of magrepResponse.data.filter.fields){
-                fieldIDs[f.type]=f.id
-            }
+            let fields =  magrepResponse.data.filter.fields.map(i =>{ return {
+                id: i.id,
+                type: i.type,
+                showField: i.showField
+            }})
 
             for (let element of magrepResponse.data.tuples){
                 let code
                 let name
                 for (let i of element.values){
-                    if (i.fieldId === fieldIDs.CODE_FIELD){
+                    let curField = fields.find(item=>i.fieldId === item.id)
+                    if (curField.type === "CODE_FIELD"){
                         code = i.value;
                     }
-                    else if (i.fieldId === fieldIDs.NAME_FIELD){
-                        name = i.value;
+                    else if (curField.showField){
+                        name = (name ? name + ', ' : '') + i.value
                     };
                 };
 
                 arr.push({
                     value: code,
-                    label: '(' + code + ') ' + name        
+                    label: name        
                 });
             };
+
             let sort_arr = arr.sort(
                 function (a, b) {
                     if (a.label < b.label) {
@@ -184,19 +192,20 @@ export default function  TokenInput(props){
         }
     };
 
-    const handleInputChange = (e) => {
-        const inputValue = e.target.value;
-        if (inputValue.length>1){
+    const handleInputChange = (value) => {
+
+        if (value.length>1){
             if (timer.current > 0){
               clearInterval(timer.current); // удаляем предыдущий таймер
             }
             timer.current = setTimeout(() => {
-                getTokens(inputValue.toLowerCase());
+                getTokens(value.toLowerCase());
             }, 1000);
         };
     }
 
-    const handleChange = (e, value) => {
+    const handleChange = (value) => {
+
         let valuesIds = [];
         let arr = []
 
@@ -210,8 +219,9 @@ export default function  TokenInput(props){
             }
         }
 
-        handleChangeValues(valuesIds, arr)
-        setCheckStatus(mandatory && !arr.length ? "error" : "success")
+        let validationStatus = mandatory && !arr.length ? "error" :  Boolean(props.filterData.maxCountItems) && arr.length > props.filterData.maxCountItems ? "limit": "success";
+        handleChangeValues(valuesIds, arr, validationStatus)
+        setCheckStatus(validationStatus)
         setInputValues(arr)
     };
 
@@ -279,14 +289,15 @@ export default function  TokenInput(props){
                 noOptionsText={'Элементы не найдены'}
                 clearText='Очистить фильтр'
                 openText='Показать'
-                onChange={(e, value) => {handleChange(e, value);}}
+                onChange={(e, value) => {handleChange(value)}}
                 renderInput={params => (
                     <TextField
                     {...params}
                     label={name}
+                    helperText={props.filterData.maxCountItems>0 ? 'Допустимое кол-во значений: ' + props.filterData.maxCountItems: null}
                     fullWidth
                     variant="outlined"
-                    onChange={(e) => {handleInputChange(e);}}
+                    onChange={(e) => {handleInputChange(e.target.value)}}
                     InputProps={{
                         ...params.InputProps,
                         endAdornment: (

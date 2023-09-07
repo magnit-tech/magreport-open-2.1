@@ -137,6 +137,12 @@ public class ScheduleDomainService {
     }
 
     @Transactional
+    public List<ScheduleTaskResponse> getAllScheduleTaskForSchedule(Long scheduleId) {
+        var schedule = repository.findById(scheduleId).orElseThrow();
+        return scheduleTaskResponseMapper.from(schedule.getScheduleTasks());
+    }
+
+    @Transactional
     public List<ScheduleTaskResponse> getTaskForDate(LocalDateTime date) {
         var response = repository.getTaskForDate(date);
         response.forEach(s -> setPlanStartDate(s.getId(), 1));

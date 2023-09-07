@@ -278,9 +278,7 @@ class FilterInstanceDomainServiceTest {
 
         FilterInstanceAddRequest request = getFilterInstanceAddRequest();
         var userView = new UserView().setId(ID);
-        var template = new FilterTemplateResponse().setFields(Arrays.asList(
-                new FilterTemplateFieldResponse().setId(ID).setType(FilterFieldTypeEnum.ID_FIELD),
-                new FilterTemplateFieldResponse().setId(4L).setType(FilterFieldTypeEnum.CODE_FIELD)));
+        FilterTemplateResponse template = getFilterTemplateResponse(4L);
 
         assertThrows(InvalidParametersException.class, () -> domainService.addFilterInstance(userView, request, template));
 
@@ -374,15 +372,9 @@ class FilterInstanceDomainServiceTest {
     @Test
     void editFilterInstance() {
 
-        var template = new FilterTemplateResponse().setFields(Arrays.asList(
-                new FilterTemplateFieldResponse()
-                        .setId(ID)
-                        .setType(FilterFieldTypeEnum.ID_FIELD),
-                new FilterTemplateFieldResponse()
-                        .setId(ID)
-                        .setType(FilterFieldTypeEnum.CODE_FIELD)));
-
         var request = getFilterInstanceAddRequest();
+
+        FilterTemplateResponse template = getFilterTemplateResponse(ID);
 
         when(filterInstanceRepository.getReferenceById(any())).thenReturn(getFilterInstance(getDataset()));
 
@@ -393,9 +385,25 @@ class FilterInstanceDomainServiceTest {
         request.setCode("1234");
 
         assertNotNull(domainService.editFilterInstance(request, template));
+    }
+
+    @Test
+    void editFilterInstanceException() {
+        FilterTemplateResponse template = getFilterTemplateResponse(ID);
 
         when(filterInstanceRepository.getReferenceById(any())).thenReturn(getFilterInstance(getDataset()).setSecurityFilters(Collections.singletonList(new SecurityFilter())));
+        var request = getFilterInstanceAddRequest();
         assertThrows(InvalidParametersException.class, () -> domainService.editFilterInstance(request, template));
+    }
+
+    private FilterTemplateResponse getFilterTemplateResponse(Long ID) {
+      return new FilterTemplateResponse().setFields(Arrays.asList(
+                new FilterTemplateFieldResponse()
+                        .setId(ID)
+                        .setType(FilterFieldTypeEnum.ID_FIELD),
+                new FilterTemplateFieldResponse()
+                        .setId(ID)
+                        .setType(FilterFieldTypeEnum.CODE_FIELD)));
     }
 
     @Test
@@ -595,9 +603,9 @@ class FilterInstanceDomainServiceTest {
     }
 
     private FilterValueListRequestData getFilterValueListRequestData() {
-        return new FilterValueListRequestData(null, null, null, null,
-                null, null, null, null, null, null,
-                null, false, null, 1, null);
+        return new FilterValueListRequestData(
+                null, null, null, null,  null,
+                null, null, true, null,   0L, null);
     }
 
     private FilterChildNodesRequestData getFilterChildNodesRequestData() {

@@ -192,7 +192,8 @@ class ExternalSecurityControllerTest {
                 true,
                 CREATED,
                 MODIFIED,
-                Collections.emptyList()
+                Collections.emptyList(),
+                true
         );
     }
 
@@ -206,7 +207,8 @@ class ExternalSecurityControllerTest {
                 true,
                 CREATED,
                 MODIFIED,
-                Collections.emptyList()
+                Collections.emptyList(),
+                true
         );
     }
 
@@ -221,7 +223,8 @@ class ExternalSecurityControllerTest {
                 true,
                 CREATED,
                 MODIFIED,
-                Collections.emptyList()
+                Collections.emptyList(),
+                true
         );
     }
 

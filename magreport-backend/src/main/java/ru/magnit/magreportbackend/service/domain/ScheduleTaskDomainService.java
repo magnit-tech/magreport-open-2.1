@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static ru.magnit.magreportbackend.domain.schedule.ScheduleTaskStatusEnum.EXPIRED;
 import static ru.magnit.magreportbackend.domain.schedule.ScheduleTaskStatusEnum.FAILED;
 import static ru.magnit.magreportbackend.domain.schedule.ScheduleTaskStatusEnum.INACTIVE;
 import static ru.magnit.magreportbackend.domain.schedule.ScheduleTaskStatusEnum.SCHEDULED;
@@ -88,13 +89,17 @@ public class ScheduleTaskDomainService {
     public String activationExpiredTask(UUID code) {
 
         var task = repository.findByExpirationCode(code);
-
         if (task == null) return "Код активации не действителен или уже использован!";
 
-        task.setStatus(new ScheduleTaskStatus(SCHEDULED.getId()));
         task.setExpirationCode(null);
         task.setExpirationDate(LocalDate.now().plusDays(task.getRenewalPeriod()));
         repository.save(task);
+
+        if (task.getStatus().getId().equals(EXPIRED.getId())){
+            if (Boolean.TRUE.equals(task.getActive())) setStatusScheduleTask(task.getId(), SCHEDULED);
+            else setStatusScheduleTask(task.getId(), INACTIVE);
+        }
+
 
         return "Продление срока выполнения задания по расписанию выполнено успешно!";
     }
@@ -109,7 +114,7 @@ public class ScheduleTaskDomainService {
                     "Запуск задания с id: " + idTask + " из текущего статуса (" + ScheduleTaskStatusEnum.getById(task.getStatus().getId()) + ") невозможен");
 
 
-        if (status == SCHEDULED && ScheduleTaskStatusEnum.getById(task.getStatus().getId()).equals(ScheduleTaskStatusEnum.EXPIRED)) {
+        if ((status == SCHEDULED || status == INACTIVE) && task.getStatus().getId().equals(ScheduleTaskStatusEnum.EXPIRED.getId())) {
             task.setExpirationDate(task.getExpirationDate().plusDays(task.getRenewalPeriod()));
         }
 

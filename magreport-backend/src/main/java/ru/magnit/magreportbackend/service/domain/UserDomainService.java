@@ -17,7 +17,9 @@ import ru.magnit.magreportbackend.dto.inner.RoleView;
 import ru.magnit.magreportbackend.dto.inner.UserInfo;
 import ru.magnit.magreportbackend.dto.inner.UserView;
 import ru.magnit.magreportbackend.dto.request.user.UserEditRequest;
+import ru.magnit.magreportbackend.dto.request.user.UserPageRequest;
 import ru.magnit.magreportbackend.dto.response.user.UserNameResponse;
+import ru.magnit.magreportbackend.dto.response.user.UserPageResponse;
 import ru.magnit.magreportbackend.dto.response.user.UserResponse;
 import ru.magnit.magreportbackend.mapper.auth.RoleViewMapper;
 import ru.magnit.magreportbackend.mapper.auth.UserResponseMapper;
@@ -186,6 +188,13 @@ public class UserDomainService {
     }
 
     @Transactional
+    public UserResponse getUserResponse(Long userId) {
+        final var user = userRepository.getReferenceById(userId);
+        return userResponseMapper.from(user);
+    }
+
+
+    @Transactional
     public void clearRoles(String userName, String domainName, List<String> roleNames) {
         final var domain = getDomain(domainName);
         final var user = userRepository.getUserByNameAndDomainId(userName, domain.getId());
@@ -246,7 +255,7 @@ public class UserDomainService {
     }
 
     @Transactional
-    public UserResponse editUser(UserEditRequest request) {
+    public void editUser(UserEditRequest request) {
 
         var user = userRepository.getReferenceById(request.getId());
 
@@ -258,8 +267,7 @@ public class UserDomainService {
                 .setDescription(request.getDescription())
                 .setModifiedDateTime(LocalDateTime.now());
 
-        user = userRepository.save(user);
-        return userResponseMapper.from(user);
+        userRepository.save(user);
     }
 
     @Transactional
@@ -269,6 +277,36 @@ public class UserDomainService {
                 .stream()
                 .map(userResponseMapper::from)
                 .toList();
+    }
+
+    @Transactional
+    public UserPageResponse getUsersPage(UserPageRequest request) {
+
+        var statuses = request.getStatuses().stream().map(UserStatusEnum::getId).toList();
+        var domains = domainRepository.findAllByNameIn(request.getDomains())
+                .stream()
+                .map(Domain::getId)
+                .toList();
+
+        List<User> users = domains.isEmpty() ? userRepository.findAll() : userRepository.getAllByDomainIdIn(domains);
+
+        var result = users.stream()
+                .filter(u -> statuses.isEmpty() || statuses.contains(u.getUserStatus().getId()))
+                .filter(u -> u.getName().contains(request.getSearchValue()))
+                .toList();
+
+        return new UserPageResponse(
+                result.size(),
+                result.stream()
+                        .skip((request.getPageNumber() - 1) * request.getUsersPerPage())
+                        .limit(request.getUsersPerPage())
+                        .map(userResponseMapper::from)
+                        .toList());
+    }
+
+    @Transactional
+    public void deleteUserRolesByUser(List<Long> userIds) {
+        userRoleRepository.deleteAllByUserIdIn(userIds);
     }
 
     private Domain getDomain(String domainName) {
@@ -281,5 +319,6 @@ public class UserDomainService {
         }
         return domain;
     }
+
 
 }

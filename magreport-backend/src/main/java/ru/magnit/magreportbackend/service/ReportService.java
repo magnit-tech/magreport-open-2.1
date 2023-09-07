@@ -3,6 +3,7 @@ package ru.magnit.magreportbackend.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.magnit.magreportbackend.domain.dataset.DataTypeEnum;
 import ru.magnit.magreportbackend.domain.filtertemplate.FilterFieldTypeEnum;
 import ru.magnit.magreportbackend.domain.filtertemplate.FilterTypeEnum;
 import ru.magnit.magreportbackend.domain.folderreport.FolderAuthorityEnum;
@@ -157,7 +158,12 @@ public class ReportService {
     public ReportResponse addReport(ReportAddRequest request) {
         final var dataSet = dataSetDomainService.getDataSet(request.getDataSetId());
 
-        if (Boolean.FALSE.equals(dataSet.getIsValid()))
+        var checkFields = dataSet.getFields()
+                .stream()
+                .filter(f -> !f.getTypeName().equals(DataTypeEnum.UNKNOWN.name()))
+                .anyMatch(f -> !f.getIsValid());
+
+        if (checkFields)
             throw new InvalidParametersException("Набор данных имеет не существующие на источнике поля.");
 
         final var currentUser = userDomainService.getCurrentUser();
@@ -183,9 +189,6 @@ public class ReportService {
     }
 
     public ReportResponse getReport(ReportRequest request) {
-
-        if (request.getId() == null)
-            throw new IllegalArgumentException("Report id must not be null");
 
         final var report = reportDomainService.getReport(request.getId());
 
@@ -375,8 +378,8 @@ public class ReportService {
                         throw new InvalidParametersException("Dest folder is not available: Permission denied" + f.getFolderId());
                 });
 
-        var newFolders = reportDomainService.copyReportFolder(request, userDomainService.getCurrentUser());
-        return newFolders.stream().map(f -> reportDomainService.getFolder(userDomainService.getCurrentUser().getId(), f)).toList();
+        var newFolders = reportDomainService.copyReportFolder(request, currentUser);
+        return newFolders.stream().map(f -> reportDomainService.getFolder(currentUser.getId(), f)).toList();
     }
 
     private List<FilterAddRequest> unWind(FilterGroupAddRequest reportFilterGroupData, List<FilterAddRequest> reportFilterData) {

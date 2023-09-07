@@ -29,8 +29,8 @@ export default function CurrentSort(props){
 	const columnDifferent = props.columnDifferent
 
 	// Создание полного имени для cellData с использованием кортежа имен строк\столбцов
-	const CDrowName = cellData.rowName.length > 0 ? `${cellData.rowName.join(' - ')} - ${cellData.metricName}` : cellData.metricName
-	const CDcolumnName = cellData.columnName.length > 0 ? `${cellData.columnName.join(' - ')} - ${cellData.metricName}` : cellData.metricName
+	const CDrowName = cellData.rowName?.length > 0 ? `${cellData.rowName.join(' - ')} - ${cellData.metricName}` : cellData.metricName
+	const CDcolumnName = cellData.columnName?.length > 0 ? `${cellData.columnName.join(' - ')} - ${cellData.metricName}` : cellData.metricName
 
 	// Задаем имена для инпутов
 	const rowName = rowDifferent ? CDrowName : rowSort.name

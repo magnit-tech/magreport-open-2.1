@@ -187,6 +187,10 @@ public class ScheduleService {
 
     }
 
+    public List<ScheduleTaskResponse> getAllScheduleTaskForSchedule(ScheduleRequest request) {
+        return scheduleDomainService.getAllScheduleTaskForSchedule(request.getId());
+    }
+
     private void clearDuplicatedFields(ScheduleTaskAddRequest request) {
 
         var report = reportService.getScheduleReport(new ScheduleReportRequest(request.getReportId(), request.getId()));

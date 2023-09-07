@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 
-import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 
 // dataHub
 import dataHub from 'ajax/DataHub';
@@ -18,26 +18,56 @@ import SidebarItems from '../../Sidebar/SidebarItems';
 
 function MailTemplatesMenuView(props){
 
+    let state = props.state;
+
     const {id} = useParams()
     const navigate = useNavigate()
     const location = useLocation()
+    const [searchParams, setSearchParams] = useSearchParams();
+    const locationPreviousHistory = { state: location.pathname + location.search }
 
-    let state = props.state;
+    const [reload, setReload] = useState({needReload : state.needReload});
 
-    let reload = {needReload : state.needReload};
     let folderItemsType = SidebarItems.admin.subItems.mailTexts.folderItemType;
     let sidebarItemType = SidebarItems.admin.subItems.mailTexts.key;
     let isSortingAvailable = true;
+
+    useEffect(() => {
+        setReload({needReload: true})
+    }, [searchParams, state.needReload])
 
 
     function handleFolderClick(folderId) {
         navigate(`/ui/systemMailTemplates/${folderId}`)
     }
     function handleItemClick(templateId) {
-        navigate(`/ui/systemMailTemplates/${id}/view/${templateId}`, {state: location.pathname})
+        navigate(`/ui/systemMailTemplates/${id}/view/${templateId}`, locationPreviousHistory)
     }
     function handleEditItemClick(templateId) {
-        navigate(`/ui/systemMailTemplates/${id}/edit/${templateId}`, {state: location.pathname})
+        navigate(`/ui/systemMailTemplates/${id}/edit/${templateId}`, locationPreviousHistory)
+    }
+    function handleSearchItems(params) {
+        const { searchString } = params
+
+        if (searchString.trim() === '') {
+            setSearchParams({})
+        } else {
+            setSearchParams({search: searchString, isRecursive: true})
+        }
+    }
+
+    async function handleDataLoaded(data) {
+        await props.actionFolderLoaded(folderItemsType, data, isSortingAvailable, false, !!searchParams.get("search"))
+
+        if(searchParams.get("search")) {
+            const actionSearchParams = {
+                open: true,
+                searchString: searchParams.get("search"),
+                isRecursive: true,
+            }
+
+            await props.actionSearchClick(folderItemsType, state.currentFolderId, actionSearchParams)
+        }
     }
 
     return(
@@ -46,7 +76,8 @@ function MailTemplatesMenuView(props){
                 loadFunc = {dataHub.serverMailTemplateController.getMailTemplateType}
                 loadParams = {id ? [Number(id)] : [null]}
                 reload = {reload}
-                onDataLoaded = {(data) => {props.actionFolderLoaded(folderItemsType, data, isSortingAvailable)}}
+                isSearchLoading = {state.isSearchLoading}
+                onDataLoaded = {(data) => handleDataLoaded(data)}
                 onDataLoadFailed = {(message) => {props.actionFolderLoadFailed(folderItemsType, message)}}
             >
                 <FolderContent
@@ -65,8 +96,8 @@ function MailTemplatesMenuView(props){
                     onDeleteItemClick = {(roleId) => {props.actionDeleteItemClick(folderItemsType, state.currentFolderId, roleId)}}
                     onEditFolder = {(folderId, name, description) => {props.actionEditFolder(sidebarItemType, folderItemsType, state.currentFolderData.id, folderId, name, description)}}
                     contextAllowed
-                    onSearchClick ={searchParams => {props.actionSearchClick(folderItemsType, state.currentFolderId, searchParams)}}
-                    onSortClick ={sortParams => {props.actionSortClick(folderItemsType, state.currentFolderId, sortParams)}}
+                    onSearchClick = {handleSearchItems}
+                    onSortClick = {sortParams => {props.actionSortClick(folderItemsType, state.currentFolderId, sortParams)}}
                 />
             </DataLoader>
         </div>

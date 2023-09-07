@@ -1,15 +1,17 @@
 <#-- @ftlvariable name="" type="ru.magnit.magreportbackend.dto.inner.filter.FilterValueListRequestData" -->
 SELECT TOP ${maxCount()}
-${idFieldName()}, ${codeFieldName()}, ${nameFieldName()}
+${idField().fieldName}, ${codeField().fieldName}, <#list nameFields() as nameField > <#if nameField.showField> ${nameField.fieldName}<#sep>,</#if></#list>
 FROM ${schemaName()}.${tableName()}
-WHERE ${filterFieldName()} <#if isCaseSensitive()>(CS)<#else>(NOT CS)</#if> LIKE
-<#if likenessType() == "STARTS">
-'${searchValue()}%'
-<#elseif likenessType() == "CONTAINS">
-'%${searchValue()}%'
-<#elseif likenessType() == "ENDS">
-'%${searchValue()}'
-</#if>
-<#if isCaseSensitive()>(CS)<#else>(NOT CS)</#if><#--
--->GROUP BY
-${idFieldName()}, ${codeFieldName()}, ${nameFieldName()};
+WHERE
+<#list filterFields() as filterField><#--
+    --><#if filterField.searchByField>
+        ${filterField.getFieldName()} <#if isCaseSensitive()>(CS)<#else>(NOT CS)</#if> LIKE
+        <#if likenessType() == "STARTS">'${searchValue()}%'
+        <#elseif likenessType() == "CONTAINS">'%${searchValue()}%'
+        <#elseif likenessType() == "ENDS">'%${searchValue()}'</#if><#--
+        --><#if isCaseSensitive()>(CS)<#else>(NOT CS)</#if><#--
+        --><#sep>OR</#sep>
+    </#if><#--
+--></#list>
+GROUP BY
+1, 2, <#list nameFields() as nameField > <#if nameField.showField > ${nameFields().indexOf(nameField) + 3}<#sep>,</#if></#list>;

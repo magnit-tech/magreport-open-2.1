@@ -5,13 +5,17 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.magnit.magreportbackend.domain.datasource.DataSourceTypeEnum;
 import ru.magnit.magreportbackend.dto.inner.datasource.DataSourceData;
+import ru.magnit.magreportbackend.dto.response.admin.DataSourceConnectInfo;
 import ru.magnit.magreportbackend.service.security.CryptoService;
 
 import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -61,13 +65,37 @@ public class ConnectionPoolManager {
         hikariConfig.setJdbcUrl(dataSource.url());
         hikariConfig.setUsername(dataSource.userName());
         hikariConfig.setPassword(cryptoService.decode(dataSource.password()));
+        hikariConfig.setReadOnly(dataSource.type() == DataSourceTypeEnum.CLICK_HOUSE);
         hikariConfig.setMaxLifetime(1800000);
         hikariConfig.setLeakDetectionThreshold(1800000);
         hikariConfig.setIdleTimeout(600000);
         hikariConfig.setMinimumIdle(3);
         hikariConfig.setMaximumPoolSize(dataSource.poolSize());
-        hikariConfig.setConnectionTimeout(6000);
+        hikariConfig.setConnectionTimeout(10000);
         return hikariConfig;
+    }
+
+
+    public List<DataSourceConnectInfo> getDataSourcePoolInfo() {
+
+        var responses = new ArrayList<DataSourceConnectInfo>();
+
+        dataSources.forEach((key, value) -> {
+
+            var response = new DataSourceConnectInfo();
+            var datasource = (HikariDataSource) value;
+
+            response
+                    .setDataSourceId(key.id())
+                    .setDataSourceName(key.dataSourceName())
+                    .setConnectPoolSize(datasource.getMaximumPoolSize())
+                    .setActiveConnectSize(datasource.getHikariPoolMXBean().getActiveConnections())
+                    .setQueueConnectSize(datasource.getHikariPoolMXBean().getThreadsAwaitingConnection());
+
+            responses.add(response);
+        });
+
+        return responses;
     }
 
     @PreDestroy

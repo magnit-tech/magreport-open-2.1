@@ -108,7 +108,7 @@ export default function(props){
     }
 
     function printMetricNamesRow(tableRow) {
-        for(let j = 0; j < props.tableData.columnDimensionsValues.length; j++){
+        for(let j = 0; j < Math.max(props.tableData.columnDimensionsValues.length, 1); j++){
             for(let mIndex in props.tableData.metrics){
                 let m = props.tableData.metrics[mIndex];
                 tableRow.push({
@@ -131,7 +131,7 @@ export default function(props){
             colSpan : 1,
             rowSpan : 1
         });
-        for(let j = 0; j < props.tableData.columnDimensionsValues.length; j++){
+        for(let j = 0; j < Math.max(props.tableData.columnDimensionsValues.length, 1); j++){
             tableRow.push({
                 fieldId : props.pivotConfiguration.fieldsLists.metricFields[metricNum]?.fieldId,
                 index: metricNum,
@@ -153,7 +153,7 @@ export default function(props){
     }
 
     function printAllMetricInColumnsValues(tableRow, rowNum) {
-        for(let j = 0; j < props.tableData.columnDimensionsValues.length; j++){
+        for(let j = 0; j < Math.max(props.tableData.columnDimensionsValues.length, 1); j++){
             for(let m = 0; m < props.tableData.metrics.length; m++){
                 
                 tableRow.push({
@@ -305,6 +305,7 @@ export default function(props){
             tableRows.push([]);
             rowNum++;
             printRowDimensionNames(tableRows[rowNum]);
+
             // Далее строки со значениями измерений по столбцам в начале, затем название метрики и затем значения данной метрики
             for(let i = 0; i < props.tableData.rowDimensionsValues.length; i++){
                 tableRows.push([]);
@@ -383,8 +384,8 @@ export default function(props){
     }
 
     function handleClickOnAddSortingArrow(position, order, {cell}) {
-        const fullMetricNameWithRowNames = cell.rowName.length > 0 ? `${cell.rowName.join(' - ')} - ${cell.metricName}` : cell.metricName
-        const fullMetricNameWithColumnNames = cell.columnName.length > 0 ? `${cell.columnName.join(' - ')} - ${cell.metricName}` : cell.metricName
+        const fullMetricNameWithRowNames = cell.rowName?.length > 0 ? `${cell.rowName.join(' - ')} - ${cell.metricName}` : cell.metricName
+        const fullMetricNameWithColumnNames = cell.columnName?.length > 0 ? `${cell.columnName.join(' - ')} - ${cell.metricName}` : cell.metricName
 
         if (position === 'row') {
             const checkColumnSort = props.sortingValues.columnSort ? {...props.sortingValues.columnSort} : {
@@ -543,8 +544,8 @@ export default function(props){
         if (cell.type === "metricValues" && (cell.conditionalFormatting && cell.conditionalFormatting.length > 0)) {
             if (cell.conditionalFormatting.length === 1) {
                 return {backgroundColor: cell.conditionalFormatting[0].color}
-            } 
-            
+            }
+
             const cellData = Number(cell.data.replace(/\s/g,'').replace('%', ''))
 
             for (let i = 0; i < cell.conditionalFormatting.length; i++) {
@@ -566,8 +567,9 @@ export default function(props){
         if (cell.type === "metricValues" && cell.fieldId) {
 
             if (cell.conditionalFormatting && cell.conditionalFormatting.length > 0) {
-                
+
                 if (cell.conditionalFormatting.length === 1) {
+                   
                     styleObj = {   
                         margin: '2px',
                         height: cell.conditionalFormatting[0].fontSize ? `${cell.conditionalFormatting[0].fontSize + 5}px` : 'auto',
@@ -593,6 +595,7 @@ export default function(props){
                                 color: cell.conditionalFormatting[i].fontColor,
                                 whiteSpace: 'nowrap'
                             }
+                            break
                         }
                     }
                 }
@@ -618,6 +621,18 @@ export default function(props){
         return styleObj
     }
 
+    function handleOnWheel(event) {
+        const { deltaY } = event;
+        const { rowFrom } = props.pivotConfiguration;
+        const { totalRows } = props.tableData;
+
+        if(Math.sign(deltaY) === -1 && rowFrom !== 0) {
+            props.onWheelScrolling(rowFrom - 1)
+        } else if(Math.sign(deltaY) === 1 && !(totalRows <= Math.min(rowFrom + props.count, totalRows))) {
+            props.onWheelScrolling(rowFrom + 1)
+        }
+    }
+
     return(
         <div className={clsx(styles.pivotTable)}>
              <Scrollbars 
@@ -625,7 +640,7 @@ export default function(props){
             >
                 {/*Без Measure скролл не реагирует на изменение размера других компонентов*/}
                 
-                <table style={{borderCollapse: 'collapse'}} className={styles.table}>
+                <table style={{borderCollapse: 'collapse'}} className={styles.table} onWheel={handleOnWheel}>
                     <Measure
 						bounds
 						onResize={contentRect => {

@@ -8,6 +8,7 @@ import ru.magnit.magreportbackend.util.Pair;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 public class WeekdayNumberExpression  extends ParameterizedExpression {
     private final Pair<String, DataTypeEnum> result = new Pair<>(null, DataTypeEnum.INTEGER);
@@ -21,7 +22,8 @@ public class WeekdayNumberExpression  extends ParameterizedExpression {
         final var firstDateParameter = parameters.get(0);
         final var firstDateResult = firstDateParameter.calculate(rowNumber);
 
-        checkParameterNotNull(firstDateParameter, firstDateResult);
+        if (Objects.isNull(firstDateResult.getL())) return result;
+
         checkParameterHasAnyType(firstDateParameter, firstDateResult, DataTypeEnum.DATE, DataTypeEnum.TIMESTAMP);
 
         final var date = firstDateResult.getR() == DataTypeEnum.TIMESTAMP ?

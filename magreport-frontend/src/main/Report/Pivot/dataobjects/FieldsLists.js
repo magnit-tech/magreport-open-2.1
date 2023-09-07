@@ -35,6 +35,7 @@ export function FieldsLists(fieldsLists){
         for(let f of derivedFields){
             let fd = new FieldData(f);
             fd.original = false;
+            this.allFields.push(fd);
             this.unusedFields.push(fd);  
         }
         for(let f of reportFields){

@@ -189,7 +189,8 @@ class ExternalSecurityServiceTest {
                 true,
                 ASM_SECURITY_CREATED_DATETIME,
                 ASM_SECURITY_MODIFIED_DATETIME,
-                Collections.emptyList()
+                Collections.emptyList(),
+                true
 
         );
     }
@@ -204,7 +205,8 @@ class ExternalSecurityServiceTest {
                 true,
                 ASM_SECURITY_CREATED_DATETIME,
                 ASM_SECURITY_MODIFIED_DATETIME,
-                Collections.emptyList()
+                Collections.emptyList(),
+                true
 
         );
     }
@@ -216,7 +218,9 @@ class ExternalSecurityServiceTest {
                 ASM_SECURITY_DESCRIPTION,
                 0L,
                 true,
+                true,
                 Collections.emptyList()
+
         );
     }
 }

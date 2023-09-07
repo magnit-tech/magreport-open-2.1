@@ -4,6 +4,8 @@ import {useState, useRef} from 'react';
 // material-ui
 
 import Grid from '@material-ui/core/Grid';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 
 // dataHub
 import dataHub from 'ajax/DataHub';
@@ -46,6 +48,60 @@ export default function TokenInputFieldsViewer(props) {
 
     }
 
+    let fieldsGrid = []
+    for (let i = 0; i < localData.datasetFields.length; i++){
+        let f = localData.datasetFields[i]
+        if (f.type !== 'CODE_FIELD'){
+            fieldsGrid.push(
+                <Grid container key = {i}>
+                    <Grid item xs={3} style={{paddingRight: '16px'}}>
+                        <ViewerTextField
+                            label={"Название поля " + f.type}
+                            value={f.name}
+                        />
+                    </Grid>
+                    <Grid item xs={3} style={{paddingRight: '16px'}}>
+                        <ViewerTextField
+                            label={"Описание поля " + f.type}
+                            value={f.description}
+                        />
+                    </Grid>
+                    <Grid item xs={4}>
+                        <ViewerTextField
+                            label="Поле ID набора данных"
+                            value={datasetFieldsNameMap.current.get(f.id)}
+                        />
+                    </Grid>
+                    <Grid item xs={2}>
+                        <div style={{marginLeft: '16px'}}>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox 
+                                        disabled 
+                                        size = "small"
+                                        checked = {f.showField} 
+                                        name="show" 
+                                    />
+                                }
+                                label="Показывать"
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        disabled 
+                                        size = "small"
+                                        checked = {f.searchByField}
+                                        name="search" 
+                                    />
+                                }
+                                label="Искать по полю"
+                            />
+                        </div>
+                    </Grid>
+                </Grid>
+            )
+        }
+    }
     return (
         <div>
             <DataLoader
@@ -65,53 +121,7 @@ export default function TokenInputFieldsViewer(props) {
                 }
                 {datasetData &&
                 <div>
-                    <Grid container>
-
-                        <Grid item xs={4} style={{paddingRight: '16px'}}>
-                            <ViewerTextField
-                                label="Название поля ID"
-                                value={localData.datasetFields.idField.name}
-                            />
-                        </Grid>
-
-                        <Grid item xs={4} style={{paddingRight: '16px'}}>
-                            <ViewerTextField
-                                label="Описание поля ID"
-                                value={localData.datasetFields.idField.description}
-                            />
-                        </Grid>
-
-                        <Grid item xs={4}>
-                            <ViewerTextField
-                                label="Поле ID набора данных"
-                                value={datasetFieldsNameMap.current.get(localData.datasetFields.idField.id)}
-                            />
-                        </Grid>
-
-                    </Grid>
-
-                    <Grid container>
-                        <Grid item xs={4} style={{paddingRight: '16px'}}>
-                            <ViewerTextField
-                                label="Название поля NAME"
-                                value={localData.datasetFields.nameField.name}
-                            />
-                        </Grid>
-
-                        <Grid item xs={4} style={{paddingRight: '16px'}}>
-                            <ViewerTextField
-                                label="Описание поля NAME"
-                                value={localData.datasetFields.nameField.description}
-                            />
-                        </Grid>
-
-                        <Grid item xs={4}>
-                            <ViewerTextField
-                                label="Поле NAME набора данных"
-                                value={datasetFieldsNameMap.current.get(localData.datasetFields.nameField.id)}
-                            />
-                        </Grid>
-                    </Grid>
+                    {fieldsGrid}
                 </div>
                 }
             </DataLoader>

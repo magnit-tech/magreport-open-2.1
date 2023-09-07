@@ -13,8 +13,10 @@ import ru.magnit.magreportbackend.dto.backup.folder.FolderReportBackupTuple;
 import ru.magnit.magreportbackend.dto.backup.report.ReportBackupTuple;
 import ru.magnit.magreportbackend.dto.backup.report.ReportFieldBackupTuple;
 import ru.magnit.magreportbackend.dto.backup.report.ReportFolderBackupTuple;
+import ru.magnit.magreportbackend.dto.backup.user.UserTuple;
 import ru.magnit.magreportbackend.dto.response.dataset.DataSetTypeResponse;
 import ru.magnit.magreportbackend.dto.response.report.PivotFieldTypeResponse;
+import ru.magnit.magreportbackend.mapper.auth.UserTupleMapper;
 import ru.magnit.magreportbackend.mapper.dataset.DataSetBackupMapper;
 import ru.magnit.magreportbackend.mapper.dataset.DataSetFieldBackupMapper;
 import ru.magnit.magreportbackend.mapper.dataset.DataSetTypeResponseMapper;
@@ -27,18 +29,7 @@ import ru.magnit.magreportbackend.mapper.report.PivotFieldTypeResponseMapper;
 import ru.magnit.magreportbackend.mapper.report.ReportBackupMapper;
 import ru.magnit.magreportbackend.mapper.report.ReportFieldBackupMapper;
 import ru.magnit.magreportbackend.mapper.report.ReportFolderBackupMapper;
-import ru.magnit.magreportbackend.repository.DataSetDataTypeRepository;
-import ru.magnit.magreportbackend.repository.DataSetFieldRepository;
-import ru.magnit.magreportbackend.repository.DataSetRepository;
-import ru.magnit.magreportbackend.repository.DataSetTypeRepository;
-import ru.magnit.magreportbackend.repository.DataSourceRepository;
-import ru.magnit.magreportbackend.repository.DataSourceTypeRepository;
-import ru.magnit.magreportbackend.repository.FolderReportRepository;
-import ru.magnit.magreportbackend.repository.FolderRepository;
-import ru.magnit.magreportbackend.repository.PivotFieldTypeRepository;
-import ru.magnit.magreportbackend.repository.ReportFieldRepository;
-import ru.magnit.magreportbackend.repository.ReportFolderRepository;
-import ru.magnit.magreportbackend.repository.ReportRepository;
+import ru.magnit.magreportbackend.repository.*;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -59,6 +50,7 @@ public class DataLineageService {
     private final ReportFolderRepository reportFolderRepository;
     private final FolderReportRepository folderReportRepository;
     private final FolderRepository folderRepository;
+    private final UserRepository userRepository;
 
     private final DataTypeBackupMapper dataTypeBackupMapper;
     private final PivotFieldTypeResponseMapper pivotFieldTypeResponseMapper;
@@ -72,6 +64,7 @@ public class DataLineageService {
     private final ReportFolderBackupMapper reportFolderBackupMapper;
     private final FolderReportBackupMapper folderReportBackupMapper;
     private final FolderBackupMapper folderBackupMapper;
+    private final UserTupleMapper userTupleMapper;
 
     @Transactional
     public List<DataTypeBackupTuple> getAllDataTypes() {
@@ -131,5 +124,10 @@ public class DataLineageService {
     @Transactional
     public List<FolderBackupTuple> getAllUserReportFolders() {
         return folderBackupMapper.from(folderRepository.findAll());
+    }
+
+    @Transactional
+    public List<UserTuple> getAllUsers() {
+        return userTupleMapper.from(userRepository.getAuthoringUsers());
     }
 }

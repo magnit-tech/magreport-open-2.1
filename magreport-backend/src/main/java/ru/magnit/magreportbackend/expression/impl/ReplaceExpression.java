@@ -6,6 +6,8 @@ import ru.magnit.magreportbackend.expression.ExpressionCreationContext;
 import ru.magnit.magreportbackend.expression.ParameterizedExpression;
 import ru.magnit.magreportbackend.util.Pair;
 
+import java.util.Objects;
+
 public class ReplaceExpression extends ParameterizedExpression {
     private final Pair<String, DataTypeEnum> result = new Pair<>(null, DataTypeEnum.STRING);
 
@@ -20,7 +22,7 @@ public class ReplaceExpression extends ParameterizedExpression {
         final var what = parameters.get(1).calculate(rowNumber);
         final var replacement = parameters.get(2).calculate(rowNumber);
 
-        checkParameterNotNull(parameters.get(0), sourceString);
+        if (Objects.isNull(sourceString.getL())) return result;
         checkParameterHasAnyType(parameters.get(0), sourceString, DataTypeEnum.STRING);
 
         checkParameterNotNull(parameters.get(1), what);
