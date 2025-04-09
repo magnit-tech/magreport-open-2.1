@@ -5,7 +5,7 @@ Enterprise data analysis sysytem
 
 ## Requirements
 
-To build and run project you need Java 16 and maven installed.
+To build and run project you need Java 19 and maven installed.
 
 ## Build project
 
